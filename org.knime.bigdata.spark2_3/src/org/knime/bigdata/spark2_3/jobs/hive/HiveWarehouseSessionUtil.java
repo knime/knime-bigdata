@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark2_3.jobs.hive;
 
+import java.util.Arrays;
+
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -77,17 +79,19 @@ public class HiveWarehouseSessionUtil {
         final Spark2HiveJobInput input) throws KNIMESparkException {
 
         if (FileFormat.valueOf(input.getFileFormat()) != FileFormat.ORC
-                && FileFormat.valueOf(input.getFileFormat()) != FileFormat.CLUSTER_DEFAULT) {
+            && FileFormat.valueOf(input.getFileFormat()) != FileFormat.CLUSTER_DEFAULT) {
 
             throw new KNIMESparkException(String.format(
                 "Hive Warehouse Connector does not support writing tables in %s format, only ORC is currently supported.",
                 input.getFileFormat()));
         }
 
+        final HiveWarehouseSession session = getOrCreateSession(sparkContext);
+
         // we are currently building our own CREATE TABLE statement to be able to quote column
         // names and support compression formats. As HWC becomes more featureful this may not be
         // necessary anymore.
-        final String createTableStmt = buildCreateTableStatement(sparkContext, dataFrame, input);
+        final String createTableStmt = buildCreateTableStatement(session, dataFrame, input);
 
         boolean clearSession = false;
         try {
@@ -98,7 +102,7 @@ public class HiveWarehouseSessionUtil {
                 clearSession = true;
             }
 
-            if (!getOrCreateSession(sparkContext).executeUpdate(createTableStmt)) {
+            if (!session.executeUpdate(createTableStmt)) {
                 throw new KNIMESparkException(String.format(
                     "Failed to create table %s (for details please check the Spark logs)", input.getHiveTableName()));
             }
@@ -106,7 +110,7 @@ public class HiveWarehouseSessionUtil {
             // NOTE: Always make sure that HiveWarehouseSession has been initialized before doing this
             // Currently this happens as part of building the CREATE TABLE statement, but we may not
             // be doing this forever
-            dataFrame.write().format(HiveWarehouseSession.HIVE_WAREHOUSE_CONNECTOR).mode("append")
+            dataFrame.write().format(HiveWarehouseSession.HIVE_WAREHOUSE_CONNECTOR).mode("error")
                 .option("table", input.getHiveTableName()).save();
         } finally {
             if (clearSession) {
@@ -115,18 +119,33 @@ public class HiveWarehouseSessionUtil {
         }
     }
 
-    private static String buildCreateTableStatement(final SparkContext sparkContext, final Dataset<Row> dataFrame,
-        final Spark2HiveJobInput input) {
-        final CreateTableBuilder createTableBuilder =
-                getOrCreateSession(sparkContext).createTable(input.getHiveTableName()).ifNotExists();
+    private static String buildCreateTableStatement(final HiveWarehouseSession session,
+        final Dataset<Row> dataFrame, final Spark2HiveJobInput input) {
 
-        // we do this to inject quotes into the CREATE TABLE statement...
-        for (StructField field : dataFrame.schema().fields()) {
-            createTableBuilder.column(String.format("`%s`", field.name()),
-                SchemaUtil.getHiveType(field.dataType(), field.metadata()));
+        final String[] dbAndTable = parseTableString(input.getHiveTableName());
+
+        synchronized (session) {
+            session.setDatabase(dbAndTable[0]);
+            final CreateTableBuilder createTableBuilder = session.createTable(dbAndTable[1]).ifNotExists();
+
+            // we do this to inject quotes into the CREATE TABLE statement...
+            for (StructField field : dataFrame.schema().fields()) {
+                createTableBuilder.column(String.format("`%s`", field.name()),
+                    SchemaUtil.getHiveType(field.dataType(), field.metadata()));
+            }
+            session.setDatabase("default");
+            return createTableBuilder.toString();
         }
+    }
 
-        final String createTableStmt = createTableBuilder.toString();
-        return createTableStmt;
+    private static String[] parseTableString(final String hiveTableName) {
+        final String[] splits = hiveTableName.split("\\.");
+        if (splits.length == 1) {
+            return new String[]{"default", hiveTableName};
+        } else if (splits.length == 2) {
+            return splits;
+        } else {
+            return new String[]{splits[0], String.join(".", Arrays.asList(splits).subList(1, splits.length))};
+        }
     }
 }
