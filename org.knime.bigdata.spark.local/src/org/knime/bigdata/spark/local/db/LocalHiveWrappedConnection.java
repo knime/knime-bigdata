@@ -51,6 +51,7 @@ package org.knime.bigdata.spark.local.db;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
 import org.knime.bigdata.database.hive.HiveWrappedConnection;
@@ -62,10 +63,18 @@ import org.knime.bigdata.spark.local.database.LocalHiveDatabaseMetaData;
  */
 public class LocalHiveWrappedConnection extends HiveWrappedConnection {
 
+    private final Connection m_hiveConnection;
+
     LocalHiveWrappedConnection(final Connection connection) {
-        super(connection, "localhive");          
+        super(connection, "localhive");
+        m_hiveConnection = connection;
     }
-    
+
+    @Override
+    public Statement createStatement() throws SQLException {
+        return new LocalHiveStatement(m_hiveConnection.createStatement());
+    }
+
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         final HiveDatabaseMetaData hiveMetaData = (HiveDatabaseMetaData)super.getMetaData();
