@@ -51,20 +51,17 @@ public class MLPredictorRegressionJob implements SimpleSparkJob<MLPredictorRegre
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final PipelineModel model = namedObjects.get(input.getNamedModelId());
 
-        final PredictionModel<?, ?> regressionModel = MLUtils.findFirstStageOfType(model, PredictionModel.class);
-        regressionModel.setPredictionCol(input.getPredictionColumn());
-
         // apply pipeline model (classification)
         final Dataset<Row> predictedDataset = model.transform(inputDataset);
 
         // clean up columns and unpack conditional class probabilities if desired
-        final Dataset<Row> cleanedDataset = predictedDataset.selectExpr(determineOutputColumns(inputDataset, input));
+        final Dataset<Row> cleanedDataset = predictedDataset.selectExpr(determineOutputColumns(inputDataset, model, input));
 
         namedObjects.addDataFrame(input.getFirstNamedOutputObject(), cleanedDataset);
     }
 
     private static String[] determineOutputColumns(final Dataset<Row> inputDataset,
-        final MLPredictorRegressionJobInput input) {
+        final PipelineModel model, final MLPredictorRegressionJobInput input) {
 
         final List<String> outputColumns = new LinkedList<>();
 
@@ -73,8 +70,12 @@ public class MLPredictorRegressionJob implements SimpleSparkJob<MLPredictorRegre
             outputColumns.add(String.format("`%s`", inputColumn));
         }
 
+        final PredictionModel<?, ?> regressionModel = MLUtils.findFirstStageOfType(model, PredictionModel.class);
+
         // then retain the desired prediction column
-        outputColumns.add(String.format("`%s`", input.getPredictionColumn()));
+        outputColumns.add(String.format("`%s` as `%s`",
+            regressionModel.getPredictionCol(),
+            input.getPredictionColumn()));
 
         return outputColumns.toArray(new String[0]);
     }
