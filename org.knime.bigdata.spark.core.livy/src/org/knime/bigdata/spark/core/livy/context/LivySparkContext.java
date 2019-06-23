@@ -253,17 +253,17 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         boolean contextWasCreated = false;
         try {
+            if (!createRemoteContext) {
+                throw new SparkContextNotFoundException(getID());
+            }
+
             exec.setProgress(0, "Opening remote Spark context on Apache Livy");
 
             ensureLivyClient(exec);
             setStatus(SparkContextStatus.OPEN);
 
-            if (createRemoteContext) {
-                createRemoteSparkContext(exec);
-                contextWasCreated = true;
-            } else {
-                throw new SparkContextNotFoundException(getID());
-            }
+            createRemoteSparkContext(exec);
+            contextWasCreated = true;
 
             exec.setProgress(0.6, "Uploading Spark jobs");
             uploadJobJar(exec);
