@@ -6,7 +6,12 @@ Bundle-Version: 4.0.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.spark.node.SparkNodePlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Export-Package: org.knime.bigdata.spark.node.io.database.hive.reader,
+Export-Package: org.knime.bigdata.spark.node.io.database.db.reader,
+ org.knime.bigdata.spark.node.io.database.db.writer,
+ org.knime.bigdata.spark.node.io.database.hive.reader,
+ org.knime.bigdata.spark.node.io.database.hive.writer,
+ org.knime.bigdata.spark.node.io.database.impala.reader,
+ org.knime.bigdata.spark.node.io.database.impala.writer,
  org.knime.bigdata.spark.node.io.database.reader,
  org.knime.bigdata.spark.node.io.database.writer,
  org.knime.bigdata.spark.node.io.genericdatasource.reader,
