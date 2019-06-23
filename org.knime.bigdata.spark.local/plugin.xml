@@ -30,4 +30,8 @@
     database="localhive2">
   </databaseUtility>
 </extension>
+
+<extension point="org.knime.database.node.workflow.migration.NodeMigrationRule">
+   <Rule class="org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeMigrationRule"/>
+</extension>
 </plugin>
