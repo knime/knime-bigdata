@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Learner" icon="icon.png">
 	<name>Spark Decision Tree Learner</name>
-	<shortDescription>Trains a decision tree classification model in Spark.
+	<shortDescription>Trains a Decision Tree classification model in Spark.
 	</shortDescription>
 	<fullDescription>
 		<intro>
@@ -12,9 +12,9 @@
 			<a
 				href="http://spark.apache.org/docs/2.4.3/ml-classification-regression.html#decision-trees">
 				spark.ml
-				decision tree
+				Decision Tree
 			</a>
-			implementation to train a decision tree classification model in Spark. The underlying algorithm performs a
+			implementation to train a Decision Tree classification model in Spark. The underlying algorithm performs a
 			recursive binary partitioning of the feature space. Each split is chosen by selecting the
 			best split from a set of possible splits, in order to maximize the information gain at
 			a tree node. It supports binary and multiclass classification. The target column must be
@@ -52,11 +52,11 @@
 				Measure to use for information gain calculation when evaluating splits. Available methods are
 				"gini" (recommended) or "entropy". For more details on the available methods see the
 				<a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">Spark
-				documentation</a>
+				documentation</a>.
 			</option>
 			
 			<option name="Max tree depth">
-				Maximum depth of the decision tree (>= 0).
+				Maximum depth of the Decision Tree. Must be >= 1.
 			</option>
 			
 			<option name="Min rows per tree node">
@@ -88,7 +88,7 @@
 		<inPort index="0" name="Input data">Input Spark DataFrame with training data.</inPort>
 		<outPort index="0" name="Feature importance measures">
 			Table with estimates of the importance of each feature. The features are listed in order of decreasing
-			importance and are normalized to sum up to 1. Note that feature importances for single decision trees
+			importance and are normalized to sum up to 1. Note that feature importances for single Decision Trees
 			can have high variance due to correlated predictor variables. Consider using the Spark Random Forest
 			Learner to determine feature importance instead.
 		</outPort>

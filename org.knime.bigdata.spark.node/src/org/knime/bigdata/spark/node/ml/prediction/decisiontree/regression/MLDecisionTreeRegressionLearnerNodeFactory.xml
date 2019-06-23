@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Learner" icon="icon.png">
 	<name>Spark Decision Tree Learner (Regression)</name>
-	<shortDescription>Trains a decision tree regression model in Spark.
+	<shortDescription>Trains a  regression model in Spark.
 	</shortDescription>
 	<fullDescription>
 		<intro>
@@ -12,9 +12,9 @@
 			<a
 				href="http://spark.apache.org/docs/2.4.3/ml-classification-regression.html#decision-trees">
 				spark.ml
-				decision tree
+				
 			</a>
-			implementation to train a decision tree regression model in Spark. The underlying algorithm performs a
+			implementation to train a  regression model in Spark. The underlying algorithm performs a
 			recursive binary partitioning of the feature space. Each split is chosen by selecting the
 			best split from a set of possible splits, in order to maximize the information gain at
 			a tree node. Information gain is calculated with a variance-based quality measure.
@@ -50,7 +50,7 @@
 			</option>
 			
 			<option name="Max tree depth">
-				Maximum depth of the decision tree (>= 0).
+				Maximum depth of the . Must be >= 1.
 			</option>
 			
 			<option name="Min rows per tree node">
@@ -82,7 +82,7 @@
 		<inPort index="0" name="Input data">Input Spark DataFrame with training data.</inPort>
 		<outPort index="0" name="Feature importance measures">
 			Table with estimates of the importance of each feature. The features are listed in order of decreasing
-			importance and are normalized to sum up to 1. Note that feature importances for single decision trees
+			importance and are normalized to sum up to 1. Note that feature importances for single s
 			can have high variance due to correlated predictor variables. Consider using the Spark Random Forest
 			Learner to determine feature importance instead.
 		</outPort>

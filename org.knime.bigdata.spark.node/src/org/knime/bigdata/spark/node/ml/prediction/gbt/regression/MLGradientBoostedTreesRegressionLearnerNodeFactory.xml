@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Learner" icon="icon.png">
     <name>Spark Gradient Boosted Trees Learner (Regression)</name>
-	<shortDescription>Random forests induction performed in Spark.</shortDescription>
+	<shortDescription>Trains a Gradient Boosted Trees regression model in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
-			Gradient Boosted Trees are ensembles of decision trees. They iteratively train decision trees in order
+			Gradient Boosted Trees are ensembles of Decision Trees. They iteratively train Decision Trees in order
 			to minimize a loss function. This node uses the
 			<a
 				href="http://spark.apache.org/docs/2.4.3/ml-classification-regression.html#gradient-boosted-trees-gbts">
@@ -43,7 +43,7 @@
 				and therefore used for learning).
 			</option>
 
-			<option name="Number of models">The number of decision tree models in the ensemble model.
+			<option name="Number of models">The number of Decision Tree models in the ensemble model.
 				Increasing this number makes the model more expressive and improves training data accuracy. However,
 				increasing it too much may lead to overfitting. Also, increasing this number directly increases the
 				time required to train the ensemble, because the trees need to be trained sequentially.
@@ -60,7 +60,7 @@
 			</option>
 
 			<option name="Max tree depth">
-				Maximum depth of the decision trees (>= 0).
+				Maximum depth of the Decision Trees. Must be >= 1.
 			</option>
 			
 			<option name="Min rows per tree node">
@@ -89,7 +89,7 @@
 		
 			<option name="Data sampling (rows)">
 				Sampling the rows is also known as bagging, a very popular ensemble learning strategy. If sampling is
-				disabled (default), then each decision tree is trained on the full data set. Otherwise each
+				disabled (default), then each Decision Tree is trained on the full data set. Otherwise each
 				tree is trained with a different data sample that contains the configured fraction of rows of the
 				original data. 
 			</option>
@@ -99,11 +99,12 @@
 				are Random Forests, but it can also be used for Gradient Boosted Trees. This option specifies the sample size
 				for each split at a tree node:
 				<ul>
-				  <li><i>auto</i>: if "Max number of models" is one, then this is the same as "all", otherwise "sqrt" will be used.</li>
-				  <li><i>all (default)</i>: each sample contains all features.</li>
-				  <li><i>sqrt</i>: sample size is sqrt(number of features)</li>
-				  <li><i>log2</i>: sample size is log2(number of features)</li>
-				  <li><i>onethird</i>: sample size is 1/3 of the features</li> 
+				  <li><i>Auto</i>: If "Max number of models" is one, then this is the same as "All", otherwise "Square root"
+				  	will be used.</li>
+				  <li><i>All (default)</i>: Each sample contains all features.</li>
+				  <li><i>Square root</i>: Sample size is sqrt(number of features)</li>
+				  <li><i>Log2</i>: Sample size is log2(number of features)</li>
+				  <li><i>One third</i>: Sample size is 1/3 of the features</li> 
 				</ul> 
 			</option>
 			

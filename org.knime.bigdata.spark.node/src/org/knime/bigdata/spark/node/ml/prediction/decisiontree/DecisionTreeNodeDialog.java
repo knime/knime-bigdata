@@ -63,6 +63,8 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
 
     private final COMPONENTS m_components;
 
+    private DataTableSpec m_tableSpec;
+
     /**
      * @param components The components to use.
      */
@@ -355,7 +357,8 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] ports)
         throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        m_components.loadSettingsFrom(settings, tableSpecs[0]);
+        m_tableSpec = tableSpecs[0];
+        m_components.loadSettingsFrom(settings, m_tableSpec);
     }
 
     /**
@@ -363,6 +366,7 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_settings.check(m_tableSpec);
         m_components.saveSettingsTo(settings);
     }
 }

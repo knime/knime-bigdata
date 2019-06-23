@@ -29,6 +29,7 @@ import org.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.FeatureSamplingStrategy;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -52,7 +53,7 @@ public class GradientBoostedTreesLearnerSettings extends DecisionTreeSettings {
     private final SettingsModelBoolean m_shouldSampleData = new SettingsModelBoolean("shouldSampleData", false);
 
     private final SettingsModelDoubleBounded m_dataSamplingRate =
-        new SettingsModelDoubleBounded("dataSamplingRate", 1, 0.0000000000001, 1);
+        new SettingsModelDoubleBounded("dataSamplingRate", 1, 0, 1);
 
     private final SettingsModelString m_lossFunction;
 
@@ -71,7 +72,7 @@ public class GradientBoostedTreesLearnerSettings extends DecisionTreeSettings {
             m_lossFunction =
                     new SettingsModelString("lossFunction", EnumContainer.GBTLossFunction.squared.name());
 
-            m_maxNoOfModels = new SettingsModelIntegerBounded("numModels", 5, 1, Integer.MAX_VALUE);
+            m_maxNoOfModels = new SettingsModelIntegerBounded("numModels", 50, 1, Integer.MAX_VALUE);
 
             m_shouldSampleData.addChangeListener(new ChangeListener() {
                 @Override
@@ -83,7 +84,7 @@ public class GradientBoostedTreesLearnerSettings extends DecisionTreeSettings {
         } else {
             m_lossFunction =
                     new SettingsModelString("lossFunction", EnumContainer.LossFunction.LogLoss.name());
-            m_maxNoOfModels = new SettingsModelIntegerBounded("noOfIterations", 5, 1, Integer.MAX_VALUE);
+            m_maxNoOfModels = new SettingsModelIntegerBounded("noOfIterations", 50, 1, Integer.MAX_VALUE);
         }
     }
 
@@ -186,6 +187,24 @@ public class GradientBoostedTreesLearnerSettings extends DecisionTreeSettings {
      */
     public SettingsModelDoubleBounded getLearningRateModel() {
         return m_learningRate;
+    }
+
+    /**
+     * @param tableSpec the original input {@link DataTableSpec}
+     * @throws InvalidSettingsException if the settings are invalid
+     */
+    @Override
+    public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
+        super.check(tableSpec);
+
+        if (m_shouldSampleData.getBooleanValue() && m_dataSamplingRate.getDoubleValue() <= 0) {
+            throw new InvalidSettingsException("The data sampling rate needs to be > 0.");
+        }
+
+        if (m_learningRate.getDoubleValue() == 0) {
+            throw new InvalidSettingsException("The learning rate needs to be > 0.");
+        }
+
     }
 
     /**

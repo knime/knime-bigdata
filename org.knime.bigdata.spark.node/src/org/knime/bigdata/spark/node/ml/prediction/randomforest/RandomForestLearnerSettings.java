@@ -52,7 +52,7 @@ public class RandomForestLearnerSettings extends DecisionTreeSettings {
     private final SettingsModelBoolean m_shouldSampleData = new SettingsModelBoolean("shouldSampleData", false);
 
     private SettingsModelDoubleBounded m_dataSamplingRate =
-        new SettingsModelDoubleBounded("dataSamplingRate", 1, 0.0000000000001, 1);
+        new SettingsModelDoubleBounded("dataSamplingRate", 1, 0, 1);
 
     /**
      * Creates a new instance that operates in the given mode.
@@ -62,7 +62,7 @@ public class RandomForestLearnerSettings extends DecisionTreeSettings {
     public RandomForestLearnerSettings(final DecisionTreeLearnerMode mode) {
         super(mode);
         if (mode != DecisionTreeLearnerMode.DEPRECATED) {
-            m_noOfModels = new SettingsModelIntegerBounded("noOfModels", 5, 1, Integer.MAX_VALUE);
+            m_noOfModels = new SettingsModelIntegerBounded("noOfModels", 100, 1, Integer.MAX_VALUE);
             m_featureSamplingStrategy =
                     new SettingsModelString("featureSamplingStrategy", FeatureSamplingStrategy.auto.name());
 
@@ -74,7 +74,7 @@ public class RandomForestLearnerSettings extends DecisionTreeSettings {
             });
             m_dataSamplingRate.setEnabled(false);
         } else {
-            m_noOfModels = new SettingsModelIntegerBounded("noOfTrees", 5, 1, Integer.MAX_VALUE);
+            m_noOfModels = new SettingsModelIntegerBounded("noOfTrees", 100, 1, Integer.MAX_VALUE);
             m_featureSamplingStrategy =
                     new SettingsModelString("featureSubsetStrategy", FeatureSamplingStrategy.auto.name());
         }
@@ -152,6 +152,10 @@ public class RandomForestLearnerSettings extends DecisionTreeSettings {
     @Override
     public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
         super.check(tableSpec);
+
+        if (m_shouldSampleData.getBooleanValue() && m_dataSamplingRate.getDoubleValue() <= 0) {
+            throw new InvalidSettingsException("The data sampling rate needs to be > 0.");
+        }
     }
 
     /**

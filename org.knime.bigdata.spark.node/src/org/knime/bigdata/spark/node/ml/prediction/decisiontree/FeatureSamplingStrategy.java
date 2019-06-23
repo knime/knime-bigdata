@@ -29,22 +29,28 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
  */
 public enum FeatureSamplingStrategy implements ButtonGroupEnumInterface {
     /**  */
-    auto,
+    auto("Auto"),
     /**  */
-    all,
+    all("All"),
     /**  */
-    sqrt,
+    sqrt("Square root"),
     /**  */
-    log2,
+    log2("Log2"),
     /**  */
-    onethird;
+    onethird("One third");
+
+    private final String m_text;
+
+    private FeatureSamplingStrategy(final String text) {
+        m_text = text;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String getText() {
-        return name();
+        return m_text;
     }
 
     /**
