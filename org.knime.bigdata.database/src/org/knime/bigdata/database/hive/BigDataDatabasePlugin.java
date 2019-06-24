@@ -44,61 +44,68 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   Jun 24, 2019 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.database.impala;
+package org.knime.bigdata.database.hive;
 
+import java.sql.Date;
 import java.sql.JDBCType;
 import java.sql.SQLType;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
-import org.knime.core.data.DataType;
-import org.knime.core.data.def.BooleanCell;
-import org.knime.core.data.time.localdate.LocalDateCellFactory;
-import org.knime.core.data.time.localtime.LocalTimeCellFactory;
-import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
-import org.knime.database.datatype.mapping.AbstractDBDataTypeMappingService;
+import org.eclipse.core.runtime.Plugin;
+import org.knime.bigdata.database.impala.ImpalaDestination;
+import org.knime.bigdata.database.impala.ImpalaSource;
+import org.knime.core.data.convert.map.ConsumerRegistry;
+import org.knime.core.data.convert.map.MappingFramework;
+import org.knime.core.data.convert.map.ProducerRegistry;
+import org.knime.database.datatype.mapping.DBCellValueConsumerFactory;
+import org.knime.database.datatype.mapping.DBCellValueProducerFactory;
+import org.knime.database.datatype.mapping.DBDestination;
+import org.knime.database.datatype.mapping.DBSource;
+import org.osgi.framework.BundleContext;
 
 /**
- * Impala specific data type mappings.
+ * KNIME BigData Database plug-in.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class ImpalaTypeMappingService extends AbstractDBDataTypeMappingService<ImpalaSource, ImpalaDestination> {
+public class BigDataDatabasePlugin extends Plugin {
 
-    private static final ImpalaTypeMappingService INSTANCE = new ImpalaTypeMappingService();
-
-    /**
-     * Gets the singleton {@link ImpalaTypeMappingService} instance.
-     *
-     * @return the only {@link ImpalaTypeMappingService} instance.
-     */
-    public static ImpalaTypeMappingService getInstance() {
-        return INSTANCE;
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        registerImpalaConsumers();
+        registerImpalaProducers();
     }
 
-    private ImpalaTypeMappingService() {
-        super(ImpalaSource.class, ImpalaDestination.class);
+    private static void registerImpalaConsumers() {
+        final ConsumerRegistry<SQLType, ImpalaDestination> reg =
+            MappingFramework.forDestinationType(ImpalaDestination.class);
+        reg.setParent(DBDestination.class);
+        reg.unregisterAllConsumers();
 
-        // Default consumption paths
-        final Map<DataType, SQLType> defaultConsumptionMap = new LinkedHashMap<>(getDefaultConsumptionMap());
-        defaultConsumptionMap.put(BooleanCell.TYPE, JDBCType.BOOLEAN);
-        defaultConsumptionMap.put(ZonedDateTimeCellFactory.TYPE, JDBCType.VARCHAR); // not supported in Impala
-        defaultConsumptionMap.put(LocalDateCellFactory.TYPE, JDBCType.TIMESTAMP);
+        reg.register(new DBCellValueConsumerFactory<>(LocalDate.class, JDBCType.TIMESTAMP, (ps, parameters, v) -> {
+            ps.setDate(parameters.getColumnIndex(), Date.valueOf(v));
+        }));
+    }
 
-        // Impala supports time columns, but parquet can't store a time as timestamp...
-        defaultConsumptionMap.put(LocalTimeCellFactory.TYPE, JDBCType.VARCHAR);
+    private static void registerImpalaProducers() {
+        final ProducerRegistry<SQLType, ImpalaSource> reg = MappingFramework.forSourceType(ImpalaSource.class);
+        reg.setParent(DBSource.class);
+        reg.unregisterAllProducers();
 
-        setDefaultConsumptionPathsFrom(defaultConsumptionMap);
-
-
-        // Default production paths
-        setDefaultProductionPathsFrom(getDefaultProductionMap());
-
-        // SQL type to database column type mapping
-        addColumnType(JDBCType.BIT, "boolean");
-        addColumnType(JDBCType.INTEGER, "int");
-        addColumnType(JDBCType.VARCHAR, "string");
+        reg.register(new DBCellValueProducerFactory<>(JDBCType.TIMESTAMP, LocalDate.class, (rs, parameters) -> {
+            final Timestamp value = rs.getTimestamp(parameters.getColumnIndex());
+            return value == null ? null : value.toLocalDateTime().toLocalDate();
+        }));
+        reg.register(new DBCellValueProducerFactory<>(JDBCType.TIMESTAMP, LocalTime.class, (rs, parameters) -> {
+            // Hive Driver: getTime is not supported, getTimestamp+getString fails with parse error
+            // Cloudera Driver: getTime+getTimestamp+getString works
+            final Time value = rs.getTime(parameters.getColumnIndex());
+            return value == null ? null : value.toLocalTime();
+        }));
     }
 }

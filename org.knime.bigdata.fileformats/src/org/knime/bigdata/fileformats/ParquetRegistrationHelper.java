@@ -142,6 +142,12 @@ public class ParquetRegistrationHelper {
             (c, v) -> c.addInteger((int)v.toEpochDay()));
         primitiveConsumers.add(localDateConsumer);
 
+        // special case for Impala loader
+        final ParquetCellValueConsumerFactory<LocalDate> localDateAsTSConsumer = new ParquetCellValueConsumerFactory<>(
+                LocalDate.class, new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS),
+                (c, v) -> c.addLong(v.atTime(0, 0, 0).atZone(ZoneOffset.UTC).toInstant().toEpochMilli()));
+        primitiveConsumers.add(localDateAsTSConsumer);
+
         final ParquetCellValueConsumerFactory<LocalDateTime> localdatetimeConsumer =
             new ParquetCellValueConsumerFactory<>(LocalDateTime.class,
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS),

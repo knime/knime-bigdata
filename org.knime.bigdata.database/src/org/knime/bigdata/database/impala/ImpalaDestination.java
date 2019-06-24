@@ -44,22 +44,28 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   Jun 24, 2019 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.database.impala;
 
-import org.knime.database.datatype.mapping.DBTypeMappingService;
-import org.knime.database.datatype.mapping.DBTypeMappingServiceSupplier;
+import java.sql.PreparedStatement;
+
+import org.knime.database.datatype.mapping.DBDestination;
 
 /**
+ * Impala database destination where to write cell values to.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class ImpalaTypeMappingServiceSupplier implements DBTypeMappingServiceSupplier<ImpalaSource, ImpalaDestination> {
+public class ImpalaDestination extends DBDestination {
 
-    @Override
-    public DBTypeMappingService<ImpalaSource, ImpalaDestination> get() {
-        return ImpalaTypeMappingService.getInstance();
+
+    /**
+     * Constructs a {@link ImpalaDestination}.
+     *
+     * @param ps the {@link PreparedStatement} to write to the database
+     */
+    public ImpalaDestination(final PreparedStatement ps) {
+        super(ps);
     }
-
 }
