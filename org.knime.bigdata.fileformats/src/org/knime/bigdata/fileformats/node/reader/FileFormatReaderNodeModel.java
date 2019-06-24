@@ -186,7 +186,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
         final RemoteFile<Connection> remoteFile =
             FileHandlingUtility.createRemoteFile(m_settings.getFileName(), connInfo, connectionMonitor);
         if (!remoteFile.exists()) {
-            throw new InvalidSettingsException("Input file '" + remoteFile.getPath() + "' does not exist");
+            throw new InvalidSettingsException("Input file '" + remoteFile.getPath() + remoteFile.getName() + "' does not exist");
         }
         if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
             throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
