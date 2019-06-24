@@ -23,6 +23,7 @@ package org.knime.bigdata.spark.node.preproc.sampling;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -120,8 +121,12 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
         final SparkSamplingNodeSettings settings = getSettings();
         final SparkContextID contextID = rdd.getContextID();
 
-        final Integer[] columnIndices = SparkUtil.getColumnIndices(rdd.getTableSpec(), settings.classColumn());
-        final Integer clasColIdx = columnIndices[0];
+        final Integer clasColIdx;
+        if (settings.samplingMethod() == SamplingMethods.Stratified) {
+            clasColIdx = SparkUtil.getColumnIndices(rdd.getTableSpec(), settings.classColumn())[0];
+        } else {
+            clasColIdx = -1;
+        }
 
         final CountMethod sparkCountMethod = CountMethod.fromKNIMEMethodName(settings.countMethod().name());
         final SamplingMethod sparkSamplingMethod = SamplingMethod.fromKNIMEMethodName(settings.samplingMethod().name());
