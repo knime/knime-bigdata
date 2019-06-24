@@ -116,7 +116,7 @@ public class HiveWarehouseSessionUtil {
             // NOTE: Always make sure that HiveWarehouseSession has been initialized before doing this
             // Currently this happens as part of building the CREATE TABLE statement, but we may not
             // be doing this forever
-            dataFrame.write().format(HIVE_WAREHOUSE_CONNECTOR).mode("error")
+            dataFrame.write().format(HIVE_WAREHOUSE_CONNECTOR).mode("append")
                 .option("table", input.getHiveTableName()).save();
         } finally {
             if (clearSession) {
