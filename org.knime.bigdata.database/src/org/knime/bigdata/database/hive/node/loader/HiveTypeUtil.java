@@ -109,7 +109,7 @@ public class HiveTypeUtil {
         typeMap.put(JDBCType.DATE, TypeDescription.createDate());
 
         //STRING
-        typeMap.put(JDBCType.VARCHAR, TypeDescription.createVarchar());
+        typeMap.put(JDBCType.VARCHAR, TypeDescription.createString());
         typeMap.put(JDBCType.CHAR, TypeDescription.createChar());
 
         //MISC
