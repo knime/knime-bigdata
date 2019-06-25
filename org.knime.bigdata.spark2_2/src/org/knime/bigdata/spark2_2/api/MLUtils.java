@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark2_2.api;
 
+import static org.apache.spark.sql.functions.column;
+import static org.apache.spark.sql.functions.lit;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +31,9 @@ import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 
@@ -78,4 +84,28 @@ public class MLUtils {
             }
         }
     }
+
+    public static Dataset<Row> retainRowsWithMissingValuesInFeatures(final Dataset<Row> inputDataset,
+        final Iterable<String> features) {
+
+        Column orIsNulls = lit(false);
+        for (String feature : features) {
+            orIsNulls = orIsNulls.or(column(feature).isNull());
+        }
+
+        return inputDataset.where(orIsNulls);
+    }
+
+    public static Dataset<Row> retainRowsWithoutMissingValuesInFeatures(final Dataset<Row> inputDataset,
+        final Iterable<String> features) {
+
+        Column andIsNotNull = lit(true);
+
+        for (String feature : features) {
+            andIsNotNull = andIsNotNull.and(column(feature).isNotNull());
+        }
+
+        return inputDataset.where(andIsNotNull);
+    }
+
 }

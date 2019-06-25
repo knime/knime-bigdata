@@ -22,6 +22,7 @@ package org.knime.bigdata.spark2_1.jobs.ml.predictor.regression;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
@@ -33,6 +34,7 @@ import org.knime.bigdata.spark.node.ml.prediction.predictor.regression.MLPredict
 import org.knime.bigdata.spark2_1.api.MLUtils;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.SimpleSparkJob;
+import org.knime.bigdata.spark2_1.jobs.ml.predictor.classification.MLPredictorClassificationJob;
 
 /**
  * Applies previously learned {@link PipelineModel} with a regression model to a given data frame.
@@ -51,13 +53,21 @@ public class MLPredictorRegressionJob implements SimpleSparkJob<MLPredictorRegre
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final PipelineModel model = namedObjects.get(input.getNamedModelId());
 
+        final Set<String> features = MLPredictorClassificationJob.getFeatures(model, inputDataset);
+        final Dataset<Row> withMVs = MLUtils.retainRowsWithMissingValuesInFeatures(inputDataset, features);
+        final Dataset<Row> withoutMVs = MLUtils.retainRowsWithoutMissingValuesInFeatures(inputDataset, features);
+
         // apply pipeline model (classification)
-        final Dataset<Row> predictedDataset = model.transform(inputDataset);
+        final Dataset<Row> predictedDataset = model.transform(withoutMVs);
 
         // clean up columns and unpack conditional class probabilities if desired
-        final Dataset<Row> cleanedDataset = predictedDataset.selectExpr(determineOutputColumns(inputDataset, model, input));
+        final Dataset<Row> cleanedDataset =
+            predictedDataset.selectExpr(determineOutputColumns(inputDataset, model, input));
 
-        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), cleanedDataset);
+        final Dataset<Row> expandedWithMVs = withMVs
+            .selectExpr(MLPredictorClassificationJob.fillRowsWithMVsWithDummyValues(withMVs, cleanedDataset.schema()));
+
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), cleanedDataset.union(expandedWithMVs));
     }
 
     private static String[] determineOutputColumns(final Dataset<Row> inputDataset,

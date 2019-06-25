@@ -22,6 +22,7 @@ package org.knime.bigdata.spark2_0.jobs.ml.prediction;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ import org.knime.bigdata.spark.core.job.NamedModelLearnerJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark2_0.api.FileUtils;
+import org.knime.bigdata.spark2_0.api.MLUtils;
 import org.knime.bigdata.spark2_0.api.NamedObjects;
 import org.knime.bigdata.spark2_0.api.SparkJob;
 
@@ -68,46 +70,14 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
 
         final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
 
-        final List<String> actualFeatureColumns = new ArrayList<>();
-        final List<PipelineStage> stages = new ArrayList<>();
+        final List<PipelineStage> stages = createStages(input, dataset);
 
-        final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
-
-        // index all nominal feature columns
-        for (int featureColIndex : input.getColumnIdxs()) {
-            final StructField field = dataset.schema().fields()[featureColIndex];
-
-            if (field.dataType() == DataTypes.StringType) {
-                final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
-
-                stages.add(new StringIndexer().setInputCol(field.name()).setOutputCol(indexedFeatureColumn)
-                    .setHandleInvalid("keep"));
-
-                actualFeatureColumns.add(indexedFeatureColumn);
-            } else {
-                actualFeatureColumns.add(field.name());
-            }
-        }
-
-        // assemble vector
-        final String featureVectorColumn = "features_" + UUID.randomUUID().toString();
-        final VectorAssembler vectorAssembler =
-            new VectorAssembler().setInputCols(actualFeatureColumns.toArray(new String[0]))
-                .setOutputCol(featureVectorColumn);
-        stages.add(vectorAssembler);
-
-        // add the regressor
-        final String predictionCol = "prediction_" + UUID.randomUUID().toString();
-        final Predictor<?, ?, ?> classifier = createRegressor(input);
-        classifier.setFeaturesCol(featureVectorColumn)
-            .setLabelCol(targetColumn)
-            .setPredictionCol(predictionCol);
-        stages.add(classifier);
+        final Dataset<Row> withoutMissingValues = getDatasetWithoutMissingValues(input, dataset);
 
         // assemble pipeline and fit
         final Pipeline pipeline = new Pipeline();
         pipeline.setStages(stages.toArray(new PipelineStage[0]));
-        final PipelineModel model = pipeline.fit(dataset);
+        final PipelineModel model = pipeline.fit(withoutMissingValues);
 
         Path serializedModelDir = null;
         Path serializedModelZip = null;
@@ -130,6 +100,65 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
         final Path modelInterpreterData = generateModelInterpreterData(sparkContext, model);
 
         return new MLModelLearnerJobOutput(serializedModelZip, modelInterpreterData, modelMetaData);
+    }
+
+    /**
+     * Called to create the stages of the pipeline.
+     *
+     * @param input
+     * @param dataset
+     * @return a list of stages.
+     */
+    protected List<PipelineStage> createStages(final I input, final Dataset<Row> dataset) {
+        final List<String> actualFeatureColumns = new ArrayList<>();
+        final List<PipelineStage> stages = new ArrayList<>();
+
+        final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
+
+        // index all nominal feature columns
+        for (int featureColIndex : input.getColumnIdxs()) {
+            final StructField field = dataset.schema().fields()[featureColIndex];
+
+            if (field.dataType() == DataTypes.StringType) {
+                final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
+
+                stages.add(new StringIndexer()
+                    .setInputCol(field.name())
+                    .setOutputCol(indexedFeatureColumn)
+                    .setHandleInvalid("skip")
+                    .fit(dataset));
+
+                actualFeatureColumns.add(indexedFeatureColumn);
+            } else {
+                actualFeatureColumns.add(field.name());
+            }
+        }
+
+        // assemble vector
+        final String featureVectorColumn = "features_" + UUID.randomUUID().toString();
+        final VectorAssembler vectorAssembler =
+            new VectorAssembler()
+                .setInputCols(actualFeatureColumns.toArray(new String[0]))
+                .setOutputCol(featureVectorColumn);
+        stages.add(vectorAssembler);
+
+        // add the regressor
+        final String predictionCol = "prediction_" + UUID.randomUUID().toString();
+        final Predictor<?, ?, ?> classifier = createRegressor(input);
+        classifier.setFeaturesCol(featureVectorColumn)
+            .setLabelCol(targetColumn)
+            .setPredictionCol(predictionCol);
+        stages.add(classifier);
+        return stages;
+    }
+
+    private Dataset<Row> getDatasetWithoutMissingValues(final I input, final Dataset<Row> dataset) {
+        final List<String> originalFeatures = new LinkedList<String>();
+        for (int featureColIndex : input.getColumnIdxs()) {
+            originalFeatures.add(dataset.schema().fields()[featureColIndex].name());
+        }
+        final Dataset<Row> withoutMissingValues = MLUtils.retainRowsWithoutMissingValuesInFeatures(dataset, originalFeatures);
+        return withoutMissingValues;
     }
 
     /**

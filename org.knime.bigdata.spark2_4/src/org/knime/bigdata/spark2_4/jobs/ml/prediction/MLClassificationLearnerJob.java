@@ -106,7 +106,7 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         final String featureVectorColumn = "features_" + UUID.randomUUID().toString();
         final VectorAssembler vectorAssembler =
             new VectorAssembler().setInputCols(actualFeatureColumns.toArray(new String[0]))
-                .setOutputCol(featureVectorColumn).setHandleInvalid("skip");
+                .setOutputCol(featureVectorColumn).setHandleInvalid("keep");
         stages.add(vectorAssembler);
 
         // add the classifier

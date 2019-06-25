@@ -22,16 +22,22 @@ package org.knime.bigdata.spark2_0.jobs.ml.predictor.classification;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.ProbabilisticClassificationModel;
 import org.apache.spark.ml.feature.IndexToString;
+import org.apache.spark.ml.feature.StringIndexerModel;
+import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.ml.prediction.predictor.classification.MLPredictorClassificationJobInput;
 import org.knime.bigdata.spark2_0.api.MLUtils;
@@ -55,17 +61,66 @@ public class MLPredictorClassificationJob implements SimpleSparkJob<MLPredictorC
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final PipelineModel model = namedObjects.get(input.getNamedModelId());
 
+        final Set<String> features = getFeatures(model, inputDataset);
+        final Dataset<Row> withMVs = MLUtils.retainRowsWithMissingValuesInFeatures(inputDataset, features);
+        final Dataset<Row> withoutMVs = MLUtils.retainRowsWithoutMissingValuesInFeatures(inputDataset, features);
+
         // apply pipeline model (classification)
-        final Dataset<Row> predictedDataset = model.transform(inputDataset);
+        final Dataset<Row> predictedDataset = model.transform(withoutMVs);
 
         // clean up columns and unpack conditional class probabilities if desired
         final Dataset<Row> cleanedDataset = predictedDataset.selectExpr(
-            determineOutputColumns(inputDataset, input, model));
+            determinePredictedRowOutputColumns(inputDataset, input, model));
 
-        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), cleanedDataset);
+        final Dataset<Row> expandedWithMVs = withMVs.selectExpr(fillRowsWithMVsWithDummyValues(withMVs, cleanedDataset.schema()));
+
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), cleanedDataset.union(expandedWithMVs));
     }
 
-    private static String[] determineOutputColumns(final Dataset<Row> inputDataset,
+    public static String[] fillRowsWithMVsWithDummyValues(final Dataset<Row> funnyRows, final StructType schema) {
+        final List<String> outputColumns = new LinkedList<>();
+
+        // first append all input columns
+        outputColumns.add("*");
+
+        // then add zeros in conditional class probability columns, if present
+        for (int i = funnyRows.schema().length(); i < schema.length() -1; i++) {
+            outputColumns.add(String.format("0 as `%s`", schema.fields()[i].name()));
+        }
+
+        // then add null value in prediction column
+        outputColumns.add(String.format("NULL as `%s`", schema.fields()[schema.length()-1].name()));
+
+        return outputColumns.toArray(new String[0]);
+    }
+
+    public static Set<String> getFeatures(final PipelineModel model, final Dataset<Row> dataset) {
+        final Set<String> features = new HashSet<>();
+
+        final Set<String> toIgnore = new HashSet<>();
+
+        for(Transformer stage : model.stages()) {
+            if (stage instanceof StringIndexerModel ) {
+                final StringIndexerModel stringIndexer = (StringIndexerModel) stage;
+                final String maybeFeature = stringIndexer.getInputCol();
+                if (dataset.schema().getFieldIndex(maybeFeature).isDefined()) {
+                    features.add(maybeFeature);
+                    toIgnore.add(stringIndexer.getOutputCol());
+                }
+            } else if (stage instanceof VectorAssembler) {
+                final VectorAssembler vecAssembler = (VectorAssembler) stage;
+                for (String maybeFeature : vecAssembler.getInputCols()) {
+                    if (!toIgnore.contains(maybeFeature)) {
+                        features.add(maybeFeature);
+                    }
+                }
+                break;
+            }
+        }
+        return features;
+    }
+
+    private static String[] determinePredictedRowOutputColumns(final Dataset<Row> inputDataset,
         final MLPredictorClassificationJobInput input, final PipelineModel model) {
 
         final IndexToString predictionColumnStringifier =

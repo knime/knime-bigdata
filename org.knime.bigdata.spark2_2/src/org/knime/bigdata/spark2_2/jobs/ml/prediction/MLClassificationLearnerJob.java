@@ -22,6 +22,7 @@ package org.knime.bigdata.spark2_2.jobs.ml.prediction;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ import org.knime.bigdata.spark.core.job.NamedModelLearnerJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark2_2.api.FileUtils;
+import org.knime.bigdata.spark2_2.api.MLUtils;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
 import org.knime.bigdata.spark2_2.api.SparkJob;
 
@@ -72,9 +74,59 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
 
         final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
 
-        final List<String> actualFeatureColumns = new ArrayList<>();
+        final List<PipelineStage> stages = createStages(input, dataset);
+
+        final Dataset<Row> withoutMissingValues = getDatasetWithoutMissingValues(input, dataset);
+
+        // assemble pipeline and fit
+        final Pipeline pipeline = new Pipeline();
+        pipeline.setStages(stages.toArray(new PipelineStage[0]));
+        final PipelineModel model = pipeline.fit(withoutMissingValues);
+
+        Path serializedModelDir = null;
+        Path serializedModelZip = null;
+        try {
+            serializedModelDir = FileUtils.createTempDir(sparkContext, "mlmodel");
+            model.write().overwrite().save(serializedModelDir.toUri().toString());
+
+            serializedModelZip = FileUtils.createTempFile(sparkContext, "mlmodel", ".zip");
+            FileUtils.zipDirectory(serializedModelDir, serializedModelZip);
+        } finally {
+            if (serializedModelDir != null) {
+                FileUtils.deleteRecursively(serializedModelDir);
+            }
+        }
+
+        namedObjects.add(input.getNamedModelId(), model);
+
+        final MLMetaData modelMetaData = createModelMetaData(model);
+
+        final Path modelInterpreterData = generateModelInterpreterData(sparkContext, model);
+
+        return new MLModelLearnerJobOutput(serializedModelZip, modelInterpreterData, modelMetaData);
+    }
+
+
+    private Dataset<Row> getDatasetWithoutMissingValues(final I input, final Dataset<Row> dataset) {
+        final List<String> originalFeatures = new LinkedList<String>();
+        for (int featureColIndex : input.getColumnIdxs()) {
+            originalFeatures.add(dataset.schema().fields()[featureColIndex].name());
+        }
+        final Dataset<Row> withoutMissingValues = MLUtils.retainRowsWithoutMissingValuesInFeatures(dataset, originalFeatures);
+        return withoutMissingValues;
+    }
+
+    /**
+     * Called to create the stages of the pipeline.
+     *
+     * @param input
+     * @param dataset
+     * @return a list of stages.
+     */
+    protected List<PipelineStage> createStages(final I input, final Dataset<Row> dataset) {
         final List<PipelineStage> stages = new ArrayList<>();
 
+        final List<String> actualFeatureColumns = new ArrayList<>();
         final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
 
         // index the nominal target column
@@ -82,7 +134,7 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         final StringIndexer targetColIndexer = new StringIndexer()
                 .setInputCol(targetColumn)
                 .setOutputCol(indexedTargetColumn)
-                .setHandleInvalid("keep");
+                .setHandleInvalid("skip");
         final StringIndexerModel targetColIndexerModel = targetColIndexer.fit(dataset);
         stages.add(targetColIndexer);
 
@@ -93,8 +145,11 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
             if (field.dataType() == DataTypes.StringType) {
                 final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
 
-                stages.add(new StringIndexer().setInputCol(field.name()).setOutputCol(indexedFeatureColumn)
-                    .setHandleInvalid("keep"));
+                stages.add(new StringIndexer()
+                    .setInputCol(field.name())
+                    .setOutputCol(indexedFeatureColumn)
+                    .setHandleInvalid("skip")
+                    .fit(dataset));
 
                 actualFeatureColumns.add(indexedFeatureColumn);
             } else {
@@ -129,33 +184,7 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
                 .setInputCol(predictionCol)
                 .setOutputCol("prediction_string_" + UUID.randomUUID().toString());
         stages.add(classIndexToString);
-
-        // assemble pipeline and fit
-        final Pipeline pipeline = new Pipeline();
-        pipeline.setStages(stages.toArray(new PipelineStage[0]));
-        final PipelineModel model = pipeline.fit(dataset);
-
-        Path serializedModelDir = null;
-        Path serializedModelZip = null;
-        try {
-            serializedModelDir = FileUtils.createTempDir(sparkContext, "mlmodel");
-            model.write().overwrite().save(serializedModelDir.toUri().toString());
-
-            serializedModelZip = FileUtils.createTempFile(sparkContext, "mlmodel", ".zip");
-            FileUtils.zipDirectory(serializedModelDir, serializedModelZip);
-        } finally {
-            if (serializedModelDir != null) {
-                FileUtils.deleteRecursively(serializedModelDir);
-            }
-        }
-
-        namedObjects.add(input.getNamedModelId(), model);
-
-        final MLMetaData modelMetaData = createModelMetaData(model);
-
-        final Path modelInterpreterData = generateModelInterpreterData(sparkContext, model);
-
-        return new MLModelLearnerJobOutput(serializedModelZip, modelInterpreterData, modelMetaData);
+        return stages;
     }
 
     /**

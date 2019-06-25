@@ -22,6 +22,7 @@ package org.knime.bigdata.spark2_1.jobs.ml.prediction;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,13 +30,12 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
-import org.apache.spark.ml.Predictor;
+import org.apache.spark.ml.classification.Classifier;
 import org.apache.spark.ml.classification.ProbabilisticClassifier;
 import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
-import org.apache.spark.ml.param.shared.HasRawPredictionCol;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
@@ -46,6 +46,7 @@ import org.knime.bigdata.spark.core.job.NamedModelLearnerJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark2_1.api.FileUtils;
+import org.knime.bigdata.spark2_1.api.MLUtils;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.SparkJob;
 
@@ -73,72 +74,14 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
 
         final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
 
-        final List<String> actualFeatureColumns = new ArrayList<>();
-        final List<PipelineStage> stages = new ArrayList<>();
+        final List<PipelineStage> stages = createStages(input, dataset);
 
-        final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
-
-        // index the nominal target column
-        final String indexedTargetColumn = targetColumn + "_" + UUID.randomUUID().toString();
-        final StringIndexer targetColIndexer = new StringIndexer()
-                .setInputCol(targetColumn)
-                .setOutputCol(indexedTargetColumn)
-                .setHandleInvalid("keep");
-        final StringIndexerModel targetColIndexerModel = targetColIndexer.fit(dataset);
-        stages.add(targetColIndexer);
-
-        // index all nominal feature columns
-        for (int featureColIndex : input.getColumnIdxs()) {
-            final StructField field = dataset.schema().fields()[featureColIndex];
-
-            if (field.dataType() == DataTypes.StringType) {
-                final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
-
-                stages.add(new StringIndexer().setInputCol(field.name()).setOutputCol(indexedFeatureColumn)
-                    .setHandleInvalid("keep"));
-
-                actualFeatureColumns.add(indexedFeatureColumn);
-            } else {
-                actualFeatureColumns.add(field.name());
-            }
-        }
-
-        // assemble vector
-        final String featureVectorColumn = "features_" + UUID.randomUUID().toString();
-        final VectorAssembler vectorAssembler =
-            new VectorAssembler().setInputCols(actualFeatureColumns.toArray(new String[0]))
-                .setOutputCol(featureVectorColumn);
-        stages.add(vectorAssembler);
-
-        // add the classifier
-        final String predictionCol = "prediction_" + UUID.randomUUID().toString();
-        final Predictor<?, ?, ?> classifier = createClassifier(input);
-        classifier.setFeaturesCol(featureVectorColumn)
-            .setLabelCol(indexedTargetColumn)
-            .setPredictionCol(predictionCol);
-
-        if (classifier instanceof HasRawPredictionCol) {
-            classifier.set(((HasRawPredictionCol)classifier).rawPredictionCol(),
-                "rawprediction_" + UUID.randomUUID().toString());
-        }
-
-        if (classifier instanceof ProbabilisticClassifier) {
-            ((ProbabilisticClassifier<?, ?, ?>)classifier)
-                .setProbabilityCol("prediction_prob_" + UUID.randomUUID().toString());
-        }
-        stages.add(classifier);
-
-        // map indexed target column back to strings
-        final IndexToString classIndexToString = new IndexToString()
-                .setLabels(targetColIndexerModel.labels())
-                .setInputCol(predictionCol)
-                .setOutputCol("prediction_string_" + UUID.randomUUID().toString());
-        stages.add(classIndexToString);
+        final Dataset<Row> withoutMissingValues = getDatasetWithoutMissingValues(input, dataset);
 
         // assemble pipeline and fit
         final Pipeline pipeline = new Pipeline();
         pipeline.setStages(stages.toArray(new PipelineStage[0]));
-        final PipelineModel model = pipeline.fit(dataset);
+        final PipelineModel model = pipeline.fit(withoutMissingValues);
 
         Path serializedModelDir = null;
         Path serializedModelZip = null;
@@ -163,13 +106,94 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         return new MLModelLearnerJobOutput(serializedModelZip, modelInterpreterData, modelMetaData);
     }
 
+
+    private Dataset<Row> getDatasetWithoutMissingValues(final I input, final Dataset<Row> dataset) {
+        final List<String> originalFeatures = new LinkedList<String>();
+        for (int featureColIndex : input.getColumnIdxs()) {
+            originalFeatures.add(dataset.schema().fields()[featureColIndex].name());
+        }
+        final Dataset<Row> withoutMissingValues = MLUtils.retainRowsWithoutMissingValuesInFeatures(dataset, originalFeatures);
+        return withoutMissingValues;
+    }
+
+    /**
+     * Called to create the stages of the pipeline.
+     *
+     * @param input
+     * @param dataset
+     * @return a list of stages.
+     */
+    protected List<PipelineStage> createStages(final I input, final Dataset<Row> dataset) {
+        final List<PipelineStage> stages = new ArrayList<>();
+
+        final List<String> actualFeatureColumns = new ArrayList<>();
+        final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
+
+        // index the nominal target column
+        final String indexedTargetColumn = targetColumn + "_" + UUID.randomUUID().toString();
+        final StringIndexer targetColIndexer = new StringIndexer()
+                .setInputCol(targetColumn)
+                .setOutputCol(indexedTargetColumn)
+                .setHandleInvalid("skip");
+        final StringIndexerModel targetColIndexerModel = targetColIndexer.fit(dataset);
+        stages.add(targetColIndexer);
+
+        // index all nominal feature columns
+        for (int featureColIndex : input.getColumnIdxs()) {
+            final StructField field = dataset.schema().fields()[featureColIndex];
+
+            if (field.dataType() == DataTypes.StringType) {
+                final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
+
+                stages.add(new StringIndexer()
+                    .setInputCol(field.name())
+                    .setOutputCol(indexedFeatureColumn)
+                    .setHandleInvalid("skip")
+                    .fit(dataset));
+
+                actualFeatureColumns.add(indexedFeatureColumn);
+            } else {
+                actualFeatureColumns.add(field.name());
+            }
+        }
+
+        // assemble vector
+        final String featureVectorColumn = "features_" + UUID.randomUUID().toString();
+        final VectorAssembler vectorAssembler =
+            new VectorAssembler().setInputCols(actualFeatureColumns.toArray(new String[0]))
+                .setOutputCol(featureVectorColumn);
+        stages.add(vectorAssembler);
+
+        // add the classifier
+        final String predictionCol = "prediction_" + UUID.randomUUID().toString();
+        final Classifier<?, ?, ?> classifier = createClassifier(input);
+        classifier.setFeaturesCol(featureVectorColumn)
+            .setLabelCol(indexedTargetColumn)
+            .setPredictionCol(predictionCol)
+            .setRawPredictionCol("rawprediction_" + UUID.randomUUID().toString());
+
+        if (classifier instanceof ProbabilisticClassifier) {
+            ((ProbabilisticClassifier<?, ?, ?>)classifier)
+                .setProbabilityCol("prediction_prob_" + UUID.randomUUID().toString());
+        }
+        stages.add(classifier);
+
+        // map indexed target column back to strings
+        final IndexToString classIndexToString = new IndexToString()
+                .setLabels(targetColIndexerModel.labels())
+                .setInputCol(predictionCol)
+                .setOutputCol("prediction_string_" + UUID.randomUUID().toString());
+        stages.add(classIndexToString);
+        return stages;
+    }
+
     /**
      * Subclasses must implement this method to create a classifier.
      *
      * @param input The job input.
      * @return a classifier.
      */
-    protected abstract Predictor<?, ?, ?> createClassifier(final I input);
+    protected abstract Classifier<?, ?, ?> createClassifier(final I input);
 
     /**
      * Subclasses must implement this method to provide some meta data on the learned model.
