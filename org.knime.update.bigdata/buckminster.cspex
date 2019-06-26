@@ -18,6 +18,18 @@
     <dependency name="com.amazonaws.aws-java-sdk-kms" componentType="osgi.bundle"/>
     <dependency name="com.amazonaws.aws-java-sdk-s3" componentType="osgi.bundle"/>
     <dependency name="com.amazonaws.jmespath-java" componentType="osgi.bundle"/>
+    <dependency name="com.google.gson" componentType="osgi.bundle"/>
+    <dependency name="net.minidev.json-smart" componentType="osgi.bundle"/>
+    <dependency name="net.minidev.accessors-smart" componentType="osgi.bundle"/>
+    <dependency name="org.slf4j.api" componentType="osgi.bundle"/>
+    <dependency name="com.github.fge.btf" componentType="osgi.bundle"/>
+    <dependency name="com.github.fge.msg-simple" componentType="osgi.bundle"/>
+    <dependency name="com.github.fge.uri-template" componentType="osgi.bundle"/>
+    <dependency name="org.mozilla.javascript" componentType="osgi.bundle"/>
+    <dependency name="com.googlecode.libphonenumber" componentType="osgi.bundle"/>
+    <dependency name="net.sf.jopt-simple.jopt-simple" componentType="osgi.bundle"/>
+    <dependency name="joda-time" componentType="osgi.bundle"/>
+    <dependency name="org.objectweb.asm" componentType="osgi.bundle" versionDesignator="[5.0.0,6.0.0)" />	
   </dependencies>
 
   <actions>
