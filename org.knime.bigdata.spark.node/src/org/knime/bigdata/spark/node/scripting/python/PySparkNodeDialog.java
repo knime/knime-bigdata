@@ -99,15 +99,8 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
     public PySparkNodeDialog(final int inCount, final int outCount) {
         m_inCount = inCount;
         m_outCount = outCount;
-        m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
-        PySparkHelper helper = getHelper();
         m_config = new PySparkNodeConfig(m_inCount, m_outCount);
         m_sourceCodePanel = new PySparkSourceCodePanel(m_config.getVariableNames(), (PySparkDocument)m_config.getDoc());
-        try {
-            m_sourceCodePanel.setPySparkPath(helper.getLocalPySparkPath());
-        } catch (IOException e) {
-           LOGGER.error("Could not obtain PySpark Path", e);
-        }
         addTab("Script", m_sourceCodePanel, false);
     }
 
