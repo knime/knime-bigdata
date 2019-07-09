@@ -75,7 +75,7 @@ public class HiveConnectorSettings extends ServerDBConnectorSettings {
     /**
      * Hive Connector settings
      */
-    protected HiveConnectorSettings() {
+    public HiveConnectorSettings() {
         super("hive-connection");
 
         setDBType(DB_TYPE.getId());
