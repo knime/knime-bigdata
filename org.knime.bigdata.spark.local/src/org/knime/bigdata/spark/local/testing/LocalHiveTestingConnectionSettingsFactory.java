@@ -24,8 +24,10 @@ import java.util.Map;
 
 import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.spark.local.database.LocalHiveConnectionSettings;
+import org.knime.bigdata.spark.local.db.LocalHiveConnectorSettings;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.database.node.connector.server.ServerDBConnectorSettings;
 
 /**
  * Provides factory methods to create {@link DatabaseConnectionSettings} objects that connect to Local Hive (Spark
@@ -43,8 +45,20 @@ public class LocalHiveTestingConnectionSettingsFactory {
      * @param flowVars A map of flow variables that provide the connection settings.
      * @return a {@link DatabaseConnectionSettings}.
      */
-    public static DatabaseConnectionSettings create(final Map<String, FlowVariable> flowVars) {
+    public static DatabaseConnectionSettings createConnectionSettings(final Map<String, FlowVariable> flowVars) {
         return new LocalHiveConnectionSettings(
+            TestflowVariable.getInt(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVars));
+    }
+
+    /**
+     * Creates a {@link ServerDBConnectorSettings} for Local Hive (Spark Thriftserver) from the given map of flow
+     * variables.
+     *
+     * @param flowVars A map of flow variables that provide the connection settings.
+     * @return a {@link ServerDBConnectorSettings}.
+     */
+    public static ServerDBConnectorSettings createDBConnectorSettings(final Map<String, FlowVariable> flowVars) {
+        return new LocalHiveConnectorSettings(
             TestflowVariable.getInt(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVars));
     }
 }

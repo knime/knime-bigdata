@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.knime.bigdata.database;singleton:=true
 Bundle-Version: 4.0.0.qualifier
 Bundle-Vendor: KNIME AG
 Export-Package: org.knime.bigdata.database.hive,
+ org.knime.bigdata.database.hive.testing,
  org.knime.bigdata.database.impala
 Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
  org.knime.workbench.repository;bundle-version="[4.0.0,5.0.0)",
@@ -15,6 +16,7 @@ Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
  org.knime.time;bundle-version="[4.0.0,5.0.0)",
  org.knime.base.filehandling;bundle-version="[4.0.0,5.0.0)",
  org.apache.orc.core;bundle-version="[1.4.1,2.0.0)",
+ org.knime.bigdata.commons;bundle-version="[4.0.0,5.0.0)",
  org.knime.bigdata.fileformats;bundle-version="[4.0.0,5.0.0)",
  org.knime.base;bundle-version="[4.0.0,5.0.0)",
  org.knime.cloud.core;bundle-version="[4.0.0,5.0.0)",
