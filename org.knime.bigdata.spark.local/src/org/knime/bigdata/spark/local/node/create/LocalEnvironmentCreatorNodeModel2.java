@@ -32,14 +32,18 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.bigdata.database.hive.Hive;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.bigdata.spark.local.context.LocalSparkContext;
+import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.db.LocalHiveConnectionController;
 import org.knime.bigdata.spark.local.db.LocalHiveConnectorSettings;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
@@ -109,8 +113,9 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
     @Override
     protected PortObject createDBPort(final ExecutionContext exec, final int hiveserverPort)
             throws CanceledExecutionException, SQLException, InvalidSettingsException {
-        final PortObject dbPortObject;
+
         m_hiveSettings = new LocalHiveConnectorSettings(hiveserverPort);
+        m_sessionInfo = createSessionInfo();
         final DBSession session = registerSession(exec);
         final DBType dbType = session.getDBType();
         final DBTypeMappingService<? extends DBSource, ? extends DBDestination> mappingService =
@@ -120,14 +125,11 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
         final DataTypeMappingConfiguration<SQLType> externalToKnime =
                 mappingService.newDefaultExternalToKnimeMappingConfiguration();
 
-        dbPortObject = new DBSessionPortObject(session.getID(), DataTypeMappingConfigurationData.from(knimeToExternal),
+        return new DBSessionPortObject(session.getID(), DataTypeMappingConfigurationData.from(knimeToExternal),
             DataTypeMappingConfigurationData.from(externalToKnime));
-        return dbPortObject;
     }
 
-    private DBSession registerSession(final ExecutionMonitor monitor)
-        throws CanceledExecutionException, SQLException {
-        m_sessionInfo = createSessionInfo();
+    private DBSession registerSession(final ExecutionMonitor monitor) throws CanceledExecutionException, SQLException {
         Objects.requireNonNull(m_sessionInfo, "m_sessionInfo must not be null");
         final DBSession session = DBSessionCache.getInstance().getOrCreate(m_sessionInfo, m_variableContext, monitor);
         session.validate(monitor);
@@ -173,22 +175,32 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
             return substitute;
         });
 
-        final DBConnectionController connectionController = createConnectionController(null);
-
+        final DBConnectionController connectionController = createConnectionController(m_hiveSettings.getDBUrl());
         return new DefaultDBSessionInformation(dbType, dialectId, sessionID, driver.getDriverDefinition(),
             connectionController, m_hiveSettings.getAttributeValues());
     }
 
-    private DBConnectionController createConnectionController(@SuppressWarnings("unused") final NodeSettingsRO settings) {
-        return new LocalHiveConnectionController(m_hiveSettings.getDBUrl());
+    private static DBConnectionController createConnectionController(final String jdbcURL) {
+        return new LocalHiveConnectionController(jdbcURL);
     }
 
     @Override
     protected void onDisposeInternal() {
         super.onDisposeInternal();
+        destroySession();
+    }
+
+    @Override
+    protected void resetInternal() {
+        super.resetInternal();
+        destroySession();
+    }
+
+    private void destroySession() {
         if (m_sessionInfo != null) {
             DBSessionCache.getInstance().destroy(m_sessionInfo.getID());
             m_sessionInfo = null;
+            m_hiveSettings = null;
         }
     }
 
@@ -197,9 +209,18 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
             throws IOException, CanceledExecutionException {
         super.loadAdditionalInternals(nodeInternDir, exec);
 
-        m_sessionInfo = DBSessionInternalsSerializer.loadFromInternals(nodeInternDir, this::createConnectionController);
         try {
-            registerSession(exec);
+            final SparkContextID contextID = m_settings.getSparkContextID();
+            final LocalSparkContext sparkContext =
+                (LocalSparkContext)SparkContextManager.<LocalSparkContextConfig> getOrCreateSparkContext(contextID);
+            final LocalSparkContextConfig sparkContextConfig = m_settings.createContextConfig();
+
+            if (sparkContextConfig.startThriftserver() && sparkContext.getStatus() == SparkContextStatus.OPEN) {
+                m_hiveSettings = new LocalHiveConnectorSettings(sparkContext.getHiveserverPort());
+                m_sessionInfo = DBSessionInternalsSerializer.loadFromInternals(nodeInternDir,
+                    t -> createConnectionController(m_hiveSettings.getDBUrl()));
+                registerSession(exec);
+            }
         } catch (final Exception exception) {
             throw new IOException(exception.getMessage(), exception);
         }
