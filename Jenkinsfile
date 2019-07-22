@@ -94,7 +94,7 @@ node {
 	stage('Build update site') {
 		buckminster (
 			component: 'org.knime.update.bigdata',
-			baseline: [file: 'git/knime-config/org.knime.config/API-Baseline.target', name: 'Release 2018-12'],
+			baseline: [file: 'git/knime-config/org.knime.config/API-Baseline.target', name: 'Release 2019-06'],
 			repos: [
 				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.org'].p2}",
 				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.labs'].p2}",
