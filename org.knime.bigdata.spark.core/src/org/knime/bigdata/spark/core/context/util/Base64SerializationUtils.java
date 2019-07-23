@@ -33,6 +33,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -98,7 +99,7 @@ public class Base64SerializationUtils {
     public static void deserializeFromBase64Compressed(final String base64String, final Path destFile) {
         try (InputStream in =
             new GZIPInputStream(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(base64String)))) {
-            Files.copy(in, destFile);
+            Files.copy(in, destFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
