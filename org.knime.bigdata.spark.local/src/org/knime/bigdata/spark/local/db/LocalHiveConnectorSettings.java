@@ -72,6 +72,13 @@ public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
 
     /**
      * Hive Connector settings
+     */
+    public LocalHiveConnectorSettings() {
+        this(-1);
+    }
+
+    /**
+     * Hive Connector settings
      * 
      * @param hiveserverPort The TCP that local Hive (i.e. Spark thriftserver) is listening on.
      */
@@ -81,7 +88,6 @@ public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
         setPort(hiveserverPort);
         setHost("localhost");
         setDatabaseName("");
-        setDBUrl(String.format("jdbc:hive2://localhost:%d/", hiveserverPort));
 
         setDBType(DB_TYPE.getId());
 
@@ -92,22 +98,8 @@ public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
     }
 
     @Override
-    protected String createJdbcUrl() {
-        final String host = getHost();
-        final int port = getPort();
-        final String dbName = getDatabaseName();
-
-        return String.format("jdbc:hive2://%s:%s/%s", host, port, dbName);
-    }
-
-    @Override
     protected String getDatabaseTypeId() {
         return DB_TYPE.getId();
-    }
-
-    @Override
-    public boolean isDatabaseNameMandatory() {
-        return false;
     }
 
 }

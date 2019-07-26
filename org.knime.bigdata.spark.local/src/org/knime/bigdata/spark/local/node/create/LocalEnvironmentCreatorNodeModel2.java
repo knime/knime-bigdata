@@ -140,8 +140,9 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
      * Creates the description of the session to be created and registered.
      *
      * @return the {@link DBSessionInformation} describing the session to be created and registered.
+     * @throws InvalidSettingsException if any of the settings is not valid.
      */
-    private DBSessionInformation createSessionInfo() {
+    private DBSessionInformation createSessionInfo() throws InvalidSettingsException {
 
         final DBSessionID sessionID = new DBSessionID();
         final DBType dbType = Hive.DB_TYPE;

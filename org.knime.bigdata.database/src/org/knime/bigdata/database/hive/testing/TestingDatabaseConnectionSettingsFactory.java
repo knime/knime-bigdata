@@ -63,10 +63,6 @@ public class TestingDatabaseConnectionSettingsFactory {
             authModel.setValues(AuthenticationType.USER_PWD, null, userName, password);
         }
 
-        final String parameter = TestflowVariable.getString(TestflowVariable.HIVE_PARAMETER, flowVars);
-        settings.setDBUrl(String.format("jdbc:hive2://%s:%s/%s;%s",
-            settings.getHost(), settings.getPort(), settings.getDatabaseName(), parameter));
-
         return settings;
     }
 }
