@@ -89,23 +89,8 @@ public class HiveConnectorSettings extends ServerDBConnectorSettings {
     }
 
     @Override
-    protected String createJdbcUrl() {
-        final String host = getHost();
-        final int port = getPort();
-        final String dbName = getDatabaseName();
-
-        return String.format("jdbc:hive2://%s:%s/%s", host, port, dbName);
-    }
-
-
-    @Override
     protected String getDatabaseTypeId() {
         return DB_TYPE.getId();
-    }
-
-    @Override
-    public boolean isDatabaseNameMandatory() {
-        return false;
     }
 
 }

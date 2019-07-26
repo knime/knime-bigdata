@@ -48,12 +48,8 @@
  */
 package org.knime.bigdata.database.impala;
 
-import static org.knime.database.driver.URLTemplate.NAME_DEFAULT;
-
 import org.knime.bigdata.database.hive.HiveDriverLocator;
 import org.knime.database.DBType;
-import org.knime.database.driver.URLTemplate;
-import org.knime.database.driver.URLTemplates;
 
 /**
  * This class contains the Impala driver definition that use the open source hive driver.
@@ -75,8 +71,4 @@ public class ImpalaHiveDriverLocator extends HiveDriverLocator {
         return Impala.DB_TYPE;
     }
 
-    @Override
-    public URLTemplates getURLTemplates() {
-        return new URLTemplates(new URLTemplate(NAME_DEFAULT, "jdbc:hive2://<host>:21050/<database_name>"));
-    }
 }

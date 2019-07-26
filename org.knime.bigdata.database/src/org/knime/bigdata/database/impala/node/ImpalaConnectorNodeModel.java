@@ -1,4 +1,5 @@
 package org.knime.bigdata.database.impala.node;
+
 import org.knime.bigdata.database.impala.ImpalaConnectionController;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -76,13 +77,13 @@ public class ImpalaConnectorNodeModel extends ServerDBConnectorNodeModel<ImpalaC
     }
 
     @Override
-    protected DBConnectionController createConnectionController(final ImpalaConnectorSettings sessionSettings) {
+    protected DBConnectionController createConnectionController(final ImpalaConnectorSettings sessionSettings)
+        throws InvalidSettingsException {
         final SettingsModelAuthentication authentication = getSettings().getAuthenticationModel();
         final CredentialsProvider credentialsProvider = getCredentialsProvider();
         return new ImpalaConnectionController(sessionSettings.getDBUrl(), authentication.getAuthenticationType(),
             authentication.getUserName(credentialsProvider), authentication.getPassword(credentialsProvider),
             authentication.getCredential(), credentialsProvider);
     }
-
 
 }

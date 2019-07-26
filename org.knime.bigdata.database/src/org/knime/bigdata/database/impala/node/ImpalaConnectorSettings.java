@@ -1,7 +1,5 @@
 package org.knime.bigdata.database.impala.node;
 
-import java.util.Optional;
-
 import org.knime.bigdata.database.impala.Impala;
 
 /*
@@ -78,7 +76,7 @@ public class ImpalaConnectorSettings extends ServerDBConnectorSettings {
     /**
      * Impala Connector settings
      */
-    protected ImpalaConnectorSettings() {
+    public ImpalaConnectorSettings() {
         super("impala-connection");
 
         setDBType(DB_TYPE.getId());
@@ -92,29 +90,8 @@ public class ImpalaConnectorSettings extends ServerDBConnectorSettings {
     }
 
     @Override
-    protected String createJdbcUrl() {
-        final Optional<DBDriverWrapper> driver = DBDriverRegistry.getInstance().getDriver(getDriver());
-
-        if (isClouderaDriver(driver.get())) {
-            return "jdbc:impala://" + getHost() + ":" + getPort() + "/" + getDatabaseName();
-        } else {
-            // Use Hive driver
-            return "jdbc:hive2://" + getHost() + ":" + getPort() + "/" + getDatabaseName();
-        }
-    }
-
-    private static boolean isClouderaDriver(final DBDriverWrapper driver) {
-        return driver != null && driver.getDriver().getClass().getName().startsWith("com.cloudera.impala.");
-    }
-
-    @Override
     protected String getDatabaseTypeId() {
         return DB_TYPE.getId();
-    }
-
-    @Override
-    public boolean isDatabaseNameMandatory() {
-        return false;
     }
 
 }

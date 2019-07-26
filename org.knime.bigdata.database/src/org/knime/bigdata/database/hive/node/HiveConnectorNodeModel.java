@@ -1,4 +1,5 @@
 package org.knime.bigdata.database.hive.node;
+
 import org.knime.bigdata.database.hive.HiveConnectionController;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -76,13 +77,13 @@ public class HiveConnectorNodeModel extends ServerDBConnectorNodeModel<HiveConne
     }
 
     @Override
-    protected DBConnectionController createConnectionController(final HiveConnectorSettings sessionSettings) {
+    protected DBConnectionController createConnectionController(final HiveConnectorSettings sessionSettings)
+        throws InvalidSettingsException {
         final SettingsModelAuthentication authentication = getSettings().getAuthenticationModel();
         final CredentialsProvider credentialsProvider = getCredentialsProvider();
         return new HiveConnectionController(sessionSettings.getDBUrl(), authentication.getAuthenticationType(),
             authentication.getUserName(credentialsProvider), authentication.getPassword(credentialsProvider),
             authentication.getCredential(), credentialsProvider);
     }
-
 
 }

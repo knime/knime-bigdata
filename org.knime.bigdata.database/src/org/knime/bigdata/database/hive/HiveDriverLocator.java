@@ -49,7 +49,6 @@
 package org.knime.bigdata.database.hive;
 
 import static java.util.Collections.emptySet;
-import static org.knime.database.driver.URLTemplate.NAME_DEFAULT;
 
 import java.util.Collection;
 
@@ -59,8 +58,6 @@ import org.knime.database.attribute.AttributeCollection;
 import org.knime.database.attribute.AttributeCollection.Accessibility;
 import org.knime.database.connection.DBConnectionManagerAttributes;
 import org.knime.database.driver.AbstractDriverLocator;
-import org.knime.database.driver.URLTemplate;
-import org.knime.database.driver.URLTemplates;
 
 /**
  * This class contains the Hive driver definition. The definition will be used by Eclipse extensions API to create a
@@ -135,8 +132,8 @@ public class HiveDriverLocator extends AbstractDriverLocator {
      * {@inheritDoc}
      */
     @Override
-    public URLTemplates getURLTemplates() {
-        return new URLTemplates(new URLTemplate(NAME_DEFAULT, "jdbc:hive2://<host>:10000/<database_name>"));
+    public String getURLTemplate() {
+        return "jdbc:hive2://<host>:<port>/[database]";
     }
 
     /**
