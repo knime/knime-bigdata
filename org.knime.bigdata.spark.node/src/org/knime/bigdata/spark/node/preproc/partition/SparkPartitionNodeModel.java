@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark.node.preproc.partition;
 
+import org.knime.base.node.preproc.sample.SamplingNodeSettings;
+import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
@@ -45,6 +47,9 @@ public class SparkPartitionNodeModel extends SparkSamplingNodeModel {
     public SparkPartitionNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE});
+        final SamplingNodeSettings settings = getSettings();
+        settings.setDefaultCountMethod(CountMethods.Relative);
+        settings.setDefaultFraction(0.7);
     }
 
     /**

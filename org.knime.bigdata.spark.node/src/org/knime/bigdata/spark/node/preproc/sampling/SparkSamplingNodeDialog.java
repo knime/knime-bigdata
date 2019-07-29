@@ -63,4 +63,12 @@ public class SparkSamplingNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_panel.saveSettingsTo(settings);
     }
+
+    /**
+     * @return the settings
+     * @since 4.1
+     */
+    public final SparkSamplingNodeSettings getSamplingSettings() {
+        return m_panel.getSettings();
+    }
 }

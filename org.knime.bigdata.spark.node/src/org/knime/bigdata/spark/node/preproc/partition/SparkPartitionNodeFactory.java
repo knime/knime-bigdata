@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark.node.preproc.partition;
 
+import org.knime.base.node.preproc.sample.SamplingNodeSettings;
+import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeDialog;
 import org.knime.core.node.NodeDialogPane;
@@ -58,7 +60,11 @@ public class SparkPartitionNodeFactory extends DefaultSparkNodeFactory<SparkPart
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkSamplingNodeDialog();
+        final SparkSamplingNodeDialog sparkSamplingNodeDialog = new SparkSamplingNodeDialog();
+        final SamplingNodeSettings settings = sparkSamplingNodeDialog.getSamplingSettings();
+        settings.setDefaultCountMethod(CountMethods.Relative);
+        settings.setDefaultFraction(0.7);
+        return sparkSamplingNodeDialog;
     }
 
 }
