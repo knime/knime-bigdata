@@ -51,11 +51,14 @@ package org.knime.bigdata.fileformats;
 
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.JulianFields;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +73,9 @@ import org.knime.bigdata.fileformats.ParquetProducers.BytesBytArrayProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.BytesInputStreamProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.DoubleDoubleProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.FloatDoubleProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.Int96LocalDateProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.Int96LocalDateTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.Int96ZonedDateTimeProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.IntLocalTimeProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.IntegerIntegerProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.IntegerLocalDateProducer;
@@ -142,17 +148,46 @@ public class ParquetRegistrationHelper {
             (c, v) -> c.addInteger((int)v.toEpochDay()));
         primitiveConsumers.add(localDateConsumer);
 
-        // special case for Impala loader
-        final ParquetCellValueConsumerFactory<LocalDate> localDateAsTSConsumer = new ParquetCellValueConsumerFactory<>(
+        // Special case for Impala on CDH => 6.2 (Date as Timestamp)
+        final ParquetCellValueConsumerFactory<LocalDate> localDateAsInt64Consumer = new ParquetCellValueConsumerFactory<>(
                 LocalDate.class, new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS),
                 (c, v) -> c.addLong(v.atTime(0, 0, 0).atZone(ZoneOffset.UTC).toInstant().toEpochMilli()));
-        primitiveConsumers.add(localDateAsTSConsumer);
+        primitiveConsumers.add(localDateAsInt64Consumer);
 
-        final ParquetCellValueConsumerFactory<LocalDateTime> localdatetimeConsumer =
+        // Special case for Impala on CDH < 6.2 (Date as Timestamp)
+        final ParquetCellValueConsumerFactory<LocalDate> localDateAsInt96Consumer =
+            new ParquetCellValueConsumerFactory<>(LocalDate.class,
+                new ParquetType(PrimitiveTypeName.INT96), (c, v) -> {
+                    final byte[] buffer = new byte[12];
+                    final ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+                    final ZonedDateTime dateTime = v.atTime(0, 0, 0).atZone(ZoneOffset.UTC);
+                    final long timeOfDayNanos = 0;
+                    final int julianDay = (int)JulianFields.JULIAN_DAY.getFrom(dateTime.toLocalDate());
+                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putLong(timeOfDayNanos).putInt(julianDay);
+                    c.addBinary(Binary.fromConstantByteArray(buffer));
+                });
+        primitiveConsumers.add(localDateAsInt96Consumer);
+
+        // Impala on CDH => 6.2
+        final ParquetCellValueConsumerFactory<LocalDateTime> localDateTimeAsInt64Consumer =
             new ParquetCellValueConsumerFactory<>(LocalDateTime.class,
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS),
                 (c, v) -> c.addLong(v.atZone(ZoneOffset.UTC).toInstant().toEpochMilli()));
-        primitiveConsumers.add(localdatetimeConsumer);
+        primitiveConsumers.add(localDateTimeAsInt64Consumer);
+
+        // Impala on CDH < 6.2 and Hive
+        final ParquetCellValueConsumerFactory<LocalDateTime> localDateTimeAsInt96Consumer =
+            new ParquetCellValueConsumerFactory<>(LocalDateTime.class,
+                new ParquetType(PrimitiveTypeName.INT96), (c, v) -> {
+                    final byte[] buffer = new byte[12];
+                    final ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+                    final ZonedDateTime dateTime = v.atZone(ZoneOffset.UTC);
+                    final long timeOfDayNanos = dateTime.toLocalTime().toNanoOfDay();
+                    final int julianDay = (int)JulianFields.JULIAN_DAY.getFrom(dateTime.toLocalDate());
+                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putLong(timeOfDayNanos).putInt(julianDay);
+                    c.addBinary(Binary.fromConstantByteArray(buffer));
+                });
+        primitiveConsumers.add(localDateTimeAsInt96Consumer);
 
         final ParquetCellValueConsumerFactory<InputStream> bytearrayConsumer = new ParquetCellValueConsumerFactory<>(
             InputStream.class, new ParquetType(PrimitiveTypeName.FIXED_LEN_BYTE_ARRAY),
@@ -214,25 +249,41 @@ public class ParquetRegistrationHelper {
                 LocalTime.class, new IntLocalTimeProducer());
         primitiveProducers.add(timeProducer);
 
-        final ParquetCellValueProducerFactory<ZonedDateTime> zonedatetimeProducer =
+        final ParquetCellValueProducerFactory<ZonedDateTime> int64asZonedDateTimeProducer =
             new ParquetCellValueProducerFactory<>(
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS), ZonedDateTime.class,
                 new LongZonedDateTimeProducer());
-        primitiveProducers.add(zonedatetimeProducer);
+        primitiveProducers.add(int64asZonedDateTimeProducer);
+
+        final ParquetCellValueProducerFactory<ZonedDateTime> int96asZonedDateTimeProducer =
+                new ParquetCellValueProducerFactory<>(
+                    new ParquetType(PrimitiveTypeName.INT96), ZonedDateTime.class,
+                    new Int96ZonedDateTimeProducer());
+        primitiveProducers.add(int96asZonedDateTimeProducer);
 
         final ParquetCellValueProducerFactory<Integer> intProducer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.INT32), Integer.class, new IntegerIntegerProducer());
         primitiveProducers.add(intProducer);
 
-        final ParquetCellValueProducerFactory<LocalDate> dateProducer =
-            new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE),
-                LocalDate.class, new IntegerLocalDateProducer());
-        primitiveProducers.add(dateProducer);
+        final ParquetCellValueProducerFactory<LocalDate> int32dateProducer =
+                new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE),
+                    LocalDate.class, new IntegerLocalDateProducer());
+        primitiveProducers.add(int32dateProducer);
 
-        final ParquetCellValueProducerFactory<LocalDateTime> dateTimeProducer = new ParquetCellValueProducerFactory<>(
+        final ParquetCellValueProducerFactory<LocalDate> int96dateProducer =
+                new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.INT96),
+                    LocalDate.class, new Int96LocalDateProducer());
+        primitiveProducers.add(int96dateProducer);
+
+        final ParquetCellValueProducerFactory<LocalDateTime> int64dateTimeProducer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS), LocalDateTime.class,
             new LongLocalDateTimeProducer());
-        primitiveProducers.add(dateTimeProducer);
+        primitiveProducers.add(int64dateTimeProducer);
+
+        final ParquetCellValueProducerFactory<LocalDateTime> int96dateTimeProducer = new ParquetCellValueProducerFactory<>(
+                new ParquetType(PrimitiveTypeName.INT96), LocalDateTime.class,
+                new Int96LocalDateTimeProducer());
+        primitiveProducers.add(int96dateTimeProducer);
 
         final ParquetCellValueProducerFactory<byte[]> byteArrayProducer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.FIXED_LEN_BYTE_ARRAY), byte[].class, new BinaryByteArrayProducer());

@@ -50,6 +50,8 @@ package org.knime.bigdata.fileformats;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -57,6 +59,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.JulianFields;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.parquet.io.api.Binary;
@@ -285,6 +288,32 @@ public class ParquetProducers {
     }
 
     /**
+     * Producer for Zoned Date Time from Binary (INT96)
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public static class Int96ZonedDateTimeProducer extends ParquetCellValueProducer<ZonedDateTime> {
+        @Override
+        public ParquetPrimitiveConverter<ZonedDateTime> createConverter() {
+            return new ParquetPrimitiveConverter<ZonedDateTime>() {
+
+                @Override
+                public void addBinary(final Binary value) {
+                    final ByteBuffer buf = value.toByteBuffer().order(ByteOrder.LITTLE_ENDIAN);
+                    final LocalTime localTime = LocalTime.ofNanoOfDay(buf.getLong());
+                    final LocalDate localDate = LocalDate.MIN.with(JulianFields.JULIAN_DAY, buf.getInt());
+                    m_value = ZonedDateTime.of(LocalDateTime.of(localDate, localTime), ZoneId.of("Etc/UTC"));
+                }
+            };
+        }
+
+        @Override
+        public Int96ZonedDateTimeProducer clone() {
+            return new Int96ZonedDateTimeProducer();
+        }
+    }
+
+    /**
      * Producer for Integer values
      *
      * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
@@ -331,6 +360,31 @@ public class ParquetProducers {
     }
 
     /**
+     * Producer for Local Date from Binary (INT96)
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public static class Int96LocalDateProducer extends ParquetCellValueProducer<LocalDate> {
+        @Override
+        public ParquetPrimitiveConverter<LocalDate> createConverter() {
+            return new ParquetPrimitiveConverter<LocalDate>() {
+
+                @Override
+                public void addBinary(final Binary value) {
+                    final ByteBuffer buf = value.toByteBuffer().order(ByteOrder.LITTLE_ENDIAN);
+                    buf.getLong(); // skip time (first 8 bytes)
+                    m_value = LocalDate.MIN.with(JulianFields.JULIAN_DAY, buf.getInt());
+                }
+            };
+        }
+
+        @Override
+        public Int96LocalDateProducer clone() {
+            return new Int96LocalDateProducer();
+        }
+    }
+
+    /**
      * Producer for Local Date Time from Long
      *
      * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
@@ -350,6 +404,32 @@ public class ParquetProducers {
         @Override
         public LongLocalDateTimeProducer clone() {
             return new LongLocalDateTimeProducer();
+        }
+    }
+
+    /**
+     * Producer for Local Date Time from Binary (INT96)
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public static class Int96LocalDateTimeProducer extends ParquetCellValueProducer<LocalDateTime> {
+        @Override
+        public ParquetPrimitiveConverter<LocalDateTime> createConverter() {
+            return new ParquetPrimitiveConverter<LocalDateTime>() {
+
+                @Override
+                public void addBinary(final Binary value) {
+                    final ByteBuffer buf = value.toByteBuffer().order(ByteOrder.LITTLE_ENDIAN);
+                    final LocalTime localTime = LocalTime.ofNanoOfDay(buf.getLong());
+                    final LocalDate localDate = LocalDate.MIN.with(JulianFields.JULIAN_DAY, buf.getInt());
+                    m_value = LocalDateTime.of(localDate, localTime);
+                }
+            };
+        }
+
+        @Override
+        public Int96LocalDateTimeProducer clone() {
+            return new Int96LocalDateTimeProducer();
         }
     }
 
