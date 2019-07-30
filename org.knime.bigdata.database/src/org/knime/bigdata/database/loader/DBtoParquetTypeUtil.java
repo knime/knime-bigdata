@@ -112,7 +112,8 @@ public class DBtoParquetTypeUtil {
         typeMap.put(JDBCType.DECIMAL, new ParquetType(PrimitiveTypeName.INT64, OriginalType.DECIMAL));
 
         //Date/time
-        typeMap.put(JDBCType.TIMESTAMP, new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS));
+        //BD-938: Timestamp needs to be INT96 (without OriginalType) instead of INT64 to be compatible with old Impala versions (< CDH 6.2) and Hive
+        typeMap.put(JDBCType.TIMESTAMP,  new ParquetType(PrimitiveTypeName.INT96));
         typeMap.put(JDBCType.DATE, new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE));
 
         //STRING
