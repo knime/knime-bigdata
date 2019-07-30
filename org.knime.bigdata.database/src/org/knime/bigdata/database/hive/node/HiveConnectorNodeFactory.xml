@@ -9,6 +9,35 @@
         <intro>
             This node creates a connection to Apache Hive™ via JDBC. You need to provide the server
             hostname (or IP address), the port, and a database name and specify an authentication mechanism.
+            <hr/>
+            <h3>Driver URL template:</h3>
+            <p>This node uses the selected driver's URL template for creating the concrete database URL.
+            For additional drivers, which are not provided by the KNIME database modules, the <i>URL template</i>
+            is to be specified on the driver preferences page under KNIME/Databases. E.g.</p>
+            <tt>jdbc:hive2://&lt;host&gt;:&lt;port&gt;/[database]</tt>
+            <p>is a possible Hive driver URL template.</p>
+            <h4>Tokens:</h4>
+            <ul>
+            <li><b>Mandatory value</b> (e.g. <tt>&lt;database&gt;</tt>)<b>:</b><br/>
+            The referenced variable must have a non-blank value.
+            The name between the brackets must be a valid variable name.
+            Please refer to the variable descriptions below.</li>
+            <li><b>Optional value</b> (e.g. <tt>[database]</tt>)<b>:</b><br/>
+            The referenced variable may have a blank value.
+            The name between the brackets must be a valid variable name.
+            Please refer to the variable descriptions below.</li>
+            </ul>
+            <h4>Variables:</h4>
+            <ul>
+            <li><tt>host</tt>:<br/>
+            The value of the <b>Hostname</b> field on the <b>Connection Settings</b> tab.</li>
+            <li><tt>port</tt>:<br/>
+            The value of the <b>Port</b> field on the <b>Connection Settings</b> tab.</li>
+            <li><tt>database</tt>:<br/>
+            The value of the <b>Database name</b> field on the <b>Connection Settings</b> tab.</li>
+            </ul>
+            <p>Field validation in the dialog depends on whether the (included) tokens referencing them are mandatory or
+            optional.</p>
         </intro>
         <tab name="Connection settings">
             <option name="Database Dialect">
@@ -24,14 +53,17 @@
                 Hive JDBC connector</a> provided by Cloudera.
             </option>
             <option name="Hostname">
-                The hostname (or IP address) of a Hive server.
+                The hostname (or IP address) of a Hive server. The corresponding driver URL template variable is
+                <tt>host</tt>.
             </option>
             <option name="Port">
                 The port on which the Hive server is listening. The default port
-                is 10,000 and 10,500 for Hive Interactive instances.
+                is 10,000 and 10,500 for Hive Interactive instances. The corresponding driver URL template variable is
+                <tt>port</tt>.
             </option>
             <option name="Database name">
-                The name of the database you want to connect to.
+                The name of the database you want to connect to. The corresponding driver URL template variable is
+                <tt>database</tt>.
             </option>
             <option name="None">
                 If checked, then authentication is not required.
