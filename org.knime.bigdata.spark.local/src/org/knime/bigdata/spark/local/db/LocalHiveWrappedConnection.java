@@ -48,31 +48,26 @@
  */
 package org.knime.bigdata.spark.local.db;
 
+import java.sql.Array;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
-import org.knime.bigdata.database.hive.HiveWrappedConnection;
 import org.knime.bigdata.spark.local.database.LocalHiveDatabaseMetaData;
+import org.knime.database.connection.impl.AbstractConnectionWrapper;
 
 /**
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class LocalHiveWrappedConnection extends HiveWrappedConnection {
-
-    private final Connection m_hiveConnection;
+public class LocalHiveWrappedConnection extends AbstractConnectionWrapper {
 
     LocalHiveWrappedConnection(final Connection connection) {
-        super(connection, "localhive");
-        m_hiveConnection = connection;
-    }
-
-    @Override
-    public Statement createStatement() throws SQLException {
-        return new LocalHiveStatement(m_hiveConnection.createStatement());
+        super(connection);
     }
 
     @Override
@@ -80,4 +75,30 @@ public class LocalHiveWrappedConnection extends HiveWrappedConnection {
         final HiveDatabaseMetaData hiveMetaData = (HiveDatabaseMetaData)super.getMetaData();
         return new LocalHiveDatabaseMetaData(hiveMetaData);
     }
+
+    @Override
+    protected Array wrap(Array array) throws SQLException {
+        return array;
+    }
+
+    @Override
+    protected CallableStatement wrap(CallableStatement statement) throws SQLException {
+        return statement;
+    }
+
+    @Override
+    protected DatabaseMetaData wrap(DatabaseMetaData metadata) throws SQLException {
+        return metadata;
+    }
+
+    @Override
+    protected PreparedStatement wrap(PreparedStatement statement) throws SQLException {
+        return statement;
+    }
+
+    @Override
+    protected Statement wrap(final Statement statement) throws SQLException {
+        return statement instanceof LocalHiveStatement ? statement : new LocalHiveStatement(statement);
+    }
+
 }
