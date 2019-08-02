@@ -27,7 +27,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.bigdata.database.hive.Hive;
-import org.knime.bigdata.database.hive.HiveConnectionController;
 import org.knime.bigdata.database.hive.testing.TestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
@@ -49,6 +48,7 @@ import org.knime.core.node.workflow.ICredentials;
 import org.knime.database.DBType;
 import org.knime.database.VariableContext;
 import org.knime.database.connection.DBConnectionController;
+import org.knime.database.connection.UserDBConnectionController;
 import org.knime.database.datatype.mapping.DBDestination;
 import org.knime.database.datatype.mapping.DBSource;
 import org.knime.database.datatype.mapping.DBTypeMappingRegistry;
@@ -142,8 +142,10 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
                 hiveSettings = TestingDatabaseConnectionSettingsFactory.createHiveSettings(flowVars);
                 final SettingsModelAuthentication authentication = hiveSettings.getAuthenticationModel();
                 final CredentialsProvider credentialsProvider = getCredentialsProvider();
-                connectionController = new HiveConnectionController(hiveSettings.getDBUrl(), authentication.getAuthenticationType(),
-                    authentication.getUserName(credentialsProvider), authentication.getPassword(credentialsProvider),
+                connectionController = new UserDBConnectionController(hiveSettings.getDBUrl(),
+                    authentication.getAuthenticationType(),
+                    authentication.getUserName(credentialsProvider),
+                    authentication.getPassword(credentialsProvider),
                     authentication.getCredential(), credentialsProvider);
                 break;
             default:

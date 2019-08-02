@@ -49,6 +49,13 @@
 package org.knime.bigdata.database.hive;
 
 import static java.util.Collections.emptySet;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_TRANSACTION_ENABLED;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_VALIDATION_QUERY;
 
 import java.util.Collection;
 
@@ -67,7 +74,7 @@ import org.knime.database.driver.AbstractDriverLocator;
  */
 public class HiveDriverLocator extends AbstractDriverLocator {
 
-    /**Driver id. */
+    /** Driver id. */
     public static final String DRIVER_ID = "hive";
 
     /**
@@ -75,24 +82,23 @@ public class HiveDriverLocator extends AbstractDriverLocator {
      */
     public static final AttributeCollection ATTRIBUTES;
 
-
     static {
         final AttributeCollection.Builder builder =
             AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
-        builder.add(Accessibility.EDITABLE, DBConnectionManagerAttributes.ATTRIBUTE_VALIDATION_QUERY, "SELECT 1");
-        builder.add(Accessibility.EDITABLE, DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED, false);
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL, true);
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR, ";");
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR, ";");
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL,
-            false);
+        builder.add(Accessibility.EDITABLE, ATTRIBUTE_VALIDATION_QUERY, "SELECT 1");
+        builder.add(Accessibility.EDITABLE, ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED, false);
+        builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL, true);
+        builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR, ";");
+        builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR, ";");
+        builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL, false);
+        builder.add(Accessibility.HIDDEN, ATTRIBUTE_TRANSACTION_ENABLED, false);
         ATTRIBUTES = builder.build();
     }
 
     /**
      * Constructs a {@link HiveDriverLocator}
      */
-    public HiveDriverLocator(){
+    public HiveDriverLocator() {
         super(ATTRIBUTES);
     }
 
