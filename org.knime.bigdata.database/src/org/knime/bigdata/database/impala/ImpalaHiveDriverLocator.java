@@ -67,6 +67,11 @@ public class ImpalaHiveDriverLocator extends HiveDriverLocator {
     }
 
     @Override
+    public String getDriverName() {
+        return "Apache Hive JDBC Driver (for Impala)";
+    }
+
+    @Override
     public DBType getDBType() {
         return Impala.DB_TYPE;
     }
