@@ -109,7 +109,7 @@ public class HiveDriverLocator extends AbstractDriverLocator {
      */
     @Override
     public String getDriverName() {
-        return "Hive";
+        return "Apache Hive JDBC Driver";
     }
 
     /**
