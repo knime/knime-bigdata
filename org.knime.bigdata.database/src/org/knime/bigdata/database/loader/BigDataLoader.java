@@ -146,7 +146,7 @@ public abstract class BigDataLoader implements DBLoader {
 
         // first create an unpartitioned table
         exec.setProgress(0, "Creating temporary table");
-        final DBTable tempTable = new DefaultDBTable(tempTableName);
+        final DBTable tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName());
 
         final SQLCommand createTableCmd = getDialect().dataDefinition()
             .getCreateTableStatement(CreateTableParameters.builder(tempTable, inputColumns, new DBUniqueConstraint[0])
