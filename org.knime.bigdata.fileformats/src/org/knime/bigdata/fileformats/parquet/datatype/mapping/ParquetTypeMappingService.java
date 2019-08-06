@@ -163,6 +163,10 @@ public class ParquetTypeMappingService
         addProductionPath(producerRegistry, defaultProductionPaths, new ParquetType(PrimitiveTypeName.BOOLEAN),
                 BooleanCell.TYPE);
         addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.BINARY, OriginalType.ENUM), StringCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.BINARY, OriginalType.JSON), StringCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
                 new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8), StringCell.TYPE);
         addProductionPath(producerRegistry, defaultProductionPaths, new ParquetType(PrimitiveTypeName.BINARY),
                 BinaryObjectDataCell.TYPE);
@@ -174,16 +178,28 @@ public class ParquetTypeMappingService
                 DoubleCell.TYPE);
         addProductionPath(producerRegistry, defaultProductionPaths, new ParquetType(PrimitiveTypeName.FLOAT),
                 DoubleCell.TYPE);
-        addProductionPath(producerRegistry, defaultProductionPaths, new ParquetType(PrimitiveTypeName.INT32),
-                IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT32), IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_8), IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_16), IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_32), IntCell.TYPE);
         addProductionPath(producerRegistry, defaultProductionPaths,
                 new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE), LocalDateCellFactory.TYPE);
         addProductionPath(producerRegistry, defaultProductionPaths,
                 new ParquetType(PrimitiveTypeName.INT32, OriginalType.TIME_MILLIS), LocalTimeCellFactory.TYPE);
-        addProductionPath(producerRegistry, defaultProductionPaths, new ParquetType(PrimitiveTypeName.INT64),
-                LongCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIME_MICROS), LocalTimeCellFactory.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT64), LongCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT64, OriginalType.INT_64), LongCell.TYPE);
         addProductionPath(producerRegistry, defaultProductionPaths,
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS), LocalDateTimeCellFactory.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths,
+                new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MICROS), LocalDateTimeCellFactory.TYPE);
 
         setDefaultProductionPaths(Collections.unmodifiableMap(defaultProductionPaths));
         final DataTypeMappingConfiguration<ParquetType> configuration = createMappingConfiguration(
