@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -76,12 +77,15 @@ import org.knime.bigdata.fileformats.ParquetProducers.FloatDoubleProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.Int96LocalDateProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.Int96LocalDateTimeProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.Int96ZonedDateTimeProducer;
-import org.knime.bigdata.fileformats.ParquetProducers.IntLocalTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.IntMillisLocalTimeProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.IntegerIntegerProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.IntegerLocalDateProducer;
-import org.knime.bigdata.fileformats.ParquetProducers.LongLocalDateTimeProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.LongLongProducer;
-import org.knime.bigdata.fileformats.ParquetProducers.LongZonedDateTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.LongMicrosLocalDateTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.LongMicrosLocalTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.LongMicrosZonedDateTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.LongMillisLocalDateTimeProducer;
+import org.knime.bigdata.fileformats.ParquetProducers.LongMillisZonedDateTimeProducer;
 import org.knime.bigdata.fileformats.ParquetProducers.StringStringProducer;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetCellValueConsumerFactory;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetCellValueProducerFactory;
@@ -90,6 +94,7 @@ import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetListCellVal
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetListCellValueProducerFactory;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.convert.map.ConsumerRegistry;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.data.convert.map.ProducerRegistry;
@@ -113,10 +118,20 @@ public class ParquetRegistrationHelper {
                 (c, v) -> c.addBinary(Binary.fromConstantByteArray(IOUtils.toByteArray(v))));
         primitiveConsumers.add(binaryConsumer);
 
-        final ParquetCellValueConsumerFactory<String> stringStringKindConsumer = new ParquetCellValueConsumerFactory<>(
+        final ParquetCellValueConsumerFactory<String> stringToBinaryEnumConsumer = new ParquetCellValueConsumerFactory<>(
+            String.class, new ParquetType(PrimitiveTypeName.BINARY, OriginalType.ENUM),
+            (c, v) -> c.addBinary(Binary.fromString(v)));
+        primitiveConsumers.add(stringToBinaryEnumConsumer);
+
+        final ParquetCellValueConsumerFactory<String> stringToBinaryJSONConsumer = new ParquetCellValueConsumerFactory<>(
+            String.class, new ParquetType(PrimitiveTypeName.BINARY, OriginalType.JSON),
+            (c, v) -> c.addBinary(Binary.fromString(v)));
+        primitiveConsumers.add(stringToBinaryJSONConsumer);
+
+        final ParquetCellValueConsumerFactory<String> stringToBinaryUTF8Consumer = new ParquetCellValueConsumerFactory<>(
             String.class, new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8),
             (c, v) -> c.addBinary(Binary.fromString(v)));
-        primitiveConsumers.add(stringStringKindConsumer);
+        primitiveConsumers.add(stringToBinaryUTF8Consumer);
 
         final ParquetCellValueConsumerFactory<Boolean> booleanConsumer = new ParquetCellValueConsumerFactory<>(
             Boolean.class, new ParquetType(PrimitiveTypeName.BOOLEAN), (c, v) -> c.addBoolean(v));
@@ -130,31 +145,68 @@ public class ParquetRegistrationHelper {
             new ParquetType(PrimitiveTypeName.FLOAT), (c, v) -> c.addFloat(v));
         primitiveConsumers.add(floatConsumer);
 
-        final ParquetCellValueConsumerFactory<Long> longConsumer = new ParquetCellValueConsumerFactory<>(Long.class,
-            new ParquetType(PrimitiveTypeName.INT64), (c, v) -> c.addLong(v));
-        primitiveConsumers.add(longConsumer);
+        final ParquetCellValueConsumerFactory<Long> longToInt64Consumer = new ParquetCellValueConsumerFactory<>(
+            Long.class, new ParquetType(PrimitiveTypeName.INT64), (c, v) -> c.addLong(v));
+        primitiveConsumers.add(longToInt64Consumer);
 
-        final ParquetCellValueConsumerFactory<LocalTime> timeConsumer = new ParquetCellValueConsumerFactory<>(
+        final ParquetCellValueConsumerFactory<Long> longToInt64Int64Consumer = new ParquetCellValueConsumerFactory<>(
+            Long.class, new ParquetType(PrimitiveTypeName.INT64, OriginalType.INT_64), (c, v) -> c.addLong(v));
+        primitiveConsumers.add(longToInt64Int64Consumer);
+
+        final ParquetCellValueConsumerFactory<LocalTime> timeToMillisConsumer = new ParquetCellValueConsumerFactory<>(
             LocalTime.class, new ParquetType(PrimitiveTypeName.INT32, OriginalType.TIME_MILLIS),
             (c, v) -> c.addInteger((int)TimeUnit.MILLISECONDS.convert(v.toNanoOfDay(), TimeUnit.NANOSECONDS)));
-        primitiveConsumers.add(timeConsumer);
+        primitiveConsumers.add(timeToMillisConsumer);
+
+        final ParquetCellValueConsumerFactory<LocalTime> timeToMicrosConsumer = new ParquetCellValueConsumerFactory<>(
+            LocalTime.class, new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIME_MICROS),
+            (c, v) -> c.addLong(TimeUnit.MICROSECONDS.convert(v.toNanoOfDay(), TimeUnit.NANOSECONDS)));
+        primitiveConsumers.add(timeToMicrosConsumer);
 
         final ParquetCellValueConsumerFactory<Integer> integerConsumer = new ParquetCellValueConsumerFactory<>(
             Integer.class, new ParquetType(PrimitiveTypeName.INT32), (c, v) -> c.addInteger(v));
         primitiveConsumers.add(integerConsumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToIn32Int8Consumer = new ParquetCellValueConsumerFactory<>(
+            Integer.class, new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_8), (c, v) -> {
+                if (v < Byte.MIN_VALUE || v > Byte.MAX_VALUE) {
+                    throw new BigDataFileFormatException(
+                        String.format("Cannot write %d as INT_8, only values between %d and %d supported.",
+                            (int) v, Byte.MIN_VALUE, Byte.MAX_VALUE));
+                } else {
+                    c.addInteger(v);
+                }
+            });
+        primitiveConsumers.add(integerToIn32Int8Consumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToIn32Int16Consumer = new ParquetCellValueConsumerFactory<>(
+            Integer.class, new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_16), (c, v) -> {
+                if (v < Short.MIN_VALUE || v > Short.MAX_VALUE) {
+                    throw new BigDataFileFormatException(
+                        String.format("Cannot write %d as INT_16, only values between %d and %d supported.",
+                            (int) v, Short.MIN_VALUE, Short.MAX_VALUE));
+                } else {
+                    c.addInteger(v);
+                }
+            });
+        primitiveConsumers.add(integerToIn32Int16Consumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToIn32Int32Consumer = new ParquetCellValueConsumerFactory<>(
+            Integer.class, new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_32), (c, v) -> c.addInteger(v));
+        primitiveConsumers.add(integerToIn32Int32Consumer);
 
         final ParquetCellValueConsumerFactory<LocalDate> localDateConsumer = new ParquetCellValueConsumerFactory<>(
             LocalDate.class, new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE),
             (c, v) -> c.addInteger((int)v.toEpochDay()));
         primitiveConsumers.add(localDateConsumer);
 
-        // Special case for Impala on CDH => 6.2 (Date as Timestamp)
+        // Special case for Impala on CDH => 6.2 (Date as Timestamp on int64)
         final ParquetCellValueConsumerFactory<LocalDate> localDateAsInt64Consumer = new ParquetCellValueConsumerFactory<>(
                 LocalDate.class, new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS),
                 (c, v) -> c.addLong(v.atTime(0, 0, 0).atZone(ZoneOffset.UTC).toInstant().toEpochMilli()));
         primitiveConsumers.add(localDateAsInt64Consumer);
 
-        // Special case for Impala on CDH < 6.2 (Date as Timestamp)
+        // Special case for Impala on CDH < 6.2 (Date as Timestamp on int96)
         final ParquetCellValueConsumerFactory<LocalDate> localDateAsInt96Consumer =
             new ParquetCellValueConsumerFactory<>(LocalDate.class,
                 new ParquetType(PrimitiveTypeName.INT96), (c, v) -> {
@@ -169,11 +221,29 @@ public class ParquetRegistrationHelper {
         primitiveConsumers.add(localDateAsInt96Consumer);
 
         // Impala on CDH => 6.2
-        final ParquetCellValueConsumerFactory<LocalDateTime> localDateTimeAsInt64Consumer =
+        final ParquetCellValueConsumerFactory<LocalDateTime> localDateTimeAsInt64MillisConsumer =
             new ParquetCellValueConsumerFactory<>(LocalDateTime.class,
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS),
                 (c, v) -> c.addLong(v.atZone(ZoneOffset.UTC).toInstant().toEpochMilli()));
-        primitiveConsumers.add(localDateTimeAsInt64Consumer);
+        primitiveConsumers.add(localDateTimeAsInt64MillisConsumer);
+
+        final ParquetCellValueConsumerFactory<LocalDateTime> localDateTimeAsInt64MicrosConsumer =
+            new ParquetCellValueConsumerFactory<>(LocalDateTime.class,
+                new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MICROS),
+                (c, v) -> {
+                    final Instant instant = v.atZone(ZoneOffset.UTC).toInstant();
+                    final long seconds = TimeUnit.MICROSECONDS.convert(instant.getEpochSecond(), TimeUnit.SECONDS);
+                    final long microSeconds = TimeUnit.MICROSECONDS.convert(instant.getNano(), TimeUnit.NANOSECONDS);
+
+                    if (seconds == Long.MIN_VALUE || seconds == Long.MAX_VALUE) {
+                        throw new BigDataFileFormatException(
+                            String.format("Cannot write %s as timestamp with microsecond precision, given time to small or to large.",
+                                v.toString()));
+                    } else {
+                        c.addLong(seconds + microSeconds);
+                    }
+                });
+        primitiveConsumers.add(localDateTimeAsInt64MicrosConsumer);
 
         // Impala on CDH < 6.2 and Hive
         final ParquetCellValueConsumerFactory<LocalDateTime> localDateTimeAsInt96Consumer =
@@ -212,7 +282,6 @@ public class ParquetRegistrationHelper {
      */
 
     public static void registerParquetProducers() {
-
         final List<ParquetCellValueProducerFactory<?>> primitiveProducers = new ArrayList<>();
 
         final ParquetCellValueProducerFactory<Boolean> booleanBooleanProducer = new ParquetCellValueProducerFactory<>(
@@ -223,10 +292,20 @@ public class ParquetRegistrationHelper {
             new ParquetType(PrimitiveTypeName.BINARY), InputStream.class, new BytesInputStreamProducer());
         primitiveProducers.add(binaryProducer);
 
-        final ParquetCellValueProducerFactory<String> stringProducer =
+        final ParquetCellValueProducerFactory<String> binaryEnumToStringProducer =
+            new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.BINARY, OriginalType.ENUM),
+                String.class, new StringStringProducer());
+        primitiveProducers.add(binaryEnumToStringProducer);
+
+        final ParquetCellValueProducerFactory<String> binaryJsonToStringProducer =
+            new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.BINARY, OriginalType.JSON),
+                String.class, new StringStringProducer());
+        primitiveProducers.add(binaryJsonToStringProducer);
+
+        final ParquetCellValueProducerFactory<String> binaryUtf8ToStringProducer =
             new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8),
                 String.class, new StringStringProducer());
-        primitiveProducers.add(stringProducer);
+        primitiveProducers.add(binaryUtf8ToStringProducer);
 
         final ParquetCellValueProducerFactory<byte[]> int96Producer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.INT96), byte[].class, new BytesBytArrayProducer());
@@ -240,20 +319,35 @@ public class ParquetRegistrationHelper {
             new ParquetType(PrimitiveTypeName.FLOAT), Double.class, new FloatDoubleProducer());
         primitiveProducers.add(floatProducer);
 
-        final ParquetCellValueProducerFactory<Long> longProducer = new ParquetCellValueProducerFactory<>(
+        final ParquetCellValueProducerFactory<Long> int64ToLongProducer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.INT64), Long.class, new LongLongProducer());
-        primitiveProducers.add(longProducer);
+        primitiveProducers.add(int64ToLongProducer);
 
-        final ParquetCellValueProducerFactory<LocalTime> timeProducer =
+        final ParquetCellValueProducerFactory<Long> int64Int64ToLongProducer = new ParquetCellValueProducerFactory<>(
+            new ParquetType(PrimitiveTypeName.INT64, OriginalType.INT_64), Long.class, new LongLongProducer());
+        primitiveProducers.add(int64Int64ToLongProducer);
+
+        final ParquetCellValueProducerFactory<LocalTime> int32MilliToTimeProducer =
             new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.INT32, OriginalType.TIME_MILLIS),
-                LocalTime.class, new IntLocalTimeProducer());
-        primitiveProducers.add(timeProducer);
+                LocalTime.class, new IntMillisLocalTimeProducer());
+        primitiveProducers.add(int32MilliToTimeProducer);
 
-        final ParquetCellValueProducerFactory<ZonedDateTime> int64asZonedDateTimeProducer =
+        final ParquetCellValueProducerFactory<LocalTime> int64MicroToTimeProducer =
+            new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIME_MICROS),
+                LocalTime.class, new LongMicrosLocalTimeProducer());
+        primitiveProducers.add(int64MicroToTimeProducer);
+
+        final ParquetCellValueProducerFactory<ZonedDateTime> int64MillisAsZonedDateTimeProducer =
             new ParquetCellValueProducerFactory<>(
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS), ZonedDateTime.class,
-                new LongZonedDateTimeProducer());
-        primitiveProducers.add(int64asZonedDateTimeProducer);
+                new LongMillisZonedDateTimeProducer());
+        primitiveProducers.add(int64MillisAsZonedDateTimeProducer);
+
+        final ParquetCellValueProducerFactory<ZonedDateTime> int64MicrosAsZonedDateTimeProducer =
+            new ParquetCellValueProducerFactory<>(
+                new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MICROS), ZonedDateTime.class,
+                new LongMicrosZonedDateTimeProducer());
+        primitiveProducers.add(int64MicrosAsZonedDateTimeProducer);
 
         final ParquetCellValueProducerFactory<ZonedDateTime> int96asZonedDateTimeProducer =
                 new ParquetCellValueProducerFactory<>(
@@ -261,9 +355,21 @@ public class ParquetRegistrationHelper {
                     new Int96ZonedDateTimeProducer());
         primitiveProducers.add(int96asZonedDateTimeProducer);
 
-        final ParquetCellValueProducerFactory<Integer> intProducer = new ParquetCellValueProducerFactory<>(
+        final ParquetCellValueProducerFactory<Integer> int32ToIntProducer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.INT32), Integer.class, new IntegerIntegerProducer());
-        primitiveProducers.add(intProducer);
+        primitiveProducers.add(int32ToIntProducer);
+
+        final ParquetCellValueProducerFactory<Integer> int32Int8ToIntProducer = new ParquetCellValueProducerFactory<>(
+            new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_8), Integer.class, new IntegerIntegerProducer());
+        primitiveProducers.add(int32Int8ToIntProducer);
+
+        final ParquetCellValueProducerFactory<Integer> int32Int16ToIntProducer = new ParquetCellValueProducerFactory<>(
+            new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_16), Integer.class, new IntegerIntegerProducer());
+        primitiveProducers.add(int32Int16ToIntProducer);
+
+        final ParquetCellValueProducerFactory<Integer> int32Int32ToIntProducer = new ParquetCellValueProducerFactory<>(
+            new ParquetType(PrimitiveTypeName.INT32, OriginalType.INT_32), Integer.class, new IntegerIntegerProducer());
+        primitiveProducers.add(int32Int32ToIntProducer);
 
         final ParquetCellValueProducerFactory<LocalDate> int32dateProducer =
                 new ParquetCellValueProducerFactory<>(new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE),
@@ -275,10 +381,15 @@ public class ParquetRegistrationHelper {
                     LocalDate.class, new Int96LocalDateProducer());
         primitiveProducers.add(int96dateProducer);
 
-        final ParquetCellValueProducerFactory<LocalDateTime> int64dateTimeProducer = new ParquetCellValueProducerFactory<>(
+        final ParquetCellValueProducerFactory<LocalDateTime> int64MillisDateTimeProducer = new ParquetCellValueProducerFactory<>(
             new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS), LocalDateTime.class,
-            new LongLocalDateTimeProducer());
-        primitiveProducers.add(int64dateTimeProducer);
+            new LongMillisLocalDateTimeProducer());
+        primitiveProducers.add(int64MillisDateTimeProducer);
+
+        final ParquetCellValueProducerFactory<LocalDateTime> int64MicrosDateTimeProducer = new ParquetCellValueProducerFactory<>(
+            new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MICROS), LocalDateTime.class,
+            new LongMicrosLocalDateTimeProducer());
+        primitiveProducers.add(int64MicrosDateTimeProducer);
 
         final ParquetCellValueProducerFactory<LocalDateTime> int96dateTimeProducer = new ParquetCellValueProducerFactory<>(
                 new ParquetType(PrimitiveTypeName.INT96), LocalDateTime.class,
