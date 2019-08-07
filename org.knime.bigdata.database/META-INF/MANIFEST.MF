@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.knime.bigdata.database;singleton:=true
 Bundle-Version: 4.0.0.qualifier
 Bundle-Vendor: KNIME AG
 Export-Package: org.knime.bigdata.database.hive,
+ org.knime.bigdata.database.hive.dialect,
  org.knime.bigdata.database.hive.testing,
  org.knime.bigdata.database.impala
 Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
