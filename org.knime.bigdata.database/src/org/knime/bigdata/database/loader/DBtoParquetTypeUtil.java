@@ -44,27 +44,34 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   11.06.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   17.06.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive.node.loader;
+package org.knime.bigdata.database.loader;
 
 import java.sql.JDBCType;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Objects;
 
-import org.apache.orc.TypeDescription;
+import org.apache.parquet.schema.OriginalType;
+import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 
 /**
- * Utility class that translates Hive type Strings to JDBCTypes
+ * Utility class for type mapping purposes in the DB Loader nodes for Hive/Impala
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveTypeUtil {
+public class DBtoParquetTypeUtil {
 
-    private final static HashMap<String, Integer> m_HiveTypetoJDBCMap = createMap();
+    private DBtoParquetTypeUtil() {
+        //Utility class
+    }
+
+    private static final HashMap<String, Integer> m_DBToJDBCMap = createMap();
 
     private static HashMap<String, Integer> createMap() {
-        HashMap<String, Integer> typeMap = new HashMap<String, Integer>();
+        HashMap<String, Integer> typeMap = new HashMap<>();
         typeMap.put("VOID", java.sql.Types.NULL);
         typeMap.put("BOOLEAN", java.sql.Types.BOOLEAN);
         typeMap.put("TINYINT", java.sql.Types.TINYINT);
@@ -83,63 +90,65 @@ public class HiveTypeUtil {
         typeMap.put("BINARY", java.sql.Types.BINARY);
         typeMap.put("DECIMAL", java.sql.Types.DECIMAL);
         typeMap.put("ARRAY", java.sql.Types.ARRAY);
-        typeMap.put("MAP", java.sql.Types.JAVA_OBJECT);
-        typeMap.put("STRUCT", java.sql.Types.STRUCT);
+        typeMap.put("MAP", java.sql.Types.OTHER);
+        typeMap.put("STRUCT", java.sql.Types.OTHER);
         typeMap.put("UNIONTYPE", java.sql.Types.OTHER);
         typeMap.put("USER_DEFINED", java.sql.Types.OTHER);
 
         return typeMap;
     }
 
-    private final static HashMap<JDBCType, TypeDescription> m_ORCtoJDBCMap = createORCMap();
+    private static final EnumMap<JDBCType, ParquetType> m_JDBCToParquetMap = createParquetMap();
 
-    private static HashMap<JDBCType, TypeDescription> createORCMap() {
-        HashMap<JDBCType, TypeDescription> typeMap = new HashMap<JDBCType, TypeDescription>();
+    private static EnumMap<JDBCType, ParquetType> createParquetMap() {
+        EnumMap<JDBCType, ParquetType> typeMap = new EnumMap<>(JDBCType.class);
         //NUMERIC
-        typeMap.put(JDBCType.TINYINT, TypeDescription.createByte());
-        typeMap.put(JDBCType.SMALLINT, TypeDescription.createShort());
-        typeMap.put(JDBCType.INTEGER, TypeDescription.createInt());
-        typeMap.put(JDBCType.BIGINT, TypeDescription.createLong());
-        typeMap.put(JDBCType.FLOAT, TypeDescription.createFloat());
-        typeMap.put(JDBCType.DOUBLE, TypeDescription.createDouble());
-        typeMap.put(JDBCType.DECIMAL, TypeDescription.createDecimal());
+        typeMap.put(JDBCType.INTEGER, new ParquetType(PrimitiveTypeName.INT32));
+        typeMap.put(JDBCType.TINYINT, new ParquetType(PrimitiveTypeName.INT32));
+        typeMap.put(JDBCType.SMALLINT, new ParquetType(PrimitiveTypeName.INT32));
+        typeMap.put(JDBCType.BIGINT, new ParquetType(PrimitiveTypeName.INT64));
+        typeMap.put(JDBCType.FLOAT, new ParquetType(PrimitiveTypeName.FLOAT));
+        typeMap.put(JDBCType.DOUBLE, new ParquetType(PrimitiveTypeName.DOUBLE));
+        typeMap.put(JDBCType.DECIMAL, new ParquetType(PrimitiveTypeName.INT64, OriginalType.DECIMAL));
 
         //Date/time
-        typeMap.put(JDBCType.TIMESTAMP, TypeDescription.createTimestamp());
-        typeMap.put(JDBCType.DATE, TypeDescription.createDate());
+        typeMap.put(JDBCType.TIMESTAMP, new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS));
+        typeMap.put(JDBCType.DATE, new ParquetType(PrimitiveTypeName.INT32, OriginalType.DATE));
 
         //STRING
-        typeMap.put(JDBCType.VARCHAR, TypeDescription.createString());
-        typeMap.put(JDBCType.CHAR, TypeDescription.createChar());
+        typeMap.put(JDBCType.VARCHAR, new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8));
+        typeMap.put(JDBCType.CHAR, new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8));
+        typeMap.put(JDBCType.OTHER, new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8));
 
         //MISC
-        typeMap.put(JDBCType.BOOLEAN, TypeDescription.createBoolean());
-        typeMap.put(JDBCType.BINARY, TypeDescription.createBinary());
+        typeMap.put(JDBCType.BOOLEAN, new ParquetType(PrimitiveTypeName.BOOLEAN));
+        typeMap.put(JDBCType.BINARY, new ParquetType(PrimitiveTypeName.BINARY));
+
         return typeMap;
     }
 
     /**
-     * Converts a Hive type String into the JDBCType equivalent
+     * Converts a Hive/Impala type String into the JDBCType equivalent
      *
-     * @param hiveType the String to convert
+     * @param type the String to convert
      * @return The corresponding JDBCType
      *
      */
-    public static JDBCType hivetoJDBCType(final String hiveType) {
-        Objects.requireNonNull(hiveType, "hiveType");
-        Integer typeInt = m_HiveTypetoJDBCMap.get(hiveType.toUpperCase());
+    public static JDBCType dbToJDBCType(final String type) {
+        Objects.requireNonNull(type, "type");
+        Integer typeInt = m_DBToJDBCMap.get(type.toUpperCase());
         return JDBCType.valueOf(typeInt);
     }
 
     /**
-     * Converts a Hive type String into the JDBCType equivalent
+     * Converts a Hive/Impala type String into the Parquet type
      *
-     * @param hiveType the String to convert
-     * @return The corresponding JDBCType
+     * @param type the String to convert
+     * @return The corresponding Parquet type
      *
      */
-    public static TypeDescription hivetoOrcType(final String hiveType) {
-        return m_ORCtoJDBCMap.get(hivetoJDBCType(hiveType));
+    public static ParquetType dbToParquetType(final String type) {
+        return m_JDBCToParquetMap.get(dbToJDBCType(type));
     }
 
 }

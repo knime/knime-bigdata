@@ -98,6 +98,7 @@ public class HiveDataTypeMappingService extends AbstractDBDataTypeMappingService
         addColumnType(JDBCType.BIT, "boolean");
         addColumnType(JDBCType.INTEGER, "int");
         addColumnType(JDBCType.VARCHAR, "string");
+        addColumnType(JDBCType.TIME, "string");
     }
 
 }

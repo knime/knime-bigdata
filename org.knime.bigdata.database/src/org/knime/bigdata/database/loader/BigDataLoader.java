@@ -58,7 +58,6 @@ import java.util.UUID;
 
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.database.hive.agent.HiveLoader;
-import org.knime.bigdata.database.hive.node.loader.HiveLoaderParameters;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.core.node.ExecutionMonitor;
@@ -79,11 +78,9 @@ import org.knime.database.session.DBSessionReference;
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public abstract class BigDataLoader implements DBLoader {
+public class BigDataLoader implements DBLoader {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveLoader.class);
-
-    private final String m_storedAsString;
 
     private final DBSessionReference m_sessionReference;
 
@@ -91,11 +88,9 @@ public abstract class BigDataLoader implements DBLoader {
      * Creates a Hive Loader
      *
      * @param sessionReference the {@link DBSessionReference} object
-     * @param storeAsString String for additional create table statement
      */
-    public BigDataLoader(final DBSessionReference sessionReference, final String storeAsString) {
+    public BigDataLoader(final DBSessionReference sessionReference) {
         m_sessionReference = requireNonNull(sessionReference, "sessionReference");
-        m_storedAsString = storeAsString;
     }
 
     /**
@@ -122,23 +117,23 @@ public abstract class BigDataLoader implements DBLoader {
     @Override
     public void load(final ExecutionMonitor exec, final Object parameters) throws Exception {
         @SuppressWarnings("unchecked")
-        final DBLoadTableFromFileParameters<HiveLoaderParameters> loadParameters =
-            (DBLoadTableFromFileParameters<HiveLoaderParameters>)requireNonNull(parameters, "parameters");
+        final DBLoadTableFromFileParameters<BigDataLoaderParameters> loadParameters =
+            (DBLoadTableFromFileParameters<BigDataLoaderParameters>)requireNonNull(parameters, "parameters");
         if (!loadParameters.getAdditionalSettings().isPresent()) {
             throw new IllegalArgumentException("Missing file writer settings.");
         }
 
-        final HiveLoaderParameters hiveParameters = loadParameters.getAdditionalSettings().get();
+        final BigDataLoaderParameters hiveParameters = loadParameters.getAdditionalSettings().get();
         final RemoteFile<?> file = hiveParameters.getRemoteFile();
 
-        final DBTable tmpTable = createTempTable(exec, loadParameters, hiveParameters.getInputColumns());
+        final DBTable tmpTable = createTempTable(exec, loadParameters, hiveParameters.getTempTableColumns());
 
-        insertIntoTable(exec, loadParameters, tmpTable, hiveParameters.getNormalColums(),
-            hiveParameters.getPartitionColums(), file);
+        insertIntoTable(exec, loadParameters, tmpTable, hiveParameters.getSelectOrderColumnNames(),
+            hiveParameters.getPartitionColumns(), file);
     }
 
     private DBTable createTempTable(final ExecutionMonitor exec,
-        final DBLoadTableFromFileParameters<HiveLoaderParameters> loadParameters, final DBColumn[] inputColumns)
+        final DBLoadTableFromFileParameters<BigDataLoaderParameters> loadParameters, final DBColumn[] columns)
         throws Exception {
         final String tempTableName =
             loadParameters.getTable().getName() + "_" + UUID.randomUUID().toString().replace('-', '_');
@@ -148,9 +143,9 @@ public abstract class BigDataLoader implements DBLoader {
         exec.setProgress(0, "Creating temporary table");
         final DBTable tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName());
 
-        final SQLCommand createTableCmd = getDialect().dataDefinition()
-            .getCreateTableStatement(CreateTableParameters.builder(tempTable, inputColumns, new DBUniqueConstraint[0])
-                .withAdditionalSQLStatement(m_storedAsString).build());
+        final String storedAsString = "STORED AS PARQUET";
+        final SQLCommand createTableCmd = getDialect().dataDefinition().getCreateTableStatement(CreateTableParameters
+            .builder(tempTable, columns, new DBUniqueConstraint[0]).withAdditionalSQLStatement(storedAsString).build());
         try (final Connection connection = getSession().getConnectionProvider().getConnection(exec);
                 final Statement statement = connection.createStatement()) {
             statement.execute(createTableCmd.getSQL());
@@ -167,27 +162,32 @@ public abstract class BigDataLoader implements DBLoader {
     }
 
     private void insertIntoTable(final ExecutionMonitor exec,
-        final DBLoadTableFromFileParameters<HiveLoaderParameters> loadParameters, final DBTable tmpTable,
-        final List<DBColumn> normalColumns, final List<DBColumn> partitionColumns, final RemoteFile<?> file) throws Exception, SQLException {
+        final DBLoadTableFromFileParameters<BigDataLoaderParameters> loadParameters, final DBTable tmpTable,
+        final List<String> selectOrderColumnNames, final List<DBColumn> partitionColumns, final RemoteFile<?> file)
+        throws Exception {
 
         exec.checkCanceled();
         final String loadTableCmd = buildLoadCommand(tmpTable, file);
         final String insertCommand =
-            buildInsertCommand(tmpTable, loadParameters.getTable(), normalColumns, partitionColumns);
+            buildInsertCommand(tmpTable, loadParameters.getTable(), selectOrderColumnNames, partitionColumns);
         try (final Connection connection = getSession().getConnectionProvider().getConnection(exec);
                 final Statement statement = connection.createStatement()) {
-            exec.setMessage("Importing data to temporary table from uploaded file...");
-            exec.checkCanceled();
-            statement.execute(loadTableCmd);
-            exec.setProgress(0.75, "Data imported into temporary table.");
-            exec.setMessage("Loading data into final table...");
-            setPartitioningSettings(statement);
-            statement.execute(insertCommand);
-            exec.setProgress(0.90, "Data loaded into final table.");
-            exec.setMessage("Removing temporary table...");
-            final SQLCommand dropTableStatement = getDialect().dataDefinition().getDropTableStatement(tmpTable, false);
-            statement.execute(dropTableStatement.getSQL());
-            exec.setProgress(0.99, "Temporary table removed.");
+            try {
+                exec.setMessage("Importing data to temporary table from uploaded file...");
+                exec.checkCanceled();
+                statement.execute(loadTableCmd);
+                exec.setProgress(0.75, "Data imported into temporary table.");
+                exec.setMessage("Loading data into final table...");
+                setPartitioningSettings(statement);
+                statement.execute(insertCommand);
+                exec.setProgress(0.90, "Data loaded into final table.");
+            } finally {
+                exec.setMessage("Removing temporary table...");
+                final SQLCommand dropTableStatement =
+                    getDialect().dataDefinition().getDropTableStatement(tmpTable, false);
+                statement.execute(dropTableStatement.getSQL());
+                exec.setProgress(0.99, "Temporary table removed.");
+            }
         } catch (final Throwable throwable) {
             if (throwable instanceof Exception) {
                 throw (Exception)throwable;
@@ -203,7 +203,9 @@ public abstract class BigDataLoader implements DBLoader {
      * @param statement
      * @throws SQLException
      */
-    protected abstract void setPartitioningSettings(final Statement statement) throws SQLException;
+    protected void setPartitioningSettings(final Statement statement) throws SQLException {
+        //Nothing to do here, may be overwritten
+    }
 
     private String buildLoadCommand(final DBTable tmpTable, final RemoteFile<?> file) throws Exception {
         final String tableName = getDialect().createFullName(tmpTable);
@@ -217,7 +219,6 @@ public abstract class BigDataLoader implements DBLoader {
             LOGGER.debug("Load data from hdfs");
             // Hive handles load via move, use Hive default FS URI and provide only input file path
             return "LOAD DATA INPATH '" + file.getFullName() + "' INTO TABLE " + tableName;
-
         } else {
             LOGGER.debug("Load data from local file system");
             return "LOAD DATA LOCAL INPATH '" + file.getFullName() + "' INTO TABLE " + tableName;
@@ -225,7 +226,7 @@ public abstract class BigDataLoader implements DBLoader {
     }
 
     private String buildInsertCommand(final DBTable sourceTable, final DBTable destTable,
-        final List<DBColumn> normalColumns, final List<DBColumn> partitionColumns) {
+        final List<String> selectOrderColumnNames, final List<DBColumn> partitionColumns) {
 
         DBSQLDialect dialect = getDialect();
         final StringBuilder buf = new StringBuilder();
@@ -240,14 +241,8 @@ public abstract class BigDataLoader implements DBLoader {
         }
         buf.append("\n");
         buf.append("SELECT ");
-        for (final DBColumn col : normalColumns) {
-            buf.append(dialect.delimit(dialect.getUnqualifiedColumnName(col.getName()))).append(",");
-        }
-        if (!partitionColumns.isEmpty()) {
-            for (final DBColumn col : partitionColumns) {
-                buf.append(dialect.delimit(dialect.getUnqualifiedColumnName(col.getName()))).append(",");
-            }
-        }
+        selectOrderColumnNames.stream()
+            .forEachOrdered(col -> buf.append(dialect.getUnqualifiedColumnName(col)).append(","));
         buf.deleteCharAt(buf.length() - 1);
         buf.append("\nFROM ").append(getDialect().createFullName(sourceTable));
 
