@@ -66,7 +66,7 @@ public class HiveLoader extends BigDataLoader {
      * @param sessionReference the {@link DBSessionReference} object
      */
     public HiveLoader(final DBSessionReference sessionReference) {
-        super(sessionReference, "STORED AS ORC");
+        super(sessionReference);
     }
 
 

@@ -46,7 +46,7 @@
  * History
  *   20.05.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive.node.loader;
+package org.knime.bigdata.database.loader;
 
 import java.util.List;
 
@@ -54,29 +54,34 @@ import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.database.dialect.DBColumn;
 
 /**
+ * Class for parameters used in the Hive/Impala loader
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveLoaderParameters {
+public class BigDataLoaderParameters {
 
     private final RemoteFile<?> m_remoteFile;
-    private final List<DBColumn> m_normalColums;
-    private final List<DBColumn> m_partitionColums;
-    private final DBColumn[] m_inputColumns;
+
+    private final List<DBColumn> m_partitionColumns;
+
+    private final DBColumn[] m_tempTableColumns;
+
+    private final List<String> m_selectOrderColumnNames;
 
     /**
-     * @param normalColums
-     * @param partitionColums
-     * @param inputColumns
-     * @param remoteFile
+     * Creates Loader parameters for the BigData implementation of the DB Loader
+     *
+     * @param partitionColumns list of partition columns
+     * @param tempTableColumns list of columns for the temporary table
+     * @param selectOrderColumnNames List of column names in the order they must be selected for the insert
+     * @param remoteFile the remote file with the input data
      */
-    public HiveLoaderParameters(final List<DBColumn> normalColums, final List<DBColumn> partitionColums,
-        final DBColumn[] inputColumns, final RemoteFile<?> remoteFile) {
+    public BigDataLoaderParameters(final List<DBColumn> partitionColumns, final DBColumn[] tempTableColumns,
+        final List<String> selectOrderColumnNames, final RemoteFile<?> remoteFile) {
         m_remoteFile = remoteFile;
-        m_normalColums = normalColums;
-        m_partitionColums = partitionColums;
-        m_inputColumns = inputColumns;
-
+        m_partitionColumns = partitionColumns;
+        m_selectOrderColumnNames = selectOrderColumnNames;
+        m_tempTableColumns = tempTableColumns;
     }
 
     /**
@@ -87,24 +92,23 @@ public class HiveLoaderParameters {
     }
 
     /**
-     * @return the normalColums
-     */
-    public List<DBColumn> getNormalColums() {
-        return m_normalColums;
-    }
-
-    /**
      * @return the partitionColums
      */
-    public List<DBColumn> getPartitionColums() {
-        return m_partitionColums;
+    public List<DBColumn> getPartitionColumns() {
+        return m_partitionColumns;
     }
 
     /**
      * @return the inputColumns
      */
-    public DBColumn[] getInputColumns() {
-        return m_inputColumns;
+    public DBColumn[] getTempTableColumns() {
+        return m_tempTableColumns;
     }
 
+    /**
+     * @return the selectOrderColumnNames
+     */
+    public List<String> getSelectOrderColumnNames() {
+        return m_selectOrderColumnNames;
+    }
 }

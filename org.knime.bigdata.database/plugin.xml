@@ -189,8 +189,7 @@
    
      <!-- Loader node implementation -->
     <extension point="org.knime.database.nodes.LoaderNode">
-   		<LoaderNode dbTypes="hive" class="org.knime.bigdata.database.hive.node.loader.HiveLoaderNode"/>
-   		<LoaderNode dbTypes="impala" class="org.knime.bigdata.database.impala.node.loader.ImpalaLoaderNode"/>
+   		<LoaderNode dbTypes="hive,impala" class="org.knime.bigdata.database.loader.BigDataLoaderNode"/>
    	</extension>
 
      <!-- Node migration rules -->
