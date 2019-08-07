@@ -66,12 +66,11 @@ public class ParquetType {
     public String toString() {
         if (m_original == OriginalType.LIST) {
             return String.format("LIST[%s]", m_elementType.toString());
-        }
-
-        if (m_original != null) {
+        } else if (m_original != null) {
             return String.format("%s (%s)", m_original, m_primitive);
+        } else {
+            return String.format("%s", m_primitive);
         }
-        return String.format("%s", m_primitive);
     }
 
     /**
@@ -92,20 +91,19 @@ public class ParquetType {
      * @return the resulting ParquetType
      */
     public static ParquetType fromString(String string) {
-        OriginalType original = null;
-        PrimitiveTypeName primitive = null;
         if (string.startsWith("LIST")) {
-            String subtype = string.substring(string.indexOf('[') + 1, string.lastIndexOf(']'));
-            ParquetType element = ParquetType.fromString(subtype);
+            final String subtype = string.substring(string.indexOf('[') + 1, string.lastIndexOf(']'));
+            final ParquetType element = ParquetType.fromString(subtype);
             return new ParquetType(element);
 
         } else if (string.contains("(")) {
-            String org = string.substring(0, string.indexOf(' '));
-            original = OriginalType.valueOf(org);
-            String prim = string.substring(string.indexOf('(') + 1, string.lastIndexOf(')'));
-            primitive = PrimitiveTypeName.valueOf(prim);
+            final String org = string.substring(0, string.indexOf(' '));
+            final String prim = string.substring(string.indexOf('(') + 1, string.lastIndexOf(')'));
+            return new ParquetType(PrimitiveTypeName.valueOf(prim), OriginalType.valueOf(org));
+
+        } else {
+            return new ParquetType(PrimitiveTypeName.valueOf(string));
         }
-        return new ParquetType(primitive, original);
     }
 
     @Override
