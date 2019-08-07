@@ -29,12 +29,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
-import org.knime.bigdata.database.hive.Hive;
+import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
-import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
@@ -49,6 +47,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
 import org.knime.database.DBType;
+import org.knime.database.DBTypeRegistry;
 import org.knime.database.VariableContext;
 import org.knime.database.connection.DBConnectionController;
 import org.knime.database.datatype.mapping.DBDestination;
@@ -144,40 +143,39 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
      */
     private DBSessionInformation createSessionInfo() throws InvalidSettingsException {
 
-        final DBSessionID sessionID = new DBSessionID();
-        final DBType dbType = Hive.DB_TYPE;
+        final Optional<DBType> dbTypeOpt = DBTypeRegistry.getInstance().getRegisteredDBType(m_hiveSettings.getDBType());
+        final DBType dbType = dbTypeOpt.orElseGet(() -> {
+            final DBType substitute = DBType.DEFAULT;
+            setWarningMessage("The built-in DB type could not be found and the default is used instead.");
+            LOGGER.warnWithFormat(
+                "The built-in DB type [%s] could not be found and the default [%s] is used instead.",
+                m_hiveSettings.getDBType(), substitute.getId());
+            return substitute;
+        });
 
-        final String settingsDialect = "hive";
         final Optional<DBSQLDialectFactory> dialectFactory =
-                DBSQLDialectRegistry.getInstance().getFactory(dbType, settingsDialect);
-        final String dialectId;
-        if (dialectFactory.isPresent()) {
-            dialectId = dialectFactory.get().getId();
-        } else {
-            dialectId = DBSQLDialectRegistry.getInstance().getDefaultFactoryFor(dbType).getId();
-            if (StringUtils.isNotEmpty(settingsDialect)) {
-                setWarningMessage("The selected SQL dialect could not be found and the default is used instead.");
-                LOGGER.warnWithFormat(
-                    "The selected SQL dialect [%s] could not be found and the default [%s] is used instead.",
-                    settingsDialect, dialectId);
-            }
-        }
-        final String sessionDriver = "hive";
-        final DBDriverRegistry driverRegistry = DBDriverRegistry.getInstance();
-        final DBDriverWrapper driver = driverRegistry.getDriver(sessionDriver).orElseGet(() -> {
-            final DBDriverWrapper substitute = driverRegistry.getLatestDriver(dbType);
-            if (StringUtils.isNotEmpty(sessionDriver)) {
-                setWarningMessage("The selected driver could not be found and the latest "
-                        + "for the chosen database type is used instead.");
-                LOGGER.warnWithFormat(
-                    "The selected driver [%s] could not be found and the latest [%s] is used instead.", sessionDriver,
-                    substitute.getDriverDefinition().getId());
-            }
+                DBSQLDialectRegistry.getInstance().getFactory(dbType, m_hiveSettings.getDialect());
+        final String dialectId = dialectFactory.orElseGet(() -> {
+            final DBSQLDialectFactory substitute = DBSQLDialectRegistry.getInstance().getDefaultFactoryFor(dbType);
+            setWarningMessage("The built-in SQL dialect could not be found and the default is used instead.");
+            LOGGER.warnWithFormat(
+                "The built-in SQL dialect [%s] could not be found and the default [%s] is used instead.",
+                m_hiveSettings.getDialect(), substitute.getId());
+            return substitute;
+        }).getId();
+
+        final DBDriverWrapper driver =
+                DBDriverRegistry.getInstance().getDriver(m_hiveSettings.getDriver()).orElseGet(() -> {
+            final DBDriverWrapper substitute = DBDriverRegistry.getInstance().getLatestDriver(dbType);
+            setWarningMessage("The built-in driver could not be found and the latest "
+                    + "for the chosen database type is used instead.");
+            LOGGER.warnWithFormat("The built-in driver [%s] could not be found and the latest [%s] is used instead.",
+                m_hiveSettings.getDriver(), substitute.getDriverDefinition().getId());
             return substitute;
         });
 
         final DBConnectionController connectionController = createConnectionController(m_hiveSettings.getDBUrl());
-        return new DefaultDBSessionInformation(dbType, dialectId, sessionID, driver.getDriverDefinition(),
+        return new DefaultDBSessionInformation(dbType, dialectId, new DBSessionID(), driver.getDriverDefinition(),
             connectionController, m_hiveSettings.getAttributeValues());
     }
 

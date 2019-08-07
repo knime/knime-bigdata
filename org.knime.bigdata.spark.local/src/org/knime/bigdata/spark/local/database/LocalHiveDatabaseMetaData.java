@@ -25,8 +25,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
-import java.sql.Statement;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
 import org.apache.hive.jdbc.HiveQueryResultSet;
 import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory;
@@ -45,10 +45,10 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	private final HiveDatabaseMetaData m_hiveMetadata;
 
 	/**
-	 * Creates a LocalHiveMetaDataObject that wraps the HiveDataBaseMetData 
+	 * Creates a LocalHiveMetaDataObject that wraps the HiveDataBaseMetData
 	 * @param hiveMetadata
 	 */
-	public LocalHiveDatabaseMetaData(HiveDatabaseMetaData hiveMetadata) {
+	public LocalHiveDatabaseMetaData(final HiveDatabaseMetaData hiveMetadata) {
 		m_hiveMetadata = hiveMetadata;
 	}
 
@@ -73,7 +73,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		return m_hiveMetadata.equals(obj);
 	}
 
@@ -88,7 +88,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean deletesAreDetected(int type) throws SQLException {
+	public boolean deletesAreDetected(final int type) throws SQLException {
 		return m_hiveMetadata.deletesAreDetected(type);
 	}
 
@@ -98,14 +98,14 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,
-			String attributeNamePattern) throws SQLException {
+	public ResultSet getAttributes(final String catalog, final String schemaPattern, final String typeNamePattern,
+			final String attributeNamePattern) throws SQLException {
 		return m_hiveMetadata.getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern);
 	}
 
 	@Override
-	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)
-			throws SQLException {
+	public ResultSet getBestRowIdentifier(final String catalog, final String schema, final String table, 
+			final int scope, final boolean nullable) throws SQLException {
 		return m_hiveMetadata.getBestRowIdentifier(catalog, schema, table, scope, nullable);
 	}
 
@@ -130,14 +130,15 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)
+	public ResultSet getColumnPrivileges(final String catalog, final String schema, final String table, 
+			final String columnNamePattern)
 			throws SQLException {
 		return m_hiveMetadata.getColumnPrivileges(catalog, schema, table, columnNamePattern);
 	}
 
 	@Override
-	public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
-			String columnNamePattern) throws SQLException {
+	public ResultSet getPseudoColumns(final String catalog, final String schemaPattern, final String tableNamePattern,
+			final String columnNamePattern) throws SQLException {
 		return m_hiveMetadata.getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
 	}
 
@@ -147,8 +148,8 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
-			throws SQLException {
+	public ResultSet getColumns(final String catalog, final String schemaPattern, final String tableNamePattern, 
+			final String columnNamePattern) throws SQLException {
 		return m_hiveMetadata.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
 	}
 
@@ -158,8 +159,9 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getCrossReference(String primaryCatalog, String primarySchema, String primaryTable,
-			String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
+	public ResultSet getCrossReference(final String primaryCatalog, final String primarySchema, 
+			final String primaryTable, final String foreignCatalog, final String foreignSchema, 
+			final String foreignTable) throws SQLException {
 		return m_hiveMetadata.getCrossReference(primaryCatalog, primarySchema, primaryTable, foreignCatalog,
 				foreignSchema, foreignTable);
 	}
@@ -215,7 +217,8 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
+	public ResultSet getExportedKeys(final String catalog, final String schema, final String table) 
+			throws SQLException {
 		return m_hiveMetadata.getExportedKeys(catalog, schema, table);
 	}
 
@@ -225,13 +228,14 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getFunctionColumns(String arg0, String arg1, String arg2, String arg3) throws SQLException {
+	public ResultSet getFunctionColumns(final String arg0, final String arg1, final String arg2, final String arg3) 
+			throws SQLException {
 		return m_hiveMetadata.getFunctionColumns(arg0, arg1, arg2, arg3);
 	}
 
 	@Override
-	public ResultSet getFunctions(String catalogName, String schemaPattern, String functionNamePattern)
-			throws SQLException {
+	public ResultSet getFunctions(final String catalogName, final String schemaPattern, 
+			final String functionNamePattern) throws SQLException {
 		return m_hiveMetadata.getFunctions(catalogName, schemaPattern, functionNamePattern);
 	}
 
@@ -241,13 +245,14 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
+	public ResultSet getImportedKeys(final String catalog, final String schema, final String table) 
+			throws SQLException {
 		return m_hiveMetadata.getImportedKeys(catalog, schema, table);
 	}
 
 	@Override
-	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
-			throws SQLException {
+	public ResultSet getIndexInfo(final String catalog, final String schema, final String table, final boolean unique, 
+			final boolean approximate) throws SQLException {
 		return m_hiveMetadata.getIndexInfo(catalog, schema, table, unique, approximate);
 	}
 
@@ -367,13 +372,13 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
+	public ResultSet getPrimaryKeys(final String catalog, final String schema, final String table) throws SQLException {
 		return m_hiveMetadata.getPrimaryKeys(catalog, schema, table);
 	}
 
 	@Override
-	public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern,
-			String columnNamePattern) throws SQLException {
+	public ResultSet getProcedureColumns(final String catalog, final String schemaPattern, 
+			final String procedureNamePattern, final String columnNamePattern) throws SQLException {
 		return m_hiveMetadata.getProcedureColumns(catalog, schemaPattern, procedureNamePattern, columnNamePattern);
 	}
 
@@ -383,7 +388,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
+	public ResultSet getProcedures(final String catalog, final String schemaPattern, final String procedureNamePattern)
 			throws SQLException {
 		return m_hiveMetadata.getProcedures(catalog, schemaPattern, procedureNamePattern);
 	}
@@ -400,7 +405,12 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 
 	@Override
 	public String getSQLKeywords() throws SQLException {
-		return m_hiveMetadata.getSQLKeywords();
+	    try {
+	        return m_hiveMetadata.getSQLKeywords();
+	    } catch (final Exception e) {
+	        //method not supported by driver return empty string instead
+	        return StringUtils.EMPTY;
+	    }
 	}
 
 	@Override
@@ -419,7 +429,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+	public ResultSet getSchemas(final String catalog, final String schemaPattern) throws SQLException {
 		return m_hiveMetadata.getSchemas(catalog, schemaPattern);
 	}
 
@@ -434,12 +444,14 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+	public ResultSet getSuperTables(final String catalog, final String schemaPattern, final String tableNamePattern) 
+			throws SQLException {
 		return m_hiveMetadata.getSuperTables(catalog, schemaPattern, tableNamePattern);
 	}
 
 	@Override
-	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
+	public ResultSet getSuperTypes(final String catalog, final String schemaPattern, final String typeNamePattern) 
+			throws SQLException {
 		return m_hiveMetadata.getSuperTypes(catalog, schemaPattern, typeNamePattern);
 	}
 
@@ -449,7 +461,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
+	public ResultSet getTablePrivileges(final String catalog, final String schemaPattern, final String tableNamePattern)
 			throws SQLException {
 		return m_hiveMetadata.getTablePrivileges(catalog, schemaPattern, tableNamePattern);
 	}
@@ -464,9 +476,9 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	 * {@link LocalEnvironmentCreatorNodeFactory}.
 	 */
 	@Override
-	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
-			throws SQLException {
-	    
+	public ResultSet getTables(final String catalog, String schemaPattern, final String tableNamePattern, 
+			final String[] types) throws SQLException {
+
         if ((types != null && types[0].equals("TABLE")) || (tableNamePattern != null && types == null)) {
             final StringBuilder query = new StringBuilder();
             query.append("SHOW TABLES");
@@ -497,8 +509,8 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
-			throws SQLException {
+	public ResultSet getUDTs(final String catalog, final String schemaPattern, final String typeNamePattern, 
+			final int[] types) throws SQLException {
 		return m_hiveMetadata.getUDTs(catalog, schemaPattern, typeNamePattern, types);
 	}
 
@@ -513,12 +525,13 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
+	public ResultSet getVersionColumns(final String catalog, final String schema, final String table) 
+			throws SQLException {
 		return m_hiveMetadata.getVersionColumns(catalog, schema, table);
 	}
 
 	@Override
-	public boolean insertsAreDetected(int type) throws SQLException {
+	public boolean insertsAreDetected(final int type) throws SQLException {
 		return m_hiveMetadata.insertsAreDetected(type);
 	}
 
@@ -563,32 +576,32 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean othersDeletesAreVisible(int type) throws SQLException {
+	public boolean othersDeletesAreVisible(final int type) throws SQLException {
 		return m_hiveMetadata.othersDeletesAreVisible(type);
 	}
 
 	@Override
-	public boolean othersInsertsAreVisible(int type) throws SQLException {
+	public boolean othersInsertsAreVisible(final int type) throws SQLException {
 		return m_hiveMetadata.othersInsertsAreVisible(type);
 	}
 
 	@Override
-	public boolean othersUpdatesAreVisible(int type) throws SQLException {
+	public boolean othersUpdatesAreVisible(final int type) throws SQLException {
 		return m_hiveMetadata.othersUpdatesAreVisible(type);
 	}
 
 	@Override
-	public boolean ownDeletesAreVisible(int type) throws SQLException {
+	public boolean ownDeletesAreVisible(final int type) throws SQLException {
 		return m_hiveMetadata.ownDeletesAreVisible(type);
 	}
 
 	@Override
-	public boolean ownInsertsAreVisible(int type) throws SQLException {
+	public boolean ownInsertsAreVisible(final int type) throws SQLException {
 		return m_hiveMetadata.ownInsertsAreVisible(type);
 	}
 
 	@Override
-	public boolean ownUpdatesAreVisible(int type) throws SQLException {
+	public boolean ownUpdatesAreVisible(final int type) throws SQLException {
 		return m_hiveMetadata.ownUpdatesAreVisible(type);
 	}
 
@@ -688,7 +701,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean supportsConvert(int fromType, int toType) throws SQLException {
+	public boolean supportsConvert(final int fromType, final int toType) throws SQLException {
 		return m_hiveMetadata.supportsConvert(fromType, toType);
 	}
 
@@ -848,17 +861,17 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException {
+	public boolean supportsResultSetConcurrency(final int type, final int concurrency) throws SQLException {
 		return m_hiveMetadata.supportsResultSetConcurrency(type, concurrency);
 	}
 
 	@Override
-	public boolean supportsResultSetHoldability(int holdability) throws SQLException {
+	public boolean supportsResultSetHoldability(final int holdability) throws SQLException {
 		return m_hiveMetadata.supportsResultSetHoldability(holdability);
 	}
 
 	@Override
-	public boolean supportsResultSetType(int type) throws SQLException {
+	public boolean supportsResultSetType(final int type) throws SQLException {
 		return m_hiveMetadata.supportsResultSetType(type);
 	}
 
@@ -938,7 +951,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean supportsTransactionIsolationLevel(int level) throws SQLException {
+	public boolean supportsTransactionIsolationLevel(final int level) throws SQLException {
 		return m_hiveMetadata.supportsTransactionIsolationLevel(level);
 	}
 
@@ -958,7 +971,7 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean updatesAreDetected(int type) throws SQLException {
+	public boolean updatesAreDetected(final int type) throws SQLException {
 		return m_hiveMetadata.updatesAreDetected(type);
 	}
 
@@ -973,12 +986,12 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+	public boolean isWrapperFor(final Class<?> iface) throws SQLException {
 		return m_hiveMetadata.isWrapperFor(iface);
 	}
 
 	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
+	public <T> T unwrap(final Class<T> iface) throws SQLException {
 		return m_hiveMetadata.unwrap(iface);
 	}
 }

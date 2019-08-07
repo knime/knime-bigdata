@@ -88,7 +88,7 @@
         </tab>
         <tab name="JDBC Parameters">
             <description>
-                This tab allows you define <b>driver-specific</b> parameters for the JDBC connection. The
+                This tab allows you to define <b>driver-specific</b> parameters for the JDBC connection. The
                 value of a parameter can be a 
                 constant, variable, credential user, credential password or KNIME URL.
                 For more information about the parameters supported by the included Apache Hive driver, please 

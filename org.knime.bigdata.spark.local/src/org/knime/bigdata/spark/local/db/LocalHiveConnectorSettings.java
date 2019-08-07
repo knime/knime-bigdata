@@ -1,8 +1,4 @@
 package org.knime.bigdata.spark.local.db;
-
-import org.knime.bigdata.database.hive.Hive;
-import org.knime.bigdata.spark.local.database.LocalHiveUtility;
-
 /*
  * ------------------------------------------------------------------------
  *
@@ -51,10 +47,12 @@ import org.knime.bigdata.spark.local.database.LocalHiveUtility;
  * History
  *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
+import java.util.Optional;
 
-import org.knime.database.DBType;
-import org.knime.database.dialect.DBSQLDialectFactory;
-import org.knime.database.dialect.DBSQLDialectRegistry;
+import org.knime.bigdata.database.hive.Hive;
+import org.knime.bigdata.database.hive.HiveDriverLocator;
+import org.knime.bigdata.database.hive.dialect.HiveSQLDialect;
+import org.knime.bigdata.spark.local.database.LocalHiveUtility;
 import org.knime.database.driver.DBDriverRegistry;
 import org.knime.database.driver.DBDriverWrapper;
 import org.knime.database.node.connector.server.ServerDBConnectorSettings;
@@ -65,11 +63,6 @@ import org.knime.database.node.connector.server.ServerDBConnectorSettings;
  */
 public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
 
-    private static final DBType DB_TYPE = Hive.DB_TYPE;
-
-    private static final DBSQLDialectFactory DEFAULT_DIALECT_FACTORY =
-        DBSQLDialectRegistry.getInstance().getDefaultFactoryFor(DB_TYPE);
-
     /**
      * Hive Connector settings
      */
@@ -79,27 +72,28 @@ public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
 
     /**
      * Hive Connector settings
-     * 
+     *
      * @param hiveserverPort The TCP that local Hive (i.e. Spark thriftserver) is listening on.
      */
-    public LocalHiveConnectorSettings(int hiveserverPort) {
+    public LocalHiveConnectorSettings(final int hiveserverPort) {
         super("localhive-connection");
         setDatabaseName(LocalHiveUtility.DATABASE_IDENTIFIER);
         setPort(hiveserverPort);
         setHost("localhost");
         setDatabaseName("");
 
-        setDBType(DB_TYPE.getId());
+        setDBType(Hive.DB_TYPE.getId());
 
-        setDialect(DEFAULT_DIALECT_FACTORY.getId());
+        setDialect(HiveSQLDialect.ID);
 
-        final DBDriverWrapper defaultDriver = DBDriverRegistry.getInstance().getLatestDriver(DB_TYPE);
-        setDriver(defaultDriver == null ? null : defaultDriver.getDriverDefinition().getId());
+        final Optional<DBDriverWrapper> builtInDriver =
+                DBDriverRegistry.getInstance().getDriver(HiveDriverLocator.DRIVER_ID);
+        setDriver(builtInDriver.isPresent() ? builtInDriver.get().getDriverDefinition().getId() : null);
     }
 
     @Override
     protected String getDatabaseTypeId() {
-        return DB_TYPE.getId();
+        return Hive.DB_TYPE.getId();
     }
 
 }

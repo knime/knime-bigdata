@@ -69,6 +69,7 @@ import org.knime.database.model.DBSchemaObject;
  * Dialect for Hive databases.
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @since 4.0
  */
 public class HiveSQLDialect extends SQL92DBSQLDialect {
 
