@@ -76,7 +76,7 @@ public class ImpalaConnectorSettings extends ServerDBConnectorSettings {
     /**
      * Impala Connector settings
      */
-    public ImpalaConnectorSettings() {
+    protected ImpalaConnectorSettings() {
         super("impala-connection");
 
         setDBType(DB_TYPE.getId());

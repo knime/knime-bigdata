@@ -65,13 +65,6 @@ public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
 
     /**
      * Hive Connector settings
-     */
-    public LocalHiveConnectorSettings() {
-        this(-1);
-    }
-
-    /**
-     * Hive Connector settings
      *
      * @param hiveserverPort The TCP that local Hive (i.e. Spark thriftserver) is listening on.
      */
