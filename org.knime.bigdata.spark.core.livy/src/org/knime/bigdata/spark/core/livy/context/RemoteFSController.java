@@ -1,26 +1,19 @@
 package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,23 +21,24 @@ import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
-import org.knime.base.filehandling.remote.files.FileRemoteFileHandler;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import org.knime.bigdata.spark.core.context.util.UploadFileCache;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils.StagingAreaAccess;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.cloud.core.util.port.CloudConnectionInformation;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
 
+/**
+ * KNIME-side implementation of {@link StagingAreaAccess} that accesses the staging area through the KNIME remote file
+ * handling API.
+ * 
+ * @author Bjoern Lohrmann, KNIME GmbH
+ */
 public class RemoteFSController implements StagingAreaAccess {
 
     private static final NodeLogger LOG = NodeLogger.getLogger(RemoteFSController.class);
@@ -57,18 +51,28 @@ public class RemoteFSController implements StagingAreaAccess {
 
     private boolean m_stagingAreaIsPath;
     
-    private final UploadFileCache m_uploadFileCache = new UploadFileCache();
-
     /**
      * Path of the staging area folder. The path always ends with a "/".
      */
     private String m_stagingAreaPath;
 
+    /**
+     * 
+     * @param connectionInformation
+     * @param stagingAreaParent
+     */
     public RemoteFSController(ConnectionInformation connectionInformation, final String stagingAreaParent) {
         m_connectionInformation = connectionInformation;
         m_stagingAreaParent = stagingAreaParent;
     }
 
+    /**
+     * Tries to create the staging area, which is typically a folder in the remote file system provided in the
+     * constructor. This method may try to create the folder in several locations before it fails.
+     * 
+     * @throws KNIMESparkException If no staging area could be created, this exception wraps the original exception
+     *             thrown during the last attempt to create the staging area folder.
+     */
     public void createStagingArea() throws KNIMESparkException {
         m_connectionMonitor = new ConnectionMonitor<>();
         boolean success = false;
@@ -199,45 +203,6 @@ public class RemoteFSController implements StagingAreaAccess {
         }
     }
 
-    // only consumes the input stream but does not close it. this is up to the caller.
-//    private String upload(final InputStream in) throws Exception {
-//        File tmpFile = null;
-//
-//        try {
-//            tmpFile = FileUtil.createTempFile("livy", "fileuploadZipped");
-//
-//            try (final OutputStream out =
-//                new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(tmpFile)))) {
-//                transferStreamToStream(in, out);
-//            }
-//
-//            final String stagingFilename = UUID.randomUUID().toString();
-//
-//            final URI stagingFileURI = new URI(
-//                m_connectionInformation.toURI().toString() + NodeUtils.encodePath(m_stagingAreaPath + stagingFilename));
-//
-//            @SuppressWarnings("unchecked")
-//            final RemoteFile<Connection> stagingAreaRemoteFile = (RemoteFile<Connection>)RemoteFileFactory
-//                .createRemoteFile(stagingFileURI, m_connectionInformation, m_connectionMonitor);
-//
-//            final RemoteFile<Connection> localTmpFile =
-//                new FileRemoteFileHandler().createRemoteFile(tmpFile.toURI(), null, null);
-//            stagingAreaRemoteFile.write(localTmpFile, null);
-//            return stagingFilename;
-//        } finally {
-//            if (tmpFile != null) {
-//                tmpFile.delete();
-//            }
-//        }
-//    }
-//
-//    private String upload(final File inputFile) throws Exception {
-//        try (InputStream in = new BufferedInputStream(new FileInputStream(inputFile))) {
-//            return upload(in);
-//        }
-//    }
-
-    // it is up to the caller to close the input stram
     private InputStream download(final String stagingFilename) throws Exception {
         final URI stagingFileURI = new URI(
             m_connectionInformation.toURI().toString() + NodeUtils.encodePath(m_stagingAreaPath + stagingFilename));
@@ -248,22 +213,9 @@ public class RemoteFSController implements StagingAreaAccess {
         return new BufferedInputStream(stagingAreaRemoteFile.openInputStream());
     }
 
-    private void downloadFile(File localFileToWrite, final String stagingFilename) throws Exception {
-        try (final OutputStream out = new BufferedOutputStream(new FileOutputStream(localFileToWrite))) {
-            try (final InputStream in = download(stagingFilename)) {
-                transferStreamToStream(in, out);
-            }
-        }
-    }
-
-    private static void transferStreamToStream(final InputStream from, final OutputStream to) throws IOException {
-        final byte[] buffer = new byte[8192];
-        int read;
-        while ((read = from.read(buffer)) >= 0) {
-            to.write(buffer, 0, read);
-        }
-    }
-
+    /**
+     * Closes the connection to the remote FS if necessary.
+     */
     public void ensureClosed() {
         if (m_connectionMonitor != null) {
             // we don't actually delete the staging area here. This is done from inside Spark.
@@ -272,6 +224,12 @@ public class RemoteFSController implements StagingAreaAccess {
         }
     }
 
+    /**
+     * Deletes the given staging file from the staging area in the remote FS.
+     * 
+     * @param stagingFilename
+     * @throws Exception
+     */
     public void delete(final String stagingFilename) throws Exception {
         final URI stagingFileURI = new URI(
             m_connectionInformation.toURI().toString() + NodeUtils.encodePath(m_stagingAreaPath + stagingFilename));
@@ -317,47 +275,7 @@ public class RemoteFSController implements StagingAreaAccess {
         return m_stagingAreaIsPath;
     }
 
-//    public List<String> uploadInputFilesCached(final JobWithFilesRun<?, ?> job, final ExecutionMonitor exec)
-//        throws KNIMESparkException, CanceledExecutionException {
-//
-//        // first we determine the files we have to upload
-//        exec.setMessage("Uploading input file(s for job");
-//        for (File inputFile : job.getInputFiles()) {
-//            String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
-//            if (cachedServerFile == null) {
-//                exec.checkCanceled();
-//                try {
-//                    final String stagingfileName = upload(inputFile);
-//                    m_uploadFileCache.addFilesToCache(inputFile, stagingfileName);
-//                } catch (Exception e) {
-//                    throw new KNIMESparkException(e);
-//                }
-//            }
-//        }
-//
-//        return job.getInputFiles().stream().map(m_uploadFileCache::tryToGetServerFileFromCache)
-//            .collect(Collectors.toList());
-//    }
-//
-//    public List<String> doUploadFiles(final List<File> filesToUpload, final ExecutionMonitor exec)
-//        throws CanceledExecutionException, KNIMESparkException {
-//
-//        List<String> serverFilenames = new LinkedList<>();
-//
-//        exec.setMessage("Uploading input file(s for job");
-//        try {
-//            for (File localFileToUpload : filesToUpload) {
-//                exec.checkCanceled();
-//                final String stagingfileName = upload(localFileToUpload);
-//                serverFilenames.add(stagingfileName);
-//            }
-//        } catch (Exception e) {
-//            throw new KNIMESparkException(e);
-//        }
-//
-//        return serverFilenames;
-//    }
-
+    @SuppressWarnings("resource")
     @Override
     public Entry<String, OutputStream> newUploadStream() throws IOException {
         final String stagingFilename = UUID.randomUUID().toString();
@@ -370,26 +288,90 @@ public class RemoteFSController implements StagingAreaAccess {
             final RemoteFile<Connection> stagingAreaRemoteFile = (RemoteFile<Connection>)RemoteFileFactory
                 .createRemoteFile(stagingFileURI, m_connectionInformation, m_connectionMonitor);
             
-            final OutputStream out = stagingAreaRemoteFile.openOutputStream();
+            OutputStream out;
+            try {
+                out = stagingAreaRemoteFile.openOutputStream();
+            } catch (UnsupportedOperationException e) {
+                out = newTempFileBufferedUpload(stagingAreaRemoteFile);
+            }
             
-            return new Entry<String, OutputStream>() {
-                @Override
-                public String getKey() {
-                    return stagingFilename;
-                }
-
-                @Override
-                public OutputStream getValue() {
-                    return out;
-                }
-
-                @Override
-                public OutputStream setValue(OutputStream value) {
-                    throw new RuntimeException("setValue not supported");
-                }
-            };
+            return new Pair(stagingFilename, out);
         } catch (Exception e) {
             throw new IOException(e);
+        }
+    }
+    
+    @SuppressWarnings("resource")
+    private static OutputStream newTempFileBufferedUpload(RemoteFile<Connection> stagingAreaRemoteFile)
+        throws IOException {
+
+        final java.nio.file.Path localTempFile = FileUtil.createTempFile("livy_upload", null).toPath();
+        final OutputStream stream = Files.newOutputStream(localTempFile, StandardOpenOption.TRUNCATE_EXISTING);
+
+        return new OutputStream() {
+            @Override
+            public void write(final int b) throws IOException {
+                stream.write(b);
+            }
+
+            @Override
+            public void write(final byte[] b) throws IOException {
+                stream.write(b);
+            }
+
+            @Override
+            public void write(final byte[] b, final int off, final int len) throws IOException {
+                stream.write(b, off, len);
+            }
+
+            @Override
+            public void flush() throws IOException {
+                stream.flush();
+            }
+
+            @Override
+            public void close() throws IOException {
+                try {
+                    stream.close();
+                    final RemoteFile<Connection> localFile =
+                        RemoteFileFactory.createRemoteFile(localTempFile.toUri(), null, null);
+                    stagingAreaRemoteFile.write(localFile, null);
+                } catch (final Exception ex) {
+                    throw new IOException(ex.getMessage());
+                } finally {
+                    Files.delete(localTempFile);
+                }
+            }
+        };
+    }
+
+    /**
+     * Internal pair class to hold upload information.
+     */
+    private static class Pair implements Entry<String, OutputStream> {
+
+        private final String m_stagingFilename;
+
+        private final OutputStream m_out;
+
+        Pair(String stagingFilename, OutputStream out) {
+            m_stagingFilename = stagingFilename;
+            m_out = out;
+        }
+
+        @Override
+        public String getKey() {
+            return m_stagingFilename;
+        }
+
+        @Override
+        public OutputStream getValue() {
+            return m_out;
+        }
+
+        @Override
+        public OutputStream setValue(OutputStream value) {
+            throw new RuntimeException("setValue not supported");
         }
     }
 
@@ -397,6 +379,8 @@ public class RemoteFSController implements StagingAreaAccess {
     public InputStream newDownloadStream(String stagingFilename) throws IOException {
         try {
             return download(stagingFilename);
+        } catch (IOException e) {
+            throw e;
         } catch (Exception e) {
             throw new IOException(e);
         }
