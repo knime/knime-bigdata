@@ -107,6 +107,7 @@ import org.knime.database.agent.loader.DBLoadTableFromFileParameters;
 import org.knime.database.agent.loader.DBLoader;
 import org.knime.database.agent.metadata.DBMetadataReader;
 import org.knime.database.agent.metadata.impl.DefaultDBTableSpec;
+import org.knime.database.connection.DBConnectionManagerAttributes;
 import org.knime.database.datatype.mapping.DBTypeMappingRegistry;
 import org.knime.database.datatype.mapping.DBTypeMappingService;
 import org.knime.database.dialect.DBColumn;
@@ -188,24 +189,27 @@ public class BigDataLoaderNode
         final DBSessionPortObjectSpec sessionPortObjectSpec = (DBSessionPortObjectSpec)inSpecs[1];
         final DBSession session = sessionPortObjectSpec.getDBSession();
 
-        final ExecutionMonitor exec = createModelConfigurationExecutionMonitor(session);
-        final DataTableSpec tableSpecification = (DataTableSpec)inSpecs[0];
+        if (session.getAttributeValues().get(DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED)) {
 
-        ColumnListsProvider columnListProvider;
-        try {
-            columnListProvider = new ColumnListsProvider(exec, customSettings.getTableNameModel().toDBTable(), session,
-                tableSpecification);
-        } catch (final Exception ex) {
-            throw new InvalidSettingsException(ex.getMessage());
+            final ExecutionMonitor exec = createModelConfigurationExecutionMonitor(session);
+            final DataTableSpec tableSpecification = (DataTableSpec)inSpecs[0];
+            final DBTable dbTable = customSettings.getTableNameModel().toDBTable();
+
+            try {
+                buildAndValidateColumnLists(session, exec, dbTable, tableSpecification,
+                    sessionPortObjectSpec.getKnimeToExternalTypeMapping());
+
+            } catch (final InvalidSettingsException e) {
+                throw e;
+            } catch (final Exception ex) {
+                throw new InvalidSettingsException(ex);
+            }
         }
-
-        validateColumns(tableSpecification, sessionPortObjectSpec.getKnimeToExternalTypeMapping(), session,
-            columnListProvider.getNormalColumns(), columnListProvider.getPartitionColumns());
 
         return super.configureModel(inSpecs, settingsModels, customSettings);
     }
 
-    private static DataTableSpec validateColumns(final DataTableSpec tableSpecification,
+    private static void validateColumns(final DataTableSpec tableSpecification,
         final DataTypeMappingConfigurationData dataTypeMappingConfigurationData, final DBSession session,
         final List<DBColumn> normalColumns, final List<DBColumn> partitionColumns) throws InvalidSettingsException {
 
@@ -227,7 +231,6 @@ public class BigDataLoaderNode
         final org.knime.database.model.DBColumn[] columns = createDBTableSpec(rearrangedSpec, consumptionPaths);
 
         validateColumns(true, columns, databaseTableSpecification);
-        return rearrangedSpec;
     }
 
     /**
@@ -316,11 +319,14 @@ public class BigDataLoaderNode
         final DBTable table = customSettings.getTableNameModel().toDBTable();
         final DataTableSpec tableSpec = parameters.getRowInput().getDataTableSpec();
         final ConnectionMonitor<?> connectionMonitor = new ConnectionMonitor<>();
-        final ColumnListsProvider columnLists = new ColumnListsProvider(exec, table, session, tableSpec);
+        final DataTypeMappingConfigurationData knimeToExternalTypeMapping =
+            sessionPortObject.getKnimeToExternalTypeMapping();
 
-        // Build and validate columns lists.
-        validateColumns(tableSpec, sessionPortObject.getKnimeToExternalTypeMapping(), session,
-            columnLists.getNormalColumns(), columnLists.getPartitionColumns());
+        final ColumnListsProvider columnLists =
+            buildAndValidateColumnLists(session, exec, table, tableSpec, knimeToExternalTypeMapping);
+
+        final TempTableColumnListProvider tempColumnLists = new TempTableColumnListProvider(
+            columnLists.getNormalColumns(), columnLists.getPartitionColumns(), tableSpec);
 
         //Write local temporary file
         final Path temporaryFile = getTempFilePath();
@@ -328,7 +334,7 @@ public class BigDataLoaderNode
         try (AutoCloseable temporaryFileDeleter = () -> delete(temporaryFile);
                 AutoCloseable connectionMonitorCloser = () -> connectionMonitor.closeAll()) {
 
-            writeTemporaryFile(parameters.getRowInput(), temporaryFile, columnLists.getTempTableColumns(), exec);
+            writeTemporaryFile(parameters.getRowInput(), temporaryFile, tempColumnLists.getTempTableColumns(), exec);
 
             final RemoteFile<?> targetFile =
                 getTargetFile(parameters, customSettings, temporaryFile, connectionMonitor);
@@ -338,15 +344,32 @@ public class BigDataLoaderNode
 
                 // Load the data
                 session.getAgent(DBLoader.class).load(exec,
-                    new DBLoadTableFromFileParameters<BigDataLoaderParameters>(null, targetFile.getFullName(), table,
+                    new DBLoadTableFromFileParameters<>(null, targetFile.getFullName(), table,
                         new BigDataLoaderParameters(columnLists.getPartitionColumns(),
-                            columnLists.getTempTableColumns(), columnLists.getSelectOrderColumnNames(), targetFile)));
+                            tempColumnLists.getTempTableColumns(), tempColumnLists.getSelectOrderColumnNames(),
+                            targetFile)));
             }
         }
 
         // Output
         return new DBDataPortObject(sessionPortObject, session.getAgent(DBMetadataReader.class).getDBDataObject(exec,
             table.getSchemaName(), table.getName(), getExternalToKnimeTypeMapping(sessionPortObject, session)));
+    }
+
+    private static ColumnListsProvider buildAndValidateColumnLists(final DBSession session, final ExecutionMonitor exec,
+        final DBTable table, final DataTableSpec tableSpec,
+        final DataTypeMappingConfigurationData knimeToExternalTypeMapping) throws Exception {
+
+        final boolean tableExist = session.getAgent(DBMetadataReader.class).isExistingTable(exec, table);
+        if (!tableExist) {
+            throw new InvalidSettingsException(
+                String.format("Table %s does not exist", session.getDialect().createFullName(table)));
+        }
+
+        final ColumnListsProvider columnLists = new ColumnListsProvider(exec, table, session);
+        BigDataLoaderNode.validateColumns(tableSpec, knimeToExternalTypeMapping, session,
+            columnLists.getNormalColumns(), columnLists.getPartitionColumns());
+        return columnLists;
     }
 
     private static DataTypeMappingConfiguration<SQLType> getExternalToKnimeTypeMapping(
@@ -359,7 +382,7 @@ public class BigDataLoaderNode
     }
 
     /**
-     *  Deleter class for try-with-resources
+     * Deleter class for try-with-resources
      *
      * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
      */
