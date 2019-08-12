@@ -11,3 +11,4 @@ Require-Bundle: org.knime.base;bundle-version="[4.0.0,5.0.0)",
   org.knime.base.filehandling;bundle-version="[4.0.0,5.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Eclipse-BundleShape: dir
