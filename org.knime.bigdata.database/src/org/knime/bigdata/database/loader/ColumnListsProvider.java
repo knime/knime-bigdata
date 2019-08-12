@@ -53,12 +53,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
-import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.database.dialect.DBColumn;
@@ -66,7 +62,7 @@ import org.knime.database.model.DBTable;
 import org.knime.database.session.DBSession;
 
 /**
- * Class that builds and provides the column lists for the {@link BigDataLoaderNode}
+ * Class that builds and provides the column lists from the database table for the {@link BigDataLoaderNode}
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
@@ -76,10 +72,6 @@ public class ColumnListsProvider {
 
     private final List<DBColumn> m_partitionColumns = new ArrayList<>();
 
-    private final List<String> m_selectOrderColumnNames = new ArrayList<>();
-
-    private final DBColumn[] m_tempTableColumns;
-
     /**
      * Constructs a new ColumnListProvider by fetching the column information from the database and building the
      * building the columns lists accordingly
@@ -87,14 +79,11 @@ public class ColumnListsProvider {
      * @param exec the ExecutionMonitor for the connection
      * @param table the table to fetch information from
      * @param session the database session
-     * @param tableSpec the KNIME table specification
      * @throws Exception if the table information can not be retrieved from the database
      */
-    public ColumnListsProvider(final ExecutionMonitor exec, final DBTable table, final DBSession session,
-        final DataTableSpec tableSpec) throws Exception {
+    public ColumnListsProvider(final ExecutionMonitor exec, final DBTable table, final DBSession session)
+        throws Exception {
         fillColumnLists(exec, table, session);
-        m_tempTableColumns = new DBColumn[m_normalColumns.size() + m_partitionColumns.size()];
-        fillTempTableColumnsLists(tableSpec);
     }
 
     /**
@@ -102,8 +91,6 @@ public class ColumnListsProvider {
      *
      * @param exec {@link ExecutionMonitor}
      * @param table the hive/impala table
-     * @param m_normalColumns list to fill with the normal column names in the order they appear
-     * @param m_partitionColumns list to fill with the partition column names in the order they appear
      * @param session the {@link DBSession} to use
      * @throws CanceledExecutionException if the execution has been cancelled.
      * @throws SQLException if a database access error occurs
@@ -152,36 +139,6 @@ public class ColumnListsProvider {
     }
 
     /**
-     * Fills the list with input columns for the creation of temporary table and a list with column names in the correct
-     * order for the select part of the insert into statement.
-     *
-     * @param m_normalColumns the normal column list
-     * @param m_partitionColumns the partition columns
-     * @param m_tempTableColumns the temporary table Column list to fill
-     * @param m_selectOrderColumnNames the column name list for the select statement to fill
-     * @param tableSpec the tablespec of the input table
-     */
-    private void fillTempTableColumnsLists(final DataTableSpec tableSpec) {
-        final Map<String, Integer> colIndexMap = createColumnNameToIndexMap(tableSpec);
-
-        Stream.concat(m_normalColumns.stream(), m_partitionColumns.stream()).forEachOrdered(d -> {
-            final int index = colIndexMap.get(d.getName().toLowerCase());
-            final String tempName = String.format("column%d", index);
-            //replace characters that can not be handled by Parquet
-            m_tempTableColumns[index] = new DBColumn(tempName, d.getType(), d.isNotNull());
-            m_selectOrderColumnNames.add(tempName);
-        });
-    }
-
-    private static Map<String, Integer> createColumnNameToIndexMap(final DataTableSpec tableSpec) {
-        final Map<String, Integer> colIndexMap = new HashMap<>();
-        for (int i = 0; i < tableSpec.getNumColumns(); i++) {
-            colIndexMap.put(tableSpec.getColumnSpec(i).getName().toLowerCase(), i);
-        }
-        return colIndexMap;
-    }
-
-    /**
      * @return the normalColumns
      */
     public List<DBColumn> getNormalColumns() {
@@ -193,20 +150,6 @@ public class ColumnListsProvider {
      */
     public List<DBColumn> getPartitionColumns() {
         return m_partitionColumns;
-    }
-
-    /**
-     * @return the tempTableColumns
-     */
-    public DBColumn[] getTempTableColumns() {
-        return m_tempTableColumns;
-    }
-
-    /**
-     * @return the selectOrderColumnNames
-     */
-    public List<String> getSelectOrderColumnNames() {
-        return m_selectOrderColumnNames;
     }
 
 }
