@@ -736,7 +736,7 @@ propagated with or for interoperation with KNIME.
       <import feature="org.knime.features.bigdata.fileformats"/>
       <import feature="org.knime.features.ext.h2o.mojo.spark"/>
       <import feature="org.knime.features.ext.h2o.spark"/>
-      <import feature="org.knime.features.testingapplication"/>
+      <import feature="org.knime.features.testing.application"/>
       <import feature="com.knime.features.bigdata.knosp"/>
       <import feature="org.knime.features.ext.perl"/>
       <import feature="org.knime.features.ext.libsvm"/>
