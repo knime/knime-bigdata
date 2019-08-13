@@ -31,7 +31,7 @@
   </databaseUtility>
 </extension>
 
-<extension point="org.knime.database.node.workflow.migration.NodeMigrationRule">
+<extension point="org.knime.workflow.migration.NodeMigrationRule">
    <Rule class="org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeMigrationRule"/>
 </extension>
 </plugin>
