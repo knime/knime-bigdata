@@ -51,7 +51,7 @@ package org.knime.bigdata.database.hive.node;
 import static org.knime.database.node.component.attribute.Attributes.saveAttributeValues;
 import static org.knime.database.node.connector.generic.DBConnectorNodeMigrationRule.extractAttributeValues;
 import static org.knime.database.node.connector.generic.DBConnectorNodeMigrationRule.migrateCommonLegacyServerConnectorSettings;
-import static org.knime.node.workflow.migration.util.NodeSettingsMigrationUtilities.getOrAddNodeSettings;
+import static org.knime.workflow.migration.util.NodeSettingsMigrationUtilities.getOrAddNodeSettings;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -63,12 +63,12 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.database.DBType;
 import org.knime.database.dialect.impl.SQL92DBSQLDialect;
-import org.knime.node.workflow.migration.MigrationException;
-import org.knime.node.workflow.migration.MigrationNodeMatchResult;
-import org.knime.node.workflow.migration.NodeMigrationAction;
-import org.knime.node.workflow.migration.NodeMigrationRule;
-import org.knime.node.workflow.migration.NodeSettingsMigrationManager;
-import org.knime.node.workflow.migration.model.MigrationNode;
+import org.knime.workflow.migration.MigrationException;
+import org.knime.workflow.migration.MigrationNodeMatchResult;
+import org.knime.workflow.migration.NodeMigrationAction;
+import org.knime.workflow.migration.NodeMigrationRule;
+import org.knime.workflow.migration.NodeSettingsMigrationManager;
+import org.knime.workflow.migration.model.MigrationNode;
 
 /**
  * Node migration rule for the <em>Hive Connector</em> node.

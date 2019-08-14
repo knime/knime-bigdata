@@ -50,12 +50,12 @@ package org.knime.bigdata.spark.migration;
 
 import org.knime.bigdata.spark.node.io.database.impala.reader.DBImpala2SparkNodeFactory;
 import org.knime.core.node.NodeFactory;
-import org.knime.node.workflow.migration.MigrationException;
-import org.knime.node.workflow.migration.MigrationNodeMatchResult;
-import org.knime.node.workflow.migration.NodeMigrationAction;
-import org.knime.node.workflow.migration.NodeMigrationRule;
-import org.knime.node.workflow.migration.NodeSettingsMigrationManager;
-import org.knime.node.workflow.migration.model.MigrationNode;
+import org.knime.workflow.migration.MigrationException;
+import org.knime.workflow.migration.MigrationNodeMatchResult;
+import org.knime.workflow.migration.NodeMigrationAction;
+import org.knime.workflow.migration.NodeMigrationRule;
+import org.knime.workflow.migration.NodeSettingsMigrationManager;
+import org.knime.workflow.migration.model.MigrationNode;
 
 /**
  * Node migration rule for the <em>Hive to Spark</em> node.

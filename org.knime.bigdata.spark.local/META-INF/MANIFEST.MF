@@ -36,7 +36,7 @@ Require-Bundle: org.knime.bigdata.spark.core;bundle-version="[4.0.0,5.0.0)",
  org.knime.database;bundle-version="[4.0.0,5.0.0)",
  org.knime.database.nodes;bundle-version="[4.0.0,5.0.0)",
  org.knime.bigdata.database;bundle-version="[4.0.0,5.0.0)",
- org.knime.workflow.migration;bundle-version="[4.0.0,5.0.0)"
+ org.knime.workflow.migration;bundle-version="[4.1.0,5.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir

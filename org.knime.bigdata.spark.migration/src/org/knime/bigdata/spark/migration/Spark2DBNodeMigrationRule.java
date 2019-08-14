@@ -54,12 +54,12 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.database.migration.DBMigrationUtil;
 import org.knime.database.node.component.dbrowser.SettingsModelDBMetadata;
-import org.knime.node.workflow.migration.MigrationException;
-import org.knime.node.workflow.migration.MigrationNodeMatchResult;
-import org.knime.node.workflow.migration.NodeMigrationAction;
-import org.knime.node.workflow.migration.NodeMigrationRule;
-import org.knime.node.workflow.migration.NodeSettingsMigrationManager;
-import org.knime.node.workflow.migration.model.MigrationNode;
+import org.knime.workflow.migration.MigrationException;
+import org.knime.workflow.migration.MigrationNodeMatchResult;
+import org.knime.workflow.migration.NodeMigrationAction;
+import org.knime.workflow.migration.NodeMigrationRule;
+import org.knime.workflow.migration.NodeSettingsMigrationManager;
+import org.knime.workflow.migration.model.MigrationNode;
 
 /**
  * Node migration rule for the <em>Spark to Database</em> node.
