@@ -33,7 +33,14 @@ import org.knime.rsyntaxtextarea.guarded.GuardedSection;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class PySparkDocument extends GuardedDocument {
+
     private static final long serialVersionUID = -9007276381124805214L;
+
+    /** The start string for the flowvariable access string. */
+    public static final String FLOW_VARIABLE_START = "flow_variables['v_";
+
+    /** The end string for the flowvariable access string. */
+    public static final String FLOW_VARIABLE_END = "']";
 
     /** The name of the guarded section for imports. */
     public static final String GUARDED_IMPORTS = "imports";
@@ -68,41 +75,46 @@ public class PySparkDocument extends GuardedDocument {
 
             final GuardedSection bodyEnd = addGuardedFooterSection(GUARDED_BODY_END, getLength());
             bodyEnd.setText("# expression end\n");
-        } catch (BadLocationException e) {
+        } catch (final BadLocationException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     /**
      * Overwrites the flow variables section with the given list of flow variables
+     *
      * @param variables the list of flow variables to set
      */
     public void writeFlowVariables(final FlowVariable[] variables) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("# Flowvariables\n\n");
         sb.append("flow_variables = {} \n");
-        for(FlowVariable flowVariable : variables) {
-           String escapedName = flowVariable.getName().replaceAll("[^A-Za-z0-9_]", "_");
-        switch (flowVariable.getType()) {
+        for (final FlowVariable flowVariable : variables) {
+            final String escapedName = VariableNameUtil.escapeName(flowVariable.getName());
+            switch (flowVariable.getType()) {
                 case INTEGER:
-                    sb.append("flow_variables['v_" + escapedName + "'] = " + flowVariable.getIntValue() + "\n");
+                    sb.append(FLOW_VARIABLE_START + escapedName + FLOW_VARIABLE_END + " = " + flowVariable.getIntValue()
+                        + "\n");
                     break;
                 case DOUBLE:
-                    sb.append("flow_variables['v_" + escapedName + "'] = " + flowVariable.getDoubleValue() + "\n");
+                    sb.append(FLOW_VARIABLE_START + escapedName + FLOW_VARIABLE_END + " = "
+                        + flowVariable.getDoubleValue() + "\n");
                     break;
                 case STRING:
-                    sb.append("flow_variables['v_" + escapedName + "'] = \"" + flowVariable.getStringValue() + "\"\n");
+                    sb.append(FLOW_VARIABLE_START + escapedName + FLOW_VARIABLE_END + " = \""
+                        + flowVariable.getStringValue() + "\"\n");
                     break;
                 default:
-                    sb.append("flow_variables['v_" + escapedName + "'] = \"" + flowVariable.getValueAsString() + "\"\n");
+                    sb.append(FLOW_VARIABLE_START + escapedName + FLOW_VARIABLE_END + " = \""
+                        + flowVariable.getValueAsString() + "\"\n");
                     break;
             }
         }
         sb.append("\n");
         try {
-        GuardedSection guardedFLow = getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES);
-        guardedFLow.setText(sb.toString());
-        }catch(BadLocationException ex) {
+            final GuardedSection guardedFLow = getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES);
+            guardedFLow.setText(sb.toString());
+        } catch (final BadLocationException ex) {
             //Should never happen
             throw new IllegalStateException(ex);
         }

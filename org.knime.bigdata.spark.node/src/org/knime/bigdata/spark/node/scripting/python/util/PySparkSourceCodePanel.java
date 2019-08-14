@@ -25,7 +25,6 @@ import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Exchanger;
@@ -33,8 +32,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
@@ -75,33 +77,48 @@ import org.knime.python2.kernel.messaging.PythonKernelResponseHandler;
 public class PySparkSourceCodePanel extends SourceCodePanel {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(PySparkSourceCodePanel.class);
+
     private static final long serialVersionUID = 1821218187292351246L;
+
     private static final String VALIDATE_ON_CLUSTER = "Validate on Cluster";
+
     private static final int DEFAULT_VALIADTE_ROW_COUNT = 50;
-    private HashMap<String, FlowVariable> m_usedFlowVariables = new HashMap<>();
+
+    private final Map<String, String> m_usedFlowVariableNames = new HashMap<>();
+
     private final JButton m_validate = new JButton(VALIDATE_ON_CLUSTER);
-    private JButton m_cancel = new JButton("Cancel");
+
+    private final JButton m_cancel = new JButton("Cancel");
+
     private PortObject[] m_input;
-    private SettingsModelInteger m_rowcount = new SettingsModelInteger("RowCount", DEFAULT_VALIADTE_ROW_COUNT);
+
+    private final SettingsModelInteger m_rowcount = new SettingsModelInteger("RowCount", DEFAULT_VALIADTE_ROW_COUNT);
+
     private PythonKernelOptions m_kernelOptions = new PythonKernelOptions();
+
     private final Lock m_lock = new ReentrantLock();
+
     private ExecutionMonitor m_exec;
+
     private PythonKernelManager m_kernelManager;
+
+    private String m_warningMessage = "";
+
     /**
      * Creates a PySparkSourceCode Panel for the given variables
      *
      * @param variableNames the variables names
      * @param pySparkDocument the document to display
      */
-    public PySparkSourceCodePanel(final VariableNames variableNames, final PySparkDocument pySparkDocument){
+    public PySparkSourceCodePanel(final VariableNames variableNames, final PySparkDocument pySparkDocument) {
         super(SyntaxConstants.SYNTAX_STYLE_PYTHON, variableNames);
         getEditor().setDocument(pySparkDocument);
-        NumberFormat format = NumberFormat.getIntegerInstance();
+        final NumberFormat format = NumberFormat.getIntegerInstance();
         format.setParseIntegerOnly(true);
         format.setMaximumIntegerDigits(4);
         format.setMinimumIntegerDigits(1);
-        DialogComponentNumberEdit rowCount =
-                new DialogComponentNumberEdit(m_rowcount, "Number of rows to validate on", 5);
+        final DialogComponentNumberEdit rowCount =
+            new DialogComponentNumberEdit(m_rowcount, "Number of rows to validate on", 5);
         m_editorButtons.removeAll();
         m_editorButtons.add(m_cancel);
         m_cancel.setVisible(false);
@@ -113,13 +130,13 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
              */
             @Override
             public void actionPerformed(final ActionEvent e) {
-                    m_validate.setEnabled(false);
-                    m_validate.setText("Executing job on cluster");
-                    m_cancel.setVisible(true);
-                    m_editorButtons.revalidate();
+                m_validate.setEnabled(false);
+                m_validate.setText("Executing job on cluster");
+                m_cancel.setVisible(true);
+                m_editorButtons.revalidate();
 
-                    Thread t = new Thread(new Executer());
-                    t.start();
+                final Thread t = new Thread(new Executer());
+                t.start();
             }
         });
 
@@ -130,59 +147,51 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
             @Override
             public void actionPerformed(final ActionEvent e) {
 
-                   m_exec.getProgressMonitor().setExecuteCanceled();
+                m_exec.getProgressMonitor().setExecuteCanceled();
 
             }
         });
 
-        if(m_input == null) {
+        if (m_input == null) {
             setInteractive(false);
             m_validate.setEnabled(false);
         }
         showWorkspacePanel(false);
 
-        int foldCount = getEditor().getFoldManager().getFoldCount();
-        for (int i = 0; i < foldCount; i++) {
-            Fold fold = getEditor().getFoldManager().getFold(i);
-            fold.setCollapsed(true);
-        }
+        collapsFolds();
     }
 
-
-
-
-
-    private class Executer implements Runnable{
+    private class Executer implements Runnable {
         /**
          * {@inheritDoc}
          */
         @Override
         public void run() {
-            int outCount = getVariableNames().getOutputObjects().length;
-            PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
+            final int outCount = getVariableNames().getOutputObjects().length;
+            final PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
             PortObject[] outObj = {};
-            if(m_input == null) {
+            if (m_input == null) {
                 errorToConsole("No input data available");
-            }else {
+            } else {
 
                 try {
-                   m_exec = new ExecutionMonitor();
+                    m_exec = new ExecutionMonitor();
                     outObj = PySparkNodeModel.executeScript(m_input, m_input.length, outCount, doc, m_exec,
                         m_rowcount.getIntValue());
-                } catch (PySparkOutRedirectException e) {
+                } catch (final PySparkOutRedirectException e) {
                     messageToConsole(e.getMessage());
-                 }catch (Exception e) {
-                     String message = e.getMessage();
-                   try {
-                       m_exec.checkCanceled();
-                   }catch (CanceledExecutionException ce){
-                       message = "Execution Canceled.";
-                   }
-                   errorToConsole(message);
+                } catch (final Exception e) {
+                    String message = e.getMessage();
+                    try {
+                        m_exec.checkCanceled();
+                    } catch (final CanceledExecutionException ce) {
+                        message = "Execution Canceled.";
+                    }
+                    errorToConsole(message);
                 }
             }
-            for(PortObject ob : outObj) {
-                SparkDataPortObject sparkObj = (SparkDataPortObject)ob;
+            for (final PortObject ob : outObj) {
+                final SparkDataPortObject sparkObj = (SparkDataPortObject)ob;
 
                 messageToConsole(sparkObj.getTableSpec().toString() + "\n");
             }
@@ -197,16 +206,27 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
         }
 
     }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void open() {
         super.open();
-        if(m_kernelManager == null) {
+        if (m_kernelManager == null) {
             setStatusMessage("Starting local python for autocompletion...");
             startKernelManagerAsync();
         }
+        if(!m_warningMessage.isEmpty() ) {
+            showWarning();
+        }
+    }
+
+
+
+    private void showWarning() {
+        JOptionPane.showMessageDialog(null, m_warningMessage, "Flow variable warning", JOptionPane.WARNING_MESSAGE);
+        errorToConsole(m_warningMessage);
     }
 
     /**
@@ -215,7 +235,7 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
     @Override
     public void close() {
         super.close();
-        if(m_kernelManager != null) {
+        if (m_kernelManager != null) {
             m_kernelManager.close();
         }
         m_kernelManager = null;
@@ -227,31 +247,33 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
     @Override
     protected void runExec(final String sourceCode) {
 
-        int outCount = getVariableNames().getOutputObjects().length;
-        PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
+        final int outCount = getVariableNames().getOutputObjects().length;
+        final PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
         PortObject[] outObj = {};
-        if(m_input == null) {
+        if (m_input == null) {
             errorToConsole("No input data available");
-        }else {
+        } else {
 
             try {
-               m_exec = new ExecutionMonitor();
+                m_exec = new ExecutionMonitor();
                 outObj = PySparkNodeModel.executeScript(m_input, m_input.length, outCount, doc, m_exec,
                     m_rowcount.getIntValue());
-            } catch (PySparkOutRedirectException e) {
+            } catch (final PySparkOutRedirectException e) {
                 messageToConsole(e.getMessage());
-             }catch (Exception e) {
-               errorToConsole(e.getMessage());
+            } catch (final Exception e) {
+                errorToConsole(e.getMessage());
             }
         }
-        for(PortObject ob : outObj) {
-            SparkDataPortObject sparkObj = (SparkDataPortObject)ob;
-
-            messageToConsole(sparkObj.getTableSpec().toString() + "\n");
-        }
+        printTableSpecsToConsol(outObj);
 
     }
 
+    private void printTableSpecsToConsol(final PortObject[] outObj) {
+        for (final PortObject ob : outObj) {
+            final SparkDataPortObject sparkObj = (SparkDataPortObject)ob;
+            messageToConsole(sparkObj.getTableSpec().toString() + "\n");
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -282,32 +304,33 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
 
         if (m_kernelManager != null) {
 
-            final Exchanger<List<Completion>> exchanger = new Exchanger<List<Completion>>();
+            final Exchanger<List<Completion>> exchanger = new Exchanger<>();
             final List<Completion> completionsList = new ArrayList<>();
 
-            m_kernelManager.autoComplete(sourceCode, line, column, new PythonKernelResponseHandler<List<Map<String, String>>>(){
+            m_kernelManager.autoComplete(sourceCode, line, column,
+                new PythonKernelResponseHandler<List<Map<String, String>>>() {
 
-                @Override
-                public void handleResponse(final List<Map<String, String>> response, final Exception exception) {
-                    if (exception == null) {
-                        for (final Map<String, String> completion : response) {
-                            String name = completion.get("name");
-                            final String type = completion.get("type");
-                            String doc = completion.get("doc").trim();
-                            if (type.equals("function")) {
-                                name += "()";
+                    @Override
+                    public void handleResponse(final List<Map<String, String>> response, final Exception exception) {
+                        if (exception == null) {
+                            for (final Map<String, String> completion : response) {
+                                String name = completion.get("name");
+                                final String type = completion.get("type");
+                                String doc = completion.get("doc").trim();
+                                if (type.equals("function")) {
+                                    name += "()";
+                                }
+                                doc = "<html><body><pre>" + doc.replace("\n", "<br />") + "</pre></body></html>";
+                                completionsList.add(new BasicCompletion(provider, name, type, doc));
                             }
-                            doc = "<html><body><pre>" + doc.replace("\n", "<br />") + "</pre></body></html>";
-                            completionsList.add(new BasicCompletion(provider, name, type, doc));
-                        }
-                        try {
-                            exchanger.exchange(completionsList, 2, TimeUnit.SECONDS);
-                        } catch (InterruptedException | TimeoutException e) {
-                            // Nothing to do.
+                            try {
+                                exchanger.exchange(completionsList, 2, TimeUnit.SECONDS);
+                            } catch (InterruptedException | TimeoutException e) {
+                                // Nothing to do.
+                            }
                         }
                     }
-                }
-            });
+                });
 
             try {
                 return exchanger.exchange(completions, 2, TimeUnit.SECONDS);
@@ -319,81 +342,116 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
         return completions;
     }
 
-
     /**
      * {@inheritDoc}
      */
     @Override
     protected String createVariableAccessString(final String variable, final String field) {
+
         if (variable.equalsIgnoreCase(getVariableNames().getFlowVariables())) {
-            Iterator<FlowVariable> flowVariablesIter = getFlowVariables().iterator();
-            while (flowVariablesIter.hasNext()) {
-                FlowVariable flowV = flowVariablesIter.next();
-                if (flowV.getName().equalsIgnoreCase(field)) {
-                    m_usedFlowVariables.put(field, flowV);
-                    break;
+            final String escapedName = VariableNameUtil.escapeName(field);
+            if (!m_usedFlowVariableNames.containsKey(escapedName)) {
+                m_usedFlowVariableNames.put(escapedName, field);
+            } else {
+                if (!m_usedFlowVariableNames.get(escapedName).equals(field)) {
+                    errorToConsole(String.format(
+                        "The escaped name %s for the flowvariable %s already exists. Please rename the variable.",
+                        escapedName, field));
+                    return "";
                 }
             }
-           writeFlowVariables();
-            return "flow_variables['v_" + field.replaceAll("[^A-Za-z0-9_]", "_") + "']";
+            writeFlowVariables();
+            return PySparkDocument.FLOW_VARIABLE_START + VariableNameUtil.escapeName(field)
+                + PySparkDocument.FLOW_VARIABLE_END;
         } else {
-
             return String.format("%s.col('%s')", variable, field);
         }
     }
 
     @Override
     public void updateFlowVariables(final FlowVariable[] flowVariables) {
-        for (FlowVariable flowV : flowVariables) {
-            if (m_usedFlowVariables.containsKey(flowV.getName())) {
-                m_usedFlowVariables.put(flowV.getName(), flowV);
-            }
-        }
-        writeFlowVariables();
         super.updateFlowVariables(flowVariables);
+        writeFlowVariables();
     }
 
     private void writeFlowVariables() {
-        final FlowVariable[] variables =
-            m_usedFlowVariables.values().toArray(new FlowVariable[m_usedFlowVariables.size()]);
-        if(variables.length > 0) {
+
+        final FlowVariable[] usedFlowVariables = getUsedFlowVariables();
+
+        if (usedFlowVariables.length != 0) {
             final PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
-            doc.writeFlowVariables(variables);
+            doc.writeFlowVariables(usedFlowVariables);
             getEditor().setDocument(doc);
         }
     }
 
+    private FlowVariable[] getUsedFlowVariables() {
+        final List<FlowVariable> currentVariables = getFlowVariables();
+
+        final List<Object> variables = currentVariables.stream().filter(new Predicate<FlowVariable>() {
+
+            @Override
+            public boolean test(final FlowVariable f) {
+                return m_usedFlowVariableNames.values().contains(f.getName());
+            }
+
+        }).collect(Collectors.toList());
+        return variables.toArray(new FlowVariable[variables.size()]);
+    }
+
     @Override
     public void saveSettingsTo(final SourceCodeConfig config) throws InvalidSettingsException {
-        PySparkNodeConfig pySparkConfig = (PySparkNodeConfig)config;
+        final PySparkNodeConfig pySparkConfig = (PySparkNodeConfig)config;
         pySparkConfig.setDoc((PySparkDocument)getEditor().getDocument());
+        pySparkConfig.setUsedFlowVariablesNames(
+            m_usedFlowVariableNames.values().toArray(new String[m_usedFlowVariableNames.size()]));
     }
 
     @Override
     public void loadSettingsFrom(final SourceCodeConfig config, final PortObjectSpec[] specs)
         throws NotConfigurableException {
         getEditor().setDocument(((PySparkNodeConfig)config).getDoc());
-        int foldCount = getEditor().getFoldManager().getFoldCount();
+        collapsFolds();
+        final List<DataTableSpec> tableSpecs = getTableSpecList(specs);
+        updateSpec(tableSpecs.toArray(new DataTableSpec[tableSpecs.size()]));
+
+        final String[] usedVariables = ((PySparkNodeConfig)config).getUsedFlowVariablesNames();
+        if (usedVariables.length != 0) {
+            m_usedFlowVariableNames.clear();
+            for (final String var : usedVariables) {
+                m_usedFlowVariableNames.put(VariableNameUtil.escapeName(var), var);
+            }
+
+            writeFlowVariables();
+        }
+    }
+
+    private void collapsFolds() {
+        final int foldCount = getEditor().getFoldManager().getFoldCount();
         for (int i = 0; i < foldCount; i++) {
-            Fold fold = getEditor().getFoldManager().getFold(i);
+            final Fold fold = getEditor().getFoldManager().getFold(i);
             fold.setCollapsed(true);
         }
+    }
+
+    private static List<DataTableSpec> getTableSpecList(final PortObjectSpec[] specs) {
         final List<DataTableSpec> tableSpecs = new ArrayList<>();
         for (final PortObjectSpec spec : specs) {
             if (spec instanceof SparkDataPortObjectSpec) {
                 tableSpecs.add(((SparkDataPortObjectSpec)spec).getTableSpec());
             }
         }
-        updateSpec(tableSpecs.toArray(new DataTableSpec[tableSpecs.size()]));
+        return tableSpecs;
     }
 
     /**
      * Updates the data for the validation
+     *
      * @param input the input data
      */
     public void updatePortObjects(final PortObject[] input) {
 
-        boolean active = (input != null);
+        final boolean active = (input != null);
         m_input = input != null ? input.clone() : null;
         setInteractive(active);
         m_validate.setEnabled(active);
@@ -452,11 +510,18 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
         }).start();
     }
 
-
     /**
      * @param pySparkPath the pySpark path to set
      */
     public void setPySparkPath(final String pySparkPath) {
         m_kernelOptions = m_kernelOptions.forExternalCustomPath(pySparkPath);
     }
+
+    /**
+     * @param warningMessage the warningMessage to set
+     */
+    public void setWarningMessage(final String warningMessage) {
+        m_warningMessage = warningMessage;
+    }
+
 }
