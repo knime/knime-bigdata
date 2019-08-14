@@ -48,6 +48,7 @@
 package org.knime.bigdata.spark.node.scripting.python;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -57,6 +58,7 @@ import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.scripting.python.util.FlowVariableCleaner;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkDocument;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkHelper;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkHelperRegistry;
@@ -76,7 +78,7 @@ import org.knime.core.node.workflow.FlowVariable;
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class PySparkNodeDialog extends DataAwareNodeDialogPane{
+public class PySparkNodeDialog extends DataAwareNodeDialogPane {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(PySparkNodeDialog.class);
 
@@ -86,9 +88,9 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
 
     private SparkVersion m_sparkVersion;
 
-    private int m_inCount;
+    private final int m_inCount;
 
-    private int m_outCount;
+    private final int m_outCount;
 
     /**
      * Create a new Dialog.
@@ -110,7 +112,7 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_sourceCodePanel.saveSettingsTo(m_config);
-        PySparkHelper helper = getHelper();
+        final PySparkHelper helper = getHelper();
         helper.checkUDF((PySparkDocument)m_config.getDoc(), m_outCount);
         m_config.saveTo(settings);
 
@@ -122,6 +124,25 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
+
+        setSparkVersion(specs);
+        final PySparkHelper helper = getHelper();
+        setPySparkPath(helper);
+
+        final PySparkNodeConfig config = new PySparkNodeConfig(m_inCount, m_outCount, helper);
+        config.loadFromInDialog(settings);
+
+
+        cleanAndUpdateFlowVariables(config);
+
+        m_sourceCodePanel.loadSettingsFrom(config, specs);
+        config.setDoc((PySparkDocument)m_sourceCodePanel.getEditor().getDocument());
+        m_config = config;
+        m_sourceCodePanel.updatePortObjects(null);
+
+    }
+
+    private void setSparkVersion(final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs == null || specs.length < 1 || specs[0] == null) {
             m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
             if (!PySparkHelperRegistry.getInstance().supportsVersion(m_sparkVersion)) {
@@ -132,21 +153,24 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
         } else {
             m_sparkVersion = SparkContextUtil.getSparkVersion(((SparkContextProvider)specs[0]).getContextID());
         }
-        PySparkHelper helper = getHelper();
+    }
+
+    private void setPySparkPath(final PySparkHelper helper) {
         try {
             m_sourceCodePanel.setPySparkPath(helper.getLocalPySparkPath());
-        } catch (IOException e) {
-           LOGGER.error("Could not obtain PySpark path.", e);
+        } catch (final IOException e) {
+            LOGGER.error("Could not obtain PySpark path.", e);
         }
-        PySparkNodeConfig config = new PySparkNodeConfig(m_inCount, m_outCount, helper);
-        config.loadFromInDialog(settings);
-        m_sourceCodePanel.loadSettingsFrom(config, specs);
+    }
+
+    private void cleanAndUpdateFlowVariables(final PySparkNodeConfig config) {
+        final String warningMessage =
+            FlowVariableCleaner.cleanFlowVariables(config, new ArrayList<>(getAvailableFlowVariables().values()));
+        if (!warningMessage.isEmpty()) {
+            m_sourceCodePanel.setWarningMessage(warningMessage);
+        }
         m_sourceCodePanel.updateFlowVariables(
             getAvailableFlowVariables().values().toArray(new FlowVariable[getAvailableFlowVariables().size()]));
-        config.setDoc((PySparkDocument)m_sourceCodePanel.getEditor().getDocument());
-        m_config = config;
-        m_sourceCodePanel.updatePortObjects(null);
-
     }
 
     private PySparkHelper getHelper() {
@@ -157,8 +181,8 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
-        final PortObject[] input) throws NotConfigurableException {
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObject[] input)
+        throws NotConfigurableException {
         final PortObjectSpec[] specs = new PortObjectSpec[input.length];
         for (int i = 0; i < specs.length; i++) {
             specs[i] = input[i] == null ? null : input[i].getSpec();
@@ -166,6 +190,7 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
         loadSettingsFrom(settings, specs);
         m_sourceCodePanel.updatePortObjects(input);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -179,7 +204,7 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
      */
     @Override
     public void onOpen() {
-        RSyntaxTextArea editor = m_sourceCodePanel.getEditor();
+        final RSyntaxTextArea editor = m_sourceCodePanel.getEditor();
         editor.requestFocus();
         editor.requestFocusInWindow();
         // reset style which causes a recreation of the popup window with
@@ -187,10 +212,10 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
         editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
         editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
         // collapse all folds
-        FoldManager foldManager = editor.getFoldManager();
-        int foldCount = foldManager.getFoldCount();
+        final FoldManager foldManager = editor.getFoldManager();
+        final int foldCount = foldManager.getFoldCount();
         for (int i = 0; i < foldCount; i++) {
-            Fold fold = foldManager.getFold(i);
+            final Fold fold = foldManager.getFold(i);
             fold.setCollapsed(true);
         }
         m_sourceCodePanel.open();

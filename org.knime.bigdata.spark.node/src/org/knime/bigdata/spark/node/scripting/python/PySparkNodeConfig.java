@@ -48,6 +48,10 @@
 
 package org.knime.bigdata.spark.node.scripting.python;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.text.BadLocationException;
 
 import org.knime.bigdata.spark.node.scripting.python.util.DefaultPySparkHelper;
@@ -70,6 +74,10 @@ public class PySparkNodeConfig extends SourceCodeConfig {
 
     private PySparkHelper m_helper;
 
+    private String[] m_usedFlowVariablesNames = new String[0];
+
+    private List<String> m_oldEscapedFlowVariablesNames = new ArrayList<>();
+
     private int m_inCount;
 
     private int m_outCount;
@@ -81,6 +89,14 @@ public class PySparkNodeConfig extends SourceCodeConfig {
     private static final String CFG_GLOBALS = "pyglobals";
 
     private static final String CFG_VARIABLES = "flowvar";
+
+    private static final String CFG_USED_VARIABLES = "used_flowvar";
+
+    private static final String CFG_OLD_VARIABLES = "old_flowvar";
+
+    private static final String VARIABLE_START = PySparkDocument.FLOW_VARIABLE_START;
+
+    private static final String VARIABLE_END = PySparkDocument.FLOW_VARIABLE_END;
 
     /**
      * Creates a new configuration for the PySpark nodes
@@ -105,13 +121,13 @@ public class PySparkNodeConfig extends SourceCodeConfig {
      * @param outCount the number of outputs
      */
     public PySparkNodeConfig(final int inCount, final int outCount) {
-        PySparkDocument guardedDoc = new PySparkDocument();
+        final PySparkDocument guardedDoc = new PySparkDocument();
         createVariableNames(inCount, outCount);
         try {
             //set default UDF
             guardedDoc.replaceBetween(PySparkDocument.GUARDED_BODY_START, PySparkDocument.GUARDED_BODY_END,
                 DefaultPySparkHelper.createDefaultUDFSection(inCount, outCount));
-        } catch (BadLocationException ex) {
+        } catch (final BadLocationException ex) {
             //should never happen
             throw new IllegalStateException(ex.getMessage(), ex);
         }
@@ -132,28 +148,30 @@ public class PySparkNodeConfig extends SourceCodeConfig {
         return m_variableNames;
     }
 
-
     @Override
     public void saveTo(final NodeSettingsWO settings) {
-        PySparkDocument guardedDoc = (PySparkDocument) getDoc();
+        final PySparkDocument guardedDoc = (PySparkDocument)getDoc();
         try {
-            String imports =
+            final String imports =
                 guardedDoc.getTextBetween(PySparkDocument.GUARDED_IMPORTS, PySparkDocument.GUARDED_FLOW_VARIABLES);
             settings.addString(CFG_IMPORT, imports);
-            String globals =
+            final String globals =
                 guardedDoc.getTextBetween(PySparkDocument.GUARDED_FLOW_VARIABLES, PySparkDocument.GUARDED_BODY_START);
             settings.addString(CFG_GLOBALS, globals);
-            String udf =
+            final String udf =
                 guardedDoc.getTextBetween(PySparkDocument.GUARDED_BODY_START, PySparkDocument.GUARDED_BODY_END);
             settings.addString(CFG_UDF, udf);
 
-            String flowVariables = guardedDoc.getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES).getText();
+            final String flowVariables = guardedDoc.getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES).getText();
             settings.addString(CFG_VARIABLES, flowVariables);
 
-        } catch (BadLocationException ex) {
+        } catch (final BadLocationException ex) {
             // this should never happen
             throw new IllegalStateException(ex);
         }
+        settings.addStringArray(CFG_USED_VARIABLES, m_usedFlowVariablesNames);
+        settings.addStringArray(CFG_OLD_VARIABLES,
+            m_oldEscapedFlowVariablesNames.toArray(new String[m_oldEscapedFlowVariablesNames.size()]));
     }
 
     /**
@@ -164,7 +182,7 @@ public class PySparkNodeConfig extends SourceCodeConfig {
      */
     @Override
     public void loadFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        PySparkDocument guardedDoc = (PySparkDocument) getDoc();
+        final PySparkDocument guardedDoc = (PySparkDocument)getDoc();
         try {
             guardedDoc.replaceBetween(PySparkDocument.GUARDED_IMPORTS, PySparkDocument.GUARDED_FLOW_VARIABLES,
                 settings.getString(CFG_IMPORT));
@@ -174,9 +192,16 @@ public class PySparkNodeConfig extends SourceCodeConfig {
                 settings.getString(CFG_UDF));
             guardedDoc.getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES)
                 .setText(settings.getString(CFG_VARIABLES));
-        } catch (BadLocationException e) {
+        } catch (final BadLocationException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+
+        m_oldEscapedFlowVariablesNames.clear();
+        if (settings.containsKey(CFG_OLD_VARIABLES)) {
+            m_oldEscapedFlowVariablesNames.addAll(Arrays.asList(settings.getStringArray(CFG_OLD_VARIABLES)));
+        }
+        setUsedFlowVariables(settings);
+
     }
 
     /**
@@ -186,7 +211,7 @@ public class PySparkNodeConfig extends SourceCodeConfig {
      */
     @Override
     public void loadFromInDialog(final NodeSettingsRO settings) {
-        PySparkDocument guardedDoc = (PySparkDocument) getDoc();
+        final PySparkDocument guardedDoc = (PySparkDocument)getDoc();
         try {
             guardedDoc.replaceBetween(PySparkDocument.GUARDED_IMPORTS, PySparkDocument.GUARDED_FLOW_VARIABLES,
                 settings.getString(CFG_IMPORT, "\n#Custom imports\n"));
@@ -196,8 +221,78 @@ public class PySparkNodeConfig extends SourceCodeConfig {
                 settings.getString(CFG_UDF, DefaultPySparkHelper.createDefaultUDFSection(m_inCount, m_outCount)));
             guardedDoc.getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES)
                 .setText(settings.getString(CFG_VARIABLES, "#Flowvariables\n"));
-        } catch (BadLocationException e) {
+        } catch (final BadLocationException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+        m_oldEscapedFlowVariablesNames.clear();
+        m_oldEscapedFlowVariablesNames.addAll(Arrays.asList(settings.getStringArray(CFG_OLD_VARIABLES, new String[0])));
+
+        setUsedFlowVariables(settings);
     }
+
+    private void setUsedFlowVariables(final NodeSettingsRO settings) {
+        m_usedFlowVariablesNames = settings.getStringArray(CFG_USED_VARIABLES, new String[0]);
+        if (m_usedFlowVariablesNames.length == 0) {
+            final String flowVariables = settings.getString(CFG_VARIABLES, "#Flowvariables\n");
+            final String udf = settings.getString(CFG_UDF, "");
+            //Old implementation missed to save the used variables separately.
+            //So we parse them from the document string here.
+            if (m_oldEscapedFlowVariablesNames.isEmpty() && flowVariables.contains(VARIABLE_START)) {
+                parseFlowVariablesFromDocument(flowVariables, udf);
+            }
+        }
+    }
+
+    private void parseFlowVariablesFromDocument(final String flowVariables, final String udf) {
+
+        int i;
+        String remainingString = flowVariables;
+
+        while ((i = remainingString.indexOf(VARIABLE_START)) != -1) {
+            final int end = remainingString.indexOf(VARIABLE_END);
+            final String escapedName =
+                remainingString.substring(i + VARIABLE_START.length(), remainingString.indexOf(VARIABLE_END));
+            if (udf.contains(VARIABLE_START + escapedName + VARIABLE_END)) {
+                m_oldEscapedFlowVariablesNames.add(escapedName);
+            }
+            remainingString = remainingString.substring(end + 1);
+        }
+
+    }
+
+    /**
+     * @return the usedFlowVariablesNames
+     */
+    public String[] getUsedFlowVariablesNames() {
+        return m_usedFlowVariablesNames;
+    }
+
+    /**
+     * @param usedFlowVariablesNames the usedFlowVariables to set
+     */
+    public void setUsedFlowVariablesNames(final String[] usedFlowVariablesNames) {
+        m_usedFlowVariablesNames = usedFlowVariablesNames;
+    }
+
+    /**
+     * @return whether all old FlowVariables have been cleaned
+     */
+    public boolean flowVariablesFullyCleaned() {
+        return m_oldEscapedFlowVariablesNames.isEmpty();
+    }
+
+    /**
+     * @return the oldEscapedFlowVariablesNames
+     */
+    public List<String> getOldEscapedFlowVariablesNames() {
+        return m_oldEscapedFlowVariablesNames;
+    }
+
+    /**
+     * @param oldEscapedFlowVariablesNames the oldEscapedFlowVariablesNames to set
+     */
+    public void setOldEscapedFlowVariablesNames(final List<String> oldEscapedFlowVariablesNames) {
+        m_oldEscapedFlowVariablesNames = oldEscapedFlowVariablesNames;
+    }
+
 }
