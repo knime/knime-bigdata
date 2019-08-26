@@ -9,6 +9,10 @@
          version="0.0.0"/>
 
    <includes
+         id="org.knime.features.bigdata.databricks"
+         version="0.0.0"/>
+
+   <includes
          id="org.knime.features.bigdata.spark"
          version="0.0.0"/>
 

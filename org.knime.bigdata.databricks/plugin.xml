@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <extension point="org.knime.base.filehandling.RemoteFileHandler">
+     <RemoteFileHandler
+         RemoteFileHandler="org.knime.bigdata.dbfs.filehandler.DBFSRemoteFileHandler">
+     </RemoteFileHandler>
+  </extension>
+
+  <extension point="org.knime.workbench.repository.nodes">
+     <node
+         category-path="/io/filehandling/remote/connections"
+         factory-class="org.knime.bigdata.dbfs.node.connector.DBFSConnectionInformationNodeFactory">
+     </node>
+  </extension>
+</plugin>

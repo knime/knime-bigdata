@@ -59,6 +59,8 @@
 		<module>../knime-orc/org.knime.features.orc</module>
 
 		<module>org.knime.bigdata.commons</module>
+		<module>org.knime.bigdata.database</module>
+		<module>org.knime.bigdata.databricks</module>
 		<module>org.knime.bigdata.fileformats</module>
 		<module>org.knime.bigdata.filehandling</module>
 		<module>org.knime.bigdata.hive</module>
@@ -81,6 +83,7 @@
 		<module>org.knime.bigdata.spark2_4</module>
 		<module>org.knime.bigdata.testing</module>
 		<module>org.knime.features.bigdata.connectors</module>
+		<module>org.knime.features.bigdata.databricks</module>
 		<module>org.knime.features.bigdata.externals</module>
 		<module>org.knime.features.bigdata.fileformats</module>
 		<module>org.knime.features.bigdata.spark</module>

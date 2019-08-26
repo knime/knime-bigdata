@@ -41,6 +41,11 @@ public enum SparkContextIDScheme {
     SPARK_LIVY("sparkLivy"),
 
     /**
+     * Scheme for Spark Databricks-specific {@link SparkContextID}s.
+     */
+    SPARK_DATABRICKS("sparkDatabricks"),
+
+    /**
      * Scheme for local Spark-specific {@link SparkContextID}s.
      */
     SPARK_LOCAL("sparkLocal");

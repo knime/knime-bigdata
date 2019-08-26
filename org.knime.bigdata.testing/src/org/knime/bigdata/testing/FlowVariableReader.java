@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,8 +126,28 @@ public class FlowVariableReader {
                     && flowVariables.get(TestflowVariable.SPARK_SJS_AUTHMETHOD.getName()).getStringValue()
                         .equalsIgnoreCase("CREDENTIALS");
             addCredentialsFlowVariable("spark.sjs", sparkUseCredentials, true, flowVariables);
+
+        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_LIVY.toString(), flowVariables)) {
+
+            addSchemeHostAndPortVariable(TestflowVariable.SPARK_LIVY_URL, flowVariables);
+
+        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_DATABRICKS.toString(), flowVariables)) {
+
+            addSchemeHostAndPortVariable(TestflowVariable.SPARK_DATABRICKS_URL, flowVariables);
+
+            if (has(TestflowVariable.SPARK_DATABRICKS_TOKEN, flowVariables)) {
+                addCredentialsTokenFlowVariable("spark.databricks", true, "token", flowVariables);
+            } else {
+                addCredentialsFlowVariable("spark.databricks", true, true, flowVariables);
+            }
+
+        } else if (has(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables)) {
+            throw new IllegalArgumentException("Unknown spark scheme: "
+                + flowVariables.get(TestflowVariable.SPARK_CONTEXTIDSCHEME.getName()).getStringValue());
         }
-        
+
         return flowVariables;
     }
     
@@ -178,8 +200,6 @@ public class FlowVariableReader {
         // Spark is optional, but if Spark scheme is defined, everything must be defined.
         if (has(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables)) {
             ensureHas(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables);
-            ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
-            ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
         
             if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
                 SparkContextIDScheme.SPARK_LOCAL.toString(), flowVariables)) {
@@ -194,6 +214,8 @@ public class FlowVariableReader {
                 if (TestflowVariable.isTrue(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables)) {
                     ensureHas(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
                 }
+                ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
             } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
                 SparkContextIDScheme.SPARK_JOBSERVER.toString(), flowVariables)) {
                 
@@ -206,6 +228,8 @@ public class FlowVariableReader {
                     ensureHas(TestflowVariable.SPARK_SJS_PASSWORD, flowVariables);
                     ensureHas(TestflowVariable.SPARK_SJS_RECEIVETIMEOUT, flowVariables);
                 }
+                ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
             } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
                 SparkContextIDScheme.SPARK_LIVY.toString(), flowVariables)) {
                 
@@ -218,6 +242,29 @@ public class FlowVariableReader {
                 }
                 ensureHas(TestflowVariable.SPARK_LIVY_CONNECTTIMEOUT, flowVariables);
                 ensureHas(TestflowVariable.SPARK_LIVY_RESPONSETIMEOUT, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
+            } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+                SparkContextIDScheme.SPARK_DATABRICKS.toString(), flowVariables)) {
+
+                ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_URL, flowVariables);
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_CLUSTER_ID, flowVariables);
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_AUTHMETHOD, flowVariables);
+                if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_DATABRICKS_AUTHMETHOD, "TOKEN", flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_DATABRICKS_TOKEN, flowVariables);
+                } else if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_DATABRICKS_AUTHMETHOD, "USER_PWD", flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_DATABRICKS_USERNAME, flowVariables);
+                    ensureHas(TestflowVariable.SPARK_DATABRICKS_PASSWORD, flowVariables);
+                } else {
+                    throw new IllegalArgumentException("Invalid databricks authentication method.");
+                }
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, flowVariables);
+                if (TestflowVariable.isTrue(TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_DATABRICKS_STAGINGAREAFOLDER, flowVariables);
+                }
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_CONNECTIONTIMEOUT, flowVariables);
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_RECEIVETIMEOUT, flowVariables);
             }
         }
 
@@ -276,6 +323,54 @@ public class FlowVariableReader {
         flowVariables.put(credsNameVar, new FlowVariable(credsNameVar, credsVar));
         flowVariables.put(credsVar,
             CredentialsStore.newCredentialsFlowVariable(credsVar, username, password, false, false));
+    }
+
+    /**
+     * Create a [prefix].credentials and [prefix].credentialsName flow variable with given token variable.
+     *
+     * @param prefix databricks/...
+     * @param realCredentials create real or dummy credentials (username might be empty in this case)
+     * @param username username to use
+     * @param flowVariables map with all flow variables
+     * @throws Exception if username or password missing
+     */
+    private static void addCredentialsTokenFlowVariable(final String prefix, final boolean realCredentials,
+        final String username, final Map<String, FlowVariable> flowVariables) throws Exception {
+
+        final String credsVar = prefix + ".credentials";
+        final String credsNameVar = prefix + ".credentialsName";
+        final String tokenVar = prefix + ".token";
+
+        String password = "dummy";
+        if (realCredentials) {
+            if (!flowVariables.containsKey(tokenVar)) {
+                throw new IllegalArgumentException("Missing flow variable definition in csv for credentials: " + tokenVar);
+            }
+            password = flowVariables.get(tokenVar).getStringValue();
+        }
+        flowVariables.put(tokenVar, new FlowVariable(tokenVar, password));
+
+        flowVariables.put(credsNameVar, new FlowVariable(credsNameVar, credsVar));
+        flowVariables.put(credsVar,
+            CredentialsStore.newCredentialsFlowVariable(credsVar, username, password, false, false));
+    }
+
+    /**
+     * Create a [prefix].scheme/hostname/port flow variable from url variable.
+     *
+     * @param flowVar Variable contains an URL. Used as prefix in [prefix].scheme/hostname/port.
+     * @param flowVariables map with all flow variables
+     */
+    private static void addSchemeHostAndPortVariable(final TestflowVariable flowVar, Map<String, FlowVariable> flowVariables) {
+        try {
+            final String prefix = flowVar.getName();
+            final URI url = new URI(flowVariables.get(prefix).getStringValue());
+            flowVariables.put(prefix + ".scheme", new FlowVariable(prefix + ".scheme", url.getScheme()));
+            flowVariables.put(prefix + ".hostname", new FlowVariable(prefix + ".hostname", url.getHost()));
+            flowVariables.put(prefix + ".port", new FlowVariable(prefix + ".port", url.getPort()));
+        } catch (final URISyntaxException e) {
+            throw new IllegalArgumentException("Unable to parse URL from " + flowVar.getName() + ": " + e.getMessage(), e);
+        }
     }
 
     /**

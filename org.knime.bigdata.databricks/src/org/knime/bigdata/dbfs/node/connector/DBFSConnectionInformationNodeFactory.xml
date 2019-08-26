@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
+    icon="./dbfsconnection16x16.png" type="Source">
+    <name>Databricks File System Connection</name>
+
+    <shortDescription>
+        Configures a connection to the Databricks File System (DBFS) of a Databricks deployment.
+    </shortDescription>
+
+    <fullDescription>
+        <intro>
+            This node configures the connection information that will be used to
+            connect to the Databricks File System (DBFS) of a Databricks deployment.
+        </intro>
+
+        <option name="Host">
+            Full domain name of the Databricks deployment,
+            <i>&lt;account&gt;.cloud.databricks.com</i> on AWS or
+            <i>&lt;region&gt;.azuredatabricks.net</i> on Azure. 
+        </option>
+        <option name="Port">
+            Port to use. Should be 443 on most deployments.
+        </option>
+        <option name="Workflow credentials">
+            Use workflow credentials to determine user and password or token.
+        </option>
+        <option name="User">
+            Name of the user.
+        </option>
+        <option name="Password">
+            Password to use.
+        </option>
+        <option name="Token">
+            Token to use.
+        </option>
+    </fullDescription>
+
+    <ports>
+        <outPort name="DBFS Connection information port" index="0">
+            Port object containing the DBFS connection information.
+        </outPort>
+    </ports>
+</knimeNode>

@@ -3,6 +3,8 @@
 
    <feature id="org.knime.features.bigdata.connectors" />
 
+   <feature id="org.knime.features.bigdata.databricks" />
+
    <feature id="org.knime.features.bigdata.spark" />
 
    <feature id="org.knime.features.bigdata.spark.local" />

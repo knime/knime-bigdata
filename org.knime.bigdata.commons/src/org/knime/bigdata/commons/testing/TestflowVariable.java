@@ -323,7 +323,83 @@ public enum TestflowVariable {
          * flow variable will be picked up for the same purpose by the "Create Big Data Test Environment" node when
          * creating a Spark context in Livy.
          */
-        SPARK_LIVY_RESPONSETIMEOUT("spark.livy.responseTimeout", Type.INT);
+        SPARK_LIVY_RESPONSETIMEOUT("spark.livy.responseTimeout", Type.INT),
+
+        /**
+         * Flow variable for the "databricksUrl" node setting of the "Create Spark Context (Databricks)" node. Also, this flow
+         * variable will be picked up for the same purpose by the "Create Big Data Test Environment" node when creating
+         * a Spark context via Databricks.
+         */
+        SPARK_DATABRICKS_URL("spark.databricks.url"),
+
+        /**
+         * Flow variable for the "cluster" node setting of the "Create Spark Context (Databricks)"
+         * node. Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test
+         * Environment" node when creating a Spark context via Databricks.
+         */
+        SPARK_DATABRICKS_CLUSTER_ID("spark.databricks.clusterId"),
+
+        /**
+         * Flow variable for the "authentication -> selectedType" node setting of the "Create Spark Context
+         * (Databricks)" node. Also, this flow variable will be picked up for the same purpose by the "Create Big Data
+         * Test Environment" node when creating a Spark context in Databricks. Possible values are: USER_PWD, TOKEN
+         *
+         * <p>
+         * A credentials flow variable called "spark.databricks.credentials" will be automatically injected. It contains
+         * the {@link #SPARK_DATABRICKS_TOKEN} or {@link #SPARK_DATABRICKS_USERNAME}/{@link #SPARK_DATABRICKS_PASSWORD}
+         * in credentials format.
+         * </p>
+         */
+        SPARK_DATABRICKS_AUTHMETHOD("spark.databricks.authMethod"),
+
+        /**
+         * Flow variable for the "token" node setting of the "Create Spark Context (Databricks)"
+         * node. Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test
+         * Environment" node when creating a Spark context via Databricks.
+         */
+        SPARK_DATABRICKS_TOKEN("spark.databricks.token"),
+
+        /**
+         * Flow variable for the "username" node setting of the "Create Spark Context (Databricks)" node.
+         * Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test Environment"
+         * node when creating a Spark Databricks Spark context.
+         */
+        SPARK_DATABRICKS_USERNAME("spark.databricks.username"),
+
+        /**
+         * Flow variable for the "password" node setting of the "Create Spark Context (Databricks)" node.
+         * Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test Environment"
+         * node when creating a Spark Databricks Spark context.
+         */
+        SPARK_DATABRICKS_PASSWORD("spark.databricks.password", Type.STRING, true),
+
+        /**
+         * Flow variable for the "setStagingAreaFolder" node setting of the "Create Spark Context (Databricks)" node. Also,
+         * this flow variable will be picked up for the same purpose by the "Create Big Data Test Environment" node when
+         * creating a Spark context via Databricks. Possible values are: true, false
+         */
+        SPARK_DATABRICKS_SETSTAGINGAREAFOLDER("spark.databricks.setStagingAreaFolder", Type.BOOLEAN),
+
+        /**
+         * Flow variable for the "stagingAreaFolder" node setting of the "Create Spark Context (Databricks)" node. Also,
+         * this flow variable will be picked up for the same purpose by the "Create Big Data Test Environment" node when
+         * creating a Spark context via Databricks.
+         */
+        SPARK_DATABRICKS_STAGINGAREAFOLDER("spark.databricks.stagingAreaFolder"),
+
+        /**
+         * Flow variable for the "connectionTimeout" node setting of the "Create Spark Context (Databricks)" node. Also, this
+         * flow variable will be picked up for the same purpose by the "Create Big Data Test Environment" node when
+         * creating a Spark context via Databricks.
+         */
+        SPARK_DATABRICKS_CONNECTIONTIMEOUT("spark.databricks.connectionTimeout", Type.INT),
+
+        /**
+         * Flow variable for the "receiveTimeout" node setting of the "Create Spark Context (Databricks)" node. Also, this
+         * flow variable will be picked up for the same purpose by the "Create Big Data Test Environment" node when
+         * creating a Spark context via Databricks.
+         */
+        SPARK_DATABRICKS_RECEIVETIMEOUT("spark.databricks.receiveTimeout", Type.INT);
 
     /**
      * Type enum for flow variables.
