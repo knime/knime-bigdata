@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spark Jobserver connector for KNIME Extension for Apache Spark
 Bundle-SymbolicName: org.knime.bigdata.spark.core.sparkjobserver;singleton:=true
-Bundle-Version: 4.0.0.qualifier
+Bundle-Version: 4.1.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.spark.core.sparkjobserver.JobserverPlugin
 Export-Package: org.knime.bigdata.spark.core.sparkjobserver.jobapi
