@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.knime.features.bigdata."
+      id="org.knime.features.bigdata.databricks"
       label="KNIME Databricks Integration"
       version="4.1.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
