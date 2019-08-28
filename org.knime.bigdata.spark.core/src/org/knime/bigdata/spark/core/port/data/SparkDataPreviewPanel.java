@@ -129,6 +129,8 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
                         errorLayout("Error fetching " + rows + " rows from Spark. For details see log file.");
                     } else {
                         m_dataTableView = new BufferedDataTableView(dataTable);
+                        // count the rows so that the JScrollPane can set the correct size (AP-12613)
+                        m_dataTableView.getTableView().countRowsInBackground();
                         defaultLayout();
                     }
 
