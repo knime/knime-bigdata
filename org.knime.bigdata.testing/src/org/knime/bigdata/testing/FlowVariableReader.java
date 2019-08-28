@@ -119,6 +119,11 @@ public class FlowVariableReader {
         }
 
         if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_LOCAL.toString(), flowVariables)) {
+
+            // no special things to do for local spark
+
+        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
             SparkContextIDScheme.SPARK_JOBSERVER.toString(), flowVariables)) {
             
             final boolean sparkUseCredentials =
