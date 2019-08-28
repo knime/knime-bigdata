@@ -38,6 +38,9 @@
         <option name="User">
             Name of the user. Optional for Kerberos authentication.
         </option>
+        <option name="Timeout">
+            Specify the timeout for the connection in milliseconds here.
+        </option>
         <option name="Test connection">
             Open dialog that test the current connection.
         </option>

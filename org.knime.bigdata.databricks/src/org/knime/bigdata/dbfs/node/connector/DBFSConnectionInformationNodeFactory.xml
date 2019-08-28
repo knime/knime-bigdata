@@ -22,8 +22,17 @@
         <option name="Port">
             Port to use. Should be 443 on most deployments.
         </option>
+        <option name="Authentication">
+            Tokens or user and password can be used for authentication. Databricks strongly recommends tokens.
+            See authentication in Databricks
+            <a href="https://docs.databricks.com/api/latest/authentication.html">AWS</a> or
+            <a href="https://docs.azuredatabricks.net/api/latest/authentication.html">Azure</a>
+            documentation for more informations about personal access token.
+        </option>
         <option name="Workflow credentials">
-            Use workflow credentials to determine user and password or token.
+            Enable the checkbox to use workflow credentials for this connection. Depending on the selected
+            authentication method (see option above), user and password are used or the password of
+            the credentials will be used as	token and the user name will be ignored.
         </option>
         <option name="User">
             Name of the user.
@@ -33,6 +42,9 @@
         </option>
         <option name="Token">
             Token to use.
+        </option>
+        <option name="Timeout">
+            Specify the timeout for the connection in milliseconds here.
         </option>
     </fullDescription>
 
