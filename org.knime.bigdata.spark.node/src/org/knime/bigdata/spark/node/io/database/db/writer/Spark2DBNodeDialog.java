@@ -30,13 +30,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.knime.bigdata.spark.node.SparkSaveMode;
+import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.workflow.FlowVariable.Type;
 import org.knime.database.node.component.dbrowser.DBTableSelectorDialogComponent;
+import org.knime.database.node.component.dbrowser.FlowVariableModelCreator;
 
 /**
  * Dialog for the Spark to JDBC node.
@@ -51,8 +54,13 @@ class Spark2DBNodeDialog extends NodeDialogPane {
     private final JComboBox<SparkSaveMode> m_saveMode;
 
     Spark2DBNodeDialog() {
-        m_table = new DBTableSelectorDialogComponent(m_settings.getSchemaAndTableModel(), 0, false, null, "Select a table",
-            "Database Metadata Browser", true);
+        m_table = new DBTableSelectorDialogComponent(m_settings.getSchemaAndTableModel(), 0, false, null,
+            "Select a table", "Database Metadata Browser", true, new FlowVariableModelCreator() {
+            @Override
+            public FlowVariableModel create(final String[] keys, final Type type) {
+                return createFlowVariableModel(keys, type);
+            }
+        });
         m_uploadDriver = new JCheckBox("Upload local JDBC driver.");
         m_saveMode = new JComboBox<>(SparkSaveMode.ALL);
         m_saveMode.setEditable(false);

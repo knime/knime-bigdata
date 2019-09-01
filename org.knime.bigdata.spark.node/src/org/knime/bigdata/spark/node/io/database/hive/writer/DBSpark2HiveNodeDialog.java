@@ -29,13 +29,12 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.bigdata.spark.node.io.database.hive.writer.DBSpark2HiveSettings.TableExistsAction;
 import org.knime.bigdata.spark.node.io.hive.writer.FileFormat;
+import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -44,15 +43,15 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.workflow.FlowVariable.Type;
 import org.knime.database.node.component.dbrowser.DBTableSelectorDialogComponent;
+import org.knime.database.node.component.dbrowser.FlowVariableModelCreator;
 
 /**
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class DBSpark2HiveNodeDialog extends NodeDialogPane {
-
-    private static final Border ELEMENTS_BORDER = new EmptyBorder(5, 5, 5, 5);
 
     private final DBSpark2HiveSettings m_settings;
     private final DBTableSelectorDialogComponent m_table;
@@ -69,7 +68,12 @@ public class DBSpark2HiveNodeDialog extends NodeDialogPane {
     public DBSpark2HiveNodeDialog(final FileFormat[] fileFormats) {
         m_settings = new DBSpark2HiveSettings(fileFormats[0]);
         m_table = new DBTableSelectorDialogComponent(m_settings.getSchemaAndTableModel(), 0, false, null,
-            "Select a table", "Database Metadata Browser", true);
+            "Select a table", "Database Metadata Browser", true, new FlowVariableModelCreator() {
+            @Override
+            public FlowVariableModel create(final String[] keys, final Type type) {
+                return createFlowVariableModel(keys, type);
+            }
+        });
         m_tableExistsAction = new DialogComponentButtonGroup(m_settings.getTableExistsActionModel(), null, false,
             TableExistsAction.values());
         m_fileFormat = new DialogComponentStringSelection(m_settings.getFileFormatModel(), "File format: ",
