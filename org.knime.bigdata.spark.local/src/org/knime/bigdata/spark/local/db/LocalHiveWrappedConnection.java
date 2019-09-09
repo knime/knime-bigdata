@@ -58,7 +58,7 @@ import java.sql.Statement;
 
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
 import org.knime.bigdata.spark.local.database.LocalHiveDatabaseMetaData;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
+import org.knime.database.connection.AbstractConnectionWrapper;
 
 /**
  *
