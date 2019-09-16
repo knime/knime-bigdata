@@ -22,14 +22,9 @@ import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transport.http.auth.HttpAuthSupplier;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.apache.cxf.transports.http.configuration.ProxyServerType;
-import org.eclipse.core.net.proxy.IProxyData;
-import org.eclipse.core.net.proxy.IProxyService;
+import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * creates and handles REST requests
@@ -38,15 +33,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author dwk
  *
  */
-class WsRsRestClient implements IRestClient {
-
-    private final static NodeLogger LOG = NodeLogger.getLogger(WsRsRestClient.class);
-
-    /** Chunk threshold in bytes. */
-    private static final int CHUNK_THRESHOLD = 10 * 1024 * 1024; // 10MB
-
-    /** Length in bytes of each chunk. */
-    private static final int CHUNK_LENGTH = 1 * 1024 * 1024; // 1MB
+class WsRsRestClient extends AbstractRESTClient implements IRestClient {
 
     private static HostnameVerifier getHostnameVerifier() {
         return new HostnameVerifier() {
@@ -56,14 +43,6 @@ class WsRsRestClient implements IRestClient {
             }
         };
     }
-
-    private final static ServiceTracker<IProxyService, IProxyService> PROXY_TRACKER;
-    static {
-        PROXY_TRACKER = new ServiceTracker<>(FrameworkUtil.getBundle(WsRsRestClient.class).getBundleContext(),
-            IProxyService.class, null);
-        PROXY_TRACKER.open();
-    }
-
 
     public final Client m_client;
 
@@ -101,73 +80,9 @@ class WsRsRestClient implements IRestClient {
         m_baseTarget = m_client.target(new URI(contextConfig.getJobServerUrl()));
 
         // Chunk transfer policy
-        m_clientPolicy = new HTTPClientPolicy();
-        m_clientPolicy.setAllowChunking(true);
-        m_clientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
-        m_clientPolicy.setChunkLength(CHUNK_LENGTH);
-        m_clientPolicy.setReceiveTimeout(contextConfig.getReceiveTimeout().toMillis());
-
-        configureProxyIfNecessary(contextConfig);
-    }
-
-    private void configureProxyIfNecessary(final JobServerSparkContextConfig contextConfig) {
-
-        final URI jobserverURI = URI.create(contextConfig.getJobServerUrl());
-
-        IProxyService proxyService = PROXY_TRACKER.getService();
-        if (proxyService == null) {
-            LOG.error("No Proxy service registered in Eclipse framework. Not using any proxies for Spark jobserver connection.");
-            return;
-        }
-
-
-        for (IProxyData proxy : proxyService.select(jobserverURI)) {
-
-            final ProxyServerType proxyType;
-            final int defaultPort;
-
-            switch (proxy.getType()) {
-                case IProxyData.HTTP_PROXY_TYPE:
-                    proxyType = ProxyServerType.HTTP;
-                    defaultPort = 80;
-                    break;
-                case IProxyData.HTTPS_PROXY_TYPE:
-                    proxyType = ProxyServerType.HTTP;
-                    defaultPort = 443;
-                    break;
-                case IProxyData.SOCKS_PROXY_TYPE:
-                    proxyType = ProxyServerType.SOCKS;
-                    defaultPort = 1080;
-                    break;
-                default:
-                    throw new UnsupportedOperationException(String.format(
-                        "Unsupported proxy type: %s. Please remove the proxy setting from File > Preferences > General > Network Connections.",
-                        proxy.getType()));
-            }
-
-            if (proxy.getHost() != null) {
-                m_clientPolicy.setProxyServerType(proxyType);
-                m_clientPolicy.setProxyServer(proxy.getHost());
-
-                m_clientPolicy.setProxyServerPort(defaultPort);
-                if (proxy.getPort() != -1) {
-                    m_clientPolicy.setProxyServerPort(proxy.getPort());
-                }
-
-                if (proxy.isRequiresAuthentication() && proxy.getUserId() != null && proxy.getPassword() != null) {
-                    m_proxyAuthPolicy = new ProxyAuthorizationPolicy();
-                    m_proxyAuthPolicy.setUserName(proxy.getUserId());
-                    m_proxyAuthPolicy.setPassword(proxy.getPassword());
-                }
-
-                LOG.debug(String.format(
-                    "Using proxy for REST connection to Spark Jobserver: %s:%d (type: %s, proxyAuthentication: %b)",
-                    m_clientPolicy.getProxyServer(), m_clientPolicy.getProxyServerPort(), proxy.getType(),
-                    m_proxyAuthPolicy != null));
-
-                break;
-            }
-        }
+        final long timeout = contextConfig.getReceiveTimeout().toMillis();
+        m_clientPolicy = createClientPolicy(timeout, timeout);
+        m_proxyAuthPolicy = configureProxyIfNecessary(contextConfig.getJobServerUrl(), m_clientPolicy);
     }
 
     /**

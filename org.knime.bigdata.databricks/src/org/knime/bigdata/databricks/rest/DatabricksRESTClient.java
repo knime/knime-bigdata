@@ -23,7 +23,6 @@ package org.knime.bigdata.databricks.rest;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
 import java.util.List;
@@ -43,13 +42,8 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
 import org.apache.cxf.transport.common.gzip.GZIPOutInterceptor;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.apache.cxf.transports.http.configuration.ProxyServerType;
-import org.eclipse.core.net.proxy.IProxyData;
-import org.eclipse.core.net.proxy.IProxyService;
+import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.core.node.NodeLogger;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.Version;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
@@ -58,27 +52,11 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksRESTClient {
+public class DatabricksRESTClient extends AbstractRESTClient {
     private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksRESTClient.class);
 
     /** Current API version. */
     private static final String API_VERSION = "2.0";
-
-    /** Chunk threshold in bytes. */
-    private static final int CHUNK_THRESHOLD = 10 * 1024 * 1024; // 10MB
-
-    /** Length in bytes of each chunk. */
-    private static final int CHUNK_LENGTH = 1 * 1024 * 1024; // 1MB
-
-    private static final Version CLIENT_VERSION = FrameworkUtil.getBundle(DatabricksRESTClient.class).getVersion();
-    private static final String USER_AGENT = "KNIME/" + CLIENT_VERSION;
-
-    private static final ServiceTracker<IProxyService, IProxyService> PROXY_TRACKER;
-    static {
-        PROXY_TRACKER = new ServiceTracker<>(FrameworkUtil.getBundle(DatabricksRESTClient.class).getBundleContext(),
-            IProxyService.class, null);
-        PROXY_TRACKER.open();
-    }
 
     private DatabricksRESTClient() {}
 
@@ -131,15 +109,7 @@ public class DatabricksRESTClient {
 
         final String baseUrl = deploymentUrl + "/api/" + API_VERSION;
 
-        // Chunk transfer policy and timeout
-        final HTTPClientPolicy clientPolicy = new HTTPClientPolicy();
-        clientPolicy.setAllowChunking(true);
-        clientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
-        clientPolicy.setChunkLength(CHUNK_LENGTH);
-        clientPolicy.setReceiveTimeout(receiveTimeoutMillis);
-        clientPolicy.setConnectionTimeout(connectionTimeoutMillis);
-
-        // HTTP Proxy configuration
+        final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeoutMillis, connectionTimeoutMillis);
         final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
 
         // Create the API Proxy
@@ -148,7 +118,7 @@ public class DatabricksRESTClient {
         WebClient.client(proxyImpl)
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .type(MediaType.APPLICATION_JSON_TYPE)
-            .header("User-Agent", USER_AGENT);
+            .header("User-Agent", getUserAgent());
         final ClientConfiguration config = WebClient.getConfig(proxyImpl);
         config.getInInterceptors().add(new GZIPInInterceptor());
         config.getOutInterceptors().add(new GZIPOutInterceptor());
@@ -203,77 +173,6 @@ public class DatabricksRESTClient {
         return proxyImpl;
     }
 
-    /**
-     * Configures HTTP proxy on given client policy and returns proxy authorization policy if required on
-     * <code>null</code>.
-     *
-     * @param url Base URL to configure proxy for
-     * @param clientPolicy Policy to apply proxy configuration to
-     * @return {@link ProxyAuthorizationPolicy} or <code>null</code> if no proxy is used or nor proxy authentication is
-     *         required
-     */
-    private static ProxyAuthorizationPolicy configureProxyIfNecessary(final String url,
-            final HTTPClientPolicy clientPolicy) {
-
-        final URI uri = URI.create(url);
-        ProxyAuthorizationPolicy proxyAuthPolicy = null;
-
-        IProxyService proxyService = PROXY_TRACKER.getService();
-        if (proxyService == null) {
-            LOG.error("No Proxy service registered in Eclipse framework. Not using any proxies for databricks connection.");
-            return null;
-        }
-
-        for (IProxyData proxy : proxyService.select(uri)) {
-
-            final ProxyServerType proxyType;
-            final int defaultPort;
-
-            switch (proxy.getType()) {
-                case IProxyData.HTTP_PROXY_TYPE:
-                    proxyType = ProxyServerType.HTTP;
-                    defaultPort = 80;
-                    break;
-                case IProxyData.HTTPS_PROXY_TYPE:
-                    proxyType = ProxyServerType.HTTP;
-                    defaultPort = 443;
-                    break;
-                case IProxyData.SOCKS_PROXY_TYPE:
-                    proxyType = ProxyServerType.SOCKS;
-                    defaultPort = 1080;
-                    break;
-                default:
-                    throw new UnsupportedOperationException(String.format(
-                        "Unsupported proxy type: %s. Please remove the proxy setting from File > Preferences > General > Network Connections.",
-                        proxy.getType()));
-            }
-
-            if (proxy.getHost() != null) {
-                clientPolicy.setProxyServerType(proxyType);
-                clientPolicy.setProxyServer(proxy.getHost());
-
-                clientPolicy.setProxyServerPort(defaultPort);
-                if (proxy.getPort() != -1) {
-                    clientPolicy.setProxyServerPort(proxy.getPort());
-                }
-
-                if (proxy.isRequiresAuthentication() && proxy.getUserId() != null && proxy.getPassword() != null) {
-                    proxyAuthPolicy = new ProxyAuthorizationPolicy();
-                    proxyAuthPolicy.setUserName(proxy.getUserId());
-                    proxyAuthPolicy.setPassword(proxy.getPassword());
-                }
-
-                LOG.debug(String.format(
-                    "Using proxy for REST connection to Databricks: %s:%d (type: %s, proxyAuthentication: %b)",
-                    clientPolicy.getProxyServer(), clientPolicy.getProxyServerPort(), proxy.getType(),
-                    proxyAuthPolicy != null));
-
-                break;
-            }
-        }
-
-        return proxyAuthPolicy;
-    }
 
     /**
      * Release the internal state and configuration associated with this service proxy.
