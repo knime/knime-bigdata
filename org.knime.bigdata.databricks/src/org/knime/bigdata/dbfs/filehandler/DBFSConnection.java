@@ -1,5 +1,7 @@
 package org.knime.bigdata.dbfs.filehandler;
 
+import java.io.Closeable;
+
 /* ------------------------------------------------------------------
  * This source code, its documentation and all appendant files
  * are protected by copyright law. All rights reserved.
@@ -34,6 +36,7 @@ import org.knime.bigdata.databricks.rest.dbfs.FileInfoReponse;
 import org.knime.bigdata.databricks.rest.dbfs.MkdirRequest;
 import org.knime.bigdata.databricks.rest.dbfs.MoveRequest;
 import org.knime.core.util.KnimeEncryption;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
  * DBFS connection implementation.
@@ -54,59 +57,77 @@ public class DBFSConnection extends Connection {
     }
 
     synchronized boolean delete(final String path, final boolean recursive) throws IOException {
-        final DeleteRequest delete = new DeleteRequest();
-        delete.path = path;
-        delete.recursive = recursive;
-        m_dbfsApi.delete(delete);
-        return true;
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final DeleteRequest delete = new DeleteRequest();
+            delete.path = path;
+            delete.recursive = recursive;
+            m_dbfsApi.delete(delete);
+            return true;
+        }
     }
 
     synchronized void move(final String source, final String destination) throws IOException {
-        final MoveRequest move = new MoveRequest();
-        move.source_path = source;
-        move.destination_path = destination;
-        m_dbfsApi.move(move);
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final MoveRequest move = new MoveRequest();
+            move.source_path = source;
+            move.destination_path = destination;
+            m_dbfsApi.move(move);
+        }
     }
 
     synchronized boolean mkDir(final String path) throws IOException {
-        final MkdirRequest mkdir = new MkdirRequest();
-        mkdir.path = path;
-        m_dbfsApi.mkdirs(mkdir);
-        return true;
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final MkdirRequest mkdir = new MkdirRequest();
+            mkdir.path = path;
+            m_dbfsApi.mkdirs(mkdir);
+            return true;
+        }
     }
 
     synchronized FileBlockResponse readBlock(final String path, final long offset, final long length) throws IOException {
-        return m_dbfsApi.read(path, offset, length);
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            return m_dbfsApi.read(path, offset, length);
+        }
     }
 
     synchronized long createHandle(final String path, final boolean overwrite) throws IOException {
-        final CreateRequest createReq = new CreateRequest();
-        createReq.path = path;
-        createReq.overwrite = overwrite;
-        return m_dbfsApi.create(createReq).handle;
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final CreateRequest createReq = new CreateRequest();
+            createReq.path = path;
+            createReq.overwrite = overwrite;
+            return m_dbfsApi.create(createReq).handle;
+        }
     }
 
     synchronized void addBlock(final long handle, final String data) throws IOException {
-        final AddBlockRequest addBlockReq = new AddBlockRequest();
-        addBlockReq.handle = handle;
-        addBlockReq.data = data;
-        m_dbfsApi.addBlock(addBlockReq);
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final AddBlockRequest addBlockReq = new AddBlockRequest();
+            addBlockReq.handle = handle;
+            addBlockReq.data = data;
+            m_dbfsApi.addBlock(addBlockReq);
+        }
     }
 
     synchronized void closeHandle(final long handle) throws IOException {
-        final CloseRequest closeReq = new CloseRequest();
-        closeReq.handle = handle;
-        m_dbfsApi.close(closeReq);
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final CloseRequest closeReq = new CloseRequest();
+            closeReq.handle = handle;
+            m_dbfsApi.close(closeReq);
+        }
     }
 
     synchronized FileInfoReponse getFileInfo(final String path) throws IOException {
-        return m_dbfsApi.getStatus(path);
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            return m_dbfsApi.getStatus(path);
+        }
     }
 
     synchronized FileInfoReponse[] listFiles(final String path) throws IOException {
-        final FileInfoListResponse resp = m_dbfsApi.list(path);
-        final FileInfoReponse[] files = resp.files;
-        return files != null ? files : new FileInfoReponse[0];
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final FileInfoListResponse resp = m_dbfsApi.list(path);
+            final FileInfoReponse[] files = resp.files;
+            return files != null ? files : new FileInfoReponse[0];
+        }
     }
 
     @Override
