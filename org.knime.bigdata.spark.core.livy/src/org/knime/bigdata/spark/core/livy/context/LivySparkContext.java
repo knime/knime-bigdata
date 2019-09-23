@@ -155,7 +155,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             try {
                 if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
                     m_livyClient = KerberosProvider
-                        .doWithKerberosAuthBlocking(() -> buildLivyClient(livyHttpConf, config.getLivyUrl()), exec); 
+                        .doWithKerberosAuthBlocking(() -> buildLivyClient(livyHttpConf, config.getLivyUrl()), exec);
                 } else {
                     m_livyClient = buildLivyClient(livyHttpConf, config.getLivyUrl());
                 }
@@ -350,8 +350,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         waitForFuture(uploadFuture, exec);
     }
 
-    private void createRemoteSparkContext(ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
-        CreateSessionHandle handle = m_livyClient.startOrConnectSession();
+    private void createRemoteSparkContext(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+        final CreateSessionHandle handle = m_livyClient.startOrConnectSession();
         waitForFuture(handle, exec);
         switch(handle.getHandleState()) {
             case DONE_CANCELLED:
@@ -387,7 +387,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
-    private static void checkForCancelation(Future<?> future, ExecutionMonitor exec) throws CanceledExecutionException {
+    private static void checkForCancelation(final Future<?> future, final ExecutionMonitor exec) throws CanceledExecutionException {
         if (exec != null) {
             try {
                 exec.checkCanceled();
@@ -436,7 +436,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         reps.put("url", config.getLivyUrl());
         reps.put("authentication", createAuthenticationInfoString());
         reps.put("context_state", getStatus().toString());
-        reps.put("spark_web_ui", m_contextAttributes != null ? m_contextAttributes.sparkWebUI : "unavailable");
+        reps.put("spark_web_ui", m_contextAttributes != null && m_contextAttributes.sparkWebUI != null ?
+            m_contextAttributes.sparkWebUI : "unavailable");
         reps.put("spark_properties", mkSparkPropertiesHTMLRows());
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {

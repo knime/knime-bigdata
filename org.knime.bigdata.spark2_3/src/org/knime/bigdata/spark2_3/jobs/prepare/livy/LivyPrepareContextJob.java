@@ -85,7 +85,12 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
         Spark_2_3_CustomUDFProvider.registerCustomUDFs(sparkContext);
 
         final String testfileName = validateStagingAreaAccess(input.getTestfileName());
-        final String sparkWebUI = sparkContext.uiWebUrl().getOrElse(null);
+        String sparkWebUI = null;
+        try {
+            sparkWebUI = sparkContext.uiWebUrl().getOrElse(null);
+        } catch (NullPointerException e) {
+            //BD-973 happens if spark.ui.enabled=false
+        }
         final Map<String, String> sparkConf =
             Arrays.stream(sparkContext.conf().getAll()).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
         return new LivyPrepareContextJobOutput(sparkWebUI, sparkConf, testfileName);
