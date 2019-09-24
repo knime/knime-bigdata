@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 2.3
 Bundle-SymbolicName: org.knime.bigdata.spark2_3;singleton:=true
-Bundle-Version: 4.0.0.qualifier
+Bundle-Version: 4.0.2.qualifier
 Bundle-ClassPath: knime.jar,
   lib/job-server-api_2.11-0.7.0.2-KNIME_spark-2.2.jar,
   lib/knime-jobserver-utils-0.7.0.2-KNIME_spark-2.2.jar,
