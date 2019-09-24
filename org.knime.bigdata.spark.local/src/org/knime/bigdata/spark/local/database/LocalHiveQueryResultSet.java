@@ -459,7 +459,7 @@ public class LocalHiveQueryResultSet implements ResultSet {
 
 	@Override
 	public String getString(String columnName) throws SQLException {
-		if (columnName.equals("TABLE_NAME")) {
+		if ("TABLE_NAME".equals(columnName)) {
 			columnName = "tablename";
 		}
 		return m_resultset.getString(columnName);
