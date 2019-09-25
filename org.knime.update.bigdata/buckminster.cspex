@@ -7,6 +7,7 @@
     <dependency name="org.knime.config" componentType="osgi.bundle"/>
     <dependency name="javax.transaction" componentType="osgi.bundle"/>
     <dependency name="javax.javaee-api" componentType="osgi.bundle"/>
+    <dependency name="javax.wsdl" componentType="osgi.bundle"/>
     <dependency name="org.apache.ws.xmlschema.core" componentType="osgi.bundle"/>
     <dependency name="osgi.cmpn" componentType="osgi.bundle"/>
     <dependency name="org.apache.cxf.cxf-rt-frontend-jaxrs" componentType="osgi.bundle"/>
