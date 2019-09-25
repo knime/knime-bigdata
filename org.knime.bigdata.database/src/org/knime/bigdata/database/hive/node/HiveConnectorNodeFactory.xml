@@ -69,10 +69,8 @@
                 If checked, then authentication is not required.
             </option>
             <option name="Credentials">
-                If checked, the credentials (user and password) need to be provided as a credentials flow
-                variable. Credentials flow variables can be created with the <i>Credentials Input</i>
-                node or using the 'Workflow Credentials' option available in the context menu
-                of the workflow.
+                If checked, the credentials (user and password)are used as defined in the workflow. The credential name
+                links to the specified user and password.
             </option>
             <option name="Username">
                 Your username for the database.
