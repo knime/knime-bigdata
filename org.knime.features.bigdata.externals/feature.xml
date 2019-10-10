@@ -1371,28 +1371,28 @@ propagated with or for interoperation with KNIME.
          id="org.apache.livy.api"
          download-size="0"
          install-size="0"
-         version="0.4.1.knime7-knimebd-20190426"
+         version="0.4.1.knime8-knimebd-20190426"
          unpack="false"/>
 
    <plugin
          id="org.apache.livy.api.source"
          download-size="0"
          install-size="0"
-         version="0.4.1.knime7-knimebd-20190426"
+         version="0.4.1.knime8-knimebd-20190426"
          unpack="false"/>
 
    <plugin
          id="org.apache.livy.client"
          download-size="0"
          install-size="0"
-         version="0.4.1.knime7-knimebd-20190426"
+         version="0.4.1.knime8-knimebd-20190426"
          unpack="false"/>
 
    <plugin
          id="org.apache.livy.client.source"
          download-size="0"
          install-size="0"
-         version="0.4.1.knime7-knimebd-20190426"
+         version="0.4.1.knime8-knimebd-20190426"
          unpack="false"/>
 
    <plugin
