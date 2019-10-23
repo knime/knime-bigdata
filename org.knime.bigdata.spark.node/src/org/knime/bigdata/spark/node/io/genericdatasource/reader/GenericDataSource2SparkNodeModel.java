@@ -103,8 +103,9 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
         if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)
                 && !(connInfo instanceof CloudConnectionInformation)
-                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))) {
-            throw new InvalidSettingsException("HDFS or cloud connection required");
+                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))
+                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().equalsIgnoreCase("dbfs"))) {
+            throw new InvalidSettingsException("HDFS, DBFS or cloud connection required");
         }
 
         m_settings.validateSettings();
