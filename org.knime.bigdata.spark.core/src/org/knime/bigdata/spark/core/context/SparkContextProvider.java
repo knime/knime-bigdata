@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -90,6 +91,7 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      * @return a new Spark context configuration based on the given map of flow variables.
      * @noreference This is testing code and its API is subject to change without notice.
      * @see TestflowVariable
+     * @throws InvalidSettingsException on invalid settings in flow variables
      */
-    public T createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables);
+    public T createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables) throws InvalidSettingsException;
 }

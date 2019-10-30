@@ -27,6 +27,7 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.context.SparkContextProviderRegistry;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -42,8 +43,10 @@ public class TestingSparkContextConfigFactory {
      *
      * @param flowVars A map of flow variables that provide the Spark context settings.
      * @return a {@link SparkContextConfig}.
+     * @throws InvalidSettingsException
      */
-    public synchronized static SparkContextConfig create(final Map<String, FlowVariable> flowVars) {
+    public synchronized static SparkContextConfig create(final Map<String, FlowVariable> flowVars)
+        throws InvalidSettingsException {
 
         if (!flowVars.containsKey(TestflowVariable.SPARK_CONTEXTIDSCHEME.getName())) {
             throw new IllegalArgumentException("No Spark context provider settings found in flow variables");

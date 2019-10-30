@@ -14,20 +14,26 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on Jul 18, 2019 by Sascha Wolke, KNIME GmbH
  */
-package org.knime.bigdata.databricks.rest.dbfs;
+package org.knime.bigdata.spark2_4.jobs.prepare.databricks;
+
+import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksPrepareContextJobInput;
+import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksPrepareContextJobOutput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 
 /**
- * List of {@link FileInfoReponse}.
+ * Prepare databricks spark context job factory.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class FileInfoListResponse {
+public class DatabricksPrepareContextJobRunFactory
+    extends DefaultJobRunFactory<DatabricksPrepareContextJobInput, DatabricksPrepareContextJobOutput> {
+
     /**
-     * List of file infos.
+     * Constructor.
      */
-    public FileInfoReponse[] files;
+    public DatabricksPrepareContextJobRunFactory() {
+        super(DatabricksPrepareContextJobInput.DATABRICKS_PREPARE_CONTEXT_JOB_ID, DatabricksPrepareContextJob.class,
+            DatabricksPrepareContextJobOutput.class);
+    }
 }

@@ -58,6 +58,7 @@ import org.knime.bigdata.spark2_4.jobs.namedobjects.NamedObjectsJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.pmml.PMMLPredictionJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.pmml.PMMLTransformationJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.prepare.PrepareContextJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.prepare.databricks.DatabricksPrepareContextJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.prepare.livy.LivyPrepareContextJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.preproc.concatenate.ConcatenateDataFramesJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.preproc.convert.category2number.Category2NumberJobRunFactory;
@@ -124,6 +125,7 @@ public class Spark_2_4_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new SVDJobRunFactory(),
             new NamedObjectsJobRunFactory(),
             new PrepareContextJobRunFactory(),
+            new DatabricksPrepareContextJobRunFactory(),
             new LivyPrepareContextJobRunFactory(),
             new ConcatenateDataFramesJobRunFactory(),
             new Category2NumberJobRunFactory(),

@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
+import org.knime.bigdata.database.databricks.testing.DatabricksTestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.hive.testing.TestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
@@ -75,6 +76,9 @@ public class CreateTestEnvironmentNodeModel extends AbstractCreateTestEnvironmen
             case SPARK_LIVY:
                 m_dbSettings = TestingDatabaseConnectionSettingsFactory.createHiveSettings(flowVars);
                 return new DatabaseConnectionPortObjectSpec(m_dbSettings);
+            case SPARK_DATABRICKS:
+                m_dbSettings = DatabricksTestingDatabaseConnectionSettingsFactory.createDeprecatedDBSettings(flowVars);
+                return new DatabaseConnectionPortObjectSpec(m_dbSettings);
             default:
                 throw new InvalidSettingsException("Spark context ID scheme not supported: " + sparkScheme);
         }
@@ -97,6 +101,7 @@ public class CreateTestEnvironmentNodeModel extends AbstractCreateTestEnvironmen
                 }
             case SPARK_JOBSERVER:
             case SPARK_LIVY:
+            case SPARK_DATABRICKS:
                 return new DatabaseConnectionPortObject(new DatabaseConnectionPortObjectSpec(m_dbSettings));
             default:
                 throw new InvalidSettingsException("Spark context ID scheme not supported: " + sparkScheme);

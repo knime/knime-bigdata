@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
+import org.knime.bigdata.database.databricks.testing.DatabricksTestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.database.hive.Hive;
 import org.knime.bigdata.database.hive.testing.TestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
@@ -46,6 +47,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
 import org.knime.database.DBType;
+import org.knime.database.DBTypeRegistry;
 import org.knime.database.VariableContext;
 import org.knime.database.connection.DBConnectionController;
 import org.knime.database.connection.UserDBConnectionController;
@@ -57,6 +59,7 @@ import org.knime.database.dialect.DBSQLDialectFactory;
 import org.knime.database.dialect.DBSQLDialectRegistry;
 import org.knime.database.driver.DBDriverRegistry;
 import org.knime.database.driver.DBDriverWrapper;
+import org.knime.database.node.connector.DBSessionSettings;
 import org.knime.database.node.connector.server.ServerDBConnectorSettings;
 import org.knime.database.port.DBSessionPortObject;
 import org.knime.database.session.DBSession;
@@ -124,7 +127,7 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
     protected PortObject createHivePort(final ExecutionContext exec, final SparkContextIDScheme sparkScheme,
         final Map<String, FlowVariable> flowVars) throws Exception {
 
-        final ServerDBConnectorSettings hiveSettings;
+        final DBSessionSettings hiveSettings;
         final DBConnectionController connectionController;
 
         switch (sparkScheme) {
@@ -140,13 +143,19 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
             case SPARK_JOBSERVER:
             case SPARK_LIVY:
                 hiveSettings = TestingDatabaseConnectionSettingsFactory.createHiveSettings(flowVars);
-                final SettingsModelAuthentication authentication = hiveSettings.getAuthenticationModel();
+                final SettingsModelAuthentication authentication =
+                    ((ServerDBConnectorSettings)hiveSettings).getAuthenticationModel();
                 final CredentialsProvider credentialsProvider = getCredentialsProvider();
                 connectionController = new UserDBConnectionController(hiveSettings.getDBUrl(),
                     authentication.getAuthenticationType(),
                     authentication.getUserName(credentialsProvider),
                     authentication.getPassword(credentialsProvider),
                     authentication.getCredential(), credentialsProvider);
+                break;
+            case SPARK_DATABRICKS:
+                hiveSettings = DatabricksTestingDatabaseConnectionSettingsFactory.createSettings(flowVars);
+                connectionController = DatabricksTestingDatabaseConnectionSettingsFactory
+                    .createDBConnectionController(hiveSettings.getDBUrl(), flowVars);
                 break;
             default:
                 throw new InvalidSettingsException("Spark context ID scheme not supported: " + sparkScheme);
@@ -165,8 +174,8 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
             DataTypeMappingConfigurationData.from(externalToKnime));
     }
 
-    private DBSession registerSession(final ExecutionMonitor monitor, final ServerDBConnectorSettings settings, final DBConnectionController connectionController)
-            throws CanceledExecutionException, SQLException {
+    private DBSession registerSession(final ExecutionMonitor monitor, final DBSessionSettings settings, final DBConnectionController connectionController)
+            throws CanceledExecutionException, SQLException, InvalidSettingsException {
 
         m_sessionInfo = createSessionInfo(settings, connectionController);
         Objects.requireNonNull(m_sessionInfo, "m_sessionInfo must not be null");
@@ -179,13 +188,15 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
      * Creates the description of the session to be created and registered.
      *
      * @return the {@link DBSessionInformation} describing the session to be created and registered.
+     * @throws InvalidSettingsException 
      */
-    private DBSessionInformation createSessionInfo(final ServerDBConnectorSettings settings, final DBConnectionController connectionController) {
+    private DBSessionInformation createSessionInfo(final DBSessionSettings settings, final DBConnectionController connectionController) throws InvalidSettingsException {
 
         final DBSessionID sessionID = new DBSessionID();
-        final DBType dbType = Hive.DB_TYPE;
+        final DBType dbType = DBTypeRegistry.getInstance().getRegisteredDBType(settings.getDBType())
+            .orElseThrow(() -> new InvalidSettingsException("Unknown DB type: " + settings.getDBType()));
 
-        final String settingsDialect = LOCAL_SPARK_HIVE_DIALECT;
+        final String settingsDialect = settings.getDialect();
         final Optional<DBSQLDialectFactory> dialectFactory =
                 DBSQLDialectRegistry.getInstance().getFactory(dbType, settingsDialect);
         final String dialectId;
@@ -201,7 +212,7 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
             }
         }
 
-        final String sessionDriver = LOCAL_SPARK_HIVE_DRIVER;
+        final String sessionDriver = settings.getDriver();
         final DBDriverRegistry driverRegistry = DBDriverRegistry.getInstance();
         final DBDriverWrapper driver = driverRegistry.getDriver(sessionDriver).orElseGet(() -> {
             final DBDriverWrapper substitute = driverRegistry.getLatestDriver(dbType);

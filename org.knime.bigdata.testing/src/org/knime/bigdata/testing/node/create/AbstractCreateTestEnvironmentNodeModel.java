@@ -22,6 +22,7 @@ package org.knime.bigdata.testing.node.create;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
@@ -32,6 +33,7 @@ import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
 import org.knime.bigdata.commons.testing.TestflowVariable;
+import org.knime.bigdata.dbfs.testing.TestingDBFSConnectionInformationFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
 import org.knime.bigdata.filehandling.testing.TestingConnectionInformationFactory;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
@@ -105,6 +107,9 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
                 fsConnectionInfo =
                     TestingConnectionInformationFactory.create(HDFSRemoteFileHandler.HTTPFS_PROTOCOL, flowVars);
                 break;
+            case SPARK_DATABRICKS:
+                fsConnectionInfo = TestingDBFSConnectionInformationFactory.create(flowVars);
+                break;
             default:
                 throw new InvalidSettingsException(
                     "Spark context ID scheme not supported: " + sparkConfig.getSparkContextID().getScheme());
@@ -177,8 +182,8 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
         final ConnectionMonitor<?> monitor = new ConnectionMonitor<>();
 
         try {
-            final RemoteFile<? extends Connection> file =
-                RemoteFileFactory.createRemoteFile(connInfo.toURI(), connInfo, monitor);
+            final URI uri = connInfo.toURI().resolve("/");
+            final RemoteFile<? extends Connection> file = RemoteFileFactory.createRemoteFile(uri, connInfo, monitor);
             if (file != null) {
                 //perform a simple operation to check that the connection really exists and is valid
                 file.exists();

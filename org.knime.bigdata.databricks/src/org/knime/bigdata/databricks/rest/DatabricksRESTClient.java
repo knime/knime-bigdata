@@ -1,18 +1,46 @@
-/* ------------------------------------------------------------------
- * This source code, its documentation and all appendant files
- * are protected by copyright law. All rights reserved.
+/*
+ * ------------------------------------------------------------------------
  *
- * Copyright by KNIME AG, Zurich, Switzerland
+ *  Copyright by KNIME AG, Zurich, Switzerland
+ *  Website: http://www.knime.com; Email: contact@knime.com
  *
- * You may not modify, publish, transmit, transfer or sell, reproduce,
- * create derivative works from, distribute, perform, display, or in
- * any way exploit any of the content, in whole or in part, except as
- * otherwise expressly permitted in writing by the copyright owner or
- * as specified in the license file distributed with this product.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License, Version 3, as
+ *  published by the Free Software Foundation.
  *
- * If you have any questions please contact the copyright holder:
- * website: www.knime.com
- * email: contact@knime.com
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ *  Additional permission under GNU GPL version 3 section 7:
+ *
+ *  KNIME interoperates with ECLIPSE solely via ECLIPSE's plug-in APIs.
+ *  Hence, KNIME and ECLIPSE are both independent programs and are not
+ *  derived from each other. Should, however, the interpretation of the
+ *  GNU GPL Version 3 ("License") under any applicable laws result in
+ *  KNIME and ECLIPSE being a combined program, KNIME AG herewith grants
+ *  you the additional permission to use and propagate KNIME together with
+ *  ECLIPSE with only the license terms in place for ECLIPSE applying to
+ *  ECLIPSE and the GNU GPL Version 3 applying for KNIME, provided the
+ *  license terms of ECLIPSE themselves allow for the respective use and
+ *  propagation of ECLIPSE together with KNIME.
+ *
+ *  Additional permission relating to nodes for KNIME that extend the Node
+ *  Extension (and in particular that are based on subclasses of NodeModel,
+ *  NodeDialog, and NodeView) and that only interoperate with KNIME through
+ *  standard APIs ("Nodes"):
+ *  Nodes are deemed to be separate and independent programs and to not be
+ *  covered works.  Notwithstanding anything to the contrary in the
+ *  License, the License does not apply to Nodes, you are not required to
+ *  license Nodes under the License, and you are granted a license to
+ *  prepare and propagate Nodes, in each case even if such Nodes are
+ *  propagated with or for interoperation with KNIME.  The owner of a Node
+ *  may freely choose the license terms applicable to such Node, including
+ *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  *
  * History
@@ -40,7 +68,6 @@ import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.ResponseExceptionMapper;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
-import org.apache.cxf.transport.common.gzip.GZIPOutInterceptor;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.core.node.NodeLogger;
@@ -55,9 +82,6 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 public class DatabricksRESTClient extends AbstractRESTClient {
     private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksRESTClient.class);
 
-    /** Current API version. */
-    private static final String API_VERSION = "2.0";
-
     private DatabricksRESTClient() {}
 
     /**
@@ -68,10 +92,17 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         public IOException fromResponse(final Response response) {
             String message = "";
 
-            // try to parse JSON response with error message
+            // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
             if (response.getMediaType().getSubtype().toLowerCase().contains("json")) {
                 try {
-                    message = response.readEntity(GenericErrorResponse.class).message;
+                    final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
+                    if (!StringUtils.isBlank(resp.message)) {
+                        message = resp.message;
+                    } else if (!StringUtils.isBlank(resp.error)) {
+                        message = resp.error;
+                    } else {
+                        message = response.getStatusInfo().getReasonPhrase();
+                    }
                 } catch (Exception e) {
                     message = e.getMessage();
                 }
@@ -107,7 +138,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     private static <T> T create(final String deploymentUrl, final Class<T> proxy,
             final int receiveTimeoutMillis, final int connectionTimeoutMillis) {
 
-        final String baseUrl = deploymentUrl + "/api/" + API_VERSION;
+        final String baseUrl = deploymentUrl + "/api/";
 
         final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeoutMillis, connectionTimeoutMillis);
         final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
@@ -121,7 +152,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             .header("User-Agent", getUserAgent());
         final ClientConfiguration config = WebClient.getConfig(proxyImpl);
         config.getInInterceptors().add(new GZIPInInterceptor());
-        config.getOutInterceptors().add(new GZIPOutInterceptor());
+        // Note: Databricks use GZIP to encode downloads, but does not support GZIP encoded uploads!
         config.getHttpConduit().setClient(clientPolicy);
         if (proxyAuthPolicy != null) {
             config.getHttpConduit().setProxyAuthorization(proxyAuthPolicy);

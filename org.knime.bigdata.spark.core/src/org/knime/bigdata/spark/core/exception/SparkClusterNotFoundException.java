@@ -14,23 +14,32 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on Jul 18, 2019 by Sascha Wolke, KNIME GmbH
  */
-package org.knime.bigdata.databricks.rest.dbfs;
+package org.knime.bigdata.spark.core.exception;
 
 /**
- * File handle returned from a create file request.
+ * This exception indicates that the cluster no longer exists.
  *
- * @see <a href="https://docs.databricks.com/api/latest/dbfs.html#create">DBFS API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
-public class FileHandleResponse {
+public class SparkClusterNotFoundException extends KNIMESparkException {
+
+    private static final long serialVersionUID = 1L;
+    private final String m_clusterId;
 
     /**
-     * Handle which should subsequently be passed into the AddBlock and Close calls when writing to a file through a
-     * stream.
+     * Default constructor.
+     * @param clusterId the unique identifier of the non existing cluster
      */
-    public long handle;
+    public SparkClusterNotFoundException(final String clusterId) {
+        super(String.format("Spark cluster %s does not exist.", clusterId));
+        m_clusterId = clusterId;
+    }
+
+    /**
+     * @return the identifier of the non existing cluster
+     */
+    public String getClusterId() {
+        return m_clusterId;
+    }
 }

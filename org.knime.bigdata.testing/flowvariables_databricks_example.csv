@@ -4,6 +4,7 @@ spark.version,2.4
 
 spark.databricks.url,https://dbc-a3c8c0f5-1c96.cloud.databricks.com:443
 spark.databricks.clusterId,12345
+spark.databricks.workspaceId,
 spark.databricks.authMethod,TOKEN
 spark.databricks.token,secret-token
 spark.databricks.setStagingAreaFolder,false

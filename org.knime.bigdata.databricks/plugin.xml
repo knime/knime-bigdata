@@ -2,16 +2,168 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+  <extension point="org.knime.bigdata.spark.core.SparkContextProvider">
+    <SparkContextProvider
+        ProviderClass="org.knime.bigdata.spark.core.databricks.DatabricksSparkContextProvider">
+    </SparkContextProvider>
+  </extension>
+
+  <extension point="org.knime.bigdata.spark.core.SparkJarProvider">
+    <SparkJarProvider
+        ProviderClass="org.knime.bigdata.spark.core.databricks.DatabricksJarProvider">
+    </SparkJarProvider>
+  </extension>
+
+  <extension point="org.knime.bigdata.spark.core.SparkNodeFactoryProvider">
+    <SparkNodeFactoryProvider
+        ProviderClass="org.knime.bigdata.spark.core.databricks.DatabricksNodeFactoryProvider">
+    </SparkNodeFactoryProvider>
+  </extension>
+
   <extension point="org.knime.base.filehandling.RemoteFileHandler">
-     <RemoteFileHandler
+    <RemoteFileHandler
          RemoteFileHandler="org.knime.bigdata.dbfs.filehandler.DBFSRemoteFileHandler">
-     </RemoteFileHandler>
+    </RemoteFileHandler>
   </extension>
 
   <extension point="org.knime.workbench.repository.nodes">
-     <node
+    <node
          category-path="/io/filehandling/remote/connections"
          factory-class="org.knime.bigdata.dbfs.node.connector.DBFSConnectionInformationNodeFactory">
-     </node>
+    </node>
   </extension>
+  
+  <!--************************** DB Extensions **************************-->
+  <extension point="org.knime.database.DBType">
+    <DBType id="databricks" name="Databricks"
+    		urlTemplateValidator="org.knime.bigdata.database.databricks.DatabricksDBUrlTemplateValidator"
+    		defaultAttributeDefinitionSupplier="org.knime.database.DBType$NonTransactionalDefaultAttributeSupplier$Factory">
+    	<UrlTemplateExamples>
+	        <UrlTemplateExample title="Databricks/Simba Driver" template="jdbc:spark://&lt;host&gt;:&lt;port&gt;/default" />
+	        <UrlTemplateExample title="Apache Hive Driver" template="jdbc:hive2://&lt;host&gt;:&lt;port&gt;/default" />
+    	</UrlTemplateExamples>
+	</DBType>
+  </extension>
+  <extension point="org.knime.database.SQLDialect">
+    <SQLDialect
+            dbTypes="databricks"
+            factory="org.knime.bigdata.database.databricks.dialect.DatabricksSQLDialect$Factory"/>
+  </extension>
+  <extension point="org.knime.database.Driver">
+    <Driver
+            locator="org.knime.bigdata.database.databricks.DatabricksDBDriverLocator">
+    </Driver>
+  </extension>
+  <extension point="org.knime.database.Agent">
+      <Agent
+            dbTypes="databricks"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.sampling.DBSampling">
+      </Agent>
+      <Agent
+            dbTypes="databricks"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.binning.DBBinner">
+      </Agent>
+   </extension>
+
+   <!-- ********************************** DB Aggregation Functions ********************************** -->
+   <extension point="org.knime.database.AggregationFunction">
+   
+   <!-- ************************** Common ************************** -->
+            
+      <!-- AvgDistinctDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.AvgDistinctDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+
+      <!-- CountDistinctDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CountDistinctDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+   
+      <!-- CorrDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CorrDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+   
+      <!-- CovarSampDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CovarSampDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- CovarPopDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CovarPopDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- GroupConcatDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.GroupConcatDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+
+      <!-- MaxDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.MaxDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+
+      <!-- MinDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.MinDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+	  <!-- VarPopDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.VarPopDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+   
+      <!--VarSampDBAggregationFunction  -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.VarSampDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- SumDistinctDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.SumDistinctDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- StdDevSampDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.StdDevSampDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- StdDevPopDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.StdDevPopDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- ************************** Hive ************************** -->
+      
+      <!-- PercentileDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.PercentileDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- PercentileApproxDBAggregationFunction -->     
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.PercentileApproxDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- CollectSetDBAggregationFunction -->       
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.CollectSetDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+            
+      <!-- CollectListDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.CollectListDBAggregationFunction$Factory"
+            dbTypes="databricks"/>
+   </extension>
+    
+   <extension point="org.knime.database.DBTypeMappingService">
+      <DBTypeMappingService
+            dbTypeId="databricks"
+            supplier="org.knime.bigdata.database.hive.HiveTypeMappingServiceSupplier">
+      </DBTypeMappingService>
+   </extension>
 </plugin>

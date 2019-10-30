@@ -1,18 +1,46 @@
-/* ------------------------------------------------------------------
- * This source code, its documentation and all appendant files
- * are protected by copyright law. All rights reserved.
+/*
+ * ------------------------------------------------------------------------
  *
- * Copyright by KNIME AG, Zurich, Switzerland
+ *  Copyright by KNIME AG, Zurich, Switzerland
+ *  Website: http://www.knime.com; Email: contact@knime.com
  *
- * You may not modify, publish, transmit, transfer or sell, reproduce,
- * create derivative works from, distribute, perform, display, or in
- * any way exploit any of the content, in whole or in part, except as
- * otherwise expressly permitted in writing by the copyright owner or
- * as specified in the license file distributed with this product.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License, Version 3, as
+ *  published by the Free Software Foundation.
  *
- * If you have any questions please contact the copyright holder:
- * website: www.knime.com
- * email: contact@knime.com
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ *  Additional permission under GNU GPL version 3 section 7:
+ *
+ *  KNIME interoperates with ECLIPSE solely via ECLIPSE's plug-in APIs.
+ *  Hence, KNIME and ECLIPSE are both independent programs and are not
+ *  derived from each other. Should, however, the interpretation of the
+ *  GNU GPL Version 3 ("License") under any applicable laws result in
+ *  KNIME and ECLIPSE being a combined program, KNIME AG herewith grants
+ *  you the additional permission to use and propagate KNIME together with
+ *  ECLIPSE with only the license terms in place for ECLIPSE applying to
+ *  ECLIPSE and the GNU GPL Version 3 applying for KNIME, provided the
+ *  license terms of ECLIPSE themselves allow for the respective use and
+ *  propagation of ECLIPSE together with KNIME.
+ *
+ *  Additional permission relating to nodes for KNIME that extend the Node
+ *  Extension (and in particular that are based on subclasses of NodeModel,
+ *  NodeDialog, and NodeView) and that only interoperate with KNIME through
+ *  standard APIs ("Nodes"):
+ *  Nodes are deemed to be separate and independent programs and to not be
+ *  covered works.  Notwithstanding anything to the contrary in the
+ *  License, the License does not apply to Nodes, you are not required to
+ *  license Nodes under the License, and you are granted a license to
+ *  prepare and propagate Nodes, in each case even if such Nodes are
+ *  propagated with or for interoperation with KNIME.  The owner of a Node
+ *  may freely choose the license terms applicable to such Node, including
+ *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  *
  * History
@@ -33,7 +61,7 @@ import javax.ws.rs.QueryParam;
  * @see <a href="https://docs.databricks.com/api/latest/dbfs.html#dbfs-api">DBFS API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
-@Path("dbfs")
+@Path("2.0/dbfs")
 public interface DBFSAPI {
 
     /**
@@ -45,7 +73,7 @@ public interface DBFSAPI {
      */
     @GET
     @Path("get-status")
-    FileInfoReponse getStatus(@QueryParam("path") String path) throws IOException;
+    FileInfo getStatus(@QueryParam("path") String path) throws IOException;
 
     /**
      * List the contents of a directory, or details of the file.
@@ -56,7 +84,7 @@ public interface DBFSAPI {
      */
     @GET
     @Path("list")
-    FileInfoListResponse list(@QueryParam("path") String path) throws IOException;
+    FileInfoList list(@QueryParam("path") String path) throws IOException;
 
     /**
      * Create the given directory and necessary parent directories if they do not exist.
@@ -66,7 +94,7 @@ public interface DBFSAPI {
      */
     @POST
     @Path("mkdirs")
-    void mkdirs(MkdirRequest mkdir) throws IOException;
+    void mkdirs(Mkdir mkdir) throws IOException;
 
     /**
      * Move a file from one location to another location within DBFS.
@@ -76,7 +104,7 @@ public interface DBFSAPI {
      */
     @POST
     @Path("move")
-    void move(MoveRequest move) throws IOException;
+    void move(Move move) throws IOException;
 
     /**
      * Delete the file or directory (optionally recursively delete all files in the directory).
@@ -86,7 +114,7 @@ public interface DBFSAPI {
      */
     @POST
     @Path("delete")
-    void delete(DeleteRequest delete) throws IOException;
+    void delete(Delete delete) throws IOException;
 
     /**
      * Return the contents of a file.
@@ -95,12 +123,12 @@ public interface DBFSAPI {
      * @param offset The offset to read from in bytes.
      * @param length The number of bytes to read starting from the offset. This has a limit of 1 MB, and a
      *        default value of 0.5 MB.
-     * @return {@link FileBlockResponse}
+     * @return {@link FileBlock}
      * @throws IOException on failures
      */
     @GET
     @Path("read")
-    FileBlockResponse read(@QueryParam("path") String path, @QueryParam("offset") long offset,
+    FileBlock read(@QueryParam("path") String path, @QueryParam("offset") long offset,
         @QueryParam("length") long length) throws IOException;
 
     /**
@@ -113,25 +141,25 @@ public interface DBFSAPI {
      */
     @POST
     @Path("create")
-    FileHandleResponse create(CreateRequest create) throws IOException;
+    FileHandle create(Create create) throws IOException;
 
     /**
      * Append a block of data to the stream specified by the input handle.
      *
-     * @param addBlock {@link AddBlockRequest} request
+     * @param addBlock {@link AddBlock} request
      * @throws IOException on failures
      */
     @POST
     @Path("add-block")
-    void addBlock(AddBlockRequest addBlock) throws IOException;
+    void addBlock(AddBlock addBlock) throws IOException;
 
     /**
      * Close the stream specified by the input handle.
      *
-     * @param close {@link CloseRequest} request
+     * @param close {@link Close} request
      * @throws IOException on failures
      */
     @POST
     @Path("close")
-    void close(CloseRequest close) throws IOException;
+    void close(Close close) throws IOException;
 }

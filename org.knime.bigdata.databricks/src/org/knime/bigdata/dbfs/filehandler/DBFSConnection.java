@@ -1,40 +1,66 @@
+/*
+ * ------------------------------------------------------------------------
+ *
+ *  Copyright by KNIME AG, Zurich, Switzerland
+ *  Website: http://www.knime.com; Email: contact@knime.com
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License, Version 3, as
+ *  published by the Free Software Foundation.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ *  Additional permission under GNU GPL version 3 section 7:
+ *
+ *  KNIME interoperates with ECLIPSE solely via ECLIPSE's plug-in APIs.
+ *  Hence, KNIME and ECLIPSE are both independent programs and are not
+ *  derived from each other. Should, however, the interpretation of the
+ *  GNU GPL Version 3 ("License") under any applicable laws result in
+ *  KNIME and ECLIPSE being a combined program, KNIME AG herewith grants
+ *  you the additional permission to use and propagate KNIME together with
+ *  ECLIPSE with only the license terms in place for ECLIPSE applying to
+ *  ECLIPSE and the GNU GPL Version 3 applying for KNIME, provided the
+ *  license terms of ECLIPSE themselves allow for the respective use and
+ *  propagation of ECLIPSE together with KNIME.
+ *
+ *  Additional permission relating to nodes for KNIME that extend the Node
+ *  Extension (and in particular that are based on subclasses of NodeModel,
+ *  NodeDialog, and NodeView) and that only interoperate with KNIME through
+ *  standard APIs ("Nodes"):
+ *  Nodes are deemed to be separate and independent programs and to not be
+ *  covered works.  Notwithstanding anything to the contrary in the
+ *  License, the License does not apply to Nodes, you are not required to
+ *  license Nodes under the License, and you are granted a license to
+ *  prepare and propagate Nodes, in each case even if such Nodes are
+ *  propagated with or for interoperation with KNIME.  The owner of a Node
+ *  may freely choose the license terms applicable to such Node, including
+ *  when such Node is propagated with or for interoperation with KNIME.
+ * ---------------------------------------------------------------------
+ */
 package org.knime.bigdata.dbfs.filehandler;
 
 import java.io.Closeable;
-
-/* ------------------------------------------------------------------
- * This source code, its documentation and all appendant files
- * are protected by copyright law. All rights reserved.
- *
- * Copyright by KNIME AG, Zurich, Switzerland
- *
- * You may not modify, publish, transmit, transfer or sell, reproduce,
- * create derivative works from, distribute, perform, display, or in
- * any way exploit any of the content, in whole or in part, except as
- * otherwise expressly permitted in writing by the copyright owner or
- * as specified in the license file distributed with this product.
- *
- * If you have any questions please contact the copyright holder:
- * website: www.knime.com
- * email: contact@knime.com
- * ---------------------------------------------------------------------
- */
-
 import java.io.IOException;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
-import org.knime.bigdata.databricks.rest.dbfs.AddBlockRequest;
-import org.knime.bigdata.databricks.rest.dbfs.CloseRequest;
-import org.knime.bigdata.databricks.rest.dbfs.CreateRequest;
+import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
+import org.knime.bigdata.databricks.rest.dbfs.Close;
+import org.knime.bigdata.databricks.rest.dbfs.Create;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.databricks.rest.dbfs.DeleteRequest;
-import org.knime.bigdata.databricks.rest.dbfs.FileBlockResponse;
-import org.knime.bigdata.databricks.rest.dbfs.FileInfoListResponse;
-import org.knime.bigdata.databricks.rest.dbfs.FileInfoReponse;
-import org.knime.bigdata.databricks.rest.dbfs.MkdirRequest;
-import org.knime.bigdata.databricks.rest.dbfs.MoveRequest;
+import org.knime.bigdata.databricks.rest.dbfs.Delete;
+import org.knime.bigdata.databricks.rest.dbfs.FileBlock;
+import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
+import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
+import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
+import org.knime.bigdata.databricks.rest.dbfs.Move;
 import org.knime.core.util.KnimeEncryption;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
@@ -58,33 +84,25 @@ public class DBFSConnection extends Connection {
 
     synchronized boolean delete(final String path, final boolean recursive) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final DeleteRequest delete = new DeleteRequest();
-            delete.path = path;
-            delete.recursive = recursive;
-            m_dbfsApi.delete(delete);
+            m_dbfsApi.delete(Delete.create(path, recursive));
             return true;
         }
     }
 
     synchronized void move(final String source, final String destination) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final MoveRequest move = new MoveRequest();
-            move.source_path = source;
-            move.destination_path = destination;
-            m_dbfsApi.move(move);
+            m_dbfsApi.move(Move.create(source, destination));
         }
     }
 
     synchronized boolean mkDir(final String path) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final MkdirRequest mkdir = new MkdirRequest();
-            mkdir.path = path;
-            m_dbfsApi.mkdirs(mkdir);
+            m_dbfsApi.mkdirs(Mkdir.create(path));
             return true;
         }
     }
 
-    synchronized FileBlockResponse readBlock(final String path, final long offset, final long length) throws IOException {
+    synchronized FileBlock readBlock(final String path, final long offset, final long length) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_dbfsApi.read(path, offset, length);
         }
@@ -92,41 +110,33 @@ public class DBFSConnection extends Connection {
 
     synchronized long createHandle(final String path, final boolean overwrite) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final CreateRequest createReq = new CreateRequest();
-            createReq.path = path;
-            createReq.overwrite = overwrite;
-            return m_dbfsApi.create(createReq).handle;
+            return m_dbfsApi.create(Create.create(path, overwrite)).handle;
         }
     }
 
     synchronized void addBlock(final long handle, final String data) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final AddBlockRequest addBlockReq = new AddBlockRequest();
-            addBlockReq.handle = handle;
-            addBlockReq.data = data;
-            m_dbfsApi.addBlock(addBlockReq);
+            m_dbfsApi.addBlock(AddBlock.create(handle, data));
         }
     }
 
     synchronized void closeHandle(final long handle) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final CloseRequest closeReq = new CloseRequest();
-            closeReq.handle = handle;
-            m_dbfsApi.close(closeReq);
+            m_dbfsApi.close(Close.create(handle));
         }
     }
 
-    synchronized FileInfoReponse getFileInfo(final String path) throws IOException {
+    synchronized FileInfo getFileInfo(final String path) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_dbfsApi.getStatus(path);
         }
     }
 
-    synchronized FileInfoReponse[] listFiles(final String path) throws IOException {
+    synchronized FileInfo[] listFiles(final String path) throws IOException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final FileInfoListResponse resp = m_dbfsApi.list(path);
-            final FileInfoReponse[] files = resp.files;
-            return files != null ? files : new FileInfoReponse[0];
+            final FileInfoList resp = m_dbfsApi.list(path);
+            final FileInfo[] files = resp.files;
+            return files != null ? files : new FileInfo[0];
         }
     }
 

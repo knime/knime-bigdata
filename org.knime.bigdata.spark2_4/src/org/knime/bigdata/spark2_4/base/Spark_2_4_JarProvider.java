@@ -40,6 +40,7 @@ public class Spark_2_4_JarProvider extends JobsPluginJarProvider {
     static {
         JOB_BINDING_CLASSES.put(SparkContextIDScheme.SPARK_JOBSERVER, JobserverSparkJob.class);
         JOB_BINDING_CLASSES.put(SparkContextIDScheme.SPARK_LIVY, LivySparkJob.class);
+        JOB_BINDING_CLASSES.put(SparkContextIDScheme.SPARK_DATABRICKS, DatabricksSparkJob.class);
     }
 
     /**

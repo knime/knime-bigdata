@@ -255,14 +255,12 @@ public class FlowVariableReader {
                 ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
                 ensureHas(TestflowVariable.SPARK_DATABRICKS_URL, flowVariables);
                 ensureHas(TestflowVariable.SPARK_DATABRICKS_CLUSTER_ID, flowVariables);
-                ensureHas(TestflowVariable.SPARK_DATABRICKS_AUTHMETHOD, flowVariables);
-                if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_DATABRICKS_AUTHMETHOD, "TOKEN", flowVariables)) {
-                    ensureHas(TestflowVariable.SPARK_DATABRICKS_TOKEN, flowVariables);
-                } else if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_DATABRICKS_AUTHMETHOD, "USER_PWD", flowVariables)) {
-                    ensureHas(TestflowVariable.SPARK_DATABRICKS_USERNAME, flowVariables);
-                    ensureHas(TestflowVariable.SPARK_DATABRICKS_PASSWORD, flowVariables);
-                } else {
-                    throw new IllegalArgumentException("Invalid databricks authentication method.");
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_WORKSPACE_ID, flowVariables);
+                final boolean hasToken = has(TestflowVariable.SPARK_DATABRICKS_TOKEN, flowVariables);
+                final boolean hasUserAndPw = has(TestflowVariable.SPARK_DATABRICKS_USERNAME, flowVariables)
+                    && has(TestflowVariable.SPARK_DATABRICKS_PASSWORD, flowVariables);
+                if (!hasToken && !hasUserAndPw) {
+                    throw new IllegalArgumentException("Invalid databricks authentication settings: token or username+password required.");
                 }
                 ensureHas(TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, flowVariables);
                 if (TestflowVariable.isTrue(TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, flowVariables)) {

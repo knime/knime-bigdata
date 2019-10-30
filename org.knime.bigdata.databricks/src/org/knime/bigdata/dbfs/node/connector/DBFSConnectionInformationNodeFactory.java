@@ -1,7 +1,6 @@
-package org.knime.bigdata.dbfs.node.connector;
-
 /*
  * ------------------------------------------------------------------------
+ *
  *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
@@ -42,8 +41,9 @@ package org.knime.bigdata.dbfs.node.connector;
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ------------------------------------------------------------------------
+ * ---------------------------------------------------------------------
  */
+package org.knime.bigdata.dbfs.node.connector;
 
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeDialog;
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeModel;
