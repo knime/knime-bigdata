@@ -22,7 +22,7 @@ package org.knime.bigdata.spark2_3.jobs.prepare;
 
 import org.apache.spark.SparkContext;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.InvalidJobJarException;
 import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
@@ -35,18 +35,18 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 public class ValidationUtil {
 
     public static void validateKNIMEPluginVersion(final PrepareContextJobInput input, final JobJarDescriptor jobJarInfo)
-        throws KNIMESparkException {
+        throws InvalidJobJarException {
         if (!input.getKNIMEPluginVersion().equals(jobJarInfo.getPluginVersion())) {
-            throw new KNIMESparkException(String.format(
+            throw new InvalidJobJarException(String.format(
                 "Spark context was created with version %s of the KNIME Extension for Apache Spark, but you are running %s. Please create a new Spark context.",
                 jobJarInfo.getPluginVersion(), input.getKNIMEPluginVersion()));
         }
     }
 
     public static void validateSparkVersion(final SparkContext sparkContext, final PrepareContextJobInput input)
-        throws KNIMESparkException {
+        throws InvalidJobJarException {
         if (!sparkContext.version().startsWith(input.getSparkVersion())) {
-            throw new KNIMESparkException(
+            throw new InvalidJobJarException(
                 String.format("Spark version mismatch: Version %s was expected, but the cluster runs %s.",
                     input.getSparkVersion(), sparkContext.version()));
         }
