@@ -89,6 +89,9 @@ public class ColumnListsProvider {
     /**
      * Method that uses the describe formatted table command to get the normal and partition column information.
      *
+     * In Hive, the first line starts with {@code # col_name}, followed by normal column names in the next rows. On
+     * Databricks, this first line already contains the first normal column.
+     *
      * @param exec {@link ExecutionMonitor}
      * @param table the hive/impala table
      * @param session the {@link DBSession} to use
@@ -107,12 +110,19 @@ public class ColumnListsProvider {
                     while (result.next()) {
                         prevRow = row;
                         row = result.getString(1);
+
+                        // Normal columns in Hive or partition columns
                         if (row.startsWith("# col_name")) {
                             if (prevRow.startsWith("# Partition Information")) {
                                 row = fillListWithColumnNamesFromResultSet(m_partitionColumns, result);
                             } else {
                                 row = fillListWithColumnNamesFromResultSet(m_normalColumns, result);
                             }
+
+                        // First normal column on Databricks
+                        } else if (!row.isEmpty() && m_normalColumns.isEmpty()) {
+                            m_normalColumns.add(new DBColumn(row, result.getString(2), false));
+                            row = fillListWithColumnNamesFromResultSet(m_normalColumns, result);
                         }
                     }
                 }

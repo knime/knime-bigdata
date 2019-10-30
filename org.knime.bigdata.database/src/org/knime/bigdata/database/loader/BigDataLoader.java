@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
 import org.knime.bigdata.database.hive.agent.HiveLoader;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.cloud.core.file.CloudRemoteFile;
@@ -218,6 +219,11 @@ public class BigDataLoader implements DBLoader {
         } else if (HDFSRemoteFileHandler.isSupportedConnection(file.getConnectionInformation())) {
             LOGGER.debug("Load data from hdfs");
             // Hive handles load via move, use Hive default FS URI and provide only input file path
+            return "LOAD DATA INPATH '" + file.getFullName() + "' INTO TABLE " + tableName;
+        } else if (RemoteFileHandlerRegistry.getProtocol(file.getConnectionInformation().getProtocol()).getName()
+                .equalsIgnoreCase("dbfs")) {
+            LOGGER.debug("Load data from dbfs");
+            // DBFS is the default FS on Databricks, use the input file path only
             return "LOAD DATA INPATH '" + file.getFullName() + "' INTO TABLE " + tableName;
         } else {
             LOGGER.debug("Load data from local file system");
