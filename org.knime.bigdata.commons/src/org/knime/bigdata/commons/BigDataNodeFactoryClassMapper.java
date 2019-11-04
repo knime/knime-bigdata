@@ -48,11 +48,12 @@
  */
 package org.knime.bigdata.commons;
 
-import org.knime.core.eclipseUtil.GlobalClassCreator;
-import org.knime.core.node.NodeFactory;
+import java.util.Collections;
+import java.util.Map;
+
 import org.knime.core.node.NodeFactoryClassMapper;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
+import org.knime.core.node.RegexNodeFactoryClassMapper;
+import org.knime.core.util.Pair;
 
 /**
  * {@link NodeFactoryClassMapper} implementation that maps from com.knime.bigdata packages to org.knime.bigdata
@@ -60,26 +61,14 @@ import org.knime.core.node.NodeModel;
  *
  * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
  */
-public class BigDataNodeFactoryClassMapper extends NodeFactoryClassMapper {
-
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(BigDataNodeFactoryClassMapper.class);
+public class BigDataNodeFactoryClassMapper extends RegexNodeFactoryClassMapper {
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings({"unchecked", "deprecation"})
     @Override
-    public NodeFactory<NodeModel> mapFactoryClassName(final String factoryClassName) {
-        if (factoryClassName.startsWith("com.knime.bigdata")) {
-            final String newClassName = factoryClassName.replace("com.knime.bigdata", "org.knime.bigdata");
-            try {
-                return (NodeFactory<NodeModel>)((GlobalClassCreator.createClass(newClassName)).newInstance());
-            } catch (Exception e) {
-                //this might happen for old com.knime.bigdata classes
-                LOGGER.debug("Could not find class " + newClassName + " for " + factoryClassName);
-            }
-        }
-        return null;
+    protected Map<String, Pair<String, String>> getRegexRulesInternal() {
+        return Collections.singletonMap("^com\\.knime\\.bigdata.*",
+            new Pair<>("^com\\.knime\\.bigdata", "org.knime.bigdata"));
     }
-
 }
