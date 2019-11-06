@@ -103,9 +103,9 @@ public final class DatabricksDBUrlTemplateValidator extends AbstractUrlTemplateV
     private static final Set<String> VARIABLE_NAMES = VARIABLES.keySet();
 
     /**
-     * The singleton {@link ServerUrlTemplateValidator} instance.
+     * The singleton {@link DatabricksDBUrlTemplateValidator} instance.
      */
-    static final ServerUrlTemplateValidator INSTANCE = new ServerUrlTemplateValidator();
+    static final DatabricksDBUrlTemplateValidator INSTANCE = new DatabricksDBUrlTemplateValidator();
 
     @Override
     public void setInitializationData(final IConfigurationElement config, final String propertyName, final Object data)
