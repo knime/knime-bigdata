@@ -5,13 +5,15 @@
 
    <extension point="org.knime.database.DBType">
       <DBType description="Hive" id="hive" name="Hive"
-        urlTemplateValidator="org.knime.database.node.connector.server.ServerUrlTemplateValidator$ExecutableExtensionFactory">
+        urlTemplateValidator="org.knime.database.node.connector.server.ServerUrlTemplateValidator$ExecutableExtensionFactory"
+        defaultAttributeDefinitionSupplier="org.knime.database.DBType$NonTransactionalDefaultAttributeSupplier$Factory">
             <UrlTemplateExamples>
             <UrlTemplateExample template="jdbc:hive2://&lt;host&gt;:&lt;port&gt;/[database]"/>
         </UrlTemplateExamples>
       </DBType>
       <DBType description="Impala" id="impala" name="Impala"
-        urlTemplateValidator="org.knime.database.node.connector.server.ServerUrlTemplateValidator$ExecutableExtensionFactory">
+        urlTemplateValidator="org.knime.database.node.connector.server.ServerUrlTemplateValidator$ExecutableExtensionFactory"
+        defaultAttributeDefinitionSupplier="org.knime.database.DBType$NonTransactionalDefaultAttributeSupplier$Factory">
             <UrlTemplateExamples>
             <UrlTemplateExample template="jdbc:impala://&lt;host&gt;:&lt;port&gt;/[database]"/>
         </UrlTemplateExamples>
