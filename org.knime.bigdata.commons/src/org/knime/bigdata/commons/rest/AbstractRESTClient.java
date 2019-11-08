@@ -69,10 +69,10 @@ public class AbstractRESTClient {
     private static final NodeLogger LOG = NodeLogger.getLogger(AbstractRESTClient.class);
 
     /** Chunk threshold in bytes. */
-    private static final int CHUNK_THRESHOLD = 10 * 1024 * 1024; // 10MB
+    protected static final int CHUNK_THRESHOLD = 10 * 1024 * 1024; // 10MB
 
     /** Length in bytes of each chunk. */
-    private static final int CHUNK_LENGTH = 1 * 1024 * 1024; // 1MB
+    protected static final int CHUNK_LENGTH = 1 * 1024 * 1024; // 1MB
 
     private static final Version CLIENT_VERSION = FrameworkUtil.getBundle(AbstractRESTClient.class).getVersion();
     private static final String USER_AGENT = "KNIME/" + CLIENT_VERSION;

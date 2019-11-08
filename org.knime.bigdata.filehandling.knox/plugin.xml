@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension point="org.knime.base.filehandling.RemoteFileHandler">
+     <RemoteFileHandler
+          RemoteFileHandler="org.knime.bigdata.filehandling.knox.KnoxHDFSRemoteFileHandler">
+     </RemoteFileHandler>
+   </extension>
+
+   <extension point="org.knime.workbench.repository.nodes">
+     <node
+         category-path="/io/filehandling/remote/connections"
+         factory-class="org.knime.bigdata.filehandling.knox.node.connector.KnoxHDFSConnectionNodeFactory">
+     </node>
+   </extension>
+  
+   <extension
+         point="org.knime.core.PortType">
+     <portType
+            hidden="false"
+            name="KnoxHdfsConnection"
+            objectClass="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObject"
+            objectSerializer="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObject$Serializer"
+            specClass="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObjectSpec"
+            specSerializer="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObjectSpec$Serializer">
+      </portType>
+   </extension>
+</plugin>

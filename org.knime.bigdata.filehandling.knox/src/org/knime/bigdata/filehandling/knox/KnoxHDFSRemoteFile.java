@@ -43,61 +43,65 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.dbfs.filehandler;
+package org.knime.bigdata.filehandling.knox;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.AccessDeniedException;
 
-import org.knime.base.filehandling.NodeUtils;
+import javax.ws.rs.NotFoundException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
+import org.knime.bigdata.filehandling.knox.rest.FileStatus;
+import org.knime.bigdata.filehandling.knox.rest.FileStatus.Type;
 import org.knime.core.node.ExecutionContext;
 
 /**
- * DBFS remote file implementation with file info cache.
+ * Web HDFS via KNOX remote file implementation with file info cache.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
+public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
 
     private boolean m_fileInfoLoaded = false;
-    private FileInfo m_fileInfo;
+    private FileStatus m_fileStatus;
 
     /**
-     * Create a remote DBFS file.
+     * Create a remote file.
      *
      * @param uri The URI pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
      */
-    protected DBFSRemoteFile(final URI uri, final ConnectionInformation connectionInformation,
-        final ConnectionMonitor<DBFSConnection> connectionMonitor) {
+    protected KnoxHDFSRemoteFile(final URI uri, final KnoxHDFSConnectionInformation connectionInformation,
+        final ConnectionMonitor<KnoxHDFSConnection> connectionMonitor) {
         super(uri, connectionInformation, connectionMonitor);
     }
 
     /**
-     * Create a remote DBFS file with cached {@link FileInfo}.
+     * Create a remote file with cached {@link FileStatus}.
      *
-     * @param fileInfo cached file info
+     * @param fileStatus cached file info
      * @param uri The URI pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
      */
-    protected DBFSRemoteFile(final FileInfo fileInfo, final URI uri,
+    protected KnoxHDFSRemoteFile(final FileStatus fileStatus, final URI uri,
             final ConnectionInformation connectionInformation,
-            final ConnectionMonitor<DBFSConnection> connectionMonitor) {
+            final ConnectionMonitor<KnoxHDFSConnection> connectionMonitor) {
         super(uri, connectionInformation, connectionMonitor);
 
         m_fileInfoLoaded = true;
-        m_fileInfo = fileInfo;
+        m_fileStatus = fileStatus;
     }
 
-    private DBFSConnection getOpenedConnection() throws IOException {
+    private KnoxHDFSConnection getOpenedConnection() throws IOException {
         try {
             open();
             return getConnection();
@@ -106,20 +110,23 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
         }
     }
 
-    private FileInfo getFileInfo() throws IOException {
+    private FileStatus getFileStatus() throws IOException {
         if (!m_fileInfoLoaded) {
             try {
-                m_fileInfo = getOpenedConnection().getFileInfo(getURI().getPath());
-            } catch (FileNotFoundException e) {
+                m_fileStatus = getOpenedConnection().getFileStatus(getURI().getPath());
                 m_fileInfoLoaded = true;
-                m_fileInfo = null;
-                throw e;
+            } catch (AccessDeniedException e) {
+                throw new RemoteFile.AccessControlException(e);
+            } catch (NotFoundException e) {
+                m_fileInfoLoaded = true;
+                m_fileStatus = null;
+                throw new FileNotFoundException(getURI().getPath());
             }
-        } else if (m_fileInfo == null) {
+        } else if (m_fileStatus == null) {
             throw new FileNotFoundException(getURI().getPath());
         }
 
-        return m_fileInfo;
+        return m_fileStatus;
     }
 
     @Override
@@ -128,53 +135,70 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
     }
 
     @Override
-    protected DBFSConnection createConnection() {
-        return new DBFSConnection(getConnectionInformation());
+    protected KnoxHDFSConnection createConnection() {
+        return new KnoxHDFSConnection((KnoxHDFSConnectionInformation) getConnectionInformation());
     }
 
     @Override
     public String getType() {
-        return DBFSRemoteFileHandler.DBFS_PROTOCOL.getName();
+        return KnoxHDFSRemoteFileHandler.KNOXHDFS_PROTOCOL.getName();
+    }
+
+    /**
+     * Create a unique connection identifier using the basic schema and the path from the KNOX end point that includes
+     * the KNOX topology/cluster name. This is required because a connection to a KNOX instance can use different
+     * topologies with e.g. different authentication methods using the same username.
+     *
+     * @return unique connection identifier
+     */
+    @Override
+    public String getIdentifier() {
+        if (getConnectionInformation() == null) {
+            throw new RuntimeException("KNOX connection informations input required.");
+        } else {
+            return ((KnoxHDFSConnectionInformation) getConnectionInformation()).getIdentifier();
+        }
     }
 
     @Override
     public boolean exists() throws Exception {
         try {
-            getFileInfo();
+            // use the cached file status instead of calling getOpenedConnection().exists
+            getFileStatus();
             return true;
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException|NotFoundException e) {
             return false;
         }
     }
 
     @Override
     public boolean isDirectory() throws Exception {
-        return getFileInfo().is_dir;
+        return getFileStatus().type == Type.DIRECTORY;
     }
 
     @Override
     public InputStream openInputStream() throws Exception {
-        return new DBFSInputStream(getURI().getPath(), getOpenedConnection());
+        return getOpenedConnection().open(getURI().getPath());
     }
 
     @Override
     public OutputStream openOutputStream() throws Exception {
         invalidateCachedFileInfo();
-        return new DBFSOutputStream(getURI().getPath(), getOpenedConnection(), true);
+        return getOpenedConnection().create(getURI().getPath(), true);
     }
 
     @Override
     public long getSize() throws Exception {
-        return getFileInfo().file_size;
+        return getFileStatus().length;
     }
 
     @Override
     public long lastModified() throws Exception {
-        throw new IllegalArgumentException("DBFS does not support modified timestamps.");
+        return getFileStatus().modificationTime;
     }
 
     @Override
-    public void move(final RemoteFile<DBFSConnection> source, final ExecutionContext exec) throws Exception {
+    public void move(final RemoteFile<KnoxHDFSConnection> source, final ExecutionContext exec) throws Exception {
         invalidateCachedFileInfo();
         if (getIdentifier().equals(source.getIdentifier())) {
             getOpenedConnection().move(source.getURI().getPath(), getURI().getPath());
@@ -190,25 +214,41 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
     }
 
     @Override
-    public DBFSRemoteFile[] listFiles() throws Exception {
-        final FileInfo[] fileInfos = getOpenedConnection().listFiles(getURI().getPath());
-        final DBFSRemoteFile[] files = new DBFSRemoteFile[fileInfos.length];
-        for (int i = 0, length = fileInfos.length; i < length; i++) {
-            final String path = fileInfos[i].path + (fileInfos[i].is_dir ? "/" : "");
-            final URI uri = getURI().resolve(NodeUtils.encodePath(path));
-            files[i] = new DBFSRemoteFile(fileInfos[i], uri, getConnectionInformation(), getConnectionMonitor());
+    public KnoxHDFSRemoteFile[] listFiles() throws Exception {
+        try {
+            final FileStatus[] fileStatus = getOpenedConnection().listFiles(getURI().getPath());
+            final KnoxHDFSRemoteFile[] files = new KnoxHDFSRemoteFile[fileStatus.length];
+            for (int i = 0, length = fileStatus.length; i < length; i++) {
+                final URI uri = getURI(getURI(), fileStatus[i]);
+                files[i] = new KnoxHDFSRemoteFile(fileStatus[i], uri, getConnectionInformation(), getConnectionMonitor());
+            }
+            return files;
+        } catch (AccessDeniedException e) {
+            throw new RemoteFile.AccessControlException(e);
         }
-        return files;
+    }
+
+    private static URI getURI(final URI parent, final FileStatus child) {
+        if (StringUtils.isBlank(child.pathSuffix)) {
+            return parent;
+        } else {
+            final String parentPath = parent.getPath();
+            final StringBuilder sb = new StringBuilder(parentPath);
+            if (!parentPath.endsWith("/")) { sb.append("/"); }
+            sb.append(child.pathSuffix);
+            if (child.type == Type.DIRECTORY) { sb.append("/"); }
+            return parent.resolve(sb.toString());
+        }
     }
 
     @Override
     public boolean mkDir() throws Exception {
         invalidateCachedFileInfo();
-        return getOpenedConnection().mkDir(getURI().getPath());
+        return getOpenedConnection().mkdirs(getURI().getPath());
     }
 
     private void invalidateCachedFileInfo() {
         m_fileInfoLoaded = false;
-        m_fileInfo = null;
+        m_fileStatus = null;
     }
 }

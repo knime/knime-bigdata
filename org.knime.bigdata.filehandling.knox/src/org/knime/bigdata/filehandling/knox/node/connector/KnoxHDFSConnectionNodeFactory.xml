@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
+    icon="./knoxconnection16x16.png" type="Source">
+    <name>Secure WebHDFS via KNOX Connection</name>
+
+    <shortDescription>
+    	Configures a WebHDFS connection using a KNOX gateway.
+    </shortDescription>
+
+    <fullDescription>
+        <intro>
+            This node configures the connection information that will be used to
+            connect to a HDFS behind a <a href="https://knox.apache.org">Apache KNOX</a> gateway using WebHDFS. 
+        </intro>
+
+        <tab name="General">
+			<option name="KNOX WebHDFS URL">
+				Full KNOX deployment URL including cluster name e.g. https://&lt;server&gt;:8443/gateway/&lt;default&gt;/webhdfs/v1
+				(replace &lt;server&gt; with the fully qualified hostname and &lt;default&gt; with you cluster/topology name).
+				Protocol should be <i>https</i> and port <i>8443</i> on most deployments.
+			</option>
+	        <option name="Authentication">
+	        	This node supports only HTTP basic authentication with username and password.
+	        </option>
+        </tab>
+        <tab name="Advanced">
+	        <option name="Timeout">
+	            Specify the timeout for the connection in milliseconds here.
+	        </option>
+        </tab>
+    </fullDescription>
+
+    <ports>
+        <outPort name="WebHDFS Connection information port" index="0">
+            Port object containing the WebHDFS connection information.
+        </outPort>
+    </ports>
+</knimeNode>
