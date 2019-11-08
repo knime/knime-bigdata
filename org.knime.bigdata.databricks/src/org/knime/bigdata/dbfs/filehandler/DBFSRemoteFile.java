@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.AccessDeniedException;
 
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
@@ -110,6 +111,9 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
         if (!m_fileInfoLoaded) {
             try {
                 m_fileInfo = getOpenedConnection().getFileInfo(getURI().getPath());
+                m_fileInfoLoaded = true;
+            } catch (AccessDeniedException e) {
+                throw new RemoteFile.AccessControlException(e);
             } catch (FileNotFoundException e) {
                 m_fileInfoLoaded = true;
                 m_fileInfo = null;
@@ -140,6 +144,8 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
     @Override
     public boolean exists() throws Exception {
         try {
+            // do not cache the exists state
+            invalidateCachedFileInfo();
             getFileInfo();
             return true;
         } catch (FileNotFoundException e) {
@@ -191,14 +197,18 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
 
     @Override
     public DBFSRemoteFile[] listFiles() throws Exception {
-        final FileInfo[] fileInfos = getOpenedConnection().listFiles(getURI().getPath());
-        final DBFSRemoteFile[] files = new DBFSRemoteFile[fileInfos.length];
-        for (int i = 0, length = fileInfos.length; i < length; i++) {
-            final String path = fileInfos[i].path + (fileInfos[i].is_dir ? "/" : "");
-            final URI uri = getURI().resolve(NodeUtils.encodePath(path));
-            files[i] = new DBFSRemoteFile(fileInfos[i], uri, getConnectionInformation(), getConnectionMonitor());
+        try {
+            final FileInfo[] fileInfos = getOpenedConnection().listFiles(getURI().getPath());
+            final DBFSRemoteFile[] files = new DBFSRemoteFile[fileInfos.length];
+            for (int i = 0, length = fileInfos.length; i < length; i++) {
+                final String path = fileInfos[i].path + (fileInfos[i].is_dir ? "/" : "");
+                final URI uri = getURI().resolve(NodeUtils.encodePath(path));
+                files[i] = new DBFSRemoteFile(fileInfos[i], uri, getConnectionInformation(), getConnectionMonitor());
+            }
+            return files;
+        } catch (AccessDeniedException e) {
+            throw new RemoteFile.AccessControlException(e);
         }
-        return files;
     }
 
     @Override

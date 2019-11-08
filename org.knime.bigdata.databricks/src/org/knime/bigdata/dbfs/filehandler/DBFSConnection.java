@@ -158,7 +158,7 @@ public class DBFSConnection extends Connection {
         // user+password based authentication
         } else if (m_dbfsApi == null) {
             m_dbfsApi = DatabricksRESTClient.create(
-                "https://" + m_connectionInformation.getHost(),
+                "https://" + m_connectionInformation.getHost() + ":" + m_connectionInformation.getPort(),
                 DBFSAPI.class,
                 m_connectionInformation.getUser(),
                 KnimeEncryption.decrypt(m_connectionInformation.getPassword()),
