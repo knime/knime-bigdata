@@ -80,6 +80,10 @@ public class DBFSConnection extends Connection {
      */
     public DBFSConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
+
+        if (connectionInformation == null) {
+            throw new RuntimeException("DBFS connection informations input required.");
+        }
     }
 
     synchronized boolean delete(final String path, final boolean recursive) throws IOException {

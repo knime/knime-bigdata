@@ -69,6 +69,10 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
     public HDFSConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
 
+        if (connectionInformation == null) {
+            throw new RuntimeException("HDFS connection informations input required.");
+        }
+
         if (m_connectionInformation.useKerberos()) {
             LOGGER.debug("Adding Kerberos settings to configuration");
             m_conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
