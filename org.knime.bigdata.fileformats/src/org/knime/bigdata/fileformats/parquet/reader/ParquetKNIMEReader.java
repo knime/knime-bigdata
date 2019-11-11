@@ -69,6 +69,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
+import org.knime.bigdata.fileformats.node.reader.FileFormatReaderInput;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetCellValueProducerFactory;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
@@ -94,7 +95,7 @@ import org.knime.datatype.mapping.ExternalDataTableSpec;
  */
 public class ParquetKNIMEReader extends AbstractFileFormatReader {
 
-    private final Queue<ParquetReader<DataRow>> m_readers;
+    private final Queue<FileFormatReaderInput<ParquetReader<DataRow>>> m_readers;
 
     private final Map<OriginalType, DataType> m_orgTypes = new EnumMap<>(OriginalType.class);
 
@@ -149,10 +150,15 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
 
             final Configuration conf = createConfig(remoteFile);
             Path path = new Path(remoteFile.getURI());
+            RemoteFile<Connection> tempFile = null;
             if (getFile().getConnection() instanceof S3Connection) {
                 final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>)remoteFile;
                 path = generateS3nPath(cloudcon);
+            } else if (readFromLocalCopy(remoteFile)) {
+                tempFile = downloadLocalCopy(remoteFile);
+                path = new Path(tempFile.getURI());
             }
+
             final MessageType schema = getSchema(path, conf);
             ProductionPath[] productionPaths = getPaths(schema);
             final DataTableSpec tableSpec = createTableSpec(schema, productionPaths);
@@ -173,13 +179,8 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
                     .withConf(conf).build();
             }
 
-            m_readers.add(reader);
-        } catch (final IOException ioe) {
-            if (ioe.getMessage().contains("No FileSystem for scheme")) {
-                throw new BigDataFileFormatException(
-                    "Protocol " + remoteFile.getConnectionInformation().getProtocol() + " is not supported.");
-            }
-            throw new BigDataFileFormatException(ioe);
+            m_readers.add(new FileFormatReaderInput<>(reader, tempFile));
+
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
@@ -254,11 +255,15 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
     @SuppressWarnings("resource")
     @Override
     public FileFormatRowIterator getNextIterator(final long i) throws Exception {
-        // Parquet inits the FS only during read() so we need the doAS here
-        final ParquetReader<DataRow> reader = m_readers.poll();
+        final FileFormatReaderInput<ParquetReader<DataRow>> readerInput = m_readers.poll();
         FileFormatRowIterator iterator = null;
-        if (reader != null) {
-            if (useKerberos()) {
+        if (readerInput != null) {
+            final ParquetReader<DataRow> reader = readerInput.getReader();
+
+            if (readerInput.removeLocalInputFileAfterClose()) {
+                iterator = new ParquetRowIterator(i, reader, readerInput.getTempInputFile());
+            } else if (useKerberos()) {
+                // Parquet inits the FS only during read() so we need the doAS here
                 iterator = UserGroupUtil.runWithProxyUserUGIIfNecessary((ugi) -> ugi
                     .doAs((PrivilegedExceptionAction<FileFormatRowIterator>)() -> new ParquetRowIterator(i, reader)));
             } else {

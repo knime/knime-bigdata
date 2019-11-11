@@ -66,6 +66,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
+import org.knime.bigdata.fileformats.node.reader.FileFormatReaderInput;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCParameter;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCSource;
@@ -112,15 +113,18 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
         private final ProducerParameters<ORCSource>[] m_parameters;
 
+        private final RemoteFile<Connection> m_tempInputFile;
+
         /**
          * Row iterator for DataRows read from a ORC file.
          *
          * @param reader the ORC Reader
          * @param batchSize the batch size for reading
+         * @param tempInputFile temporary input file that should be removed on close
          * @throws IOException if file can not be read
          */
         OrcRowIterator(final Reader reader, final long index, final ProductionPath[] paths,
-            final ProducerParameters<ORCSource>[] params) throws IOException {
+            final ProducerParameters<ORCSource>[] params, final RemoteFile<Connection> tempInputFile) throws IOException {
             m_orcReader = reader;
             final Options options = m_orcReader.options();
             m_rows = m_orcReader.rows(options);
@@ -129,6 +133,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             m_index = index;
             m_iterationPaths = paths.clone();
             m_parameters = params.clone();
+            m_tempInputFile = tempInputFile;
             internalNext();
         }
 
@@ -141,8 +146,20 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
                 m_rows.close();
             } catch (final IOException e) {
                 LOGGER.info("Could not close iterator.", e);
+            } finally {
+                removeTempInputFile();
             }
             m_hastNext = false;
+        }
+
+        private void removeTempInputFile() {
+            if (m_tempInputFile != null) {
+                try {
+                    m_tempInputFile.delete();
+                } catch (Exception e) {
+                    throw new BigDataFileFormatException("Could not delete temporary file: " + e.getMessage(), e);
+                }
+            }
         }
 
         @Override
@@ -206,7 +223,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(OrcKNIMEReader.class);
 
-    private final Queue<Reader> m_readers;
+    private final Queue<FileFormatReaderInput<Reader>> m_readers;
 
     private ProductionPath[] m_paths;
 
@@ -247,15 +264,20 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         return params;
     }
 
-    private Reader createORCReader(final RemoteFile<Connection> remotefile) throws Exception {
+    private FileFormatReaderInput<Reader> createORCReader(final RemoteFile<Connection> remotefile) throws Exception {
         final Configuration conf = createConfig(remotefile);
         Path readPath = new Path(remotefile.getURI());
         Reader reader = null;
+        RemoteFile<Connection> tempFile = null;
 
         if (getFile().getConnection() instanceof S3Connection) {
             final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>)remotefile;
             readPath = generateS3nPath(cloudcon);
+        } else if (readFromLocalCopy(remotefile)) {
+            tempFile = downloadLocalCopy(remotefile);
+            readPath = new Path(tempFile.getURI());
         }
+
         final Path path = readPath;
         if (useKerberos()) {
             reader = UserGroupUtil.runWithProxyUserUGIIfNecessary((ugi) -> ugi.doAs(
@@ -263,27 +285,21 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         } else {
             reader = OrcFile.createReader(readPath, OrcFile.readerOptions(conf));
         }
-        return reader;
+
+        return new FileFormatReaderInput<>(reader, tempFile);
     }
 
     @Override
     protected void createReader(final List<DataTableSpec> schemas, final RemoteFile<Connection> remotefile) {
         try {
-            final Reader reader = createORCReader(remotefile);
-            m_readers.add(reader);
+            final FileFormatReaderInput<Reader> readerInput = createORCReader(remotefile);
+            m_readers.add(readerInput);
             final ExecutionContext exec = getExec();
             if (exec != null) {
                 exec.setProgress("Retrieving schema for file " + remotefile.getName());
                 exec.checkCanceled();
             }
-            schemas.add(createSpecFromOrcSchema(reader.getSchema()));
-
-        } catch (final IOException ioe) {
-            if (ioe.getMessage().contains("No FileSystem for scheme")) {
-                throw new BigDataFileFormatException(
-                    "Protocol " + remotefile.getConnectionInformation().getProtocol() + " is not supported.");
-            }
-            throw new BigDataFileFormatException(ioe);
+            schemas.add(createSpecFromOrcSchema(readerInput.getReader().getSchema()));
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
@@ -314,10 +330,11 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
      */
     @Override
     public FileFormatRowIterator getNextIterator(final long i) throws IOException {
-        final Reader reader = m_readers.poll();
+        final FileFormatReaderInput<Reader> readerInput = m_readers.poll();
         FileFormatRowIterator rowIterator = null;
-        if (reader != null) {
-            rowIterator = new OrcRowIterator(reader, i, m_paths, m_params);
+        if (readerInput != null) {
+            rowIterator =
+                new OrcRowIterator(readerInput.getReader(), i, m_paths, m_params, readerInput.getTempInputFile());
         }
         return rowIterator;
     }

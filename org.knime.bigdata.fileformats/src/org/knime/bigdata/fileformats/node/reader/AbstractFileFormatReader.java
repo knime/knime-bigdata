@@ -44,9 +44,11 @@
  */
 package org.knime.bigdata.fileformats.node.reader;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.security.InvalidKeyException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +63,9 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
+import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.cloud.aws.s3.filehandler.S3RemoteFileHandler;
@@ -72,6 +76,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.filestore.FileStoreFactory;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.util.FileUtil;
 import org.knime.core.util.KnimeEncryption;
 import org.knime.datatype.mapping.ExternalDataTableSpec;
 
@@ -98,6 +103,26 @@ public abstract class AbstractFileFormatReader {
             if (!schemas.get(i).equals(refSchema)) {
                 throw new FileFormatException("Schemas of input files do not match.");
             }
+        }
+    }
+
+    /**
+     * Decides if the file should be downloaded and then read from the local copy.
+     *
+     * @param remoteFile the remote file to access
+     * @return {@code true} if file should be downloaded and read from local copy
+     * @throws IOException on missing connection informations
+     */
+    protected static boolean readFromLocalCopy(final RemoteFile<Connection> remoteFile) throws IOException {
+        final ConnectionInformation conInfo = remoteFile.getConnectionInformation();
+
+        if (conInfo == null
+                || HDFSRemoteFileHandler.isSupportedConnection(conInfo)
+                || HDFSLocalRemoteFileHandler.isSupportedConnection(conInfo)
+                || S3RemoteFileHandler.PROTOCOL.getName().equals(conInfo.getProtocol())) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -148,8 +173,6 @@ public abstract class AbstractFileFormatReader {
                 toReturn.set("fs.s3n.awsSecretAccessKey", secretKey);
                 toReturn.set("fs.s3.awsAccessKeyId", accessID);
                 toReturn.set("fs.s3.awsSecretAccessKey", secretKey);
-            } else {
-                throw new IOException(conInfo.getProtocol() + " protocol not supported");
             }
         }
 
@@ -180,6 +203,16 @@ public abstract class AbstractFileFormatReader {
     private ExternalDataTableSpec<?> m_externalTableSpec;
 
     private final boolean m_useKerberos;
+
+    /**
+     * Download directory for local copies or {@code null} on HDFS/S3 connections.
+     */
+    private File m_localDownloadDir;
+
+    /**
+     * Download file count, used for temporary file suffix.
+     */
+    private int m_localDownloadCount;
 
     /**
      * Constructor for FileFormatReader
@@ -333,4 +366,33 @@ public abstract class AbstractFileFormatReader {
         return m_useKerberos;
     }
 
+    /**
+     * Download given remote file to a local temporary file.
+     *
+     * @param remoteFile remote file to download
+     * @return local temporary copy of remote file
+     * @throws Exception on download failures
+     */
+    protected synchronized RemoteFile<Connection> downloadLocalCopy(final RemoteFile<Connection> remoteFile) throws Exception {
+        if (m_localDownloadDir == null) {
+            m_localDownloadDir = FileUtil.createTempDir("clouddownload");
+            m_localDownloadCount = 0;
+        }
+
+        if (useKerberos()) {
+            return UserGroupUtil.runWithProxyUserUGIIfNecessary(
+                ugi -> ugi.doAs((PrivilegedExceptionAction<RemoteFile<Connection>>)() -> downloadLocalCopy(m_exec,
+                    remoteFile, m_localDownloadDir, m_localDownloadCount++)));
+        } else {
+            return downloadLocalCopy(m_exec, remoteFile, m_localDownloadDir, m_localDownloadCount++);
+        }
+    }
+
+    private static RemoteFile<Connection> downloadLocalCopy(final ExecutionContext exec,
+        final RemoteFile<Connection> remotefile, final File localDownloadDir, final int fileCount) throws Exception {
+
+        final RemoteFile<Connection> tempFile = FileHandlingUtility.createTempFile(localDownloadDir, fileCount);
+        tempFile.write(remotefile, exec);
+        return tempFile;
+    }
 }

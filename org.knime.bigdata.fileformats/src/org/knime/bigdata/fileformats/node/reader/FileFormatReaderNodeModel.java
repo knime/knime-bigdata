@@ -191,11 +191,18 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
         if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
             throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
         }
-        boolean useKerberos = connInfo != null && connInfo.useKerberos();
-        final AbstractFileFormatReader reader =
-            getReader(remoteFile, null, outputDataTypeMappingConfiguration, useKerberos);
-        final DataTableSpec spec = reader.getTableSpec();
-        return new DataTableSpec[]{spec};
+
+        // do not download files in configure
+        if (AbstractFileFormatReader.readFromLocalCopy(remoteFile)) {
+            return new DataTableSpec[]{null};
+
+        } else {
+            boolean useKerberos = connInfo != null && connInfo.useKerberos();
+            final AbstractFileFormatReader reader =
+                getReader(remoteFile, null, outputDataTypeMappingConfiguration, useKerberos);
+            final DataTableSpec spec = reader.getTableSpec();
+            return new DataTableSpec[]{spec};
+        }
     }
 
     /**

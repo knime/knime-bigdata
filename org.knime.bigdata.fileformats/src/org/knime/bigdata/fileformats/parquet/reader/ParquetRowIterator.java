@@ -49,6 +49,8 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import org.apache.parquet.hadoop.ParquetReader;
+import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
@@ -59,17 +61,25 @@ class ParquetRowIterator extends FileFormatRowIterator {
     long m_index;
     private final ParquetReader<DataRow> m_reader;
     private DataRow m_nextRow;
+    private final RemoteFile<Connection> m_tempInputFile;
 
     /**
      * @param index the index to start the row key
      * @param reader the reader to use
+     * @param tempInputFile temporary input file that should be removed on close
      */
-    public ParquetRowIterator(final long index, final ParquetReader<DataRow> reader) {
+    public ParquetRowIterator(final long index, final ParquetReader<DataRow> reader, final RemoteFile<Connection> tempInputFile) {
         super();
         m_index = index;
         m_reader = reader;
         m_nextRow = internalNext();
+        m_tempInputFile = tempInputFile;
     }
+
+    public ParquetRowIterator(final long index, final ParquetReader<DataRow> reader) {
+        this(index, reader, null);
+    }
+
 
     @Override
     public void close() {
@@ -77,6 +87,18 @@ class ParquetRowIterator extends FileFormatRowIterator {
             m_reader.close();
         } catch (final IOException e) {
             throw new BigDataFileFormatException("Could not close reader", e);
+        } finally {
+            removeTempInputFile();
+        }
+    }
+
+    private void removeTempInputFile() {
+        if (m_tempInputFile != null) {
+            try {
+                m_tempInputFile.delete();
+            } catch (Exception e) {
+                throw new BigDataFileFormatException("Could not delete temporary file: " + e.getMessage(), e);
+            }
         }
     }
 
