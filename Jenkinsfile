@@ -42,6 +42,7 @@ node {
 				[name : 'knime-jenkins'],
 				[name : 'knime-orc'],
 				[name : 'knime-parquet'],
+				[name : 'knime-google'],
 				[name : 'knime-sparkling-water']
 			]
 		)

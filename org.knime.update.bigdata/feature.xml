@@ -52,4 +52,8 @@
          id="com.knime.features.bigdata.knosp"
          version="0.0.0"/>
 
+   <includes
+         id="org.knime.features.database.extensions.bigquery"
+         version="0.0.0"/>
+
 </feature>
