@@ -88,15 +88,19 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
 
     /**
      * Write Support for KNIME DataRow
-     * 
-     * @param name the name of table
+     *
+     * @param name the name of table. All special characters will be replaced with _!
      * @param spec the table spec
      * @param consumptionPaths the type mapping consumption paths
      * @param params the parameters for writing
      */
-    public DataRowWriteSupport(String name, DataTableSpec spec, 
-            ConsumptionPath[] consumptionPaths, ParquetParameter[] params) {
-        m_name = name;
+    public DataRowWriteSupport(final String name, final DataTableSpec spec,
+            final ConsumptionPath[] consumptionPaths, final ParquetParameter[] params) {
+        if (name != null) {
+            m_name = name.replaceAll("\\W", "_");
+        } else {
+            m_name = "KNIMETable";
+        }
         m_paths = consumptionPaths.clone();
         m_spec = spec;
         m_params = params.clone();
@@ -113,7 +117,7 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
         .map(CellValueConsumerFactory::getDestinationType)
         .collect(Collectors.toList());
 
-        
+
         final List<Type> fields = new ArrayList<>();
         for (int i = 0; i < m_spec.getNumColumns() ; i++) {
             final Type type = types.get(i).constructParquetType(m_spec.getColumnSpec(i).getName());
