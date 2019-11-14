@@ -56,9 +56,11 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
 import org.knime.bigdata.database.hive.agent.HiveLoader;
+import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnectionInformation;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.core.node.ExecutionMonitor;
@@ -210,18 +212,19 @@ public class BigDataLoader implements DBLoader {
 
     private String buildLoadCommand(final DBTable tmpTable, final RemoteFile<?> file) throws Exception {
         final String tableName = getDialect().createFullName(tmpTable);
+        final ConnectionInformation connInfo = file.getConnectionInformation();
         if (file instanceof CloudRemoteFile) {
             LOGGER.debug("Load data from cloud file system");
             final CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>)file;
             final String clusterInputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
             // Hive handles load via move, use the full URI for cloud file systems e.g S3 and Azure BlobStore
             return "LOAD DATA INPATH '" + clusterInputPath + "' INTO TABLE " + tableName;
-        } else if (HDFSRemoteFileHandler.isSupportedConnection(file.getConnectionInformation())) {
+        } else if (HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+                || connInfo instanceof HDFSCompatibleConnectionInformation) {
             LOGGER.debug("Load data from hdfs");
             // Hive handles load via move, use Hive default FS URI and provide only input file path
             return "LOAD DATA INPATH '" + file.getFullName() + "' INTO TABLE " + tableName;
-        } else if (RemoteFileHandlerRegistry.getProtocol(file.getConnectionInformation().getProtocol()).getName()
-                .equalsIgnoreCase("dbfs")) {
+        } else if (RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().equalsIgnoreCase("dbfs")) {
             LOGGER.debug("Load data from dbfs");
             // DBFS is the default FS on Databricks, use the input file path only
             return "LOAD DATA INPATH '" + file.getFullName() + "' INTO TABLE " + tableName;

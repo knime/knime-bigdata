@@ -24,6 +24,8 @@ import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
+import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnection;
+import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnectionInformation;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -105,6 +107,7 @@ public class RemoteFSController implements StagingAreaAccess {
 
     private static boolean stagingAreaIsPath(final ConnectionInformation connInfo) {
         if (HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+            || (connInfo instanceof HDFSCompatibleConnectionInformation)
             || HDFSLocalRemoteFileHandler.isSupportedConnection(connInfo)) {
             return true;
         } else if (connInfo instanceof CloudConnectionInformation) {
@@ -116,7 +119,8 @@ public class RemoteFSController implements StagingAreaAccess {
     }
 
     private List<String> generateStagingAreaCandidates() throws Exception {
-        if (HDFSRemoteFileHandler.isSupportedConnection(m_connectionInformation)) {
+        if (HDFSRemoteFileHandler.isSupportedConnection(m_connectionInformation)
+                || m_connectionInformation instanceof HDFSCompatibleConnectionInformation) {
             return generateStagingAreaCandidatesForHDFS();
         } else if (HDFSLocalRemoteFileHandler.isSupportedConnection(m_connectionInformation)) {
             return generateStagingAreaCandidatesForLocalHDFS();
@@ -151,9 +155,8 @@ public class RemoteFSController implements StagingAreaAccess {
         return String.format("%s%s%s/", parent, (parent.endsWith("/") ? "" : "/"), childDir);
     }
 
-    @SuppressWarnings("resource")
     private List<String> generateStagingAreaCandidatesForHDFS() throws Exception {
-        final FileSystem hadoopFs = getHadoopFS();
+        final HDFSCompatibleConnection connection = getHDFSCompatibleConnection();
         final List<String> toReturn = new LinkedList<>();
 
         final String stagingDir = ".knime-spark-staging-" + UUID.randomUUID().toString();
@@ -161,14 +164,14 @@ public class RemoteFSController implements StagingAreaAccess {
         if (m_stagingAreaParent != null) {
             toReturn.add(appendDirs(m_stagingAreaParent, stagingDir));
         } else {
-            final Path hdfsHome = hadoopFs.getHomeDirectory();
-            if (hadoopFs.exists(hdfsHome)) {
-                toReturn.add(appendDirs(hdfsHome.toUri().getPath(), stagingDir));
+            final URI hdfsHome = connection.getHomeDirectory();
+            if (connection.exists(hdfsHome)) {
+                toReturn.add(appendDirs(hdfsHome.getPath(), stagingDir));
             }
 
-            final Path hdfsTmp = new Path("/tmp");
-            if (hadoopFs.exists(hdfsTmp)) {
-                toReturn.add(appendDirs("/tmp", stagingDir));
+            final URI hdfsTmp = new Path("/tmp").toUri();
+            if (connection.exists(hdfsTmp)) {
+                toReturn.add(appendDirs(hdfsTmp.getPath(), stagingDir));
             }
 
             if (toReturn.isEmpty()) {
@@ -181,10 +184,10 @@ public class RemoteFSController implements StagingAreaAccess {
         return toReturn;
     }
 
-    private FileSystem getHadoopFS() throws Exception {
-        final HDFSRemoteFile hdfsRemoteFile = (HDFSRemoteFile)RemoteFileFactory
-            .createRemoteFile(m_connectionInformation.toURI(), m_connectionInformation, m_connectionMonitor);
-        return hdfsRemoteFile.getConnection().getFileSystem();
+    private HDFSCompatibleConnection getHDFSCompatibleConnection() throws Exception {
+        return (HDFSCompatibleConnection) RemoteFileFactory
+            .createRemoteFile(m_connectionInformation.toURI(), m_connectionInformation, m_connectionMonitor)
+            .getConnection();
     }
 
     private void tryCreateStagingArea(final String stagingArea) throws Exception {
@@ -197,9 +200,9 @@ public class RemoteFSController implements StagingAreaAccess {
             RemoteFileFactory.createRemoteFile(stagingAreaURI, m_connectionInformation, m_connectionMonitor);
 
         stagingAreaRemoteFile.mkDirs(true);
-        if (stagingAreaRemoteFile instanceof HDFSRemoteFile) {
-            final HDFSRemoteFile hdfsStagingFolderRemoteFile = (HDFSRemoteFile)stagingAreaRemoteFile;
-            hdfsStagingFolderRemoteFile.setPermission("-rwx------");
+        if (stagingAreaRemoteFile.getConnection() instanceof HDFSCompatibleConnection) {
+            final HDFSCompatibleConnection conn = (HDFSCompatibleConnection) stagingAreaRemoteFile.getConnection();
+            conn.setPermission(stagingAreaURI, "-rwx------");
         }
     }
 

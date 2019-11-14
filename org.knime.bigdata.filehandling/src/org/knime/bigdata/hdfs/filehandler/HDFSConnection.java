@@ -52,7 +52,7 @@ import org.knime.core.util.MutableInteger;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
-public class HDFSConnection extends Connection {
+public class HDFSConnection extends Connection implements HDFSCompatibleConnection {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HDFSConnection.class);
     private FileSystem m_fs = null;
     private final Configuration m_conf;
@@ -315,6 +315,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the path exists
      * @throws IOException if an exception occurs
      */
+    @Override
     @SuppressWarnings("resource")
     public synchronized boolean exists(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
@@ -376,9 +377,15 @@ public class HDFSConnection extends Connection {
      * @param unixSymbolicPermission  a Unix symbolic permission string e.g. "-rw-rw-rw-"
      * @throws IOException if an exception occurs
      */
+    @Override
     @SuppressWarnings("resource")
     public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
         final FileSystem fs = getFileSystem();
         fs.setPermission(getHDFSPath4URI(uri), FsPermission.valueOf(unixSymbolicPermission));
+    }
+
+    @Override
+    public synchronized URI getHomeDirectory() throws IOException {
+        return getFileSystem().getHomeDirectory().toUri();
     }
 }

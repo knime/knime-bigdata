@@ -38,13 +38,14 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnection;
 import org.knime.core.node.NodeLogger;
 
 /**
  *
  * @author Ole Ostergaard, KNIME GmbH, Konstanz, Germany
  */
-public class HDFSLocalConnection extends Connection {
+public class HDFSLocalConnection extends Connection implements HDFSCompatibleConnection {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HDFSLocalConnection.class);
 
     private LocalFileSystem m_fs = null;
@@ -224,6 +225,7 @@ public class HDFSLocalConnection extends Connection {
      * @return <code>true</code> if the path exists
      * @throws IOException if an exception occurs
      */
+    @Override
     public synchronized boolean exists(final URI uri) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         return fs.exists(getHDFSPath4URI(uri));
@@ -280,8 +282,14 @@ public class HDFSLocalConnection extends Connection {
      * @param unixSymbolicPermission  a Unix symbolic permission string e.g. "-rw-rw-rw-"
      * @throws IOException if an exception occurs
      */
+    @Override
     public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         fs.setPermission(getHDFSPath4URI(uri), FsPermission.valueOf(unixSymbolicPermission));
+    }
+
+    @Override
+    public synchronized URI getHomeDirectory() throws IOException {
+        return getFileSystem().getHomeDirectory().toUri();
     }
 }

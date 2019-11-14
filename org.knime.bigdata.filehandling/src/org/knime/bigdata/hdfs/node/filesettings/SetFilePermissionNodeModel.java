@@ -26,11 +26,12 @@ import java.io.IOException;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
+import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
 import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
-import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
+import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnection;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -93,10 +94,9 @@ public class SetFilePermissionNodeModel extends NodeModel {
         if (connInfo == null) {
             throw new InvalidSettingsException("No connection information available");
         }
-        if (!HDFSRemoteFileHandler.HDFS_PROTOCOL.getName().equals(connInfo.getProtocol())
-        		&& !HDFSRemoteFileHandler.WEBHDFS_PROTOCOL.getName().equals(connInfo.getProtocol())
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)
         		&& !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))) {
-            throw new InvalidSettingsException("HDFS/webHDFS connection required");
+            throw new InvalidSettingsException("HDFS based connection required");
         }
         final DataTableSpec tableSpec = (DataTableSpec) inSpecs[1];
         if (m_col.getStringValue() == null) {
@@ -131,24 +131,29 @@ public class SetFilePermissionNodeModel extends NodeModel {
         final ConnectionInformationPortObject con = (ConnectionInformationPortObject)inObjects[0];
         final BufferedDataTable table = (BufferedDataTable)inObjects[1];
         final int idx = table.getSpec().findColumnIndex(m_col.getStringValue());
-        final ConnectionMonitor<HDFSConnection> monitor = new ConnectionMonitor<>();
+        final ConnectionMonitor<Connection> monitor = new ConnectionMonitor<>();
         int rowCounter= 0;
-        for (DataRow row : table) {
-            exec.checkCanceled();
-            final int rowCount = table.getRowCount();
-            exec.setProgress(rowCounter++ / rowCount, "Processing file" + rowCounter + " of " + rowCount);
-            DataCell cell = row.getCell(idx);
-            if (cell.isMissing()) {
-                continue;
+        try {
+            for (DataRow row : table) {
+                exec.checkCanceled();
+                final int rowCount = table.getRowCount();
+                exec.setProgress(rowCounter++ / rowCount, "Processing file" + rowCounter + " of " + rowCount);
+                DataCell cell = row.getCell(idx);
+                if (cell.isMissing()) {
+                    continue;
+                }
+                if (cell instanceof URIDataValue) {
+                    URIDataValue uriCell = (URIDataValue)cell;
+                    final RemoteFile<? extends Connection> targetFile = RemoteFileFactory.createRemoteFile(
+                        uriCell.getURIContent().getURI(), con.getConnectionInformation(), monitor);
+                    final HDFSCompatibleConnection connection = (HDFSCompatibleConnection) targetFile.getConnection();
+                    connection.setPermission(targetFile.getURI(), m_filePermission.getStringValue());
+                }
             }
-            if (cell instanceof URIDataValue) {
-                URIDataValue uriCell = (URIDataValue)cell;
-                final HDFSRemoteFile targetFile = RemoteFileFactory.<HDFSConnection, HDFSRemoteFile>createRemoteFile(
-                    uriCell.getURIContent().getURI(), con.getConnectionInformation(), monitor);
-                targetFile.setPermission(m_filePermission.getStringValue());
-            }
+            return new PortObject[] {table};
+        } finally {
+            monitor.closeAll();
         }
-        return new PortObject[] {table};
     }
 
     /**

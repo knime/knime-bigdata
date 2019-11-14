@@ -22,6 +22,7 @@ package org.knime.bigdata.impala.node.loader;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.hive.utility.AbstractLoaderNodeModel;
 import org.knime.bigdata.impala.utility.ImpalaUtility;
@@ -58,8 +59,9 @@ class ImpalaLoaderNodeModel extends AbstractLoaderNodeModel {
         if (!(connSettings.getUtility() instanceof ImpalaUtility)) {
             throw new InvalidSettingsException("Only Impala database connections are supported");
         }
-        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
-            throw new InvalidSettingsException("HDFS connection required");
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))) {
+            throw new InvalidSettingsException("HDFS based connection required");
         }
         // We cannot provide a spec because it's not clear yet what the DB will return when the imported data
         // is read back into KNIME
