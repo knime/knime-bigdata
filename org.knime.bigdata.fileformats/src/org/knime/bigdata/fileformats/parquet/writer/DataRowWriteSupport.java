@@ -64,6 +64,7 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.convert.map.CellValueConsumerFactory;
 import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.KnimeToExternalMapper;
 import org.knime.core.data.convert.map.MappingFramework;
 
 /**
@@ -86,6 +87,8 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
 
     private final DataTableSpec m_spec;
 
+    private final KnimeToExternalMapper<ParquetDestination, ParquetParameter> m_knimeToExternalMapper;
+
     /**
      * Write Support for KNIME DataRow
      *
@@ -101,7 +104,8 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
         } else {
             m_name = "KNIMETable";
         }
-        m_paths = consumptionPaths.clone();
+        m_paths = consumptionPaths;
+        m_knimeToExternalMapper = MappingFramework.createMapper(consumptionPaths);
         m_spec = spec;
         m_params = params.clone();
     }
@@ -144,7 +148,7 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
 
         // write column values
         try {
-            MappingFramework.map(record, m_destination, m_paths, m_params);
+            m_knimeToExternalMapper.map(record, m_destination, m_params);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }

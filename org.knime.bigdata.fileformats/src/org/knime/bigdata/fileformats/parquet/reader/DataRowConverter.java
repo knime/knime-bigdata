@@ -52,6 +52,7 @@ import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.RowKey;
+import org.knime.core.data.convert.map.ExternalToKnimeMapper;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.data.convert.map.ProductionPath;
 import org.knime.core.data.convert.map.Source.ProducerParameters;
@@ -75,12 +76,12 @@ final class DataRowConverter extends GroupConverter {
 
     private final ProducerParameters<ParquetSource>[] m_parameters;
 
-    private final FileStoreFactory m_fileStoreFactory;
+    private final ExternalToKnimeMapper<ParquetSource, ProducerParameters<ParquetSource>> m_externalToKnimeMapper;
 
     DataRowConverter(final FileStoreFactory fileStoreFactory, final ProductionPath[] paths,
         final ProducerParameters<ParquetSource>[] params) {
-        m_fileStoreFactory = fileStoreFactory;
-        m_paths = paths.clone();
+        m_paths = paths;
+        m_externalToKnimeMapper = MappingFramework.createMapper(i -> fileStoreFactory, paths);
         m_parameters = params.clone();
         m_source = new ParquetSource();
     }
@@ -92,13 +93,12 @@ final class DataRowConverter extends GroupConverter {
     public void end() {
         m_rowCount++;
         try {
-            m_dataRow = MappingFramework.map(RowKey.createRowKey(m_rowCount), m_fileStoreFactory, m_source, m_paths,
-                m_parameters);
+            m_dataRow = m_externalToKnimeMapper.map(RowKey.createRowKey(m_rowCount), m_source, m_parameters);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
         for(final ProductionPath path: m_paths) {
-            ((ParquetCellValueProducerFactory<?>) path.getProducerFactory()).resetConvertes();
+            ((ParquetCellValueProducerFactory<?>) path.getProducerFactory()).resetConverters();
         }
     }
 

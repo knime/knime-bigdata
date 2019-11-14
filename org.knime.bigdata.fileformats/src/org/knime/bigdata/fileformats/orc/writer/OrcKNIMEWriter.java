@@ -70,6 +70,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.KnimeToExternalMapper;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsWO;
@@ -92,11 +93,13 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
 
     private final CompressionKind m_compression;
 
-    private final DataTypeMappingConfiguration<?> m_inputputDataTypeMappingConfiguration;
-
     private final ORCParameter[] m_params;
 
     private ORCDestination m_destination;
+
+    private final ConsumptionPath[] m_consumptionPaths;
+
+    private final KnimeToExternalMapper<ORCDestination, ORCParameter> m_knimeToExternalMapper;
 
     /**
      * Constructor for ORC writer, that writes KNIME {@link DataRow}s to an ORC file
@@ -115,15 +118,20 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
      *             if writer cannot be initialized
      */
     public OrcKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final int batchSize,
-            final String compression, DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
+            final String compression, final DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
                     throws IOException {
         super(file, batchSize, spec);
         m_compression = CompressionKind.valueOf(compression);
-        m_inputputDataTypeMappingConfiguration = inputputDataTypeMappingConfiguration;
         m_params = new ORCParameter[spec.getNumColumns()];
         for (int i = 0; i < spec.getNumColumns(); i++) {
             m_params[i] = new ORCParameter(i);
         }
+        try {
+            m_consumptionPaths = inputputDataTypeMappingConfiguration.getConsumptionPathsFor(spec);
+        } catch (final InvalidSettingsException e) {
+            throw new BigDataFileFormatException(e);
+        }
+        m_knimeToExternalMapper = MappingFramework.createMapper(m_consumptionPaths);
         initWriter();
     }
 
@@ -155,14 +163,8 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
     private void initWriter() throws IOException {
         m_fields = new ArrayList<>();
         final DataTableSpec tableSpec = getTableSpec();
-        ConsumptionPath[] consumptionPathes;
-        try {
-            consumptionPathes = m_inputputDataTypeMappingConfiguration.getConsumptionPathsFor(tableSpec);
-        } catch (final InvalidSettingsException e) {
-            throw new BigDataFileFormatException(e);
-        }
         for(int i = 0; i < tableSpec.getNumColumns(); i++) {
-            final TypeDescription orcType = (TypeDescription) consumptionPathes[i].getConsumerFactory()
+            final TypeDescription orcType = (TypeDescription)m_consumptionPaths[i].getConsumerFactory()
                     .getDestinationType();
             final String colName = tableSpec.getColumnSpec(i).getName();
             m_fields.add(new Pair<>(colName, TypeDescription.fromString(orcType.toString())));
@@ -215,15 +217,8 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
      */
     @Override
     public void writeRow(final DataRow row) throws Exception {
-
-        ConsumptionPath[] consumptionPaths;
-        try {
-            consumptionPaths = m_inputputDataTypeMappingConfiguration.getConsumptionPathsFor(getTableSpec());
-        } catch (final InvalidSettingsException e) {
-            throw new BigDataFileFormatException(e);
-        }
         m_destination.next();
-        MappingFramework.map(row, m_destination, consumptionPaths, m_params);
+        m_knimeToExternalMapper.map(row, m_destination, m_params);
 
         if (m_rowBatch.size == getBatchSize() - 1) {
             m_writer.addRowBatch(m_rowBatch);

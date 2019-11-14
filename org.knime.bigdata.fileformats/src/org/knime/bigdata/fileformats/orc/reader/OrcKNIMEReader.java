@@ -78,6 +78,7 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.RowKey;
+import org.knime.core.data.convert.map.ExternalToKnimeMapper;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.data.convert.map.ProductionPath;
 import org.knime.core.data.convert.map.Source.ProducerParameters;
@@ -109,8 +110,6 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
         private ORCSource m_source;
 
-        private final ProductionPath[] m_iterationPaths;
-
         private final ProducerParameters<ORCSource>[] m_parameters;
 
         private final RemoteFile<Connection> m_tempInputFile;
@@ -123,15 +122,14 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          * @param tempInputFile temporary input file that should be removed on close
          * @throws IOException if file can not be read
          */
-        OrcRowIterator(final Reader reader, final long index, final ProductionPath[] paths,
-            final ProducerParameters<ORCSource>[] params, final RemoteFile<Connection> tempInputFile) throws IOException {
+        OrcRowIterator(final Reader reader, final long index, final ProducerParameters<ORCSource>[] params,
+            final RemoteFile<Connection> tempInputFile) throws IOException {
             m_orcReader = reader;
             final Options options = m_orcReader.options();
             m_rows = m_orcReader.rows(options);
             m_rowBatch = m_orcReader.getSchema().createRowBatch();
             m_source = new ORCSource(m_rowBatch);
             m_index = index;
-            m_iterationPaths = paths.clone();
             m_parameters = params.clone();
             m_tempInputFile = tempInputFile;
             internalNext();
@@ -196,9 +194,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
             DataRow safeRow;
             try {
-                safeRow = MappingFramework.map(RowKey.createRowKey(m_index), getFileStoreFactory(), m_source, m_paths,
-                    m_parameters);
-
+                safeRow = m_externalToKnimeMapper.map(RowKey.createRowKey(m_index), m_source, m_parameters);
             } catch (final Exception e1) {
                 throw new BigDataFileFormatException(e1);
             }
@@ -230,6 +226,8 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     private ProducerParameters<ORCSource>[] m_params;
 
     private final DataTypeMappingConfiguration<TypeDescription> m_outputTypeMappingConf;
+
+    private ExternalToKnimeMapper<ORCSource, ProducerParameters<ORCSource>> m_externalToKnimeMapper;
 
     /**
      * KNIME Reader, that reads ORC Files into DataRows.
@@ -315,6 +313,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         setExternalTableSpec(exTableSpec);
         m_paths = m_outputTypeMappingConf.getProductionPathsFor(exTableSpec);
         m_params = createDefault(exTableSpec);
+        m_externalToKnimeMapper = MappingFramework.createMapper(i -> getFileStoreFactory(), m_paths);
 
         for (final ProductionPath path : m_paths) {
             final DataType dataType = path.getConverterFactory().getDestinationType();
@@ -334,7 +333,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         FileFormatRowIterator rowIterator = null;
         if (readerInput != null) {
             rowIterator =
-                new OrcRowIterator(readerInput.getReader(), i, m_paths, m_params, readerInput.getTempInputFile());
+                new OrcRowIterator(readerInput.getReader(), i, m_params, readerInput.getTempInputFile());
         }
         return rowIterator;
     }
