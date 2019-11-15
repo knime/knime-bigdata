@@ -49,7 +49,8 @@ public enum TestflowVariable {
          * false.
          * <p>
          * If true, then a credentials flow variable called "hdfs.credentials" will be automatically injected. The
-         * username of the injected credentials is taken from {@link #HDFS_USERNAME}.
+         * username of the injected credentials is taken from {@link #HDFS_USERNAME} and password from
+         * {@link #HDFS_PASSWORD} if set.
          * </p>
          */
         HDFS_USECREDENTIALS("hdfs.useCredentials", Type.BOOLEAN),
@@ -66,6 +67,13 @@ public enum TestflowVariable {
          * @see #HDFS_USECREDENTIALS
          */
         HDFS_USERNAME("hdfs.username"),
+
+        /**
+         * Flow variable for the "password" setting of the HDFS connection node.
+         *
+         * @see #HDFS_USECREDENTIALS
+         */
+        HDFS_PASSWORD("hdfs.password"),
 
         /**
          * Flow variable with the WebHDFS port.
@@ -293,9 +301,21 @@ public enum TestflowVariable {
         /**
          * Flow variable for the "authentication -> selectedType" node setting of the "Create Spark Context via Livy"
          * node. Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test
-         * Environment" node when creating a Spark context in Livy. Possible values are: NONE, KERBEROS
+         * Environment" node when creating a Spark context in Livy. Possible values are: NONE, CREDENTIALS, KERBEROS
          */
         SPARK_LIVY_AUTHMETHOD("spark.livy.authMethod"),
+
+        /**
+         * Flow variable of username to generated credentials variable if CREDENTIALS are selected in
+         * {@link #SPARK_LIVY_AUTHMETHOD}. Ignored otherwise.
+         */
+        SPARK_LIVY_USERNAME("spark.livy.username"),
+
+        /**
+         * Flow variable of password to generated credentials variable if CREDENTIALS are selected in
+         * {@link #SPARK_LIVY_AUTHMETHOD}. Ignored otherwise.
+         */
+        SPARK_LIVY_PASSWORD("spark.livy.password"),
 
         /**
          * Flow variable for the "setStagingAreaFolder" node setting of the "Create Spark Context via Livy" node. Also,
@@ -571,7 +591,7 @@ public enum TestflowVariable {
         final Map<String, FlowVariable> flowVars) {
 
         return flowVars.containsKey(flowVar.getName())
-            && flowVars.get(flowVar.getName()).getStringValue().equals(expectedValue);
+            && flowVars.get(flowVar.getName()).getStringValue().equalsIgnoreCase(expectedValue);
     }
 
     /**

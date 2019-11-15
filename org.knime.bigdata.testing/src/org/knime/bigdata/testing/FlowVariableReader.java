@@ -137,6 +137,10 @@ public class FlowVariableReader {
 
             addSchemeHostAndPortVariable(TestflowVariable.SPARK_LIVY_URL, flowVariables);
 
+            final boolean sparkUseCredentials = TestflowVariable
+                .stringEqualsIgnoreCase(TestflowVariable.SPARK_LIVY_AUTHMETHOD, "CREDENTIALS", flowVariables);
+            addCredentialsFlowVariable("spark.livy", sparkUseCredentials, true, flowVariables);
+
         } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
             SparkContextIDScheme.SPARK_DATABRICKS.toString(), flowVariables)) {
 
@@ -241,6 +245,10 @@ public class FlowVariableReader {
                 ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
                 ensureHas(TestflowVariable.SPARK_LIVY_URL, flowVariables);
                 ensureHas(TestflowVariable.SPARK_LIVY_AUTHMETHOD, flowVariables);
+                if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_LIVY_AUTHMETHOD, "CREDENTIALS", flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_LIVY_USERNAME, flowVariables);
+                    ensureHas(TestflowVariable.SPARK_LIVY_PASSWORD, flowVariables);
+                }
                 ensureHas(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables);
                 if (TestflowVariable.isTrue(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables)) {
                     ensureHas(TestflowVariable.SPARK_LIVY_STAGINGAREAFOLDER, flowVariables);
@@ -289,13 +297,14 @@ public class FlowVariableReader {
      *
      * @param prefix hdfs/hive/impala/ssh/spark
      * @param realCredentials create real or dummy credentials (username might be empty in this case)
-     * @param hasPassword Whether there is a password flow variable under the given prefix. If yes, this will be used to
-     *            generate the credentials. Otherwise an empty password will be used.
+     * @param requirePassword Whether there is a password flow variable under the given prefix. If yes, this will be
+     *            used to generate the credentials or an exception gets thrown on missing variable. If no, an empty
+     *            password will be used.
      * @param flowVariables map with all flow variables
      * @throws Exception if username or password missing
      */
     private static void addCredentialsFlowVariable(final String prefix, final boolean realCredentials,
-        final boolean hasPassword, final Map<String, FlowVariable> flowVariables) throws Exception {
+        final boolean requirePassword, final Map<String, FlowVariable> flowVariables) throws Exception {
         
         final String credsVar = prefix + ".credentials";
         final String credsNameVar = prefix + ".credentialsName";
@@ -310,10 +319,9 @@ public class FlowVariableReader {
             }
             username = flowVariables.get(usernameVar).getStringValue();
 
-            if (hasPassword) {
-                if (!flowVariables.containsKey(passwordVar)) {
-                    throw new IllegalArgumentException("Missing flow variable definition in csv: " + passwordVar);
-                }
+            if (requirePassword && !flowVariables.containsKey(passwordVar)) {
+                throw new IllegalArgumentException("Missing required password flow variable definition in csv: " + passwordVar);
+            } else if (flowVariables.containsKey(passwordVar)) {
                 password = flowVariables.get(passwordVar).getStringValue();
             } else {
                 password = "";
