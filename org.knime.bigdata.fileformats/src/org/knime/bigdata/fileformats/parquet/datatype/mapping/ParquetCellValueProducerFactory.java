@@ -114,7 +114,7 @@ extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetPar
     }
 
     /**
-     * Resets the producer convertes
+     * Resets the producer converters
      */
     public void resetConverters() {
         m_parquetProducer.resetConverters();
