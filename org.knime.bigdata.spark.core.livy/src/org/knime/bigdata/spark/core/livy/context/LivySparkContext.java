@@ -21,8 +21,11 @@ package org.knime.bigdata.spark.core.livy.context;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -150,14 +153,15 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         if (m_livyClient == null) {
             final LivySparkContextConfig config = getConfiguration();
             final Properties livyHttpConf = createLivyHttpConf(config);
+            final String livyUrl = config.getLivyUrlWithAuthentication();
 
             LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
             try {
                 if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
                     m_livyClient = KerberosProvider
-                        .doWithKerberosAuthBlocking(() -> buildLivyClient(livyHttpConf, config.getLivyUrl()), exec);
+                        .doWithKerberosAuthBlocking(() -> buildLivyClient(livyHttpConf, livyUrl), exec);
                 } else {
-                    m_livyClient = buildLivyClient(livyHttpConf, config.getLivyUrl());
+                    m_livyClient = buildLivyClient(livyHttpConf, livyUrl);
                 }
             } catch (final Exception e) {
                 throw new KNIMESparkException(e);
@@ -433,7 +437,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         final Map<String, String> reps = new HashMap<>();
 
         reps.put("spark_version", config.getSparkVersion().toString());
-        reps.put("url", config.getLivyUrl());
+        reps.put("url", config.getLivyUrlWithoutAuthentication());
         reps.put("authentication", createAuthenticationInfoString());
         reps.put("context_state", getStatus().toString());
         reps.put("spark_web_ui", m_contextAttributes != null && m_contextAttributes.sparkWebUI != null ?
@@ -470,6 +474,16 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                 return String.format("Kerberos (authenticated as: %s)", krbState.getPrincipal());
             } else {
                 return "Kerberos (currently not logged in)";
+            }
+        } else if (config.getAuthenticationType() == AuthenticationType.CREDENTIALS
+            || config.getAuthenticationType() == AuthenticationType.USER
+            || config.getAuthenticationType() == AuthenticationType.USER_PWD) {
+
+            final String[] userInfo = URI.create(config.getLivyUrlWithAuthentication()).getUserInfo().split(":");
+            try {
+                return String.format("Basic (user: %s)", URLDecoder.decode(userInfo[0], StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                return "Basic";
             }
         } else {
             return "None";

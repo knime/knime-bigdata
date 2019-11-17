@@ -1,5 +1,7 @@
 package org.knime.bigdata.spark.core.livy.context;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
@@ -115,9 +117,22 @@ public class LivySparkContextConfig implements SparkContextConfig {
     }
 
     /**
-     * @return the http(s) URL for Livy
+     * @return the http(s) URL for Livy without credentials
      */
-    public String getLivyUrl() {
+    public String getLivyUrlWithoutAuthentication() {
+        final URI uri = URI.create(m_livyUrl);
+        try {
+            return new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
+        } catch (URISyntaxException e) {
+            // should never happen (validated in model)
+            throw new RuntimeException("Unable to build Livy URL: " + e, e);
+        }
+    }
+
+    /**
+     * @return the http(s) URL for Livy with credentials
+     */
+    String getLivyUrlWithAuthentication() {
         return m_livyUrl;
     }
 

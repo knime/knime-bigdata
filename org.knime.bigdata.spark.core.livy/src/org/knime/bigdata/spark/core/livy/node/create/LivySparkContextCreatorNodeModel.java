@@ -50,6 +50,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.workflow.CredentialsProvider;
 
 /**
  * Node model of the "Create Spark Context (Livy)" node.
@@ -102,7 +103,7 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         }            
 
         m_settings.validateDeeper();
-        configureSparkContext(m_sparkContextId, connInfo, m_settings);
+        configureSparkContext(m_sparkContextId, connInfo, m_settings, getCredentialsProvider());
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_sparkContextId)};
     }
 
@@ -115,7 +116,7 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         final ConnectionInformation connInfo = object.getConnectionInformation();
 
         exec.setProgress(0, "Configuring Livy Spark context");
-        configureSparkContext(m_sparkContextId, connInfo, m_settings);
+        configureSparkContext(m_sparkContextId, connInfo, m_settings, getCredentialsProvider());
 
         final LivySparkContext sparkContext =
             (LivySparkContext)SparkContextManager.<LivySparkContextConfig> getOrCreateSparkContext(m_sparkContextId);
@@ -142,7 +143,8 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         // has and never will be opened because m_uniqueContextId has a new and unique value.
         final String previousContextID = Files
             .readAllLines(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"), Charset.forName("UTF-8")).get(0);
-        configureSparkContext(new SparkContextID(previousContextID), dummyConnInfo, m_settings);
+        configureSparkContext(new SparkContextID(previousContextID), dummyConnInfo, m_settings,
+            getCredentialsProvider());
     }
 
     @Override
@@ -166,13 +168,14 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
      * @param sparkContextId Identifies the Spark context to configure.
      * @param connInfo 
      * @param settings The settings from which to configure the context.
+     * @param credProv Credentials provider to use
      */
-    protected static void configureSparkContext(final SparkContextID sparkContextId,
-        ConnectionInformation connInfo, final LivySparkContextCreatorNodeSettings settings) {
+    protected static void configureSparkContext(final SparkContextID sparkContextId, ConnectionInformation connInfo,
+        final LivySparkContextCreatorNodeSettings settings, final CredentialsProvider credProv) {
         
         final SparkContext<LivySparkContextConfig> sparkContext =
             SparkContextManager.getOrCreateSparkContext(sparkContextId);
-        final LivySparkContextConfig config = settings.createContextConfig(sparkContextId, connInfo);
+        final LivySparkContextConfig config = settings.createContextConfig(sparkContextId, connInfo, credProv);
 
         final boolean configApplied = sparkContext.ensureConfigured(config, true);
         if (!configApplied) {

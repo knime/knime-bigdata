@@ -79,7 +79,8 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         new DialogComponentString(m_settings.getLivyUrlModel(), "Livy URL:", true, 35);
 
     private final DialogComponentAuthentication m_authentication = new DialogComponentAuthentication(
-        m_settings.getAuthenticationModel(), "Authentication", AuthenticationType.NONE, AuthenticationType.KERBEROS);
+        m_settings.getAuthenticationModel(), "Authentication", AuthenticationType.NONE, AuthenticationType.CREDENTIALS,
+        AuthenticationType.USER, AuthenticationType.USER_PWD, AuthenticationType.KERBEROS);
 
     private final ContainerResourceDialogPanel m_executorResourcePanel =
         new ContainerResourceDialogPanel("Spark executor", m_settings.getExecutorResources());
@@ -348,6 +349,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         throws NotConfigurableException {
         try {
             m_settings.loadSettingsFrom(settings);
+            m_authentication.loadSettingsFrom(settings, specs, getCredentialsProvider());
             updateExecutorAllocationOptions();
             updateExecutorResourceSummary();
             m_stagingAreaFolder.setSelection(m_settings.getStagingAreaFolder());

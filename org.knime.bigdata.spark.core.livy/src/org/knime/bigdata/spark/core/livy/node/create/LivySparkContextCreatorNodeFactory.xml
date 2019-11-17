@@ -31,6 +31,10 @@
                 Select
                 <ul>
 		            <li><i>None</i>, if Livy does not require any credentials.</li>
+		            <li><i>Credentials</i>, if Livy uses HTTP basic based authentication and a credentials variable
+		            should be used to determine username and password.</li>
+		            <li><i>Username</i>, if Livy uses HTTP basic based authentication without a password.</li>
+		            <li><i>Username &amp; password</i>, if Livy uses HTTP basic based authentication.</li>
 		            <li><i>Kerberos</i>, if Livy uses Kerberos based authentication.</li>
 		        </ul>
             </option>

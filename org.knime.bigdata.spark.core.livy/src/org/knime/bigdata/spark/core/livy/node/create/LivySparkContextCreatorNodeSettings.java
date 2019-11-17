@@ -18,6 +18,11 @@
 package org.knime.bigdata.spark.core.livy.node.create;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
@@ -47,6 +53,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.ButtonGroupEnumInterface;
+import org.knime.core.node.workflow.CredentialsProvider;
 
 /**
  * Settings class for the "Create Local Big Data Environment" node.
@@ -223,6 +230,48 @@ public class LivySparkContextCreatorNodeSettings {
      */
     public String getLivyUrl() {
         return m_livyUrl.getStringValue();
+    }
+
+    /**
+     * Create Livy URL with username and password.
+     *
+     * @param credentialsProvider Credentials provider for username and password
+     * @return URL with credentials
+     */
+    private String getLivyUrlWithAuthentication(final CredentialsProvider credentialsProvider) {
+        final AuthenticationType auth = m_authentication.getAuthenticationType();
+        if (auth == AuthenticationType.CREDENTIALS || auth == AuthenticationType.USER
+            || auth == AuthenticationType.USER_PWD) {
+
+            final URI baseUri = URI.create(m_livyUrl.getStringValue());
+            final String username = m_authentication.getUserName(credentialsProvider);
+            final String password = m_authentication.getPassword(credentialsProvider);
+            final String userInfo;
+
+            try {
+                // backward compatible: do not overwrite user info from URL
+                if (!StringUtils.isBlank(baseUri.getUserInfo())) {
+                    userInfo = baseUri.getUserInfo();
+                } else if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
+                    userInfo = URLEncoder.encode(username, StandardCharsets.UTF_8.name()) + ":"
+                        + URLEncoder.encode(password, StandardCharsets.UTF_8.name());
+                } else if (!StringUtils.isBlank(username)) {
+                    userInfo = URLEncoder.encode(username, StandardCharsets.UTF_8.name());
+                } else {
+                    userInfo = null;
+                }
+
+                return new URI(baseUri.getScheme(), userInfo, baseUri.getHost(), baseUri.getPort(), baseUri.getPath(),
+                    baseUri.getQuery(), baseUri.getFragment()).toString();
+            } catch (final UnsupportedEncodingException e) {
+                throw new RuntimeException("Unable to encode username and password: " + e, e);
+            } catch (final URISyntaxException e) {
+                // should never happen (validated in model)
+                throw new RuntimeException("Unable to build Livy URL: " + e, e);
+            }
+        } else {
+            return m_livyUrl.getStringValue();
+        }
     }
 
     /**
@@ -590,11 +639,12 @@ public class LivySparkContextCreatorNodeSettings {
      * @return a new {@link LivySparkContextConfig} derived from the current settings.
      */
     public LivySparkContextConfig createContextConfig(final SparkContextID contextId,
-        final ConnectionInformation connInfo) {
+        final ConnectionInformation connInfo, final CredentialsProvider credentialsProvider) {
         
+        final String livyUrl = getLivyUrlWithAuthentication(credentialsProvider);
         final Map<String, String> sparkSettings = generateSparkSettings();
 
-        return new LivySparkContextConfig(getSparkVersion(), getLivyUrl(), getAuthenticationType(),
+        return new LivySparkContextConfig(getSparkVersion(), livyUrl, getAuthenticationType(),
             (isStagingAreaFolderSet()) ? getStagingAreaFolder() : null, getConnectTimeout(), getResponseTimeout(),
             getJobCheckFrequency(), sparkSettings, contextId, connInfo);
     }
