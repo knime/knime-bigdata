@@ -10,7 +10,7 @@
             Creates a new Spark context via <a href="http://livy.apache.org/">Apache Livy</a>. 
             
             <p>
-            This node requires access to a remote file system such as HDFS/webHDFs/httpFS or S3/Blob Store
+            This node requires access to a remote file system such as HDFS/webHDFs/httpFS or S3/Blob Store/Cloud Store
             in order to exchange temporary files between KNIME and the Spark context (running on the cluster).
             </p>
             
@@ -67,7 +67,7 @@
                 If enabled you can specify a directory in the connected remote file system,
                 that will be used to transfer temporary files between KNIME and the Spark context. If no directory
                 is set, then a default directory will be chosen, e.g. the HDFS user home directory. However, if the remote file
-                system is Amazon S3 or Azure Blob Store, then a staging directory <i>must</i> be provided.
+                system is Amazon S3, Azure Blob Store or Google Cloud Storage, then a staging directory <i>must</i> be provided.
             </option>
             
             <option name="Set custom Spark settings">
@@ -86,8 +86,8 @@
 		<li>HDFS, webHDFS and httpFS. Note that here KNIME must access the remote file system with the same user as Spark,
 		otherwise Spark context creation fails. When authenticating with <i>Kerberos</i> against both HDFS/webHDFs/httpFS and Livy,
 		then usually the same user will be used. Otherwise, this must be ensured manually.</li>
-		<li>Amazon S3 and Azure Blob Store (recommended when using Spark on Amazon EMR/Azure HDInsight). Note that for these file systems
-		a <i>staging area</i> must be specified (see above).</li>
+		<li>Amazon S3, Azure Blob Store and Google Cloud Storage (recommended when using Spark on Amazon EMR/Azure HDInsight/Google Cloud Dataproc).
+		Note that for these file systems a <i>staging area</i> must be specified (see above).</li>
 		</ul>
 	</inPort>
 	<outPort index="0" name="Spark Context">Spark context.</outPort>

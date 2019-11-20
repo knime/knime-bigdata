@@ -99,7 +99,7 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         if (connInfo instanceof CloudConnectionInformation && !m_settings.isStagingAreaFolderSet()) {
             throw new InvalidSettingsException(
                 String.format("When connecting to %s a staging directory must be specified (see Advanced tab).",
-                    connInfo.getProtocol()));
+                    ((CloudConnectionInformation)connInfo).getServiceName()));
         }            
 
         m_settings.validateDeeper();

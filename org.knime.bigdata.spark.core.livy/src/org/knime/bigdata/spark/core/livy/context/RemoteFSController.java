@@ -144,7 +144,7 @@ public class RemoteFSController implements StagingAreaAccess {
         if (m_stagingAreaParent == null) {
             throw new IllegalArgumentException(
                 String.format("When connecting to %s a staging directory must be specified (see Advanced tab).",
-                    m_connectionInformation.getProtocol()));
+                    ((CloudConnectionInformation)m_connectionInformation).getServiceName()));
         } else {
             final String stagingDir = "knime-spark-staging-" + UUID.randomUUID().toString();
             return Collections.singletonList(appendDirs(m_stagingAreaParent, stagingDir));
