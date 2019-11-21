@@ -163,7 +163,8 @@ public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
     @Override
     public boolean exists() throws Exception {
         try {
-            // use the cached file status instead of calling getOpenedConnection().exists
+            // do not cache the exists state
+            invalidateCachedFileInfo();
             getFileStatus();
             return true;
         } catch (FileNotFoundException|NotFoundException e) {
