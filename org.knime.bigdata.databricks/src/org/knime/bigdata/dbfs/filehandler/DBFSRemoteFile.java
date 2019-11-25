@@ -144,8 +144,10 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
     @Override
     public boolean exists() throws Exception {
         try {
-            // do not cache the exists state
-            invalidateCachedFileInfo();
+            // Note: The databricks REST API includes special directories like '/databricks-results'
+            // in the root directory file listing, but return a 404 not found on get file info of
+            // '/databricks-results'. This crashes the file chooser dialog.
+            // Use the cached 'exists' info here if available from e.g. the list directory.
             getFileInfo();
             return true;
         } catch (FileNotFoundException e) {
