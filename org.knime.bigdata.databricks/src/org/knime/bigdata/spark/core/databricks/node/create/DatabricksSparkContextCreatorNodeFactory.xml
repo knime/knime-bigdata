@@ -49,6 +49,13 @@
             </option>
         </tab>
         <tab name="Advanced">
+            <option name="Create Spark context">
+            	If enabled, an execution context will be started on Databricks to run KNIME Spark jobs.
+            	If disabled, the Spark context port will be disabled.
+            	This might be useful to save resources in the driver process or required if the cluster runs with 
+            	<a href="https://docs.databricks.com/administration-guide/access-control/table-acls/index.html">Table Access Control</a>.
+            </option>
+        
             <option name="Set staging area for Spark jobs">
                 If enabled you can specify a directory in the connected Databricks file system,
                 that will be used to transfer temporary files between KNIME and the Spark context. If no directory

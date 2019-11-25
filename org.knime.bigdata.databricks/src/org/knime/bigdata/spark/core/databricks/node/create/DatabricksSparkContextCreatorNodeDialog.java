@@ -69,8 +69,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.bigdata.database.databricks.Databricks;
@@ -178,6 +176,9 @@ public class DatabricksSparkContextCreatorNodeDialog extends NodeDialogPane impl
     private final DialogComponentAuthentication m_authentication = new DialogComponentAuthentication(
         m_settings.getAuthenticationModel(), "Authentication", getAuthLabelMap(),
         AuthenticationType.USER_PWD, AuthenticationType.PWD, AuthenticationType.CREDENTIALS);
+
+    private final DialogComponentBoolean m_createSparkContext =
+        new DialogComponentBoolean(m_settings.getCreateSparkContextModel(), "Create Spark context");
 
     private final DialogComponentBoolean m_setStagingAreaFolder =
         new DialogComponentBoolean(m_settings.getSetStagingAreaFolderModel(), "Set staging area for Spark jobs");
@@ -287,6 +288,11 @@ public class DatabricksSparkContextCreatorNodeDialog extends NodeDialogPane impl
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.insets = new Insets(5, 0, 5, 5);
+        addDialogComponentToPanel(m_createSparkContext, panel, gbc);
+        m_createSparkContext.getModel().addChangeListener(this);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
         addDialogComponentToPanel(m_setStagingAreaFolder, panel, gbc);
         m_setStagingAreaFolder.getModel().addChangeListener(this);
 
@@ -505,15 +511,9 @@ public class DatabricksSparkContextCreatorNodeDialog extends NodeDialogPane impl
             m_stagingAreaFolder.setEnabled(m_settings.isStagingAreaFolderSet());
 
             updateDBComponents(specs);
+            updateStagingAreaConnection();
         } catch (final InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());
-        }
-
-        if (specs.length > 0 && specs[0] != null) {
-            final ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
-            m_stagingAreaFolder.setConnectionInformation(connInfo);
-        } else {
-            m_stagingAreaFolder.setConnectionInformation(null);
         }
     }
 

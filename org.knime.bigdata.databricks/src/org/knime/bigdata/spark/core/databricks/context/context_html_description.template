@@ -2,9 +2,11 @@
 <hr/>
 <strong>Spark version:</strong>&nbsp;&nbsp;<tt>${spark_version}</tt>
 <br/>
-<strong>Databricks URL:</strong>&nbsp;&nbsp;<tt>${url}</tt>
+<strong>Databricks URL:</strong>&nbsp;&nbsp;<tt><a href="${url}">${url}</a></tt>
 <br/>
 <strong>Cluster ID:</strong>&nbsp;&nbsp;<tt>${cluster_id}</tt>
+<br/>
+<strong>Cluster Name:</strong>&nbsp;&nbsp;<tt>${cluster_name}</tt>
 <br/>
 <strong>Spark WebUI: </strong>&nbsp;&nbsp;<a href="${spark_web_ui}">${spark_web_ui}<a/>
 <br/>

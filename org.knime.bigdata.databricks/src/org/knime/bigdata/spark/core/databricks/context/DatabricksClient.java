@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
+import org.knime.bigdata.database.databricks.TableAccessControllException;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.clusters.Cluster;
 import org.knime.bigdata.databricks.rest.clusters.ClusterAPI;
@@ -364,13 +365,42 @@ public class DatabricksClient {
     }
 
     /**
+     * Try to detect table access control mode: Check if cluster configuration contains allowedLanguages setting without
+     * scala.
+     *
+     * @throws SparkClusterNotFoundException
+     */
+    private boolean checkTableAccessControlSetting() throws SparkClusterNotFoundException {
+        final String clusterId = m_config.getClusterId();
+
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            final ClusterInfo clusterInfo = m_clusterAPI.getCluster(clusterId);
+            if (clusterInfo.spark_conf != null) {
+                return clusterInfo.spark_conf.entrySet()
+                    .stream()
+                    .anyMatch(e ->
+                        (e.getKey().equalsIgnoreCase("spark.databricks.repl.allowedLanguages")
+                            && !e.getValue().toLowerCase().contains("scala"))
+                        || (e.getKey().equalsIgnoreCase("spark.databricks.acl.sqlOnly")
+                            && e.getValue().equalsIgnoreCase("true")));
+            }
+        } catch (final FileNotFoundException e) {
+            throw new SparkClusterNotFoundException(clusterId);
+        } catch (final IOException e) {
+            LOG.warn("Unable to fetch cluster configuration: " + e.getMessage(), e);
+        }
+
+        return false;
+    }
+
+    /**
      * Check if cluster is in {@link ClusterState#RUNNING} state.
      *
      * @return {@code true} if cluster is in {@link ClusterState#RUNNING} state.
      * @throws KNIMESparkException on connection failures
      */
     boolean isClusterRunning() throws KNIMESparkException {
-        try {
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_clusterAPI.getCluster(m_config.getClusterId()).state == ClusterState.RUNNING;
         } catch (IOException e) {
             throw new KNIMESparkException("Unable to fetch cluster state: " + e.getMessage(), e);
@@ -412,6 +442,10 @@ public class DatabricksClient {
 
         if (exec != null) {
             exec.setMessage("Starting context on cluster");
+        }
+
+        if (checkTableAccessControlSetting()) {
+            LOG.warn("Table Access Control detected, see the advanced tab in the configuration dialog to disable the spark context.");
         }
 
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
@@ -509,7 +543,11 @@ public class DatabricksClient {
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution cancled after thread interruption.");
         } catch (final IOException e) {
-            throw new KNIMESparkException("Unable to run command on cluster: " + e.getMessage(), e);
+            if (e.getMessage() != null && e.getMessage().startsWith("Server error: UnauthorizedCommandException")) {
+                throw new TableAccessControllException(e);
+            } else {
+                throw new KNIMESparkException("Unable to run command on cluster: " + e.getMessage(), e);
+            }
         }
     }
 

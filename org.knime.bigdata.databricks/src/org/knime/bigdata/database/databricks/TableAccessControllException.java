@@ -42,68 +42,30 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   Nov 25, 2019 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.databricks.rest.clusters;
+package org.knime.bigdata.database.databricks;
 
-import java.util.Map;
+import java.io.IOException;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
- * Describe all of the metadata about a cluster. This class contains only parts of the returned informations.
+ * Exception that wraps the databricks UnauthorizedCommandException with a hint to disable the spark context.
  *
- * @see <a href="https://docs.databricks.com/api/latest/clusters.html#clusterinfo">Cluster API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ClusterInfo {
+public class TableAccessControllException extends KNIMESparkException {
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Canonical identifier for the cluster. This ID is retained during cluster restarts and resizes, while each new
-     * cluster has a globally unique ID.
+     * Default constructor.
+     *
+     * @param e original exception from databricks
      */
-    public String cluster_id;
-
-    /**
-     * Cluster name requested by the user. This doesn’t have to be unique. If not specified at creation, the cluster
-     * name will be an empty string.
-     */
-    public String cluster_name;
-
-    /**
-     * Creator user name. The field won’t be included in the response if the user has already been deleted.
-     */
-    public String creator_user_name;
-
-    /**
-     * Port on which Spark JDBC server is listening, in the driver nod. No service will be listening on on this port in
-     * executor nodes.
-     */
-    public int jdbc_port;
-
-    /**
-     * The Spark version of the cluster. A list of available Spark versions can be retrieved by using the Spark Versions
-     * API call.
-     */
-    public String spark_version;
-
-    /**
-     * Current state of the cluster.
-     */
-    public ClusterState state;
-
-    /**
-     * Time (in epoch milliseconds) when the cluster was last active.
-     */
-    public long last_activity_time;
-
-    /**
-     * An map containing a set of optional, user-specified Spark configuration key-value pairs.
-     */
-    public Map<String, String> spark_conf;
-
-    @Override
-    public String toString() {
-        return cluster_name + " (" + cluster_id + ")";
+    public TableAccessControllException(final IOException e) {
+        super("Table Access Control detected, see the advanced tab in the configuration dialog to disable the spark context.\n" + e.getMessage(), e);
     }
 }

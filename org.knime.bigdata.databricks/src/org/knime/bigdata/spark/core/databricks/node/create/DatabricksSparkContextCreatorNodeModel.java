@@ -82,6 +82,8 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.inactive.InactiveBranchPortObject;
+import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
@@ -171,35 +173,49 @@ public class DatabricksSparkContextCreatorNodeModel extends SparkNodeModel {
 
         final ConnectionInformation connInfo = m_settings.createDBFSConnectionInformation(getCredentialsProvider());
         configureSparkContext(m_sparkContextId, connInfo, m_settings, getCredentialsProvider());
-        return new PortObjectSpec[] {
-            null,
-            new ConnectionInformationPortObjectSpec(connInfo),
-            new SparkContextPortObjectSpec(m_sparkContextId)
-        };
+
+        final PortObjectSpec sparkPortSpec;
+        if (m_settings.isCreateSparkContextSet()) {
+            sparkPortSpec = new SparkContextPortObjectSpec(m_sparkContextId);
+        } else {
+            sparkPortSpec = InactiveBranchPortObjectSpec.INSTANCE;
+        }
+
+        return new PortObjectSpec[]{null, new ConnectionInformationPortObjectSpec(connInfo), sparkPortSpec};
     }
 
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final ConnectionInformation connInfo = m_settings.createDBFSConnectionInformation(getCredentialsProvider());
 
+        // configure context
         exec.setProgress(0.1, "Configuring Databricks Spark context");
         configureSparkContext(m_sparkContextId, connInfo, m_settings, getCredentialsProvider());
 
-        final DatabricksSparkContext sparkContext =
-            (DatabricksSparkContext)SparkContextManager.<DatabricksSparkContextConfig> getOrCreateSparkContext(m_sparkContextId);
+        // start cluster
+        exec.setProgress(0.2, "Starting cluster on Databricks");
+        final DatabricksSparkContext sparkContext = (DatabricksSparkContext)SparkContextManager
+            .<DatabricksSparkContextConfig> getOrCreateSparkContext(m_sparkContextId);
+        sparkContext.startCluster(exec);
 
-        // try to open the context
-        exec.setProgress(0.2, "Creating context");
-        sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
+        // create spark context
+        final PortObject sparkPortObject;
+        if (m_settings.isCreateSparkContextSet()) {
+            exec.setProgress(0.5, "Creating context");
+            sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
+            sparkPortObject = new SparkContextPortObject(m_sparkContextId);
+        } else {
+            sparkPortObject = InactiveBranchPortObject.INSTANCE;
+        }
 
-        // open the JDBC connection AFTER starting the cluster, otherwise Databricks returns 503...
+        // open the JDBC connection AFTER starting the cluster, otherwise Databricks returns 503... (cluster starting)
         exec.setProgress(0.9, "Configuring Databricks DB connection");
         final PortObject dbPortObject = createDBPort(exec, sparkContext.getClusterStatusHandler());
 
         return new PortObject[]{
             dbPortObject,
             new ConnectionInformationPortObject(new ConnectionInformationPortObjectSpec(connInfo)),
-            new SparkContextPortObject(m_sparkContextId)};
+            sparkPortObject};
     }
 
     /**

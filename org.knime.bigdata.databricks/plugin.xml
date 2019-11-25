@@ -37,7 +37,7 @@
   <extension point="org.knime.database.DBType">
     <DBType id="databricks" name="Databricks"
     		urlTemplateValidator="org.knime.bigdata.database.databricks.DatabricksDBUrlTemplateValidator"
-    		defaultAttributeDefinitionSupplier="org.knime.database.DBType$NonTransactionalDefaultAttributeSupplier$Factory">
+    		defaultAttributeDefinitionSupplier="org.knime.bigdata.database.databricks.DatabricksDefaultAttributeSupplier">
     	<UrlTemplateExamples>
 	        <UrlTemplateExample title="Databricks/Simba Driver" template="jdbc:spark://&lt;host&gt;:&lt;port&gt;/default" />
 	        <UrlTemplateExample title="Apache Hive Driver" template="jdbc:hive2://&lt;host&gt;:&lt;port&gt;/default" />

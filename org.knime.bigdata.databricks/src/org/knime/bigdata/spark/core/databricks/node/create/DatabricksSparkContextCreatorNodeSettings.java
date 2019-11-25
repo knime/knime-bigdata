@@ -142,6 +142,8 @@ public class DatabricksSparkContextCreatorNodeSettings extends DBSessionSettings
     private final SettingsModelAuthentication m_authentication =
         new SettingsModelAuthentication("authentication", AuthenticationType.PWD);
 
+    private final SettingsModelBoolean m_createSparkContext = new SettingsModelBoolean("createSparkContext", true);
+
     private final SettingsModelBoolean m_setStagingAreaFolder = new SettingsModelBoolean("setStagingAreaFolder", false);
 
     private final SettingsModelString m_stagingAreaFolder = new SettingsModelString("stagingAreaFolder", "");
@@ -183,7 +185,15 @@ public class DatabricksSparkContextCreatorNodeSettings extends DBSessionSettings
      * Updates the enabledness of the underlying settings models.
      */
     public void updateEnabledness() {
-        m_stagingAreaFolder.setEnabled(m_setStagingAreaFolder.getBooleanValue());
+        if (m_createSparkContext.getBooleanValue()) {
+            m_setStagingAreaFolder.setEnabled(true);
+            m_stagingAreaFolder.setEnabled(m_setStagingAreaFolder.getBooleanValue());
+            m_terminateClusterOnDestroy.setEnabled(true);
+        } else {
+            m_setStagingAreaFolder.setEnabled(false);
+            m_stagingAreaFolder.setEnabled(false);
+            m_terminateClusterOnDestroy.setEnabled(false);
+        }
     }
 
     /**
@@ -249,6 +259,20 @@ public class DatabricksSparkContextCreatorNodeSettings extends DBSessionSettings
      */
     protected SettingsModelAuthentication getAuthenticationModel() {
         return m_authentication;
+    }
+
+    /**
+     * @return the create spark context settings model
+     */
+    protected SettingsModelBoolean getCreateSparkContextModel() {
+        return m_createSparkContext;
+    }
+
+    /**
+     * @return {@code true} if a spark context should be created
+     */
+    protected boolean isCreateSparkContextSet() {
+        return m_createSparkContext.getBooleanValue();
     }
 
     /**
@@ -415,6 +439,7 @@ public class DatabricksSparkContextCreatorNodeSettings extends DBSessionSettings
         m_workspaceId.saveSettingsTo(settings);
         m_authentication.saveSettingsTo(settings);
 
+        m_createSparkContext.saveSettingsTo(settings);
         m_setStagingAreaFolder.saveSettingsTo(settings);
         m_stagingAreaFolder.saveSettingsTo(settings);
 
@@ -446,6 +471,7 @@ public class DatabricksSparkContextCreatorNodeSettings extends DBSessionSettings
         m_workspaceId.validateSettings(settings);
         m_authentication.validateSettings(settings);
 
+        m_createSparkContext.loadSettingsFrom(settings);
         m_setStagingAreaFolder.validateSettings(settings);
         if (m_setStagingAreaFolder.getBooleanValue()) {
             m_stagingAreaFolder.validateSettings(settings);
@@ -533,6 +559,7 @@ public class DatabricksSparkContextCreatorNodeSettings extends DBSessionSettings
         m_workspaceId.loadSettingsFrom(settings);
         m_authentication.loadSettingsFrom(settings);
 
+        m_createSparkContext.loadSettingsFrom(settings);
         m_setStagingAreaFolder.loadSettingsFrom(settings);
         m_stagingAreaFolder.loadSettingsFrom(settings);
 

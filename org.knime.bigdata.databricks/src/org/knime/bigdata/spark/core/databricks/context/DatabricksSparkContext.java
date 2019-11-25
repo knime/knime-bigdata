@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -81,6 +82,8 @@ import org.knime.core.node.NodeLogger;
 public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextConfig> {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(DatabricksSparkContext.class);
+
+    private static final String CLUSTER_NAME_CONF_KEY = "spark.databricks.clusterUsageTags.clusterName";
 
     /**
      * Filename of the job jar in the remote staging area.
@@ -193,8 +196,17 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
     }
 
     /**
-     * {@inheritDoc}
+     * Start a cluster on databricks if required and wait until cluster is in running state.
+     *
+     * @param exec
+     * @throws KNIMESparkException
+     * @throws CanceledExecutionException
      */
+    public void startCluster(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+        ensureDatabricksClient();
+        m_databricksClient.startOrConnectCluster(exec);
+    }
+
     @Override
     protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         boolean contextWasCreated = false;
@@ -203,17 +215,17 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
                 throw new SparkContextNotFoundException(getID());
             }
 
-            exec.setProgress(0, "Opening remote Spark context on Databricks");
-
             ensureDatabricksClient();
             setStatus(SparkContextStatus.OPEN);
 
-            m_databricksClient.startOrConnectCluster(exec);
+            exec.setProgress(0.1, "Uploading Spark jobs jar");
+            uploadJobJar(exec);
+
+            exec.setProgress(0.5, "Opening remote Spark context on Databricks");
+            m_jobController.createContext(exec);
             contextWasCreated = true;
 
-            exec.setProgress(0.6, "Uploading Spark jobs");
-            uploadJobJar(exec);
-            m_jobController.createContext(exec);
+            exec.setProgress(0.9, "Validating and preparing context on Databricks");
             validateAndPrepareContext(exec);
             exec.setProgress(1);
         } catch (final Exception e) {
@@ -357,6 +369,7 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
         reps.put("spark_version", config.getSparkVersion().toString());
         reps.put("url", config.getDatabricksUrl());
         reps.put("cluster_id", config.getClusterId());
+        reps.put("cluster_name", getClusterName());
         reps.put("authentication", createAuthenticationInfoString());
         reps.put("job_check_frequency", Integer.toString(config.getJobCheckFrequencySeconds()));
         reps.put("terminate_on_dispose", config.terminateClusterOnDestroy() ? "yes" : "no");
@@ -368,6 +381,15 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
             return TextTemplateUtil.fillOutTemplate(r, reps);
         } catch (final IOException e) {
             throw new RuntimeException("Failed to read context description template");
+        }
+    }
+
+    private String getClusterName() {
+        if (m_contextAttributes != null
+                && !StringUtils.isBlank(m_contextAttributes.sparkConf.get(CLUSTER_NAME_CONF_KEY))) {
+            return m_contextAttributes.sparkConf.get(CLUSTER_NAME_CONF_KEY);
+        } else {
+            return "unavailable";
         }
     }
 
