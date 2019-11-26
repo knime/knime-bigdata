@@ -3,15 +3,15 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Learner" icon="icon.png">
     <name>Spark Random Forest Learner (Regression)</name>
-	<shortDescription>Trains a Random Forest regression model in Spark.</shortDescription>
+	<shortDescription>Trains a random forest regression model in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
-			Random forests are ensembles of Decision Trees. Learning a Random Forest model means
-			training a set of independent Decision Trees in parallel.
+			A random forest* is an ensemble of decision trees. Learning a random forest model means
+			training a set of independent decision trees in parallel.
 			This node uses the
 			<a
 				href="http://spark.apache.org/docs/2.4.3/ml-classification-regression.html#random-forests">
-				spark.ml Random Forest
+				spark.ml random forest
 			</a>
 			implementation to train a regression model in Spark. The target column must be numeric, whereas the
 			feature columns can be either nominal or numerical.
@@ -26,6 +26,7 @@
 				for a full description of the underlying algorithm.
 			</p>
 			<p><i>This node requires at least Apache Spark 2.0.</i></p>
+			(*) RANDOM FOREST is a registered trademark of Minitab, LLC and is used with Minitab’s permission.
 		</intro>
 		
 		<tab name="Settings">
@@ -45,12 +46,12 @@
 			</option>
 
 			<option name="Number of models">
-				The number of Decision Trees in the forest. Increasing this number will make the Random Forest model
+				The number of decision trees in the forest. Increasing this number will make the random forest model
 				less likely to overfit, but also directly increase training time.
 			</option>
 			
 			<option name="Max tree depth">
-				Maximum depth of the Decision Trees. Must be >= 1.
+				Maximum depth of the decision trees. Must be >= 1.
 			</option>
 			
 			<option name="Min rows per tree node">
@@ -75,7 +76,7 @@
 		<tab name="Advanced">
 			<option name="Data sampling (rows)">
 				Sampling the rows is also known as bagging, a very popular ensemble learning strategy. If sampling is
-				disabled (default), then each Decision Tree is trained on the full data set. Otherwise each
+				disabled (default), then each decision tree is trained on the full data set. Otherwise each
 				tree is trained with a different data sample that contains the configured fraction of rows of the
 				original data. 
 			</option>
@@ -106,6 +107,6 @@
 			Table with estimates of the importance of each feature. The features are listed in order of decreasing
 			importance and are normalized to sum up to 1.
 		</outPort>
-		<outPort index="1" name="Spark ML Random Forest model (regression)">Spark ML Random Forest model (regression)</outPort>
+		<outPort index="1" name="Spark ML Random Forest model (regression)">Spark ML random forest model (regression)</outPort>
     </ports>
 </knimeNode>
