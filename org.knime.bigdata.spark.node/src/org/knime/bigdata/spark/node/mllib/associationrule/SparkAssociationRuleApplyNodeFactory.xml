@@ -8,7 +8,8 @@
     <intro>
       <p>
         This node applies <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html#association-rules">association rules</a>
-        to a given column with item sets (transactions). A rule matches an item set, if the item set contains all antecedent items
+        created by a Spark rule learner*.
+        The rules are applied to a given column with item sets (transactions). A rule matches an item set, if the item set contains all antecedent items
         of the rule. The consequent items of the matching rules are then added to the output set of predicted items
         if they are not already included in the input items collection (the output set contains only <i>new</i> items).
       </p>
@@ -29,6 +30,8 @@
       </p>
 
       <p><i>This node requires at least Apache Spark 2.0.</i></p>
+      <br/>
+      (*) RULE LEARNER is a registered trademark of Minitab, LLC and is used with Minitab’s permission.
     </intro>
 
         <option name="Antecedent Column">

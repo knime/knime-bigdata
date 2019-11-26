@@ -7,7 +7,7 @@
   <fullDescription>
     <intro>
       <p>
-        This node uses Spark MLlib to compute frequent item sets and then extract association rules from the given input data. 
+        This rule learner* uses Spark MLlib to compute frequent item sets and then extract association rules from the given input data. 
         Association rules describe relations between items in a set of transactions. For example, if a customer bought <i>onions,
         potatos</i> and <i>meat</i> in a transaction, this implies that a new customer who buys <i>onions</i> and <i>potatos</i> is likely
         to also buy <i>meat</i>. This can be written as an association rule with <i>onions</i> and <i>potatos</i> as antecedents and
@@ -42,6 +42,8 @@
       </p>
 
       <p><i>This node requires at least Apache Spark 2.0.</i></p>
+      <br/>
+      (*) RULE LEARNER is a registered trademark of Minitab, LLC and is used with Minitab’s permission.
     </intro>
 
     <option name="Item Column">
