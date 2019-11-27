@@ -141,8 +141,9 @@ public class DBSpark2HiveNodeModel extends SparkNodeModel {
      * @throws InvalidSettingsException If the wrong database is connected
      */
     protected void checkDatabaseIdentifier(final DBSessionPortObjectSpec spec) throws InvalidSettingsException {
-        DBType dbType = spec.getDBSession().getDBType();
-        if (Hive.DB_TYPE != dbType) {
+        final DBType dbType = spec.getDBSession().getDBType();
+        //I use the string here for databricks to avoid a dependency on the whole Databricks plugin
+        if (Hive.DB_TYPE != dbType && !dbType.getId().equals("databricks")) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
     }
