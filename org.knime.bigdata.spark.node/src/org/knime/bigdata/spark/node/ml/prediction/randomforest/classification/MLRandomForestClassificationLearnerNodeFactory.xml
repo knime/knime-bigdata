@@ -26,7 +26,7 @@
 				for a full description of the underlying algorithm.
 			</p>
 			<p><i>This node requires at least Apache Spark 2.0.</i></p>
-			(*) RANDOM FOREST is a registered trademark of Minitab, LLC and is used with Minitab’s permission.
+			(*) RANDOM FORESTS is a registered trademark of Minitab, LLC and is used with Minitab’s permission.
 		</intro>
 		
 		<tab name="Settings">

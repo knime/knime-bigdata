@@ -16,7 +16,7 @@
 			<p>
 				Use the Spark Predictor node to apply the learned model to unseen data.
 			</p>
-			(*) RANDOM FOREST is a registered trademark of Minitab, LLC and is used with Minitab’s permission.	
+			(*) RANDOM FORESTS is a registered trademark of Minitab, LLC and is used with Minitab’s permission.	
 		</intro>
 		
 		<tab name="Settings">
