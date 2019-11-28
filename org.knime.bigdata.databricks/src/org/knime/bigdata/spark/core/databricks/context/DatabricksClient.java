@@ -78,6 +78,7 @@ import org.knime.bigdata.databricks.rest.libraries.LibraryStatus;
 import org.knime.bigdata.databricks.rest.libraries.UnInstallLibrary;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkClusterNotFoundException;
+import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
@@ -542,6 +543,8 @@ public class DatabricksClient {
             cancelCommand(contextId, command);
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution cancled after thread interruption.");
+        } catch (final FileNotFoundException e) { // cluster or driver restart
+            throw new SparkContextNotFoundException();
         } catch (final IOException e) {
             if (e.getMessage() != null && e.getMessage().startsWith("Server error: UnauthorizedCommandException")) {
                 throw new TableAccessControllException(e);

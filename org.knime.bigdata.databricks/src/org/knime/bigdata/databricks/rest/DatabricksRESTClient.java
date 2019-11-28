@@ -116,6 +116,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
                 return new FileNotFoundException(message);
             } else if (response.getStatus() == 404) {
                 return new FileNotFoundException("Resource not found");
+            } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
+                return new FileNotFoundException("Context not found");
             } else if (!StringUtils.isBlank(message)) {
                 return new IOException("Server error: " + message);
             } else {

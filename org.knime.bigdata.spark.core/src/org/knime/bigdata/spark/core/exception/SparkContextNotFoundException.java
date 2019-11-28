@@ -35,16 +35,24 @@ public class SparkContextNotFoundException extends KNIMESparkException {
 
     /**
      * Constructor
+     */
+    public SparkContextNotFoundException() {
+        super("Spark context does not exist in the cluster. Please create a context first.");
+        m_contextID = null;
+    }
+
+    /**
+     * Constructor
      * @param contextID the {@link SparkContextID} that does not exist anymore
      */
     public SparkContextNotFoundException(final SparkContextID contextID) {
-        super(String.format("Spark context does not exist in the cluster. Please create a context first.",
+        super(String.format("Spark context '%s' does not exist in the cluster. Please create a context first.",
             contextID.toString()));
         m_contextID = contextID;
     }
 
     /**
-     * @return the {@link SparkContextID} that no longer exists
+     * @return the {@link SparkContextID} that no longer exists or {@code null}
      */
     public SparkContextID getSparkContextID() {
         return m_contextID;
