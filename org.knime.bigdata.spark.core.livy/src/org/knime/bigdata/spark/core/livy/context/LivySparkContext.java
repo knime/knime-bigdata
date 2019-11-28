@@ -154,8 +154,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             final LivySparkContextConfig config = getConfiguration();
             final Properties livyHttpConf = createLivyHttpConf(config);
             final String livyUrl = config.getLivyUrlWithAuthentication();
+            final String livyUrlLog = config.getLivyUrlWithoutAuthentication();
 
-            LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
+            LOGGER.debug(String.format("Creating new remote Spark context %s at %s with authentication %s.",
+                config.getSparkContextID(), livyUrlLog, config.getAuthenticationType()));
+
             try {
                 if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
                     m_livyClient = KerberosProvider
