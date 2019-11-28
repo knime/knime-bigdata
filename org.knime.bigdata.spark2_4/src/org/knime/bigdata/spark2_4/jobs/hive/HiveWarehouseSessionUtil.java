@@ -23,6 +23,7 @@ package org.knime.bigdata.spark2_4.jobs.hive;
 import java.util.Arrays;
 
 import org.apache.spark.SparkContext;
+import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -116,8 +117,16 @@ public class HiveWarehouseSessionUtil {
             // NOTE: Always make sure that HiveWarehouseSession has been initialized before doing this
             // Currently this happens as part of building the CREATE TABLE statement, but we may not
             // be doing this forever
-            dataFrame.write().format(HIVE_WAREHOUSE_CONNECTOR).mode("append")
-                .option("table", input.getHiveTableName()).save();
+            final DataFrameWriter<Row> writer = dataFrame.write().format(HIVE_WAREHOUSE_CONNECTOR).mode("append");
+
+            // NOTE: HWC use getTables and equalsIgnoreCase to check if the table already exists. The escaping must
+            // be removed to support this check, otherwise HWC creates the table again and fails in HDP 3.1.4+ with
+            // an exception that the table already exists. In versions before HDP 3.1.4, this error will be logged
+            // as an error and ignored.
+            writer.option("table", input.getHiveTableName().replace("`", ""));
+
+            // Hopefully enough workarounds applied, do it.
+            writer.save();
         } finally {
             if (clearSession) {
                 SparkSession.clearActiveSession();
