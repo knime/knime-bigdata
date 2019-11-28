@@ -227,7 +227,9 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
                         new ParquetType(subtype.asPrimitiveType().getPrimitiveTypeName(), subtype.getOriginalType());
                     columns.add(new ExternalDataColumnSpec<>(field.getName(), ParquetType.createListType(element)));
                 } else {
-                    throw new BigDataFileFormatException("Only Supported GroupType is LIST");
+                    throw new BigDataFileFormatException(
+                        String.format("Found unsupported group type in column '%s', only supported group type is LIST.",
+                            field.getName()));
                 }
             }
         }
