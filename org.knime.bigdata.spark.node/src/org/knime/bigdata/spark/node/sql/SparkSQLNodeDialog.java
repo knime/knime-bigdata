@@ -23,6 +23,7 @@ import java.awt.event.MouseListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -32,6 +33,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 
 import org.fife.ui.autocomplete.AutoCompletion;
@@ -42,7 +45,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.knime.base.util.flowvariable.FlowVariableResolver;
-import org.knime.bigdata.spark.core.exception.MissingJobException;
+import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -64,9 +67,11 @@ import org.knime.rsyntaxtextarea.KnimeSyntaxTextArea;
  */
 class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
 
-    private static final Dimension MINIMUM_PANEL_SIZE = new Dimension(100, 100);
+    private static final Dimension MINIMUM_PANEL_SIZE = new Dimension(200, 200);
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkSQLNodeDialog.class);
+
+    private final AtomicBoolean m_fetchFunctionsJobRunning = new AtomicBoolean(false);
 
     private final SparkSQLSettings m_settings = new SparkSQLSettings();
 
@@ -78,13 +83,18 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
     private final JList<DataColumnSpec> m_columns;
     private final JLabel m_columnsError;
 
+    private final JScrollPane m_variablesPanel;
     private final DefaultListModel<FlowVariable> m_variablesModel;
     private final JList<FlowVariable> m_variables;
+    private final JLabel m_variablesError;
 
     private final JScrollPane m_functionsPanel;
     private final DefaultListModel<String> m_functionsModel;
     private final JList<String> m_functions;
+    private final JLabel m_functionsLoading;
     private final JLabel m_functionsError;
+
+    private SparkContextID m_lastContextId;
 
     SparkSQLNodeDialog() {
         // Query
@@ -95,7 +105,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         queryPane.setBorder(BorderFactory.createTitledBorder(" SQL Statement "));
 
         // Input columns
-        m_columnsError = new JLabel("<html><center>No<br/>column<br/>information<br/>available</center></html>");
+        m_columnsError = createInfoLabel("No<br/>column<br/>information<br/>available");
         m_columnsModel = new DefaultListModel<>();
         m_columns = new JList<>(m_columnsModel);
         m_columns.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -108,19 +118,21 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_columnsPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
 
         // Flow variables
+        m_variablesError = createInfoLabel("No<br/>variables<br/>information<br/>available");
         m_variablesModel = new DefaultListModel<>();
         m_variables = new JList<>(m_variablesModel);
         m_variables.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_variables.setCellRenderer(new FlowVariableListCellRenderer());
         m_variables.addMouseListener(this);
-        final JScrollPane variablesPanel = new JScrollPane(m_variables,
+        m_variablesPanel = new JScrollPane(m_variables,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        variablesPanel.setBorder(BorderFactory.createTitledBorder(" Flow Variable "));
-        variablesPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
+        m_variablesPanel.setBorder(BorderFactory.createTitledBorder(" Flow Variable "));
+        m_variablesPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
 
         // Functions
-        m_functionsError = new JLabel("<html><center>No<br/>function<br/>information<br/>available</center></html>");
+        m_functionsLoading = createInfoLabel("Loading<br/>function<br/>information");
+        m_functionsError = createInfoLabel("No<br/>function<br/>information<br/>available");
         m_functionsModel = new DefaultListModel<>();
         m_functions = new JList<>(m_functionsModel);
         m_functions.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -131,7 +143,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_functionsPanel.setBorder(BorderFactory.createTitledBorder(" Functions "));
         m_functionsPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
 
-        final JSplitPane columnVarPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_columnsPanel, variablesPanel);
+        final JSplitPane columnVarPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_columnsPanel, m_variablesPanel);
         columnVarPane.setResizeWeight(0.7);
         columnVarPane.setOneTouchExpandable(true);
         final JSplitPane inputPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, columnVarPane, m_functionsPanel);
@@ -144,70 +156,81 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         addTab("Query", mainPane, false);
     }
 
+    private static JLabel createInfoLabel(final String message) {
+        final JLabel label = new JLabel("<html><center>" + message + "</center></html>");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        return label;
+    }
+
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
         m_settings.loadSettingsFrom(settings);
         m_query.setText(m_settings.getQuery());
-        final DefaultCompletionProvider queryCompletition = new DefaultCompletionProvider();
-        final List<Completion> completions = new LinkedList<>();
 
-        m_columnsModel.removeAllElements();
         if (specs != null && specs.length > 0 && specs[0] != null) {
             final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec) specs[0];
 
             // Columns
+            m_columnsModel.removeAllElements();
             for(DataColumnSpec col : spec.getTableSpec()) {
                 m_columnsModel.addElement(col);
-                final String desc = "Column (" + col.getType().toPrettyString() + ")";
-                completions.add(new ShorthandCompletion(queryCompletition, col.getName(), "`" + col.getName() + "`", desc));
             }
             m_columnsPanel.setViewportView(m_columns);
             m_columnsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
+            // Variables
+            m_variablesModel.removeAllElements();
+            for (Map.Entry<String, FlowVariable> e : getAvailableFlowVariables().entrySet()) {
+                m_variablesModel.addElement(e.getValue());
+            }
+            m_variablesPanel.setViewportView(m_variables);
+            m_variablesPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
             // Functions
-            if (m_functionsModel.isEmpty()) {
-                try {
-                    final List<String> functions = SparkSQLNodeModel.getSQLFunctions(spec.getContextID());
-                    m_functionsModel.removeAllElements();
-                    for (String function : functions) {
-                        m_functionsModel.addElement(function);
-                        completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "Function"));
-                    }
-                    m_functionsPanel.setViewportView(m_functions);
-                    m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-                } catch(MissingJobException e) {
-                    LOGGER.info("Spark SQL function listing not supported by this Spark version.");
-                    m_functionsPanel.setViewportView(m_functionsError);
-                    m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-
-                } catch (Exception e) {
-                    LOGGER.warn("Unable to fetch SQL functions list: " + e.getMessage(), e);
-                    m_functionsPanel.setViewportView(m_functionsError);
-                    m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-                }
+            if (m_functionsModel.isEmpty() || !spec.getContextID().equals(m_lastContextId)) {
+                m_functionsModel.removeAllElements();
+                m_functionsPanel.setViewportView(m_functionsLoading);
+                m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+                fetchFunctionsAsync(spec.getContextID());
             } else {
-                //fill the completion with the elements from the function model
-                for (int i = 0; i < m_functionsModel.size(); i++) {
-                    final String function = m_functionsModel.get(i);
-                    completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "Function"));
-                }
+                m_functionsPanel.setViewportView(m_functions);
+                m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             }
 
         } else {
             m_columnsPanel.setViewportView(m_columnsError);
             m_columnsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            m_variablesPanel.setViewportView(m_variablesError);
+            m_variablesPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             m_functionsPanel.setViewportView(m_functionsError);
             m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         }
 
+        updateCompletitions();
+    }
+
+    void updateCompletitions() {
+        final DefaultCompletionProvider queryCompletition = new DefaultCompletionProvider();
+        final List<Completion> completions = new LinkedList<>();
+
+        // Columns
+        for(int i = 0; i < m_columnsModel.size(); i++) {
+            final DataColumnSpec col = m_columnsModel.get(i);
+            final String desc = "Column (" + col.getType().toPrettyString() + ")";
+            completions.add(new ShorthandCompletion(queryCompletition, col.getName(), "`" + col.getName() + "`", desc));
+        }
+
+        // Functions
+        for (int i = 0; i < m_functionsModel.size(); i++) {
+            final String function = m_functionsModel.get(i);
+            completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "Function"));
+        }
+
         // Variables
-        m_variablesModel.removeAllElements();
-        for (Map.Entry<String, FlowVariable> e : getAvailableFlowVariables().entrySet()) {
-            final FlowVariable var = e.getValue();
-            m_variablesModel.addElement(var);
+        for (int i = 0; i < m_variablesModel.size(); i++) {
+            final FlowVariable var = m_variablesModel.get(i);
             final String repl = FlowVariableResolver.getPlaceHolderForVariable(var);
             final String desc = "Flow Variable (" + var.getType() + ")";
             completions.add(new ShorthandCompletion(queryCompletition, var.getName(), repl, desc));
@@ -223,6 +246,48 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         }
         m_autoCompletion = new AutoCompletion(queryCompletition);
         m_autoCompletion.install(m_query);
+    }
+
+    void showFunctionsList(final List<String> functions) {
+        m_functionsModel.removeAllElements();
+        for (String function : functions) {
+            m_functionsModel.addElement(function);
+        }
+        m_functionsPanel.setViewportView(m_functions);
+        m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        updateCompletitions();
+    }
+
+    void showFunctionsLoadError() {
+        m_functionsPanel.setViewportView(m_functionsError);
+        m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        updateCompletitions();
+    }
+
+    void fetchFunctionsAsync(final SparkContextID contextID) {
+        if (m_fetchFunctionsJobRunning.compareAndSet(false, true)) {
+            new SwingWorker<List<String>, Void>() {
+                @Override
+                protected List<String> doInBackground() throws Exception {
+                    return SparkSQLNodeModel.getSQLFunctions(contextID);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        showFunctionsList(get());
+                        m_lastContextId = contextID; // remember context ID on success
+                    } catch (Exception e) {
+                        LOGGER.warn("Unable to fetch SQL functions list: " + e.getMessage(), e);
+                        showFunctionsLoadError();
+                    }
+                    m_fetchFunctionsJobRunning.set(false);
+                }
+            }.execute();
+        } else {
+            LOGGER.debug("Spark SQL functions fetch job already started.");
+        }
     }
 
     @Override
