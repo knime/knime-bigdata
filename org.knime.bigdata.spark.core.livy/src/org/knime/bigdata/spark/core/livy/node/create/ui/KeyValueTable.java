@@ -83,6 +83,9 @@ public class KeyValueTable extends JTable {
     /** The wrong input color. */
     private static final Color WRONG_INPUT_COLOR = new Color(255, 120, 120);
 
+    /** The wrong input color. */
+    private static final Color CUSTOM_KEY_INPUT_COLOR = new Color(255, 200, 0);
+
     /**
      * Constructor.
      *
@@ -132,18 +135,10 @@ public class KeyValueTable extends JTable {
     }
 
     /**
-     * Adds an row to the table.
-     *
-     * @return <code>True</code> if the row was added to the table and <code>False</code> otherwise
+     * Adds an row to the table and highlights the row
      */
-    boolean addRow() {
-        // add a row to the model
-        if (getModel().addRow()) {
-            // highlight the newly create row
-            highlightRow(getModel().getRowCount() - 1);
-            return true;
-        }
-        return false;
+    void addRow() {
+        highlightRow(getModel().addRow());
     }
 
     /**
@@ -203,7 +198,7 @@ public class KeyValueTable extends JTable {
         if (selectedRows.length == 1) {
             if (!isEmpty()) {
                 final int idx = selectedRows[0];
-                highlightRow(Math.max(0, Math.min(getRowCount(), idx - 1)));
+                highlightRow(Math.max(0, Math.min(getRowCount() - 1, idx))); // stay on current or last row
             } else {
                 getSelectionModel().clearSelection();
             }
@@ -271,15 +266,26 @@ public class KeyValueTable extends JTable {
         @Override
         public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
             final boolean hasFocus, final int row, final int column) {
+
+            final int rowIndex = convertRowIndexToModel(row);
+            final int columnIndex = convertColumnIndexToModel(column);
+
             // reset the background color
             setBackground(PROPER_INPUT_COLOR);
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            // use custom key background
+            if (getModel().isCustomKey(value, rowIndex, columnIndex) && columnIndex == KeyValueTableModel.KEY_IDX) {
+                setBackground(CUSTOM_KEY_INPUT_COLOR);
+            }
+
             // if the entry is not valid change the background
             try {
-                getModel().validate(value, convertRowIndexToModel(row), convertColumnIndexToModel(column));
+                getModel().validate(value, rowIndex, columnIndex);
             } catch (final Exception e) {
                 setBackground(WRONG_INPUT_COLOR);
             }
+
             return this;
         }
     }

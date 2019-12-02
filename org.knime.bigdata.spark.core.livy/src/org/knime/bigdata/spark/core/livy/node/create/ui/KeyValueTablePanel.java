@@ -168,11 +168,18 @@ final class KeyValueTablePanel extends JPanel {
      */
     public void toggleButtons() {
         if (!isEnabled()) {
+            try {
+                m_keyValueTable.stopEditing();
+            } catch (InvalidSettingsException ex) {
+                LOGGER.debug(ex.getMessage());
+            }
+            m_addButton.setEnabled(false);
+            m_addAllButton.setEnabled(false);
             m_removeButton.setEnabled(false);
             m_removeAllButton.setEnabled(false);
-            setEnabledAddButtons(false);
         } else {
-            setEnabledAddButtons(m_keyValueTable.hasMoreRows());
+            m_addButton.setEnabled(true);
+            m_addAllButton.setEnabled(m_keyValueTable.hasMoreRows());
             m_removeButton.setEnabled(m_keyValueTable.getSelectedRowCount() > 0);
             boolean removeAllPossible = !m_keyValueTable.isEmpty();
             m_removeAllButton.setEnabled(removeAllPossible);
@@ -256,16 +263,6 @@ final class KeyValueTablePanel extends JPanel {
      */
     private void onRemoveAllAction() {
         m_keyValueTable.removeAllRows();
-    }
-
-    /**
-     * Enables or disables the add and addAll button.
-     *
-     * @param isEnabled <code>true</code> if the add button should be enabled, otherwise <code>false</code>
-     */
-    private void setEnabledAddButtons(final boolean isEnabled) {
-        m_addButton.setEnabled(isEnabled);
-        m_addAllButton.setEnabled(isEnabled);
     }
 
     /**

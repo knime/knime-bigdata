@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -58,27 +60,37 @@ public class SettingsModelKeyValue extends SettingsModel {
     }
 
     /**
-     * Takes the next unassigned key and assigns the key's default value.
+     * Takes the next unassigned key and assigns the key's default value or creates an empty row if no unassigned keys
+     * available anymore.
      * 
-     * @return the key that has been assigned.
+     * @return row index of new row
      */
-    public String addNext() {
-        final String nextKey = m_unassignedKeys.first();
-        setKeyValuePair(nextKey, m_supportedKeys.get(nextKey).getDefaultValue());
-        return nextKey;
+    public int addRow() {
+        if (!m_unassignedKeys.isEmpty()) {
+            final String nextKey = m_unassignedKeys.first();
+            setKeyValuePair(nextKey, m_supportedKeys.get(nextKey).getDefaultValue());
+            return m_assignedKeys.size() - 1;
+        } else if (!isAssignedKey("")) {
+            // add empty row for custom key
+            setKeyValuePair("", "");
+            return m_assignedKeys.size() - 1;
+        } else {
+            // reuse last empty row
+            return m_assignedKeys.indexOf("");
+        }
     }
 
     /**
      * @return whether there are still unassigned keys or not.
      */
-    public boolean hasNext() {
+    public boolean hasUnassignedKeys() {
         return !m_unassignedKeys.isEmpty();
     }
 
     /**
      * Takes all unassigned keys and assigns to each its respective default value.
      */
-    public void addAll() {
+    public void addAllUnassignedKeys() {
         for (String key : m_unassignedKeys) {
             m_assignedKeys.add(key);
             m_assignments.put(key, m_supportedKeys.get(key).getDefaultValue());
@@ -95,8 +107,6 @@ public class SettingsModelKeyValue extends SettingsModel {
      * @throws IllegalArgumentException If the given map contains unsupported keys.
      */
     public void setKeyValuePairs(Map<String, String> newAssignments) {
-        newAssignments.keySet().stream().forEach(this::ensureKeySupported);
-
         setKeyValuePairsInternal(newAssignments);
         notifyChangeListeners();
     }
@@ -114,14 +124,12 @@ public class SettingsModelKeyValue extends SettingsModel {
     /**
      * Assigns the given value to the given key. If the key was previously unassigned, the assignment will be added to
      * the end of the list of assignments.
-     * 
+     *
      * @param key The key to assign to.
      * @param newValue The value to assign.
      * @throws IllegalArgumentException if the given key is not supported.
      */
-    public void setKeyValuePair(String key, String newValue) {
-        ensureKeySupported(key);
-
+    public void setKeyValuePair(final String key, final String newValue) {
         final boolean previouslyUnassigned = !m_assignments.containsKey(key);
         final boolean changed = previouslyUnassigned || !Objects.equals(m_assignments.get(key), newValue);
 
@@ -155,13 +163,13 @@ public class SettingsModelKeyValue extends SettingsModel {
             throw new IllegalArgumentException("Key is already assigned: " + newKey);
         }
 
-        ensureKeySupported(newKey);
-
         int preKeyIdx = m_assignedKeys.indexOf(prevKey);
         m_assignedKeys.set(preKeyIdx, newKey);
         m_assignments.remove(prevKey);
         m_assignments.put(newKey, newValue);
-        m_unassignedKeys.add(prevKey);
+        if (m_supportedKeys.containsKey(prevKey)) {
+            m_unassignedKeys.add(prevKey);
+        }
         m_unassignedKeys.remove(newKey);
 
         notifyChangeListeners();
@@ -195,12 +203,6 @@ public class SettingsModelKeyValue extends SettingsModel {
         notifyChangeListeners();
 
         return keyToRemove;
-    }
-
-    private void ensureKeySupported(String key) {
-        if (!isSupported(key)) {
-            throw new IllegalArgumentException("Unsupported key: " + key);
-        }
     }
 
     /**
@@ -339,13 +341,16 @@ public class SettingsModelKeyValue extends SettingsModel {
         }
     }
 
-    private void validateAssignmentForKey(String key, String value) throws InvalidSettingsException {
-        try {
-            ensureKeySupported(key);
-            m_supportedKeys.get(key).validateValue(value);
+    private void validateAssignmentForKey(final String key, final String value) throws InvalidSettingsException {
+        if (m_supportedKeys.containsKey(key)) {
+            try {
+                m_supportedKeys.get(key).validateValue(value);
+            } catch (final IllegalArgumentException e) {
+                throw new InvalidSettingsException(String.format("Invalid value for %s: %s", key, e.getMessage()));
+            }
 
-        } catch (IllegalArgumentException e) {
-            throw new InvalidSettingsException(String.format("Invalid value for %s: %s", key, e.getMessage()));
+        } else if (StringUtils.isBlank(key) && !StringUtils.isBlank(value)) {
+            throw new InvalidSettingsException("Unsupported row with value set, but empty key.");
         }
     }
 
@@ -433,8 +438,11 @@ public class SettingsModelKeyValue extends SettingsModel {
     protected void saveSettingsForModel(NodeSettingsWO settings) {
         final NodeSettingsWO settingsData = settings.addNodeSettings(getConfigName());
 
-        for (String key : m_assignments.keySet()) {
-            settingsData.addString(key, m_assignments.get(key));
+        for (final Entry<String, String> e : m_assignments.entrySet()) {
+            // ignore rows with empty keys
+            if (!StringUtils.isBlank(e.getKey())) {
+                settingsData.addString(e.getKey(), e.getValue());
+            }
         }
     }
 

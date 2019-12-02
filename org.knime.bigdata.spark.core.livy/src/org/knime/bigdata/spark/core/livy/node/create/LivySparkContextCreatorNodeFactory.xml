@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
     <name>Create Spark Context (Livy)</name>
     
     <shortDescription>Creates a new Spark context via Apache Livy.</shortDescription>
@@ -74,7 +74,10 @@
                 If enabled you can specify additional Spark setting. 
                 A tooltip is provided for the keys if available. For further information about the Spark settings
                 refer to the <a href="https://spark.apache.org/docs/latest/configuration.html#available-properties">
-                Spark documentation</a>.  
+                Spark documentation</a>.
+                Invalid keys or values are highlighted with a red background.
+                Custom keys are highlighted with a yellow background and should be prefixed with <i>spark</i> or
+                <i>spark.hadoop</i>.
             </option>
         </tab>
     </fullDescription>

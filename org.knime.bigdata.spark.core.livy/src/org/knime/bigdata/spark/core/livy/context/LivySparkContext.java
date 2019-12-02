@@ -212,8 +212,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         // transfer all custom Spark settings
         for (final Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
             final String settingName = customSparkSetting.getKey();
-            if (!settingName.startsWith("livy.client.http.")) {
-                livyHttpConf.setProperty(customSparkSetting.getKey(), customSparkSetting.getValue());
+            final String settingsValue = customSparkSetting.getValue();
+            if (!settingName.startsWith("livy.client.http.") && settingsValue == null) {
+                livyHttpConf.setProperty(settingName, "");
+            } else if (!settingName.startsWith("livy.client.http.")) {
+                livyHttpConf.setProperty(settingName, settingsValue);
             } else {
                 LOGGER.warn(String.format(
                     "Ignoring custom Spark setting %s=%s. Custom Spark settings must not start with \"livy.client.http\"",

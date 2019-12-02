@@ -78,9 +78,15 @@ final class KeyValueCellEditor extends DefaultCellEditor {
      * @param settingsModel The underlying settings model that supplies the keys.
      */
     KeyValueCellEditor(final SettingsModelKeyValue settingsModel) {
-        super(new JComboBox<String>());
+        super(createEditableComboBox());
         m_settingsModel = settingsModel;
         getComboBox().setRenderer(new KeyValueListCellRenderer());
+    }
+
+    private static JComboBox<String> createEditableComboBox() {
+        final JComboBox<String> comboBox = new JComboBox<>();
+        comboBox.setEditable(true);
+        return comboBox;
     }
 
     /**
@@ -115,6 +121,12 @@ final class KeyValueCellEditor extends DefaultCellEditor {
         }
 
         return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+    }
+
+    @Override
+    public Object getCellEditorValue() {
+        // get the value from the combo box editor, otherwise current value will be lost after pressing "tab"
+        return getComboBox().getEditor().getItem();
     }
 
     /**

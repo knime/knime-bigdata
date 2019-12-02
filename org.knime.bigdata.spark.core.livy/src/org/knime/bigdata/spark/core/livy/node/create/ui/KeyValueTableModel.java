@@ -54,6 +54,8 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * A Swing {@link TableModel} model implementation for {@link KeyValueTable}. The table model does actually hold the
  * data, this is all delegated to the underlying {@link SettingsModelKeyValue} instance.
@@ -145,12 +147,13 @@ public class KeyValueTableModel extends AbstractTableModel {
     String getToolTipText(final int rowIndex, final int columnIndex) {
         if (checkRanges(rowIndex, columnIndex)) {
             final String key = m_settingsModel.getKey(rowIndex);
-
-            String tooltip = null;
-            if (m_settingsModel.isSupported(key)) {
-                tooltip = m_settingsModel.getSupportedKey(key).getDescription();
+            if (StringUtils.isBlank(key)) {
+                return "Missing Spark configuration key.";
+            } else if (m_settingsModel.isSupported(key)) {
+                return m_settingsModel.getSupportedKey(key).getDescription();
+            } else {
+                return "User defined Spark configuration key.";
             }
-            return tooltip;
         }
         return null;
     }
@@ -158,15 +161,10 @@ public class KeyValueTableModel extends AbstractTableModel {
     /**
      * Adds a row to this model.
      *
-     * @return <code>True</code> if a new row has been added to this model and <code>False</code> otherwise
+     * @return row index of the added row
      */
-    boolean addRow() {
-        // check if there are more rows available
-        if (m_settingsModel.hasNext()) {
-            m_settingsModel.addNext();
-            return true;
-        }
-        return false;
+    int addRow() {
+        return m_settingsModel.addRow();
     }
 
     /**
@@ -177,8 +175,8 @@ public class KeyValueTableModel extends AbstractTableModel {
      */
     boolean addAllRows() {
         // check if there are more rows available
-        if (m_settingsModel.hasNext()) {
-            m_settingsModel.addAll();
+        if (m_settingsModel.hasUnassignedKeys()) {
+            m_settingsModel.addAllUnassignedKeys();
             return true;
         }
         return false;
@@ -197,7 +195,7 @@ public class KeyValueTableModel extends AbstractTableModel {
      * @return <code>true</code> if this model contains more rows
      */
     boolean hasMoreRows() {
-        return m_settingsModel.hasNext();
+        return m_settingsModel.hasUnassignedKeys();
     }
 
     /**
@@ -232,9 +230,15 @@ public class KeyValueTableModel extends AbstractTableModel {
                 case KEY_IDX:
                     // only update if the value changed
                     if (!newVal.equals(prevKeyAtRow)) {
-                        // a new key also refers to a new value
-                        m_settingsModel.replaceKeyValuePair(prevKeyAtRow, newVal,
-                            m_settingsModel.getSupportedKey(newVal).getDefaultValue());
+                        if (m_settingsModel.isSupported(newVal)) {
+                            // known key: a new key also refers to a new value
+                            m_settingsModel.replaceKeyValuePair(prevKeyAtRow, newVal,
+                                m_settingsModel.getSupportedKey(newVal).getDefaultValue());
+                        } else {
+                            // custom key: keep the value while editing the key
+                            final String prevVal = m_settingsModel.getValue(prevKeyAtRow);
+                            m_settingsModel.replaceKeyValuePair(prevKeyAtRow, newVal, prevVal);
+                        }
                     }
                     break;
                 case VAL_IDX:
@@ -291,21 +295,38 @@ public class KeyValueTableModel extends AbstractTableModel {
     void validate(final Object aValue, final int rowIndex, final int columnIndex) throws Exception {
         if (checkRanges(rowIndex, columnIndex)) {
             final String newVal = (String)aValue;
-            switch (columnIndex) {
-                case KEY_IDX:
-                    // check if the value is among the allowed rows
-                    if (m_settingsModel.getSupportedKey(newVal) == null) {
-                        throw new UnsupportedDataTypeException("The key: " + newVal + " is not supported anymore");
-                    }
-                    break;
-                case VAL_IDX:
-                    // check if the value fulfills the ConfigDef requirements
-                    final String key = m_settingsModel.getKey(rowIndex);
+
+            // check if the key is empty
+            if (columnIndex == KEY_IDX && StringUtils.isEmpty(newVal)) {
+                throw new UnsupportedDataTypeException("Key required");
+
+            // validate the value on known keys
+            } else if (columnIndex == VAL_IDX) {
+                final String key = m_settingsModel.getKey(rowIndex);
+                if (m_settingsModel.isSupported(key)) { // ignore custom keys
                     m_settingsModel.getSupportedKey(key).validateValue(newVal);
-                    break;
-                default:
-                    break;
+                }
             }
         }
+    }
+
+    /**
+     * Validates if the row contains a custom (unknown) key.
+     *
+     * @param aValue new value of current cell
+     * @param rowIndex row index to check
+     * @param columnIndex column index of current cell
+     * @return {@code true} if row contains an unknown key
+     */
+    boolean isCustomKey(final Object aValue, final int rowIndex, final int columnIndex) {
+        final String key;
+
+        if (columnIndex == KEY_IDX) {
+            key = (String) aValue;
+        } else {
+            key = m_settingsModel.getKey(rowIndex);
+        }
+
+        return !m_settingsModel.isSupported(key);
     }
 }
