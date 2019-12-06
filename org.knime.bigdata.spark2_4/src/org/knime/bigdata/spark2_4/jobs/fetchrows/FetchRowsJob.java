@@ -2,6 +2,7 @@ package org.knime.bigdata.spark2_4.jobs.fetchrows;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -36,8 +37,10 @@ public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOut
     public FetchRowsJobOutput runJob(final SparkContext sparkContext, final FetchRowsJobInput config,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
+        final IntermediateSpec interSpec = config.getSpec(config.getFirstNamedInputObject());
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(config.getFirstNamedInputObject());
         final int numRows = config.getNumberOfRows();
+        compareColumns(interSpec.getFields(), inputDataset.columns());
 
         LOGGER.info("Fetching " + numRows + " rows from input data frame.");
 
@@ -48,7 +51,7 @@ public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOut
             res = inputDataset.collectAsList();
         }
 
-        return FetchRowsJobOutput.create(mapToListOfLists(res, config.getSpec(config.getFirstNamedInputObject())));
+        return FetchRowsJobOutput.create(mapToListOfLists(res, interSpec));
     }
 
     private List<List<Serializable>> mapToListOfLists(final List<Row> aRows, final IntermediateSpec spec) {
@@ -72,5 +75,43 @@ public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOut
         }
 
         return rows;
+    }
+
+    /**
+     * Validate that KNIME and Spark spec contains the same columns.
+     *
+     * @param interColumns KNIME side intermediate columns
+     * @param frameColumns Spark side data frame column
+     * @throws KNIMESparkException if column count differs
+     */
+    private static void compareColumns(final IntermediateField[] interColumns, final String[] frameColumns)
+        throws KNIMESparkException {
+        if (interColumns.length != frameColumns.length) {
+            final HashSet<String> interColumnsSet = new HashSet<>();
+            for (final IntermediateField field : interColumns) {
+                interColumnsSet.add(field.getName());
+            }
+
+            final HashSet<String> frameColumnsSet = new HashSet<>();
+            for (final String column : frameColumns) {
+                frameColumnsSet.add(column);
+            }
+
+            if (interColumns.length > frameColumns.length) {
+                interColumnsSet.removeAll(frameColumnsSet);
+                LOGGER.error(
+                    "Different KNIME and Spark spec detected. Columns that are present in KNIME, but not in Spark: "
+                        + interColumnsSet.toString());
+            } else {
+                frameColumnsSet.removeAll(interColumnsSet);
+                LOGGER.error(
+                    "Different KNIME and Spark spec detected. Columns that are present in Spark, but not in KNIME: "
+                        + frameColumnsSet.toString());
+            }
+
+            throw new KNIMESparkException(String.format(
+                "Unable to convert table, KNIME and Spark spec contains different number of columns (KNIME: %d, Spark: %d). See KNIME log for details.",
+                interColumns.length, frameColumns.length));
+        }
     }
 }
