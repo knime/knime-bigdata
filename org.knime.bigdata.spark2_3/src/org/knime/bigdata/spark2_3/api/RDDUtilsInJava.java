@@ -1,16 +1,13 @@
 package org.knime.bigdata.spark2_3.api;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.ml.linalg.DenseMatrix;
 import org.apache.spark.ml.linalg.VectorUDT;
@@ -33,8 +30,6 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-
-import scala.Tuple2;
 
 /**
  * converts various intermediate Java RDD forms to JavaRDD of type JavaRDD[Row] or vice versa
@@ -410,63 +405,5 @@ public class RDDUtilsInJava {
             }
         });
         return rows;
-    }
-
-    /**
-     * count the number of times each pair of values of the given two indices occurs in the rdd
-     *
-     * @param aInputRdd
-     * @param aIndex1 - first index in pair
-     * @param aIndex2 - second index in pair
-     * @return map with counts for all pairs of values that occur at least once
-     */
-    public static Map<Tuple2<Object, Object>, Integer> aggregatePairs(final JavaRDD<Row> aInputRdd, final int aIndex1,
-        final int aIndex2) {
-        Map<Tuple2<Object, Object>, Integer> emptyMap = new HashMap<>();
-
-        Map<Tuple2<Object, Object>, Integer> counts =
-            aInputRdd
-                .aggregate(
-                    emptyMap,
-                    new Function2<Map<Tuple2<Object, Object>, Integer>, Row, Map<Tuple2<Object, Object>, Integer>>() {
-                        private static final long serialVersionUID = 1L;
-
-                        @Override
-                        public Map<Tuple2<Object, Object>, Integer> call(
-                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues, final Row row)
-                            throws Exception {
-
-                            Object val1 = row.get(aIndex1);
-                            Object val2 = row.get(aIndex2);
-                            final Tuple2<Object, Object> key = new Tuple2<>(val1, val2);
-                            final Integer count;
-                            if (aAggregatedValues.containsKey(key)) {
-                                count = aAggregatedValues.get(key) + 1;
-                            } else {
-                                count = 1;
-                            }
-                            aAggregatedValues.put(key, count);
-                            return aAggregatedValues;
-                        }
-                    },
-                    new Function2<Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>>() {
-                        private static final long serialVersionUID = 1L;
-
-                        @Override
-                        public Map<Tuple2<Object, Object>, Integer> call(
-                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues0,
-                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues1) throws Exception {
-                            for (Map.Entry<Tuple2<Object, Object>, Integer> entry : aAggregatedValues0.entrySet()) {
-                                if (aAggregatedValues1.containsKey(entry.getKey())) {
-                                    final Integer val = aAggregatedValues1.remove(entry.getKey());
-                                    aAggregatedValues0.put(entry.getKey(), entry.getValue() + val);
-                                }
-                            }
-                            //copy remaining values over
-                            aAggregatedValues0.putAll(aAggregatedValues1);
-                            return aAggregatedValues0;
-                        }
-                    });
-        return counts;
     }
 }

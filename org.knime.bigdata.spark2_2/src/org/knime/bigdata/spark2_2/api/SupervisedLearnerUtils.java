@@ -139,23 +139,6 @@ public class SupervisedLearnerUtils {
     }
 
     /**
-     * find the distinct values of a column
-     * @param aRDD
-     * @param aColumn
-     * @return the distinct values for the given column index
-     */
-    public static JavaRDD<Object> getDistinctValuesOfColumn(final JavaRDD<Row> aRDD, final int aColumn) {
-        return aRDD.map(new Function<Row, Object>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Object call(final Row aRow) throws Exception {
-                return aRow.get(aColumn);
-            }
-        }).distinct();
-    }
-
-    /**
      * compute the number of classes
      * @param aRDD
      * @return the number of distinct labels
