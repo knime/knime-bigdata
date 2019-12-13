@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark core infrastructure
 Bundle-SymbolicName: org.knime.bigdata.spark.core;singleton:=true
-Bundle-Version: 4.1.0.qualifier
+Bundle-Version: 4.2.0.qualifier
 Bundle-ClassPath: knime.jar,
   conf/
 Bundle-Activator: org.knime.bigdata.spark.core.SparkPlugin
