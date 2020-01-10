@@ -22,10 +22,10 @@ properties:
   spark2_4: 2.4.0
   knime_log4j_version: 1.2.15
   knime_slf4j_version: 1.7.2
-  # KNIME contains most jackson.core artifacts in 2.8.9, with some exceptions
+  # KNIME contains most jackson.core artifacts in 2.10.2, with some exceptions
   # hence we need to be a little more flexible when depending on it
-  knime_jackson_version: 2.8.9
-  knime_jackson_dependency_range: '[2.8,2.9)'
+  knime_jackson_version: 2.10.2
+  knime_jackson_dependency_range: '[2.10.2,3.0)'
   knime_guava_version: 19.0.0
   knime_commons_httpclient_version: 3.1.0
   knime_httpcomponents_httpclient_version: 4.5.3
@@ -34,7 +34,7 @@ properties:
   knime_servletapi_version: 3.1.0
   knime_xerces_version: 2.9.0
   
-  jackson_module_scala_version: 2.8.9
+  jackson_module_scala_version: 2.10.2
   
   # taken from spark's hadoop-2.7 profile (with update to curator, see
   # https://issues.apache.org/jira/browse/SPARK-13933)
