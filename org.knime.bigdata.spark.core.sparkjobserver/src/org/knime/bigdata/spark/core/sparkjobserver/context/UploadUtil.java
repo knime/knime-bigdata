@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.core.sparkjobserver.context;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,14 +53,15 @@ class UploadUtil {
 
     private final List<Path> m_localFiles;
 
-    private final List<Path> m_serverFileNames;
+    private final List<String> m_serverFileNames;
 
-    public UploadUtil(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final List<Path> file) {
+    public UploadUtil(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig,
+        final RestClient restClient, final List<Path> file) {
         this(contextId, contextConfig, restClient, file, false);
     }
 
-    public UploadUtil(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final List<Path> file,
-        final boolean deleteRemoteFilesDuringCleanup) {
+    public UploadUtil(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig,
+        final RestClient restClient, final List<Path> file, final boolean deleteRemoteFilesDuringCleanup) {
 
         m_contextId = contextId;
         m_context = contextConfig;
@@ -78,12 +78,12 @@ class UploadUtil {
      */
     public void upload() throws KNIMESparkException {
         try {
-            for (Path localFile : m_localFiles) {
+            for (final Path localFile : m_localFiles) {
                 final String serverFileName = new UploadFileRequest(m_contextId, m_context, m_restClient, localFile,
                     JobserverConstants.buildDataPath(localFile.getFileName().toString())).send();
-                m_serverFileNames.add(Paths.get(serverFileName));
+                m_serverFileNames.add(serverFileName);
             }
-        } catch (KNIMESparkException e) {
+        } catch (final KNIMESparkException e) {
             cleanup();
             throw e;
         }
@@ -92,7 +92,7 @@ class UploadUtil {
     /**
      * @return filenames on jobserver
      */
-    public List<Path> getServerFileNames() {
+    public List<String> getServerFileNames() {
         return m_serverFileNames;
     }
 
@@ -109,10 +109,10 @@ class UploadUtil {
      */
     public void cleanup() {
         if (m_deleteRemoteFilesDuringCleanup) {
-            for (Path serverFileName : m_serverFileNames) {
+            for (final String serverFileName : m_serverFileNames) {
                 try {
-                    new DeleteDataFileRequest(m_contextId, m_context, m_restClient, serverFileName.toString()).send();
-                } catch (KNIMESparkException e) {
+                    new DeleteDataFileRequest(m_contextId, m_context, m_restClient, serverFileName).send();
+                } catch (final KNIMESparkException e) {
                     LOGGER.error("Failed to delete previously uploaded file on jobserver: " + serverFileName, e);
                 }
             }

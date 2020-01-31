@@ -35,7 +35,7 @@ import org.knime.core.util.Pair;
  */
 public class UploadFileCache {
 
-    private final Map<String, Pair<Long, Path>> m_inputFileCopyCache = new HashMap<>();
+    private final Map<String, Pair<Long, String>> m_inputFileCopyCache = new HashMap<>();
 
     /**
      * Adds cache entries for the given local/server files. If there is an existing cache entry for a local file, the
@@ -47,12 +47,12 @@ public class UploadFileCache {
      *         server-side file can be deleted and the existing (fresher) mapping can be queried with
      *         {@link #tryToGetServerFileFromCache(Path)}.
      */
-    public synchronized boolean addFilesToCache(final Path localFile, final Path serverFile) {
+    public synchronized boolean addFilesToCache(final Path localFile, final String serverFile) {
 
         final String normalizedLocalFile = localFile.normalize().toAbsolutePath().toString();
 
-        Pair<Long, Path> newCacheEntry = new Pair<Long, Path>(localFile.toFile().lastModified(), serverFile);
-        Pair<Long, Path> existingCacheEntry = m_inputFileCopyCache.get(normalizedLocalFile);
+        Pair<Long, String> newCacheEntry = new Pair<Long, String>(localFile.toFile().lastModified(), serverFile);
+        Pair<Long, String> existingCacheEntry = m_inputFileCopyCache.get(normalizedLocalFile);
 
         if (existingCacheEntry == null || newCacheEntry.getFirst() > existingCacheEntry.getFirst()) {
             m_inputFileCopyCache.put(normalizedLocalFile, newCacheEntry);
@@ -68,10 +68,10 @@ public class UploadFileCache {
      * @param file
      * @return true if a matching cache entry was found, false otherwise.
      */
-    public Path tryToGetServerFileFromCache(final Path file) {
+    public String tryToGetServerFileFromCache(final Path file) {
         String inputFilePath = file.normalize().toAbsolutePath().toString();
         if (m_inputFileCopyCache.containsKey(inputFilePath)) {
-            Pair<Long, Path> mtimeAndServerPath = m_inputFileCopyCache.get(inputFilePath);
+            Pair<Long, String> mtimeAndServerPath = m_inputFileCopyCache.get(inputFilePath);
 
             final long cachedModificationTime = mtimeAndServerPath.getFirst();
             if (file.toFile().lastModified() == cachedModificationTime) {

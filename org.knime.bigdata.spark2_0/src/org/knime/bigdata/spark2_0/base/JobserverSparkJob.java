@@ -2,8 +2,6 @@ package org.knime.bigdata.spark2_0.base;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,6 +37,8 @@ import spark.jobserver.api.JobEnvironment;
  */
 @SparkClass
 public class JobserverSparkJob extends KNIMESparkJob {
+
+    private static final String CANNOT_READ_JOBSERVER_FILE = "Cannot read input file on jobserver: ";
 
     /** Empty deserialization constructor */
     public JobserverSparkJob() {
@@ -103,33 +103,35 @@ public class JobserverSparkJob extends KNIMESparkJob {
         }
     }
 
-    private static List<File> validateInputFiles(final JobEnvironment runtime, final JobserverJobInput jsInput) throws KNIMESparkException {
-        List<File> inputFiles = new LinkedList<>();
+    private static List<File> validateInputFiles(final JobEnvironment runtime, final JobserverJobInput jsInput)
+        throws KNIMESparkException {
+        final List<File> inputFiles = new LinkedList<>();
 
         if (runtime instanceof DataFileCache) {
-            final DataFileCache fileCache = (DataFileCache) runtime;
+            final DataFileCache fileCache = (DataFileCache)runtime;
 
-            for (Path pathToFile : jsInput.getFiles()) {
+            for (final String pathToFile : jsInput.getJobServerFiles()) {
                 try {
-                    File inputFile = fileCache.getDataFile(pathToFile.toString());
+                    final File inputFile = fileCache.getDataFile(pathToFile);
 
                     if (inputFile.canRead()) {
                         inputFiles.add(inputFile);
                     } else {
-                        throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile);
+                        throw new KNIMESparkException(CANNOT_READ_JOBSERVER_FILE + pathToFile);
                     }
 
-                } catch(IOException e) {
-                    throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile, e);
+                } catch (final IOException e) {
+                    throw new KNIMESparkException(CANNOT_READ_JOBSERVER_FILE + pathToFile, e);
                 }
             }
 
         } else {
-            for (Path pathToFile : jsInput.getFiles()) {
-                if (Files.isReadable(pathToFile)) {
-                    inputFiles.add(pathToFile.toFile());
+            for (final String pathToFile : jsInput.getJobServerFiles()) {
+                final File file = new File(pathToFile);
+                if (file.canRead()) {
+                    inputFiles.add(file);
                 } else {
-                    throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile);
+                    throw new KNIMESparkException(CANNOT_READ_JOBSERVER_FILE + pathToFile);
                 }
             }
         }
