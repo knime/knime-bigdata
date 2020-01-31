@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
 import org.knime.bigdata.commons.hadoop.HadoopInitializer;
+import org.knime.kerberos.api.KerberosProvider;
 import org.osgi.framework.BundleContext;
 
 
@@ -60,6 +61,11 @@ public class CommonsPlugin extends AbstractUIPlugin {
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
         EclipsePreferencesHelper.checkForLegacyPreferences(getBundle().getSymbolicName());
+
+        // ensure Kerberos debug logging is properly initialized, which needs to be done before initializing Hadoop
+        // UGIs (which happens below).
+        KerberosProvider.ensureInitialized();
+
         HadoopInitializer.ensureInitialized();
     }
 

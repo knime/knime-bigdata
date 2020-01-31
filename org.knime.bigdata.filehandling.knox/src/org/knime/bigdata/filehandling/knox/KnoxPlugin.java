@@ -53,6 +53,7 @@ import javax.ws.rs.ext.RuntimeDelegate;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.knime.kerberos.api.KerberosProvider;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -91,6 +92,9 @@ public class KnoxPlugin extends AbstractUIPlugin {
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
         initializeJaxRSRuntime();
+
+        // ensure Kerberos debug logging is properly initialized
+        KerberosProvider.ensureInitialized();
     }
 
     /**
