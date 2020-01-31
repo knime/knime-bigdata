@@ -27,6 +27,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.kerberos.api.KerberosProvider;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -70,6 +71,9 @@ public class LivyPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
+        
+        // ensure Kerberos debug logging is properly initialized
+        KerberosProvider.ensureInitialized();
     }
 
     /**
