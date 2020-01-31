@@ -22,7 +22,6 @@ package org.knime.bigdata.spark.core.sparkjobserver.jobapi;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +66,7 @@ public class TypesafeConfigSerializationUtils {
 
         Config typesafeConfig = ConfigFactory.empty();
 
-        for (Entry<String, Object> entry : jsInput.getInternalMap().entrySet()) {
+        for (final Entry<String, Object> entry : jsInput.getInternalMap().entrySet()) {
             final String key = entry.getKey();
             final Object value = entry.getValue();
 
@@ -87,8 +86,8 @@ public class TypesafeConfigSerializationUtils {
             typesafeConfig.withValue(KEY_SERIALIZED_FIELDS, ConfigValueFactory.fromAnyRef(serializedFields));
 
         final List<String> files = new LinkedList<>();
-        for (Path file : jsInput.getFiles()) {
-            files.add(file.toString());
+        for (final String file : jsInput.getJobServerFiles()) {
+            files.add(file);
         }
         typesafeConfig = typesafeConfig.withValue(KEY_FILES, ConfigValueFactory.fromIterable(files));
 
@@ -152,19 +151,19 @@ public class TypesafeConfigSerializationUtils {
         final JobserverJobInput toReturn = new JobserverJobInput();
         final Map<String, Object> deserializedInternalMap = toReturn.getInternalMap();
 
-        for (Map.Entry<String, ConfigValue> entry : configToDeserialize.entrySet()) {
+        for (final Map.Entry<String, ConfigValue> entry : configToDeserialize.entrySet()) {
             deserializedInternalMap.put(entry.getKey(), entry.getValue().unwrapped());
         }
 
         final List<String> serializedFields = (List<String>)deserializedInternalMap.remove(KEY_SERIALIZED_FIELDS);
-        for (String serializedField : serializedFields) {
+        for (final String serializedField : serializedFields) {
             deserializedInternalMap.put(serializedField, Base64SerializationUtils.deserializeFromBase64(
                 (String)deserializedInternalMap.get(serializedField), toReturn.getClass().getClassLoader()));
         }
 
         final List<String> files = (List<String>)deserializedInternalMap.remove(KEY_FILES);
-        for (String file : files) {
-            toReturn.withFile(Paths.get(file));
+        for (final String file : files) {
+            toReturn.withJobServerFile(file);
         }
         return toReturn;
     }

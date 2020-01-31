@@ -3,7 +3,6 @@ package org.knime.bigdata.spark.core.sparkjobserver.context;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -23,10 +22,10 @@ import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.JobRun;
-import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
@@ -127,7 +126,7 @@ class JobserverJobController implements JobController {
                 "File copy cache can only be used for files with lifetime " + FileLifetime.CONTEXT);
         }
 
-        for (File inputFile : job.getInputFiles()) {
+        for (final File inputFile : job.getInputFiles()) {
             input.withFile(inputFile.toPath());
         }
         
@@ -150,14 +149,14 @@ class JobserverJobController implements JobController {
      * @param exec
      * @throws KNIMESparkException
      */
-    private List<Path> uploadInputFilesCached(final JobInput job) throws KNIMESparkException {
+    private List<String> uploadInputFilesCached(final JobInput job) throws KNIMESparkException {
 
-        final Map<String, Path> serverFilenamesToReturn = new LinkedHashMap<>();
+        final Map<String, String> serverFilenamesToReturn = new LinkedHashMap<>();
 
         // first we determine the files we have to upload
         final List<Path> filesToUpload = new LinkedList<>();
-        for (Path inputFile : job.getFiles()) {
-            final Path cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
+        for (final Path inputFile : job.getFiles()) {
+            final String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
             if (cachedServerFile != null) {
                 serverFilenamesToReturn.put(inputFile.toString(), cachedServerFile);
             } else {
@@ -168,16 +167,16 @@ class JobserverJobController implements JobController {
         }
 
         // now we upload those files
-        UploadUtil uploadUtil = new UploadUtil(m_contextId, m_contextConfig, m_restClient, filesToUpload);
+        final UploadUtil uploadUtil = new UploadUtil(m_contextId, m_contextConfig, m_restClient, filesToUpload);
         uploadUtil.upload();
 
         // now we add the uploaded files to the upload file cache
-        Iterator<Path> localFileIter = filesToUpload.iterator();
-        Iterator<Path> serverFilesIter = uploadUtil.getServerFileNames().iterator();
+        final Iterator<Path> localFileIter = filesToUpload.iterator();
+        final Iterator<String> serverFilesIter = uploadUtil.getServerFileNames().iterator();
 
         while (localFileIter.hasNext()) {
             final Path localFile = localFileIter.next();
-            final Path serverFile = serverFilesIter.next();
+            final String serverFile = serverFilesIter.next();
 
             if (m_uploadFileCache.addFilesToCache(localFile, serverFile)) {
                 serverFilenamesToReturn.put(localFile.toString(), serverFile);
@@ -190,7 +189,7 @@ class JobserverJobController implements JobController {
             }
         }
 
-        return new LinkedList<Path>(serverFilenamesToReturn.values());
+        return new LinkedList<>(serverFilenamesToReturn.values());
     }
 
     /**
@@ -201,33 +200,34 @@ class JobserverJobController implements JobController {
         throws KNIMESparkException, CanceledExecutionException {
         
         final JobInput jobInput = job.getInput();
-        JobserverJobInput jsInput = JobserverJobInput.createFromSparkJobInput(jobInput, job.getJobClass().getCanonicalName());
+        final JobserverJobInput jsInput =
+            JobserverJobInput.createFromSparkJobInput(jobInput, job.getJobClass().getCanonicalName());
 
         if (jobInput.hasFiles()) {
             exec.setMessage("Uploading input data to Spark");
             if ((job instanceof JobWithFilesRun) && (((JobWithFilesRun<?, O>)job).useInputFileCopyCache())) {
-                for (Path fileOnServer : uploadInputFilesCached(jobInput)) {
-                    jsInput.withFile(fileOnServer);
+                for (final String fileOnServer : uploadInputFilesCached(jobInput)) {
+                    jsInput.withJobServerFile(fileOnServer);
                 }
             } else {
-                for (Path fileOnServer : uploadInputFiles(jobInput.getFiles(), FileLifetime.CONTEXT)
+                for (final String fileOnServer : uploadInputFiles(jobInput.getFiles(), FileLifetime.CONTEXT)
                     .getServerFileNames()) {
-                    jsInput.withFile(fileOnServer);
+                    jsInput.withJobServerFile(fileOnServer);
                 }
             }
         }
 
         exec.setMessage("Running Spark job");
-        String jobId = startJobAsynchronously(job, jsInput);
+        final String jobId = startJobAsynchronously(job, jsInput);
 
-        WrapperJobOutput jobOutput = waitForJob(job, jobId, exec);
+        final WrapperJobOutput jobOutput = waitForJob(job, jobId, exec);
 
-		if (jobOutput.isError()) {
-		    throw jobOutput.getException();
+        if (jobOutput.isError()) {
+            throw jobOutput.getException();
         } else {
             final Map<String, NamedObjectStatistics> stats = jobOutput.getNamedObjectStatistics();
             if (stats != null) {
-                for (Entry<String, NamedObjectStatistics> kv : stats.entrySet()) {
+                for (final Entry<String, NamedObjectStatistics> kv : stats.entrySet()) {
                     m_namedObjectsController.addNamedObjectStatistics(kv.getKey(), kv.getValue());
                 }
             }

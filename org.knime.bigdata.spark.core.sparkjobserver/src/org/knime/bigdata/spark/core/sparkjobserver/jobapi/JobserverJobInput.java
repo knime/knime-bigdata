@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark.core.sparkjobserver.jobapi;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.job.JobData;
@@ -41,11 +44,13 @@ public class JobserverJobInput extends JobData {
 
     private static final String KEY_LOG4JLOG_LEVEL = "loglevel";
 
+    private List<String> m_jobServerFiles;
+
     JobserverJobInput() {
         super(JOBSERVER_PREFIX);
     }
 
-    JobserverJobInput(final Map<String,Object> internalMap) {
+    JobserverJobInput(final Map<String, Object> internalMap) {
         super(JOBSERVER_PREFIX, internalMap);
     }
 
@@ -87,9 +92,8 @@ public class JobserverJobInput extends JobData {
      * @param sparkJobClass the Spark job class to use
      * @return the {@link JobserverJobInput}
      */
-    public static JobserverJobInput createFromSparkJobInput(final JobInput jobInput,
-        final String sparkJobClass) {
-        JobserverJobInput jsInput = new JobserverJobInput(jobInput.getInternalMap());
+    public static JobserverJobInput createFromSparkJobInput(final JobInput jobInput, final String sparkJobClass) {
+        final JobserverJobInput jsInput = new JobserverJobInput(jobInput.getInternalMap());
         jsInput.set(KEY_JOBINPUT_CLASS, jobInput.getClass().getName());
         jsInput.set(KEY_JOB_CLASS, sparkJobClass);
         return jsInput;
@@ -100,7 +104,7 @@ public class JobserverJobInput extends JobData {
      * @return the {@link JobserverJobInput}
      */
     public static JobserverJobInput createFromMap(final Map<String, Object> internalMap) {
-        JobserverJobInput jsInput = new JobserverJobInput(internalMap);
+        final JobserverJobInput jsInput = new JobserverJobInput(internalMap);
         return jsInput;
     }
 
@@ -111,5 +115,32 @@ public class JobserverJobInput extends JobData {
     public JobserverJobInput withLog4jLogLevel(final int log4jLogLevel) {
         set(KEY_LOG4JLOG_LEVEL, log4jLogLevel);
         return this;
+    }
+
+    /**
+     * Adds the given path string of a server file to the list of files.
+     *
+     * @param path a string representing the path to a file on the server
+     * @return this object, with the given file added
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends JobData> T withJobServerFile(final String path) {
+        if (m_jobServerFiles == null) {
+            m_jobServerFiles = new LinkedList<>();
+        }
+
+        m_jobServerFiles.add(path);
+        return (T)this;
+    }
+
+    /**
+     * @return a list of string representing path on the server
+     */
+    public List<String> getJobServerFiles() {
+        if (m_jobServerFiles != null) {
+            return Collections.unmodifiableList(m_jobServerFiles);
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

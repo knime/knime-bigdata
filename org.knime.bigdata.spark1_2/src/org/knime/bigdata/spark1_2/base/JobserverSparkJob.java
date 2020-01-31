@@ -1,8 +1,6 @@
 package org.knime.bigdata.spark1_2.base;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,9 +56,9 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
 
             ensureNamedInputObjectsExist(input);
             ensureNamedOutputObjectsDoNotExist(input);
-            List<File> inputFiles = validateInputFiles(jsInput);
+            final List<File> inputFiles = validateInputFiles(jsInput);
 
-            Object sparkJob = getClass().getClassLoader().loadClass(jsInput.getSparkJobClass()).newInstance();
+            final Object sparkJob = getClass().getClassLoader().loadClass(jsInput.getSparkJobClass()).newInstance();
 
             if (sparkJob instanceof SparkJob) {
                 toReturn = WrapperJobOutput
@@ -105,11 +103,12 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
     }
 
     private static List<File> validateInputFiles(final JobserverJobInput jsInput) throws KNIMESparkException {
-        List<File> inputFiles = new LinkedList<File>();
+        final List<File> inputFiles = new LinkedList<>();
 
-        for (Path pathToFile : jsInput.getFiles()) {
-            if (Files.isReadable(pathToFile)) {
-                inputFiles.add(pathToFile.toFile());
+        for (final String pathToFile : jsInput.getJobServerFiles()) {
+            final File currentFile = new File(pathToFile);
+            if (currentFile.canRead()) {
+                inputFiles.add(currentFile);
             } else {
                 throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile);
             }
