@@ -39,6 +39,7 @@ node {
 				[name : 'knime-bigdata'],
 				[name : 'knime-on-spark'],
 				[name : 'knime-config'],
+				[name : 'knime-database-bigquery'],
 				[name : 'knime-jenkins'],
 				[name : 'knime-orc'],
 				[name : 'knime-parquet'],
