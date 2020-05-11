@@ -34,7 +34,7 @@ import org.knime.core.node.port.database.DatabaseUtility;
 public class HiveDriverDetector {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveDriverDetector.class);
 
-    private static final String CLOUDERA_DRIVER_NAME = "com.cloudera.hive.jdbc41.HS2Driver";
+    private static final String CLOUDERA_DRIVER_NAME_REGEX = "com\\.cloudera\\.hive\\.jdbc[0-9]*\\.HS2Driver";
 
     private static final String SIMBA_DRIVER_NAME = "com.simba.hive.jdbc41.HS2Driver";
 
@@ -49,8 +49,7 @@ public class HiveDriverDetector {
         final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
         String driverName;
 
-        if (externalDriver.contains(CLOUDERA_DRIVER_NAME)) {
-            driverName = CLOUDERA_DRIVER_NAME;
+        if ((driverName = containsDriver(externalDriver, CLOUDERA_DRIVER_NAME_REGEX)) != null) {
             LOGGER.debug("Using Cloudera Hive driver: " + driverName);
 
         } else if (externalDriver.contains(SIMBA_DRIVER_NAME)) {
@@ -84,7 +83,7 @@ public class HiveDriverDetector {
         } catch(Exception e) {
         }
 
-        if (driverName.equals(CLOUDERA_DRIVER_NAME)) {
+        if (driverName.matches(CLOUDERA_DRIVER_NAME_REGEX)) {
             return String.format("Cloudera Hive Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.equals(SIMBA_DRIVER_NAME)) {
             return String.format("Simba Hive Driver (%s%s)", driverName, versionInfo);
