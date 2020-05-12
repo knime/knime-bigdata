@@ -21,6 +21,7 @@
 package org.knime.bigdata.impala.utility;
 
 import java.sql.Driver;
+import java.util.Set;
 
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
@@ -34,7 +35,7 @@ import org.knime.core.node.port.database.DatabaseUtility;
 public class ImpalaDriverDetector {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(ImpalaDriverDetector.class);
 
-    private static final String CLOUDERA_DRIVER_NAME = "com.cloudera.impala.jdbc41.Driver";
+    private static final String CLOUDERA_DRIVER_NAME_REGEX = "com\\.cloudera\\.impala\\.jdbc[0-9]*.Driver";
 
     /**
      * Searches for drivers and returns preferred driver to use (external drivers are preferred).
@@ -42,10 +43,10 @@ public class ImpalaDriverDetector {
      * @return the driver class name of the preferred driver to use.
      */
     public static String getDriverName() {
+        final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
         String driverName;
 
-        if (clouderaDriverAvailable()) {
-            driverName = CLOUDERA_DRIVER_NAME;
+        if ((driverName = containsDriver(externalDriver, CLOUDERA_DRIVER_NAME_REGEX)) != null) {
             LOGGER.debug("Using Cloudera Impala driver: " + driverName);
 
         } else {
@@ -70,7 +71,7 @@ public class ImpalaDriverDetector {
         } catch(Exception e) {
         }
 
-        if (driverName.equals(CLOUDERA_DRIVER_NAME)) {
+        if (driverName.matches(CLOUDERA_DRIVER_NAME_REGEX)) {
             return String.format("Cloudera Impala Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.equals(ImpalaUtility.DRIVER)) {
             return String.format("Open-Source Impala Driver (%s%s)", driverName, versionInfo);
@@ -83,6 +84,16 @@ public class ImpalaDriverDetector {
      * @return <code>true</code> if the Cloudera driver has been registered
      */
     public static boolean clouderaDriverAvailable() {
-        return DatabaseUtility.getJDBCDriverClasses().contains(CLOUDERA_DRIVER_NAME);
+        return containsDriver(DatabaseUtility.getJDBCDriverClasses(), CLOUDERA_DRIVER_NAME_REGEX) != null;
+    }
+
+    private static String containsDriver(final Set<String> drivers, final String driverRegex) {
+        for (String driver : drivers) {
+            if (driver.matches(driverRegex)) {
+                return driver;
+            }
+        }
+
+        return null;
     }
 }
