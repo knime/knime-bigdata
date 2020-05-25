@@ -63,7 +63,7 @@ node {
 			// build org.knime.update.bigdata.externals
 			withMaven(maven: 'Maven 3.2') {
 				dir("${env.WORKSPACE}/git/knime-bigdata/org.knime.bigdata.externals-parent") {
-					sh "${maven} -Dorg.knime.update.org=$JENKINS_URL/jobs/${upstreamParams['org.knime.update.org'].p2},$JENKINS_URL/jobs/${upstreamParams['org.knime.update.targetPlatform'].p2} } clean package"
+					sh "${maven} -Dorg.knime.update.org=$JENKINS_URL/jobs/${upstreamParams['org.knime.update.org'].p2} -Dorg.knime.update.targetPlatform=$JENKINS_URL/jobs/${upstreamParams['org.knime.update.targetPlatform'].p2} } clean package"
 				}
 			}
 
