@@ -8,6 +8,7 @@ node {
 	
 	def upstreamParams = defaultProperties('org.knime.update.org',
 		'com.knime.update.pmml.compilation',
+		'org.knime.update.targetPlatform',
 		'org.knime.update.labs')
 
 
