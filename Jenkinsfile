@@ -99,8 +99,8 @@ node {
 			baseline: [file: 'git/knime-config/org.knime.config/API-Baseline.target', name: 'Release 2019-12'],
 			repos: [
 				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.org'].p2}",
-				"$JENKINS_URL/jobs/org.knime.update.targetPlatform/branches/$BRANCH_NAME/lastStable/archive/org.knime.update.targetPlatform/",
 				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.labs'].p2}",
+				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.targetPlatform'].p2}",
 				"$JENKINS_URL/jobs/${upstreamParams['com.knime.update.pmml.compilation'].p2}",
 				"file:///${WORKSPACE.replace('\\', '/')}/org.knime.update.bigdata.externals/"
 			]
