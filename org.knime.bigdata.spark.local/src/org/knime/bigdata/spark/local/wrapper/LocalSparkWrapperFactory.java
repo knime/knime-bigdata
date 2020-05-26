@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
+import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -100,7 +101,7 @@ public class LocalSparkWrapperFactory {
 				// we also need to intercept class loading of log4j because this
 				// will make Spark
 				// use KNIME's already configured log4j logging system
-				if (name.equals(LocalSparkWrapper.class.getName())) {
+				if (name.equals(LocalSparkWrapper.class.getName()) || name.equals(LocalFileSystemHiveTempWrapper.class.getName())) {
 					return LocalSparkWrapperFactory.class.getClassLoader().loadClass(name);
 				} else {
 					// this tries to load classes from the urls and its parent

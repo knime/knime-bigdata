@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.util.Shell;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -35,6 +37,7 @@ import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
+import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
 import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_4.api.SparkJob;
@@ -321,7 +324,11 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
 			}
 		} catch (IOException e) {
+			closeAlleHadoopFileSystems();
 			throw new KNIMESparkException(e);
+		} catch (Exception e) {
+			closeAlleHadoopFileSystems();
+			throw e;
 		} finally {
 			Thread.currentThread().setContextClassLoader(origContextClassLoader);
 		}
@@ -435,6 +442,11 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		sparkConf.set("spark.sql.catalogImplementation", "hive");
 		sparkConf.set("hive.exec.scratchdir", hiveScratchDir.getCanonicalPath());
 
+		// add local file system wrapper to fake hive scratch directory permission on windows
+		if (Shell.WINDOWS) {
+		    sparkConf.set("spark.hadoop.fs.file.impl", LocalFileSystemHiveTempWrapper.class.getName());
+		}
+
 		// To shutdown the derby system on destroy, the Derby driver needs to be loaded
 		// from the same (shared) class loader in the Hiveserver
 		// Note: This fix can be removed in Spark 2.4: https://issues.apache.org/jira/browse/SPARK-23831
@@ -492,8 +504,19 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
     			DriverManager.getConnection("jdbc:derby:;shutdown=true");
     		} catch (SQLException e) {
     		}
+    		closeAlleHadoopFileSystems();
 	    }
 		FileUtils.deleteQuietly(m_sparkTmpDir);
+	}
+
+	/**
+	 * Ensure that all hadoop file systems are closed.
+	 */
+	private static void closeAlleHadoopFileSystems() {
+		try {
+			FileSystem.closeAll();
+		} catch (IOException e) {
+		}
 	}
 
 	@Override
