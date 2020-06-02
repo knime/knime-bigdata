@@ -730,16 +730,16 @@ propagated with or for interoperation with KNIME.
    </license>
 
    <requires>
-      <import feature="org.knime.features.bigdata.spark"/>
+      <!-- <import feature="org.knime.features.bigdata.spark"/>
       <import feature="org.knime.features.bigdata.connectors"/>
       <import feature="org.knime.features.bigdata.spark.local"/>
-      <import feature="org.knime.features.bigdata.fileformats"/>
-      <import feature="org.knime.features.ext.h2o.mojo.spark"/>
-      <import feature="org.knime.features.ext.h2o.spark"/>
-      <import feature="org.knime.features.testing.application"/>
-      <import feature="com.knime.features.bigdata.knosp"/>
-      <import feature="org.knime.features.ext.perl"/>
-      <import feature="org.knime.features.ext.libsvm"/>
+      <import feature="org.knime.features.bigdata.fileformats"/> -->
+      <!-- <import feature="org.knime.features.ext.h2o.mojo.spark"/>
+      <import feature="org.knime.features.ext.h2o.spark"/> -->
+      <!-- <import feature="org.knime.features.testing.application"/> -->
+      <!-- <import feature="com.knime.features.bigdata.knosp"/> -->
+      <!-- <import feature="org.knime.features.ext.perl"/>
+      <import feature="org.knime.features.ext.libsvm"/> -->
    </requires>
 
    <plugin

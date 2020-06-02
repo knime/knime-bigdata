@@ -22,6 +22,8 @@
 	<properties>
 		<!-- Remember to remove the Patching for 2.4.0 (BD-878) in Jenkinsfile if you change this-->
 		<spark.version>2.4.3</spark.version>
+		<scalastyle.skip>true</scalastyle.skip>
+		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
 	
 	

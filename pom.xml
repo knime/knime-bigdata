@@ -1,62 +1,30 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.knime.bigdata</groupId>
-	<artifactId>bigdata-parent</artifactId>
-	<version>4.2.0-SNAPSHOT</version>
+
+	<parent>
+		<groupId>org.knime.maven</groupId>
+		<artifactId>ap.parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+
+	<groupId>org.knime</groupId>
+	<artifactId>knime-bigdata</artifactId>
+	<version>${revision}${changelist}</version>
 	<packaging>pom</packaging>
-	<name>Parent pom for org.knime.update.bigdata</name>
 
 	<properties>
+		<revision>4.2.0</revision>
+		<changelist>-SNAPSHOT</changelist>
+		<feature-branch-extension.branchListProperty>git.branch</feature-branch-extension.branchListProperty>
+		<feature-branch-extension.appendArtifactoryProperties>false</feature-branch-extension.appendArtifactoryProperties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<tycho-version>1.2.0</tycho-version>
-		<tycho-extras-version>1.2.0</tycho-extras-version>
-
-		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
-		a file:// or http:// URL pointing to org.knime.update.org	-->
-		<org.knime.update.org>REPLACE_ME_WITH_URL</org.knime.update.org>
-
-		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
-		a file:// or http:// URL pointing to com.knime.update.pmml.compilation -->
-		<com.knime.update.pmml.compilation>REPLACE_ME_WITH_URL</com.knime.update.pmml.compilation>
-
-		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
-		a file:// or http:// URL pointing to org.knime.update.labs -->
-		<org.knime.update.labs>REPLACE_ME_WITH_URL</org.knime.update.labs>
-		
-		<com.knime.tpbuilder>file:${project.basedir}/../com.knime.tpbuilder/target/repository/</com.knime.tpbuilder>
 	</properties>
 
 	<modules>
 		<!-- this needs to go first because it ensures that jar files required by spark.local are present -->
 		<module>org.knime.bigdata.spark.local/libs/fetch_jars</module>
-	
-		<module>../knime-on-spark/com.knime.bigdata.knosp.node</module>
-		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_2</module>
-		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_3</module>
-		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_4</module>
-		<module>../knime-on-spark/com.knime.osgiproxy</module>
-		<module>../knime-on-spark/com.knime.features.bigdata.knosp</module>
-		
-		<module>../knime-parquet/org.knime.parquet</module>
-		<module>../knime-parquet/org.knime.features.parquet</module>
-
-
-		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark.node</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_2</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_3</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_4</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.spark</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.node</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_2</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_3</module>
-		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_4</module>
-		<module>../knime-sparkling-water/org.knime.features.ext.h2o.spark</module>
-		<module>../knime-sparkling-water/org.knime.features.ext.h2o.mojo.spark</module>
-
-		<module>../knime-orc/org.knime.orc</module>
-		<module>../knime-orc/org.knime.features.orc</module>
 
 		<module>org.knime.bigdata.commons</module>
 		<module>org.knime.bigdata.database</module>
@@ -71,6 +39,7 @@
 		<module>org.knime.bigdata.spark.core.livy</module>
 		<module>org.knime.bigdata.spark.core.sparkjobserver</module>
 		<module>org.knime.bigdata.spark.local</module>
+		<module>org.knime.bigdata.spark.migration</module>
 		<module>org.knime.bigdata.spark.node</module>
 		<module>org.knime.bigdata.spark1_2</module>
 		<module>org.knime.bigdata.spark1_3</module>
@@ -85,7 +54,6 @@
 		<module>org.knime.bigdata.testing</module>
 		<module>org.knime.features.bigdata.connectors</module>
 		<module>org.knime.features.bigdata.databricks</module>
-		<module>org.knime.features.bigdata.externals</module>
 		<module>org.knime.features.bigdata.fileformats</module>
 		<module>org.knime.features.bigdata.spark</module>
 		<module>org.knime.features.bigdata.spark.local</module>
@@ -93,139 +61,130 @@
 		<module>org.knime.update.bigdata</module>
 	</modules>
 
+	<repositories>
+		<repository>
+			<id>p2-knime-bigdata-externals</id>
+			<layout>p2</layout>
+			<url>${knime.p2.repo}/knime-bigdata-externals/${git.branch}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-core</id>
+			<layout>p2</layout>
+			<url>${knime.core.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-database</id>
+			<layout>p2</layout>
+			<url>${knime.database.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-javasnippet</id>
+			<layout>p2</layout>
+			<url>${knime.javasnippet.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-filehandling</id>
+			<layout>p2</layout>
+			<url>${knime.filehandling.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-svg</id>
+			<layout>p2</layout>
+			<url>${knime.svg.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-js-core</id>
+			<layout>p2</layout>
+			<url>${knime.js.core.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-expressions</id>
+			<layout>p2</layout>
+			<url>${knime.expressions.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-cloud</id>
+			<layout>p2</layout>
+			<url>${knime.cloud.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-base</id>
+			<layout>p2</layout>
+			<url>${knime.base.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-kerberos</id>
+			<layout>p2</layout>
+			<url>${knime.kerberos.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-workbench</id>
+			<layout>p2</layout>
+			<url>${knime.workbench.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-pmml-compilation</id>
+			<layout>p2</layout>
+			<url>${knime.pmml.compilation.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-pmml-translation</id>
+			<layout>p2</layout>
+			<url>${knime.pmml.translation.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-server-client</id>
+			<layout>p2</layout>
+			<url>${knime.server.client.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-python</id>
+			<layout>p2</layout>
+			<url>${knime.python.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-ensembles</id>
+			<layout>p2</layout>
+			<url>${knime.ensembles.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-distance</id>
+			<layout>p2</layout>
+			<url>${knime.distance.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-shared</id>
+			<layout>p2</layout>
+			<url>${knime.shared.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-tp</id>
+			<layout>p2</layout>
+			<url>${knime.tp.p2}</url>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-maven-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.eclipse.tycho.extras</groupId>
-						<artifactId>tycho-buildtimestamp-jgit</artifactId>
-						<version>${tycho-extras-version}</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-					<timestampProvider>jgit</timestampProvider>
-					<jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<configuration>
-					<environments>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
-							<arch>x86_64</arch>
-						</environment>
-					</environments>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jarsigner-plugin</artifactId>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>sign</id>
+						<id>source-feature</id>
+						<phase>package</phase>
 						<goals>
-							<goal>sign</goal>
+							<goal>source-feature</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<excludes>
+						<plugin id="com.knime.pmml.compilation.java" />
+						<plugin id="com.knime.pmml.translation" />
+					</excludes>
+				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-source-feature-plugin</artifactId>
-			</plugin>
-
 		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-maven-plugin</artifactId>
-					<version>${tycho-version}</version>
-					<extensions>true</extensions>
-				</plugin>
-
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>target-platform-configuration</artifactId>
-					<version>${tycho-version}</version>
-				</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.4</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-source-feature-plugin</artifactId>
-				<version>${tycho-version}</version>
-			</plugin>
-
-			</plugins>
-		</pluginManagement>
-	</build>
-
-	<repositories>
-		<repository>
-			<id>com.knime.tpbuilder</id>
-			<layout>p2</layout>
-			<url>${com.knime.tpbuilder}</url>
-		</repository>
-
-		<repository>
-			<id>org.knime.update.org</id>
-			<layout>p2</layout>
-			<url>${org.knime.update.org}</url>
-		</repository>
-
-		<repository>
-			<id>com.knime.update.pmml.compilation</id>
-			<layout>p2</layout>
-			<url>${com.knime.update.pmml.compilation}</url>
-		</repository>
-
-		<repository>
-			<id>org.knime.update.labs</id>
-			<layout>p2</layout>
-			<url>${org.knime.update.labs}</url>
-		</repository>
-	</repositories>
+	</build>	
 </project>
