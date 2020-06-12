@@ -20,12 +20,10 @@ package org.knime.bigdata.spark.local.hadoop;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FilterFileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.fs.RawLocalFileSystem;
 
 /**
  * Wrapper around the local Hadoop file system to return a valid hive scratch directory permission on Windows.
@@ -35,66 +33,51 @@ import org.apache.hadoop.fs.permission.FsPermission;
  * error gets catched, ignored and a (wrong) default permission of 666 will be returned. The hive startup fails in this
  * case and becomes very difficult to debug.
  *
+ * Note: The {@link RawLocalFileSystem} always uses the DeprecatedRawLocalFileStatus on Windows. This deprecated file
+ * status calls {@code new File(...)} instead of {@link RawLocalFileSystem#pathToFile(Path)} and fails if the path
+ * contains a scheme that is not {@code file}. The {@link LocalFileSystemHiveTempWrapper} replaces therefore all file
+ * status objects to avoid this.
+ *
  * @author Sascha Wolke, KNIME GmbH
  */
 public class LocalFileSystemHiveTempWrapper extends LocalFileSystem {
-    private static final FsPermission SCRATCHDIR_PERM = new FsPermission((short)00733);
-    private static final String SCRATCHDIR_OWNER = "hive-user";
-    private static final String SCRATCHDIR_GROUP = "hive-group";
-
-    private Path m_hiveScratchDir = null;
-
-    @Override
-    public void initialize(URI name, Configuration conf) throws IOException {
-        super.initialize(name, conf);
-        setHiveScratchDir(conf);
-    }
-
-    @Override
-    public void setConf(Configuration conf) {
-        super.setConf(conf);
-        setHiveScratchDir(conf);
-    }
+    /**
+     * Scheme of this file system.
+     */
+    public static final String SCHEME = "spark-local-hive-tmp";
 
     /**
-     * Read the hive scratch directory from the given configuration if available.
+     * The {@link URI} of this file system.
      */
-    private void setHiveScratchDir(final Configuration conf) {
-        m_hiveScratchDir = null;
-
-        if (conf != null) {
-            final String path = conf.get("hive.exec.scratchdir");
-            if (!StringUtils.isEmpty(path)) {
-                m_hiveScratchDir = makeQualified(new Path(path));
-            }
-        }
-    }
-
-    @Override
-    public FileStatus getFileStatus(Path f) throws IOException {
-        return fakePermission(super.getFileStatus(f));
-    }
-
-    @Override
-    public FileStatus[] listStatus(Path f) throws IOException {
-        final FileStatus[] oriStatus = super.listStatus(f);
-        final FileStatus[] newStatus = new FileStatus[oriStatus.length];
-        for (int i = 0; i < oriStatus.length; i++) {
-            newStatus[i] = fakePermission(oriStatus[i]);
-        }
-        return newStatus;
-    }
+    public static final URI FS_URI = URI.create(SCHEME + ":///");
 
     /**
-     * Replace the permission, owner and group of the given file status object if it matches the hive scratch directory.
+     * Default constructor that uses {@link RawLocalFileSystem} with a custom scheme.
+     *
+     * Note: The file system gets closed via {@link FilterFileSystem#close()} and the resource warning can be ignored
+     * here.
      */
-    private FileStatus fakePermission(final FileStatus s) throws IOException {
-        if (m_hiveScratchDir != null && s.getPath().equals(m_hiveScratchDir)) {
-            return new FileStatus(s.getLen(), s.isDirectory(), s.getReplication(), s.getBlockSize(),
-                s.getModificationTime(), s.getAccessTime(), SCRATCHDIR_PERM, SCRATCHDIR_OWNER, SCRATCHDIR_GROUP,
-                (s.isSymlink() ? s.getSymlink() : null), s.getPath());
-        } else {
-            return s;
-        }
+    @SuppressWarnings("resource")
+    public LocalFileSystemHiveTempWrapper() {
+        super(new PermissionIndependentRawLocalFileSystem());
+    }
+
+    @Override
+    public String getScheme() {
+        return SCHEME;
+    }
+
+    @Override
+    public void copyFromLocalFile(boolean delSrc, Path src, Path dst) throws IOException {
+        // copyFromLocalFile in LocalFileSystem assumes that both files are on the same file system,
+        // remove the "file" scheme from the source path to handle it like files from spark-local-hive-tmp
+        super.copyFromLocalFile(delSrc, Path.getPathWithoutSchemeAndAuthority(src), dst);
+    }
+
+    @Override
+    public void copyToLocalFile(boolean delSrc, Path src, Path dst) throws IOException {
+        // copyToLocalFile in LocalFileSystem assumes that both files are on the same file system,
+        // remove the "file" scheme from the destination path to handle it like files from spark-local-hive-tmp
+        super.copyToLocalFile(delSrc, src, Path.getPathWithoutSchemeAndAuthority(dst));
     }
 }

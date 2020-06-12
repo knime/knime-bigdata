@@ -324,11 +324,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
 			}
 		} catch (IOException e) {
-			closeAlleHadoopFileSystems();
 			throw new KNIMESparkException(e);
-		} catch (Exception e) {
-			closeAlleHadoopFileSystems();
-			throw e;
 		} finally {
 			Thread.currentThread().setContextClassLoader(origContextClassLoader);
 		}
@@ -437,15 +433,15 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 		
 		sparkConf.set("javax.jdo.option.ConnectionURL", m_derbyUrl + ";create=true");
-		sparkConf.set("spark.sql.warehouse.dir", warehouseDir.getCanonicalPath());
-		sparkConf.set("hive.server2.logging.operation.log.location", hiveOperationLogsDir.getCanonicalPath());
 		sparkConf.set("spark.sql.catalogImplementation", "hive");
-		sparkConf.set("hive.exec.scratchdir", hiveScratchDir.getCanonicalPath());
 
-		// add local file system wrapper to fake hive scratch directory permission on windows
-		if (Shell.WINDOWS) {
-		    sparkConf.set("spark.hadoop.fs.file.impl", LocalFileSystemHiveTempWrapper.class.getName());
-		}
+		// add local file system wrapper to fake permissions of hive temporary directories
+		sparkConf.set("spark.hadoop.fs." + LocalFileSystemHiveTempWrapper.SCHEME + ".impl",
+			LocalFileSystemHiveTempWrapper.class.getName());
+		sparkConf.set("hive.exec.scratchdir", getDummyPermissionFileSystemUri(hiveScratchDir));
+		sparkConf.set("spark.sql.warehouse.dir", getDummyPermissionFileSystemUri(warehouseDir));
+		sparkConf.set("hive.server2.logging.operation.log.location",
+			getDummyPermissionFileSystemUri(hiveOperationLogsDir));
 
 		// To shutdown the derby system on destroy, the Derby driver needs to be loaded
 		// from the same (shared) class loader in the Hiveserver
@@ -462,6 +458,10 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 					String.format("%s at %s is write-protected. Please change file permissions accordingly.",
 							errorMsgName, maybeDir.getAbsolutePath()));
 		}
+	}
+
+	private static String getDummyPermissionFileSystemUri(final File hiveScratchDir) {
+		return LocalFileSystemHiveTempWrapper.SCHEME + "://" + hiveScratchDir.toURI().getPath();
 	}
 
 	private void initSparkTmpDir() throws IOException {
@@ -504,19 +504,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
     			DriverManager.getConnection("jdbc:derby:;shutdown=true");
     		} catch (SQLException e) {
     		}
-    		closeAlleHadoopFileSystems();
 	    }
 		FileUtils.deleteQuietly(m_sparkTmpDir);
-	}
-
-	/**
-	 * Ensure that all hadoop file systems are closed.
-	 */
-	private static void closeAlleHadoopFileSystems() {
-		try {
-			FileSystem.closeAll();
-		} catch (IOException e) {
-		}
 	}
 
 	@Override
