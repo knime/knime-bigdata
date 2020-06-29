@@ -16,6 +16,14 @@
             if loaded in executed state from a stored workflow.
             Reset and execute the node to start the cluster and create a Spark execution context.
             </p>
+
+            <p>
+            <i>Cluster access control</i>: KNIME uploads additional libraries to the cluster. This requires
+            <a href="https://docs.databricks.com/security/access-control/cluster-acl.html#cluster-level-permissions">manage cluster-level permissions</a>
+            if your cluster is secured with access control.
+            See the <a href="https://docs.databricks.com/security/access-control/cluster-acl.html#configure-cluster-level-permissions">Databricks documentation</a>
+            on how to set up the permission.
+            </p>
         </intro>
         <tab name="General">
             <option name="Spark version">
