@@ -7,21 +7,20 @@
 	<parent>
 		<groupId>org.apache.spark</groupId>
 		<artifactId>spark-parent_2.11</artifactId>
-		<version>2.4.3</version>
+		<version>2.4.6</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.knime.bigdata</groupId>
 	<artifactId>spark-local-fetch-jars</artifactId>
-	<version>2.4.3</version>
+	<version>2.4.6</version>
 	<packaging>pom</packaging>
 
 	<name>Jar fetcher for local Spark</name>
 	<description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
 	<properties>
-		<!-- Remember to remove the Patching for 2.4.0 (BD-878) in Jenkinsfile if you change this-->
-		<spark.version>2.4.3</spark.version>
+		<spark.version>2.4.6</spark.version>
 		<scalastyle.skip>true</scalastyle.skip>
 		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
