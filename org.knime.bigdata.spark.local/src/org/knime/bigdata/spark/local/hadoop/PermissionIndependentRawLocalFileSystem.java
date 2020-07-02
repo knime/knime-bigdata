@@ -68,6 +68,12 @@ public class PermissionIndependentRawLocalFileSystem extends RawLocalFileSystem 
         return super.getLinkTarget(Path.getPathWithoutSchemeAndAuthority(f));
     }
 
+    @Override
+    public boolean mkdirs(Path f, FsPermission permission) throws IOException {
+        // ignore permissions
+        return super.mkdirs(f, null);
+    }
+
     /**
      * Replace the permission, owner and group of the given file status object.
      */

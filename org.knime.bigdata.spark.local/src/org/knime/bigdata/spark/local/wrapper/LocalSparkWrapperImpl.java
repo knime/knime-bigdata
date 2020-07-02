@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.Shell;
+import org.apache.hadoop.util.Shell.ExitCodeException;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -54,7 +56,7 @@ import scala.Option;
 @SparkClass
 public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
-	// private final static Logger LOG = Logger.getLogger(LocalSparkWrapperImpl.class);
+	private final static Logger LOG = Logger.getLogger(LocalSparkWrapperImpl.class);
 	
 	private final static String SPARK_APP_NAME = "spark.app.name";
 	
@@ -321,7 +323,16 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.getOrCreate();
 
 			if (startThriftserver) {
-				HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
+				try {
+					HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
+				} catch (RuntimeException e) {
+					if (Shell.WINDOWS && e.getCause() != null && e.getCause() instanceof ExitCodeException
+							&& ((ExitCodeException)e.getCause()).getExitCode() == -1073741515) {
+						LOG.error("Hadoop requires the Microsoft Visual C++ 2010 Redistributable Package on Windows."
+							+ " See http://www.microsoft.com/en-us/download/details.aspx?id=14632");
+					}
+					throw e;
+				}
 			}
 		} catch (IOException e) {
 			throw new KNIMESparkException(e);
@@ -428,10 +439,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 		
 		final File hiveScratchDir = new File(m_sparkTmpDir, "hive_scratch");
-		if (hiveScratchDir.exists()) {
-			ensureWritableDirectory(hiveScratchDir, "Hive scratch");
-		}
-		
+		final File hiveLocalScratchDir = new File(m_sparkTmpDir, "hive_local_scratch");
+		final File hiveDownloadResDir = new File(m_sparkTmpDir, "hive_download_res");
+
 		sparkConf.set("javax.jdo.option.ConnectionURL", m_derbyUrl + ";create=true");
 		sparkConf.set("spark.sql.catalogImplementation", "hive");
 
@@ -442,6 +452,10 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		sparkConf.set("spark.sql.warehouse.dir", getDummyPermissionFileSystemUri(warehouseDir));
 		sparkConf.set("hive.server2.logging.operation.log.location",
 			getDummyPermissionFileSystemUri(hiveOperationLogsDir));
+
+		// directories that must be in the local FS an can not be wrapped
+		sparkConf.set("hive.exec.local.scratchdir", hiveLocalScratchDir.getCanonicalPath());
+		sparkConf.set("hive.downloaded.resources.dir", hiveDownloadResDir.getCanonicalPath());
 
 		// To shutdown the derby system on destroy, the Derby driver needs to be loaded
 		// from the same (shared) class loader in the Hiveserver

@@ -19,6 +19,10 @@
             <i>Action to perform on dispose</i>. Spark contexts created by this node can be shared between
             KNIME workflows.
             </p>
+            <p>
+            <i>Note on Windows</i>: Hadoop requires the Microsoft Visual C++ 2010 Redistributable Package on Windows.
+            The package can be downloaded from the <a href="http://www.microsoft.com/en-us/download/details.aspx?id=14632">Microsoft Download Center</a>.
+            </p>
         </intro>
         <option name="Context name">The unique name of the context. Only one Spark context will be created when you 
         execute several <i>Create Local Big Data Environment</i> nodes with the same context name.</option>
