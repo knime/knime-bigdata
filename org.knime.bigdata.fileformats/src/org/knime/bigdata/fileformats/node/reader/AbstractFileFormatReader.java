@@ -309,7 +309,8 @@ public abstract class AbstractFileFormatReader {
                     throw new BigDataFileFormatException("Empty directory.");
                 }
                 for (final RemoteFile<Connection> remotefile : fileList) {
-                    if (remotefile.getSize() > 0 && !remotefile.getName().endsWith(".crc")) {
+                    final String filename = remotefile.getName();
+                    if (remotefile.getSize() > 0 && !filename.startsWith(".") && !filename.startsWith("_")) {
 
                         createReader(schemas, remotefile);
 
