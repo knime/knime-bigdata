@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,6 +58,7 @@ import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaTester;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.core.node.CanceledExecutionException;
@@ -89,7 +91,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         String sparkWebUI;
 
         Map<String, String> sparkConf;
+
+        Map<String, String> systemProperties;
     }
+
+    private KNIMEToIntermediateConverterParameter m_converterParameter;
 
     /**
      * Creates a new Spark context that pushes jobs to Apache Livy.
@@ -314,9 +320,38 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         m_contextAttributes = new ContextAttributes();
         m_contextAttributes.sparkWebUI = output.getSparkWebUI();
         m_contextAttributes.sparkConf = output.getSparkConf();
+        m_contextAttributes.systemProperties = output.getSystemProperties();
+
+        m_converterParameter = getConfiguration().getConverterParameter(m_contextAttributes.sparkConf,
+            m_contextAttributes.systemProperties);
+
+        if (getConfiguration().failOnDifferentClusterTimeZone()) {
+            validateClusterTimeZone(getConfiguration(), m_contextAttributes.systemProperties);
+        }
 
         exec.setProgress(0.9, "Testing file download on file system connection");
         downloadStagingTestfile(output.getTestfileName());
+    }
+
+    /**
+     * Validate that cluster uses the same time zone set in configuration and throw an exception otherwise.
+     */
+    private static void validateClusterTimeZone(final LivySparkContextConfig config,
+        final Map<String, String> systemProperties) throws KNIMESparkException {
+
+        final ZoneId clusterTimeZone;
+        final ZoneId expectedTimeZone = config.getTimeShiftZone();
+
+        if (systemProperties.containsKey("user.timezone")) {
+            clusterTimeZone = ZoneId.of(systemProperties.get("user.timezone"));
+        } else {
+            throw new KNIMESparkException("Unable to identifiy cluster default time zone.");
+        }
+
+        if (!expectedTimeZone.equals(clusterTimeZone)) {
+            throw new KNIMESparkException(
+                "Found different time zone " + clusterTimeZone + " on cluster than expected " + expectedTimeZone + ".");
+        }
     }
 
     private void downloadStagingTestfile(final String testfileName) throws KNIMESparkException {
@@ -446,9 +481,14 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         reps.put("url", config.getLivyUrlWithoutAuthentication());
         reps.put("authentication", createAuthenticationInfoString());
         reps.put("context_state", getStatus().toString());
+        reps.put("time_shift",
+            m_converterParameter != null ? m_converterParameter.getTimeShiftDescription() : "unavailable");
         reps.put("spark_web_ui", m_contextAttributes != null && m_contextAttributes.sparkWebUI != null ?
             m_contextAttributes.sparkWebUI : "unavailable");
-        reps.put("spark_properties", mkSparkPropertiesHTMLRows());
+        reps.put("spark_properties",
+            mkPropertiesHTMLRows(m_contextAttributes != null ? m_contextAttributes.sparkConf : null));
+        reps.put("sys_properties",
+            mkPropertiesHTMLRows(m_contextAttributes != null ? m_contextAttributes.systemProperties : null));
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
@@ -457,17 +497,17 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
-    private String mkSparkPropertiesHTMLRows() {
-        if (m_contextAttributes == null) {
+    private static String mkPropertiesHTMLRows(final Map<String, String> props) {
+        if (props == null) {
             return "<tr><td>unavailable</td><td></td></tr>";
         }
 
-        final ArrayList<String> sortedProperties = new ArrayList<>(m_contextAttributes.sparkConf.keySet());
+        final ArrayList<String> sortedProperties = new ArrayList<>(props.keySet());
         Collections.sort(sortedProperties);
         final StringBuilder buf = new StringBuilder();
         for (final String property : sortedProperties) {
             buf.append(String.format("<tr><td>%s</td><td>%s</td></tr>\n", property,
-                m_contextAttributes.sparkConf.get(property)));
+                props.get(property)));
         }
         return buf.toString();
     }
@@ -527,5 +567,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             default: // this is actually OPEN
                 return waitForFuture(m_livyClient.getDriverLog(rows), exec);
         }
+    }
+
+    @Override
+    public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
+        return m_converterParameter;
     }
 }

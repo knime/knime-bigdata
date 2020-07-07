@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.core.data.DataColumnSpec;
@@ -57,9 +58,11 @@ public class FixedLocalDateMissingValueHandler extends SparkMissingValueHandler 
     }
 
     @Override
-    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) {
-        return SparkMissingValueJobInput
-            .createFixedValueConfig(converter.convert(LocalDateCellFactory.create(m_fixVal.getLocalDate())));
+    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter,
+        final KNIMEToIntermediateConverterParameter converterParameter) {
+
+        return SparkMissingValueJobInput.createFixedValueConfig(
+            converter.convert(LocalDateCellFactory.create(m_fixVal.getLocalDate()), converterParameter));
     }
 
     @Override

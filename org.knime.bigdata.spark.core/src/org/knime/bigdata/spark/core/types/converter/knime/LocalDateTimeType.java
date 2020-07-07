@@ -53,7 +53,9 @@ public class LocalDateTimeType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected Serializable convertNoneMissingCell(final DataCell cell) {
+    protected Serializable convertNoneMissingCell(final DataCell cell,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (cell instanceof LocalDateTimeValue) {
             // This interprets the given LocalDateTime in the UTC timezone. For example,
             // 2017-01-02 01:02:03 is interpreted as the instant 2017-01-02 01:02:03 UTC.
@@ -69,7 +71,9 @@ public class LocalDateTimeType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
+    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (intermediateTypeObject instanceof Timestamp) {
             final Timestamp sqlTimestamp = (Timestamp) intermediateTypeObject;
 

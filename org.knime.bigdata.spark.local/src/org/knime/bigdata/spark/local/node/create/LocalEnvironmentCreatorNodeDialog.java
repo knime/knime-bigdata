@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
+import org.knime.bigdata.spark.node.util.context.create.TimeDialogPanel;
 import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -61,7 +61,9 @@ public class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements
     private final FlowVariableModel m_hiveFolderFlowVariable;
 
     private final FilesHistoryPanel m_hiveFolderChooser;
-    
+
+    private final TimeDialogPanel m_timeShift;
+
     /**
      * Constructor.
      */
@@ -133,28 +135,26 @@ public class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements
                 "Hide warning about an existing local Spark context").getComponentPanel(), c);
 
         addTab("Local Big Data Environment Settings", panel);
+
+        m_timeShift = new TimeDialogPanel(m_settings.getTimeShiftSettings());
+        addTab("Time", m_timeShift);
     }
 
     @Override
     public void stateChanged(final ChangeEvent e) {
     	final Object eventSource = e.getSource(); 
     	
-    	if (eventSource == m_settings.getUseCustomSparkSettingsModel()) {
-            m_settings.getCustomSparkSettingsModel()
-                .setEnabled(m_settings.getUseCustomSparkSettingsModel().getBooleanValue());
-        } else if (eventSource == m_settings.getSqlSupportModel() || eventSource == m_settings.getUseHiveDataFolderModel()) {
-        	updateSQLSettingsEnabledness();
+        if (eventSource == m_settings.getUseCustomSparkSettingsModel() //
+            || eventSource == m_settings.getSqlSupportModel() //
+            || eventSource == m_settings.getUseHiveDataFolderModel()) {
+
+            updateEnabledness();
         }
     }
 
-	private void updateSQLSettingsEnabledness() {
-		final boolean hiveEnabled = SQLSupport
-				.valueOf(m_settings.getSqlSupportModel().getStringValue()) != SQLSupport.SPARK_SQL_ONLY;
-		m_settings.getUseHiveDataFolderModel().setEnabled(hiveEnabled);
-
-		final boolean hiveDataFolderChooserEnabled = hiveEnabled && m_settings.useHiveDataFolder();
-		m_settings.getHiveDataFolderModel().setEnabled(hiveDataFolderChooserEnabled);
-		m_hiveFolderChooser.setEnabled(hiveDataFolderChooserEnabled);
+	private void updateEnabledness() {
+        m_settings.updateEnabledness();
+        m_hiveFolderChooser.setEnabled(m_settings.isHiveEnabled() && m_settings.useHiveDataFolder());
 	}
     
     /**
@@ -175,7 +175,7 @@ public class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements
         try {
             m_settings.loadSettingsFrom(settings);
             m_hiveFolderChooser.setSelectedFile(m_settings.getHiveDataFolderModel().getStringValue());
-            updateSQLSettingsEnabledness();
+            updateEnabledness();
             
         } catch (InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());

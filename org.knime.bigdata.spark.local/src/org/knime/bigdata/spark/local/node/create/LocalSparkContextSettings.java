@@ -37,6 +37,7 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
+import org.knime.bigdata.spark.node.util.context.create.TimeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
@@ -188,15 +189,13 @@ public class LocalSparkContextSettings {
 
     private final SettingsModelBoolean m_hideExistsWarning = new SettingsModelBoolean("hideExistsWarning", false);
 
+    private final TimeSettings m_timeShiftSettings = new TimeSettings();
+
     /**
      * Constructor.
      */
     public LocalSparkContextSettings() {
-        m_customSparkSettings.setEnabled(m_overrideSparkSettings.getBooleanValue());
-
-        final boolean hiveQLEnabled = !m_sqlSupport.getStringValue().equals(SQLSupport.SPARK_SQL_ONLY);
-        m_useHiveDataFolder.setEnabled(hiveQLEnabled);
-        m_hiveDataFolder.setEnabled(hiveQLEnabled && m_useHiveDataFolder.getBooleanValue());
+        updateEnabledness();
     }
 
     /**
@@ -309,6 +308,13 @@ public class LocalSparkContextSettings {
     }
 
     /**
+     * @return {@code true} if hive support is enabled
+     */
+    public boolean isHiveEnabled() {
+        return getSQLSupport() != SQLSupport.SPARK_SQL_ONLY;
+    }
+
+    /**
      *
      * @return settings model that says whether or not to use a custom folder for the Hive Metastore DB and warehouse.
      * @see #useHiveDataFolder()
@@ -361,6 +367,13 @@ public class LocalSparkContextSettings {
     }
 
     /**
+     * @return the time shift settings model
+     */
+    public TimeSettings getTimeShiftSettings() {
+        return m_timeShiftSettings;
+    }
+
+    /**
      * @return the {@link SparkContextID} derived from the configuration settings.
      */
     public SparkContextID getSparkContextID() {
@@ -404,6 +417,8 @@ public class LocalSparkContextSettings {
         m_hiveDataFolder.saveSettingsTo(settings);
 
         m_hideExistsWarning.saveSettingsTo(settings);
+
+        m_timeShiftSettings.saveSettingsTo(settings.addNodeSettings("timeshift"));
     }
 
     /**
@@ -427,6 +442,10 @@ public class LocalSparkContextSettings {
         }
 
         m_hideExistsWarning.validateSettings(settings);
+
+        if (settings.containsKey("timeshift")) { // added in 4.2
+            m_timeShiftSettings.validateSettings(settings.getNodeSettings("timeshift"));
+        }
 
         final LocalSparkContextSettings tmpSettings = new LocalSparkContextSettings();
         tmpSettings.loadSettingsFrom(settings);
@@ -479,6 +498,25 @@ public class LocalSparkContextSettings {
         m_hiveDataFolder.loadSettingsFrom(settings);
 
         m_hideExistsWarning.loadSettingsFrom(settings);
+
+        if (settings.containsKey("timeshift")) { // added in 4.2
+            m_timeShiftSettings.loadSettingsFrom(settings.getNodeSettings("timeshift"));
+        }
+
+        updateEnabledness();
+    }
+
+    /**
+     * Updates the enabledness of the underlying settings models.
+     */
+    public void updateEnabledness() {
+        m_customSparkSettings.setEnabled(m_overrideSparkSettings.getBooleanValue());
+
+        final boolean hiveQLEnabled = isHiveEnabled();
+        m_useHiveDataFolder.setEnabled(hiveQLEnabled);
+        m_hiveDataFolder.setEnabled(hiveQLEnabled && useHiveDataFolder());
+
+        m_timeShiftSettings.updateEnabledness();
     }
 
     /**
@@ -503,6 +541,9 @@ public class LocalSparkContextSettings {
             getOnDisposeAction() == OnDisposeAction.DELETE_DATA,
             useCustomSparkSettings(),
             getCustomSparkSettings(),
+            m_timeShiftSettings.getTimeShiftStrategy(),
+            m_timeShiftSettings.getFixedTimeZoneId(),
+            m_timeShiftSettings.failOnDifferentClusterTZ(),
 
             // Hive
             enableHiveSupport,

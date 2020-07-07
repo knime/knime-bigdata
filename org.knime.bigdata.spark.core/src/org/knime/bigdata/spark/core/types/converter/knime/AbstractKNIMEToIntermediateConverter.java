@@ -164,18 +164,20 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
      * {@inheritDoc}
      */
     @Override
-    public Serializable convert(final DataCell cell) {
+    public Serializable convert(final DataCell cell, final KNIMEToIntermediateConverterParameter parameter) {
         if (cell.isMissing()) {
             return null;
         }
-        return convertNoneMissingCell(cell);
+        return convertNoneMissingCell(cell, parameter);
     }
 
     /**
      * @param cell the {@link DataCell}. Can not be a missing {@link DataCell}!
+     * @param parameter Context specific converter parameter.
      * @return the {@link Serializable} for the not missing {@link DataCell}
      */
-    protected abstract Serializable convertNoneMissingCell(DataCell cell);
+    protected abstract Serializable convertNoneMissingCell(DataCell cell,
+        final KNIMEToIntermediateConverterParameter parameter);
 
     /**
      * @param cell the incompatible cell
@@ -189,18 +191,22 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
      * {@inheritDoc}
      */
     @Override
-    public DataCell convert(final Serializable intermediateTypeObject) {
+    public DataCell convert(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (intermediateTypeObject == null) {
             return DataType.getMissingCell();
         }
-        return convertNotNullSerializable(intermediateTypeObject);
+
+        return convertNotNullSerializable(intermediateTypeObject, parameter);
     }
 
     /**
      * @param intermediateTypeObject not <code>null</code> {@link Serializable}
+     * @param parameter Context specific converter parameter.
      * @return the {@link DataCell} representation of the not <code>null</code> {@link Serializable}
      */
-    protected abstract DataCell convertNotNullSerializable(Serializable intermediateTypeObject);
+    protected abstract DataCell convertNotNullSerializable(Serializable intermediateTypeObject, final KNIMEToIntermediateConverterParameter parameter);
 
     /**
      * @param intermediateTypeObject the incompatible intermediateTypeObject

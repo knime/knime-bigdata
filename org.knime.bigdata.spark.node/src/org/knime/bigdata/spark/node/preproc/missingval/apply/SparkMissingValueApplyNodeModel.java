@@ -34,6 +34,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -126,7 +127,10 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
                 final SparkMissingValueHandler handler = createHandlerForColumn(colSpec, df);
                 final KNIMEToIntermediateConverter converter =
                         KNIMEToIntermediateConverterRegistry.get(handler.getOutputDataType());
-                final Map<String, Serializable> colConfig = handler.getJobInputColumnConfig(converter);
+                final KNIMEToIntermediateConverterParameter converterParameter =
+                    SparkContextUtil.getConverterParameter(contextID);
+                final Map<String, Serializable> colConfig =
+                    handler.getJobInputColumnConfig(converter, converterParameter);
 
                 if (colSpec.getType().equals(handler.getOutputDataType())) {
                     outputColSpec[colIndex] = colSpec;

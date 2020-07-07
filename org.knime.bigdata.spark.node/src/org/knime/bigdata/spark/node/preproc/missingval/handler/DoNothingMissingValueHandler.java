@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.core.data.DataColumnSpec;
 
@@ -40,7 +41,9 @@ public class DoNothingMissingValueHandler extends SparkMissingValueHandler {
     }
 
     @Override
-    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) {
+    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter,
+        final KNIMEToIntermediateConverterParameter converterParameter) {
+
         return null;
     }
 

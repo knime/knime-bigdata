@@ -4,6 +4,7 @@
 package org.knime.bigdata.spark.core.livy;
 
 import java.net.URI;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import org.knime.bigdata.spark.core.livy.node.create.LivySparkContextCreatorNode
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.workflow.FlowVariable;
 
@@ -163,9 +165,13 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
 
         final ConnectionInformation remoteFsConnectionInfo = createHttpFSConnectionInformation(flowVariables);
 
+        final TimeShiftStrategy timeShiftStrategy = TimeShiftStrategy.NONE;
+        final ZoneId timeShiftZoneId = null;
+        final boolean failOnDifferentClusterTimeZone = false;
+
         return new LivySparkContextConfig(sparkVersion, livyUrl, authenticationType, stagingAreaFolder,
             connectTimeoutSeconds, responseTimeoutSeconds, jobCheckFrequencySeconds, customSparkSettings,
-            sparkContextId, remoteFsConnectionInfo);
+            sparkContextId, remoteFsConnectionInfo, timeShiftStrategy, timeShiftZoneId, failOnDifferentClusterTimeZone);
     }
 
     private static ConnectionInformation createHttpFSConnectionInformation(Map<String, FlowVariable> flowVariables) {

@@ -2,12 +2,17 @@ package org.knime.bigdata.spark.core.livy.context;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZoneId;
 import java.util.Map;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 
 /**
@@ -36,6 +41,12 @@ public class LivySparkContextConfig implements SparkContextConfig {
     
     private final ConnectionInformation m_remoteFsConnectionInfo;
 
+    private final TimeShiftStrategy m_timeShiftStrategy;
+
+    private ZoneId m_timeShiftZoneId;
+
+    private boolean m_failOnDifferentClusterTimeZone;
+
     /**
      * Constructor.
      * 
@@ -49,12 +60,17 @@ public class LivySparkContextConfig implements SparkContextConfig {
      * @param customSparkSettings
      * @param sparkContextId
      * @param remoteFsConnectionInfo 
+     * @param timeShiftStrategy
+     * @param timeShiftZoneId optional time shift zone ID, might by {@code null}
+     * @param failOnDifferentClusterTimeZone {@code true} if context creation should fail on different cluster time zone
      */
     public LivySparkContextConfig(final SparkVersion sparkVersion, final String livyUrl,
         final AuthenticationType authenticationType, final String stagingAreaFolder, final int connectTimeoutSeconds,
         final int responseTimeoutSeconds, final int jobCheckFrequencySeconds,
         final Map<String, String> customSparkSettings, final SparkContextID sparkContextId,
-        ConnectionInformation remoteFsConnectionInfo) {
+        final ConnectionInformation remoteFsConnectionInfo,
+        final TimeShiftStrategy timeShiftStrategy, final ZoneId timeShiftZoneId,
+        final boolean failOnDifferentClusterTimeZone) {
 
         m_sparkVersion = sparkVersion;
         m_livyUrl = livyUrl;
@@ -66,6 +82,9 @@ public class LivySparkContextConfig implements SparkContextConfig {
         m_customSparkSettings = customSparkSettings;
         m_sparkContextId = sparkContextId;
         m_remoteFsConnectionInfo = remoteFsConnectionInfo;
+        m_timeShiftStrategy = timeShiftStrategy;
+        m_timeShiftZoneId = timeShiftZoneId;
+        m_failOnDifferentClusterTimeZone = failOnDifferentClusterTimeZone;
     }
 
     /**
@@ -175,6 +194,68 @@ public class LivySparkContextConfig implements SparkContextConfig {
     }
 
     /**
+     * @return the time shift strategy to use
+     */
+    protected TimeShiftStrategy getTimeShiftStrategy() {
+        return m_timeShiftStrategy;
+    }
+
+    /**
+     * @return Time shift ZoneId in {@link TimeShiftStrategy#FIXED} or  {@link TimeShiftStrategy#DEFAULT_CLIENT} mode.
+     * @throws KNIMESparkException on other time shift strategy
+     */
+    protected ZoneId getTimeShiftZone() throws KNIMESparkException{
+        if (m_timeShiftStrategy == TimeShiftStrategy.FIXED) {
+            return m_timeShiftZoneId;
+        } else if (m_timeShiftStrategy == TimeShiftStrategy.DEFAULT_CLIENT ) {
+            return ZoneId.systemDefault();
+        } else {
+            throw new KNIMESparkException(
+                "Unsupported time zone parameter on " + m_timeShiftStrategy + " time shift strategy.");
+        }
+    }
+
+    /**
+     * Creates the context specific converter parameters.
+     *
+     * @param sparkConf the spark configuration the driver is running with
+     * @param sparkDriverSystemProperties the system properties the driver is running with
+     * @return converter parameters
+     * @throws KNIMESparkException on unknown time shift strategy or missing time zone informations in given parameters
+     */
+    protected KNIMEToIntermediateConverterParameter getConverterParameter(final Map<String, String> sparkConf,
+        final Map<String, String> sparkDriverSystemProperties) throws KNIMESparkException {
+
+        switch (m_timeShiftStrategy) {
+            case NONE:
+                return KNIMEToIntermediateConverterParameter.DEFAULT;
+            case FIXED:
+                return new KNIMEToIntermediateConverterParameter(m_timeShiftZoneId);
+            case DEFAULT_CLIENT:
+                return new KNIMEToIntermediateConverterParameter(ZoneId.systemDefault());
+            case DEFAULT_CLUSTER:
+                if (sparkConf.containsKey("spark.sql.session.timeZone")) {
+                    return new KNIMEToIntermediateConverterParameter(
+                        ZoneId.of(sparkConf.get("spark.sql.session.timeZone")));
+                } else if (sparkDriverSystemProperties.containsKey("user.timezone")) {
+                    return new KNIMEToIntermediateConverterParameter(
+                        ZoneId.of(sparkDriverSystemProperties.get("user.timezone")));
+                } else {
+                    throw new KNIMESparkException("Unable to get time zone from cluster.");
+                }
+            default:
+                throw new KNIMESparkException("Unsuported time shift settings.");
+        }
+    }
+
+    /**
+     * @return {@code true} if context creation should fail on different cluster time zone
+     */
+    public boolean failOnDifferentClusterTimeZone() {
+        return m_failOnDifferentClusterTimeZone;
+    }
+
+    /**
      * Autogenerated {@link #hashCode()} implementation over all members.
      */
     @Override
@@ -185,11 +266,14 @@ public class LivySparkContextConfig implements SparkContextConfig {
         result = prime * result + ((m_stagingAreaFolder == null) ? 0 : m_stagingAreaFolder.hashCode());
         result = prime * result + m_connectTimeoutSeconds;
         result = prime * result + ((m_customSparkSettings == null) ? 0 : m_customSparkSettings.hashCode());
+        result = prime * result + (m_failOnDifferentClusterTimeZone ? 1231 : 1237);
         result = prime * result + m_jobCheckFrequencySeconds;
         result = prime * result + ((m_livyUrl == null) ? 0 : m_livyUrl.hashCode());
         result = prime * result + m_responseTimeoutSeconds;
         result = prime * result + ((m_sparkContextId == null) ? 0 : m_sparkContextId.hashCode());
         result = prime * result + ((m_sparkVersion == null) ? 0 : m_sparkVersion.hashCode());
+        result = prime * result + ((m_timeShiftStrategy == null) ? 0 : m_timeShiftStrategy.hashCode());
+        result = prime * result + ((m_timeShiftZoneId == null) ? 0 : m_timeShiftZoneId.hashCode());
         return result;
     }
 
@@ -219,6 +303,8 @@ public class LivySparkContextConfig implements SparkContextConfig {
                 return false;
         } else if (!m_customSparkSettings.equals(other.m_customSparkSettings))
             return false;
+        if (m_failOnDifferentClusterTimeZone != other.m_failOnDifferentClusterTimeZone)
+            return false;
         if (m_jobCheckFrequencySeconds != other.m_jobCheckFrequencySeconds)
             return false;
         if (m_livyUrl == null) {
@@ -237,6 +323,13 @@ public class LivySparkContextConfig implements SparkContextConfig {
             if (other.m_sparkVersion != null)
                 return false;
         } else if (!m_sparkVersion.equals(other.m_sparkVersion))
+            return false;
+        if (m_timeShiftStrategy != other.m_timeShiftStrategy)
+            return false;
+        if (m_timeShiftZoneId == null) {
+            if (other.m_timeShiftZoneId != null)
+                return false;
+        } else if (!m_timeShiftZoneId.equals(other.m_timeShiftZoneId))
             return false;
         return true;
     }

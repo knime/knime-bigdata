@@ -23,6 +23,11 @@ package org.knime.bigdata.spark.core.types.converter.knime;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
@@ -51,10 +56,23 @@ public class DateAndTimeType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected Serializable convertNoneMissingCell(final DataCell cell) {
+    protected Serializable convertNoneMissingCell(final DataCell cell,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (cell instanceof DateAndTimeValue) {
-            return new Timestamp(((DateAndTimeValue)cell).getUTCTimeInMillis());
+            if (parameter != null && parameter.useTimeShift()) {
+                final long localTimeInMillis = ((DateAndTimeValue)cell).getUTCTimeInMillis();
+                final Instant localInstant = Instant.ofEpochMilli(localTimeInMillis);
+                // UTC offset means no time shift here:
+                final LocalDateTime localDateTime = LocalDateTime.ofInstant(localInstant, ZoneOffset.UTC);
+                final ZoneId zone = parameter.getTimShiftZoneId();
+                final Instant utcInstant = ZonedDateTime.of(localDateTime, zone).toInstant();
+                return Timestamp.from(utcInstant);
+            } else {
+                return new Timestamp(((DateAndTimeValue)cell).getUTCTimeInMillis());
+            }
         }
+
         throw incompatibleCellException(cell);
     }
 
@@ -62,14 +80,27 @@ public class DateAndTimeType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
+    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (intermediateTypeObject instanceof Timestamp) {
-            Timestamp val = (Timestamp) intermediateTypeObject;
-            return new DateAndTimeCell(val.getTime(), true, true, true);
+            final Timestamp val = (Timestamp) intermediateTypeObject;
+            if (parameter != null && parameter.useTimeShift()) {
+                final Instant utcInstant = val.toInstant();
+                final ZoneId zone = parameter.getTimShiftZoneId();
+                final ZoneOffset zoneOffset = zone.getRules().getOffset(utcInstant);
+                final Instant localInstant = utcInstant.plusSeconds(zoneOffset.getTotalSeconds());
+                final long localEpochMillis = Timestamp.from(localInstant).getTime();
+                return new DateAndTimeCell(localEpochMillis, true, true, true);
+            } else {
+                return new DateAndTimeCell(val.getTime(), true, true, true);
+            }
+
         } else if (intermediateTypeObject instanceof Date) {
-            Date val = (Date) intermediateTypeObject;
+            final Date val = (Date) intermediateTypeObject;
             return new DateAndTimeCell(val.getTime(), true, false, false);
         }
+
         throw incompatibleSerializableException(intermediateTypeObject);
     }
 }

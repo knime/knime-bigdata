@@ -10,6 +10,8 @@
 <br/>
 <strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
 <br/>
+<strong>Time shift: </strong>&nbsp;&nbsp;<tt>${time_shift}</tt>
+<br/>
 <br/>
 <strong>Context settings</strong>
 <hr/>
@@ -21,3 +23,13 @@
   </tr>
   ${spark_properties}
  </table>
+<br/>
+<strong>System Properties: </strong>
+<table align="left" width="80%">
+  <tr>
+    <th align="left">Name</th>
+    <th align="left">Value</th>
+  </tr>
+  ${sys_properties}
+ </table>
+ 

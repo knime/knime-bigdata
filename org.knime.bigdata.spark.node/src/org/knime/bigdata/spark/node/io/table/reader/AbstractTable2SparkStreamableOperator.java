@@ -25,11 +25,13 @@ import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.core.data.DataCell;
@@ -72,8 +74,10 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
         final RowInput rowInput = (RowInput)inputs[0];
         final SparkContextPortObject contextPortObject =
             (SparkContextPortObject)((PortObjectInput)inputs[1]).getPortObject();
+        final KNIMEToIntermediateConverterParameter converterParameter =
+            SparkContextUtil.getConverterParameter(contextPortObject.getContextID());
 
-        runWithRowInput(rowInput, exec);
+        runWithRowInput(rowInput, exec, converterParameter);
 
         // if you change this, you also need to change the behavior in Table2SparkNodeModel#configureInternal()
         // and Table2SparkNodeModel#executeInternal()
@@ -95,7 +99,8 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
     protected abstract SparkDataTable createSparkDataTable(final SparkContextID contextID, final DataTableSpec spec);
 
     /**
-     * Used by {@link #runWithRowInput(RowInput, ExecutionContext)} to obtain a queue for writing rows.
+     * Used by {@link #runWithRowInput(RowInput, ExecutionContext, KNIMEToIntermediateConverterParameter)} to obtain a
+     * queue for writing rows.
      *
      * @param rowInput The row input from which rows are assumed to come.
      * @return A queue to write rows to.
@@ -109,12 +114,14 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
      *
      * @param exec Execution context for progress reporting.
      * @param rowInput The row input to read rows from.
+     * @param converterParameter Context specific converter parameters.
      * @throws IOException when something goes wrong while allocating the queue.
      * @throws InterruptedException when the current thread is interrupted while it executes this method.
      * @throws CanceledExecutionException when the execution is canceled via the provided execution context.
      * @throws KNIMESparkException when something goes wrong while uploading the data to Spark.
      */
-    public void runWithRowInput(final RowInput rowInput, final ExecutionContext exec)
+    public void runWithRowInput(final RowInput rowInput, final ExecutionContext exec,
+        final KNIMEToIntermediateConverterParameter converterParameter)
         throws IOException, InterruptedException, CanceledExecutionException, KNIMESparkException {
 
         exec.checkCanceled();
@@ -127,11 +134,12 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
         }
 
         // transfer all rows from rowInput to m_queue
-        convertRowsAndTransferToQueue(rowInput, noOfRows, subExec, queue);
+        convertRowsAndTransferToQueue(rowInput, noOfRows, subExec, queue, converterParameter);
     }
 
     private void convertRowsAndTransferToQueue(final RowInput rowInput, final long noOfRows,
-        final ExecutionMonitor exec, final BlockingQueue<Serializable[]> queue)
+        final ExecutionMonitor exec, final BlockingQueue<Serializable[]> queue,
+        final KNIMEToIntermediateConverterParameter converterParameter)
         throws InterruptedException, CanceledExecutionException {
 
         KNIMEToIntermediateConverter[] m_converters = KNIMEToIntermediateConverterRegistry
@@ -146,7 +154,7 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
             int colIdx = 0;
             final Serializable[] array = new Serializable[noColums];
             for (final DataCell cell : row) {
-                array[colIdx] = m_converters[colIdx].convert(cell);
+                array[colIdx] = m_converters[colIdx].convert(cell, converterParameter);
                 colIdx++;
             }
             queue.put(array);

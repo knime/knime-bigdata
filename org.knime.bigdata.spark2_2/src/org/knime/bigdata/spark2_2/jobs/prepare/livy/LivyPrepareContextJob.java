@@ -25,8 +25,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -93,7 +96,16 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
         }
         final Map<String, String> sparkConf =
             Arrays.stream(sparkContext.conf().getAll()).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-        return new LivyPrepareContextJobOutput(sparkWebUI, sparkConf, testfileName);
+
+        ZoneId.systemDefault(); // set default time zone property if required
+        final Map<String, String> sysProps = new HashMap<>();
+        for (final Entry<Object, Object> e : System.getProperties().entrySet()) {
+            if (e.getValue() != null) {
+                sysProps.put(e.getKey().toString(), e.getValue().toString());
+            }
+        }
+
+        return new LivyPrepareContextJobOutput(sparkWebUI, sparkConf, sysProps, testfileName);
     }
 
     private static String validateStagingAreaAccess(final String testfileName) throws KNIMESparkException {

@@ -46,11 +46,14 @@ public class IntegerType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
+    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (intermediateTypeObject instanceof Number) {
             final Number val = (Number) intermediateTypeObject;
             return new IntCell(val.intValue());
         }
+
         throw incompatibleSerializableException(intermediateTypeObject);
     }
 
@@ -58,10 +61,13 @@ public class IntegerType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected Serializable convertNoneMissingCell(final DataCell cell) {
+    protected Serializable convertNoneMissingCell(final DataCell cell,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (cell instanceof IntValue) {
             return ((IntValue)cell).getIntValue();
         }
+
         throw incompatibleCellException(cell);
     }
 

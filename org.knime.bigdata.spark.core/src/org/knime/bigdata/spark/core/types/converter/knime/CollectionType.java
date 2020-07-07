@@ -107,18 +107,21 @@ public class CollectionType implements KNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    public DataCell convert(final Serializable intermediateTypeObject) {
+    public DataCell convert(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (intermediateTypeObject instanceof Serializable[]) {
             final Serializable[] vals = (Serializable[])intermediateTypeObject;
             final Collection<DataCell> cells = new ArrayList<>(vals.length);
             for (Serializable val : vals) {
-                cells.add(m_elementConverter.convert(val));
+                cells.add(m_elementConverter.convert(val, parameter));
             }
             if (createSet()) {
                 return CollectionCellFactory.createSetCell(cells);
             }
             return CollectionCellFactory.createListCell(cells);
         }
+
         return DataType.getMissingCell();
     }
 
@@ -126,13 +129,13 @@ public class CollectionType implements KNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    public Serializable convert(final DataCell cell) {
+    public Serializable convert(final DataCell cell, final KNIMEToIntermediateConverterParameter parameter) {
         if (cell instanceof CollectionDataValue) {
             final CollectionDataValue colCell = (CollectionDataValue) cell;
             final Serializable[ ] vals = new Serializable[colCell.size()];
             int idx = 0;
             for (DataCell dataCell : colCell) {
-                vals[idx++] = m_elementConverter.convert(dataCell);
+                vals[idx++] = m_elementConverter.convert(dataCell, parameter);
             }
             return vals;
         }

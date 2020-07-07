@@ -32,6 +32,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -97,6 +98,8 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         final SparkContextID contextID = inputPort.getContextID();
         final DataTableSpec inputSpec = inputPort.getTableSpec();
         final KNIMEToIntermediateConverter converters[] = new KNIMEToIntermediateConverter[inputSpec.getNumColumns()];
+        final KNIMEToIntermediateConverterParameter converterParameter =
+            SparkContextUtil.getConverterParameter(contextID);
         final String namedInputObject = inputPort.getData().getID();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkMissingValueJobInput jobInput = new SparkMissingValueJobInput(namedInputObject, namedOutputObject);
@@ -113,7 +116,8 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
             final SparkMissingValueHandler handler = getSparkMissingValueHandler(inputColSpec);
 
             converters[i] = KNIMEToIntermediateConverterRegistry.get(outputColSpec.getType());
-            final Map<String, Serializable> colConfig = handler.getJobInputColumnConfig(converters[i]);
+            final Map<String, Serializable> colConfig =
+                handler.getJobInputColumnConfig(converters[i], converterParameter);
 
             if (!inputColSpec.getType().equals(outputColSpec.getType())) {
                 SparkMissingValueJobInput.addCastConfig(colConfig, converters[i].getIntermediateDataType());
@@ -150,7 +154,7 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
             final Map<String, Serializable> intermediateOutput = jobOutput.getValues();
             for (Entry<String, Serializable> e : intermediateOutput.entrySet()) {
                 KNIMEToIntermediateConverter converter = converters[inputSpec.findColumnIndex(e.getKey())];
-                outputValues.put(e.getKey(), converter.convert(e.getValue()));
+                outputValues.put(e.getKey(), converter.convert(e.getValue(), converterParameter));
             }
         }
 

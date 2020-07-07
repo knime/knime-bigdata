@@ -6,6 +6,7 @@ package org.knime.bigdata.spark.local.context;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -59,6 +61,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
 	private LocalSparkNamedObjectsController m_namedObjectsController;
 
+	private KNIMEToIntermediateConverterParameter m_converterParameter;
 
 	/**
 	 * Creates a new local Spark context with the given ID.
@@ -147,9 +150,8 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 			// reduce the shuffle default (200 partitions) to something smaller in local mode
 			sparkConf.put("spark.sql.shuffle.partitions", "" + (3 * config.getNumberOfThreads()));
 
-			if (config.useCustomSparkSettings()) {
-				sparkConf.putAll(config.getCustomSparkSettings());
-			}
+			// load setting from context configuration
+			config.addSparkSettings(sparkConf);
 
 			final File[] extraJars = collectExtraJars(config);
 
@@ -163,6 +165,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 					config.useHiveDataFolder()
 							? config.getHiveDataFolder()
 							: null);
+            m_converterParameter = config.getConverterParameter();
 
 			contextWasCreated = true;
 			setStatus(SparkContextStatus.OPEN);
@@ -235,7 +238,24 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
 		SparkContextUtil.getSimpleRunFactory(getID(), PREPARE_LOCAL_SPARK_CONTEXT_JOB).createRun(prepInput)
 				.run(getID());
+
+		if (getConfiguration().failOnDifferentClusterTimeZone()) {
+		    validateClusterTimeZone(getConfiguration());
+		}
 	}
+
+	/**
+     * Validate that cluster uses the same time zone set in configuration and throw an exception otherwise.
+     */
+    private static void validateClusterTimeZone(final LocalSparkContextConfig config) throws KNIMESparkException {
+        final ZoneId clusterTimeZone = ZoneId.systemDefault();
+        final ZoneId expectedTimeZone = config.getTimeShiftZone();
+
+        if (!expectedTimeZone.equals(clusterTimeZone)) {
+            throw new KNIMESparkException(
+                "Found different time zone " + clusterTimeZone + " on cluster than expected " + expectedTimeZone + ".");
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -243,6 +263,10 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 	@Override
 	protected void destroy() throws KNIMESparkException {
 		try {
+		    if (m_converterParameter != null) {
+		        m_converterParameter = null;
+		    }
+
 			if (m_wrapper != null) {
 				LOGGER.info("Destroying local Spark context " + getID());
 				m_wrapper.destroy();
@@ -292,7 +316,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
             		.collect(Collectors.joining("\n"))
             : "(not applicable)");
         reps.put("context_state", getStatus().toString());
-        
+        reps.put("time_shift",
+            m_converterParameter != null ? m_converterParameter.getTimeShiftDescription() : "unavailable");
+
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
         } catch (IOException e) {
@@ -328,4 +354,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
 		return m_wrapper.getHiveserverPort();
 	}
+
+    @Override
+    public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
+        return m_converterParameter;
+    }
 }

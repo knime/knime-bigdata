@@ -3,12 +3,16 @@
  */
 package org.knime.bigdata.spark.local.context;
 
+import java.time.ZoneId;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.LocalSparkVersion;
+import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
 
 /**
  * Implementation of {@link SparkContextConfig} interface for local Spark.
@@ -41,6 +45,12 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 
     private final String m_hiveDataFolder;
 
+    private final TimeShiftStrategy m_timeShiftStrategy;
+
+    private ZoneId m_timeShiftZoneId;
+
+    private boolean m_failOnDifferentClusterTimeZone;
+
     /**
      * Constructor.
      * 
@@ -50,6 +60,9 @@ public class LocalSparkContextConfig implements SparkContextConfig {
      * @param deleteObjectsOnDispose Whether to delete named objects on dispose.
      * @param useCustomSparkSettings Whether to inject the given custom Spark settings into SparkConf.
      * @param customSparkSettings Key-value pairs of custom settings to inject into SparkConf.
+     * @param timeShiftStrategy Time shift strategy to use in converter between KNIME and Spark
+     * @param timeShiftZoneId optional time shift zone ID, might by {@code null}
+     * @param failOnDifferentClusterTimeZone if context creation should fail on different time zone
      * @param enableHiveSupport Whether to provide HiveQL (or just SparkSQL).
      * @param startThriftserver Whether to start Spark Thriftserver or not.
      * @param thriftserverPort The TCP port on which Spark Thriftserver shall listen for JDBC connections. May be -1,
@@ -64,6 +77,9 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         final boolean deleteObjectsOnDispose, 
         final boolean useCustomSparkSettings, 
         final Map<String, String> customSparkSettings,
+        final TimeShiftStrategy timeShiftStrategy,
+        final ZoneId timeShiftZoneId,
+        boolean failOnDifferentClusterTimeZone,
         final boolean enableHiveSupport,
         final boolean startThriftserver, 
         final int thriftserverPort,
@@ -86,6 +102,14 @@ public class LocalSparkContextConfig implements SparkContextConfig {
             throw new IllegalArgumentException("Can't override spark settings with empty settings");
         }
 
+        if (timeShiftStrategy == null) {
+            throw new IllegalArgumentException("Time shift strategy requiered.");
+        }
+
+        if (timeShiftStrategy == TimeShiftStrategy.FIXED && timeShiftZoneId == null) {
+            throw new IllegalArgumentException("Time zone required with fixed time shift strategy.");
+        }
+
         if (useHiveDataFolder && (hiveDataFolder == null || hiveDataFolder.isEmpty())) {
             throw new IllegalArgumentException("Name of persistent Hive folder must not be empty.");
         }
@@ -97,6 +121,9 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         m_deleteObjectsOnDispose = deleteObjectsOnDispose;
         m_useCustomSparkSettings = useCustomSparkSettings;
         m_customSparkSettings = customSparkSettings;
+        m_timeShiftStrategy = timeShiftStrategy;
+        m_timeShiftZoneId = timeShiftZoneId;
+        m_failOnDifferentClusterTimeZone = failOnDifferentClusterTimeZone;
 
         // Hive
         m_enableHiveSupport = enableHiveSupport;
@@ -152,7 +179,74 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     public Map<String, String> getCustomSparkSettings() {
         return m_customSparkSettings;
     }
-    
+
+    /**
+     * Add context specific settings like custom spark settings and time shift settings to given spark settings.
+     *
+     * @param sparkConf Spark settings to add context settings
+     */
+    public void addSparkSettings(final Map<String, String> sparkConf) {
+        if (m_timeShiftStrategy == TimeShiftStrategy.FIXED) {
+            sparkConf.put("spark.sql.session.timeZone", m_timeShiftZoneId.getId());
+        } else if (m_timeShiftStrategy == TimeShiftStrategy.DEFAULT_CLIENT) {
+            sparkConf.put("spark.sql.session.timeZone", ZoneId.systemDefault().toString());
+        }
+
+        if (m_useCustomSparkSettings) {
+            sparkConf.putAll(m_customSparkSettings);
+        }
+    }
+
+    /**
+     * @return the time shift strategy to use
+     */
+    protected TimeShiftStrategy getTimeShiftStrategy() {
+        return m_timeShiftStrategy;
+    }
+
+
+    /**
+     * @return Time shift ZoneId in {@link TimeShiftStrategy#FIXED} or  {@link TimeShiftStrategy#DEFAULT_CLIENT} mode.
+     * @throws KNIMESparkException on other time shift strategy
+     */
+    protected ZoneId getTimeShiftZone() throws KNIMESparkException{
+        if (m_timeShiftStrategy == TimeShiftStrategy.FIXED) {
+            return m_timeShiftZoneId;
+        } else if (m_timeShiftStrategy == TimeShiftStrategy.DEFAULT_CLIENT ) {
+            return ZoneId.systemDefault();
+        } else {
+            throw new KNIMESparkException(
+                "Unsupported time zone parameter on " + m_timeShiftStrategy + " time shift strategy.");
+        }
+    }
+
+    /**
+     * Creates the context specific converter parameters.
+     *
+     * @return converter parameters
+     * @throws KNIMESparkException on unknown time shift strategy
+     */
+    protected KNIMEToIntermediateConverterParameter getConverterParameter() throws KNIMESparkException {
+        switch (m_timeShiftStrategy) {
+            case NONE:
+                return KNIMEToIntermediateConverterParameter.DEFAULT;
+            case FIXED:
+                return new KNIMEToIntermediateConverterParameter(m_timeShiftZoneId);
+            case DEFAULT_CLIENT:
+            case DEFAULT_CLUSTER:
+                return new KNIMEToIntermediateConverterParameter(ZoneId.systemDefault());
+            default:
+                throw new KNIMESparkException("Unsuported time shift settings.");
+        }
+    }
+
+    /**
+     * @return {@code true} if context creation should fail on different cluster time zone
+     */
+    public boolean failOnDifferentClusterTimeZone() {
+        return m_failOnDifferentClusterTimeZone;
+    }
+
 	/**
 	 * @return true, if HiveQL support should be enabled in Spark, false
 	 *         otherwise.
@@ -218,6 +312,9 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 		result = prime * result + ((m_sparkVersion == null) ? 0 : m_sparkVersion.hashCode());
 		result = prime * result + (m_startThriftserver ? 1231 : 1237);
         result = prime * result + m_thriftserverPort;
+        result = prime * result + ((m_timeShiftStrategy == null) ? 0 : m_timeShiftStrategy.hashCode());
+        result = prime * result + ((m_timeShiftZoneId == null) ? 0 : m_timeShiftZoneId.hashCode());
+        result = prime * result + (m_failOnDifferentClusterTimeZone ? 1231 : 1237);
 		result = prime * result + (m_useCustomSparkSettings ? 1231 : 1237);
 		result = prime * result + (m_useHiveDataFolder ? 1231 : 1237);
 		return result;
@@ -264,6 +361,18 @@ public class LocalSparkContextConfig implements SparkContextConfig {
             return false;
 		if (m_useCustomSparkSettings != other.m_useCustomSparkSettings)
 			return false;
+		if (m_failOnDifferentClusterTimeZone != other.m_failOnDifferentClusterTimeZone)
+		    return false;
+        if (m_timeShiftStrategy != other.m_timeShiftStrategy) {
+            return false;
+        }
+        if (m_timeShiftZoneId == null) {
+            if (other.m_timeShiftZoneId != null) {
+                return false;
+            }
+        } else if (!m_timeShiftZoneId.equals(other.m_timeShiftZoneId)) {
+            return false;
+        }
 		if (m_useHiveDataFolder != other.m_useHiveDataFolder)
 			return false;
 		return true;

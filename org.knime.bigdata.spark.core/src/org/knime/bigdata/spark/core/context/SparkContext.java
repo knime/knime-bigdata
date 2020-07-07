@@ -34,6 +34,7 @@ import org.knime.bigdata.spark.core.job.JobRun;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
@@ -354,6 +355,11 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         }
         return m_config.getSparkVersion();
     }
+
+    /**
+     * @return Context specific converter parameter
+     */
+    public abstract KNIMEToIntermediateConverterParameter getConverterPrameter();
 
     /**
      * This method is invoked to while trying to run Spark jobs. Subclasses must provide an implementation of the the

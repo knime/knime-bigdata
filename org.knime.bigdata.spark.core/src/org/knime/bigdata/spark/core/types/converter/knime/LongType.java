@@ -44,11 +44,14 @@ public class LongType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
+    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (intermediateTypeObject instanceof Number) {
             Number val = (Number) intermediateTypeObject;
             return new LongCell(val.longValue());
         }
+
         throw incompatibleSerializableException(intermediateTypeObject);
     }
 
@@ -56,10 +59,13 @@ public class LongType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected Serializable convertNoneMissingCell(final DataCell cell) {
+    protected Serializable convertNoneMissingCell(final DataCell cell,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (cell instanceof LongValue) {
             return ((LongValue)cell).getLongValue();
         }
+
         throw incompatibleCellException(cell);
     }
 }

@@ -24,6 +24,7 @@ import org.dmg.pmml.DATATYPE;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.base.node.preproc.pmml.missingval.PMMLApplyMissingCellHandler;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.core.data.DataCell;
@@ -79,8 +80,11 @@ public class PMMLApplyMissingValueHandler extends SparkMissingValueHandler {
     }
 
     @Override
-    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) throws InvalidSettingsException {
-        return SparkMissingValueJobInput.createFixedValueConfig(converter.convert(getKnimeDataCell()));
+    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter,
+        final KNIMEToIntermediateConverterParameter converterParameter) throws InvalidSettingsException {
+
+        return SparkMissingValueJobInput
+            .createFixedValueConfig(converter.convert(getKnimeDataCell(), converterParameter));
     }
 
     @Override

@@ -4,6 +4,7 @@
 package org.knime.bigdata.spark.local;
 
 import java.net.URI;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
+import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -113,6 +115,9 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
             TestflowVariable.isTrue(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
         final Map<String, String> customSparkSettings = SparkPreferenceValidator
             .parseSettingsString(TestflowVariable.getString(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables));
+        final TimeShiftStrategy timeShiftStrategy = TimeShiftStrategy.NONE;
+        final ZoneId timeShiftZoneId = null;
+        final boolean failOnDifferentTimeZone = false;
         boolean enableHiveSupport = TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT,
             SQLSupport.HIVEQL_WITH_JDBC.getActionCommand(), flowVariables)
             || TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT,
@@ -127,7 +132,7 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
             TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
 
         return new LocalSparkContextConfig(contextID, contextName, numberOfThreads, deleteObjectsOnDispose,
-            useCustomSparkSettings, customSparkSettings, enableHiveSupport, startThriftserver, thriftserverPort,
-            useHiveDataFolder, hiveDataFolder);
+            useCustomSparkSettings, customSparkSettings, timeShiftStrategy, timeShiftZoneId, failOnDifferentTimeZone,
+            enableHiveSupport, startThriftserver, thriftserverPort, useHiveDataFolder, hiveDataFolder);
     }
 }

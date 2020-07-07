@@ -69,17 +69,19 @@ public interface KNIMEToIntermediateConverter extends TypeConverter {
      * {@link #getSupportedIntermediateDataTypes()}) to value from the KNIME data type.
      *
      * @param intermediateTypeObject a value from one of the intermediate type domains. May be null.
+     * @param parameter Context specific converter parameter.
      * @return corresponding KNIME {@link DataCell} of type {@link #getKNIMEDataType()} or
      *         {@link DataType#getMissingCell()} if the object is <code>null</code>
      */
-    public DataCell convert(Serializable intermediateTypeObject);
+    public DataCell convert(Serializable intermediateTypeObject, KNIMEToIntermediateConverterParameter parameter);
 
     /**
      * Converts a value from the KNIME type domain (see {@link #getKNIMEDataType()}) to value from the intermediate type
      * domain (see {@link #getIntermediateDataType()}).
      *
      * @param cell A KNIME {@link DataCell} to convert.
+     * @param parameter Context specific converter parameter.
      * @return the corresponding value from the intermediate type domain (see {@link #getIntermediateDataType()})
      */
-    public Serializable convert(DataCell cell);
+    public Serializable convert(DataCell cell, KNIMEToIntermediateConverterParameter parameter);
 }

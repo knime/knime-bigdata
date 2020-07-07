@@ -46,6 +46,7 @@ import org.knime.bigdata.spark.core.livy.LivySparkContextProvider;
 import org.knime.bigdata.spark.core.livy.node.create.LivySparkContextCreatorNodeSettings.ExecutorAllocation;
 import org.knime.bigdata.spark.core.livy.node.create.ui.DialogComponentKeyValueEdit;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.util.context.create.TimeDialogPanel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -126,6 +127,8 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     private final DialogComponentNumber m_jobCheckFrequency = new DialogComponentNumber(
         m_settings.getJobCheckFrequencyModel(), "Job status polling interval (seconds): ", 1, 3);
 
+    private final TimeDialogPanel m_timeShift = new TimeDialogPanel(m_settings.getTimeShiftSettings());
+
     private final List<DialogComponent> m_dialogComponents = new ArrayList<>();
 
     /**
@@ -134,6 +137,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     LivySparkContextCreatorNodeDialog() {
         addTab("General", createGeneralTab());
         addTab("Advanced", createAdvancedTab());
+        addTab("Time", m_timeShift);
     }
 
     private JPanel createAdvancedTab() {

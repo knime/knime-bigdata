@@ -8,6 +8,8 @@
 <br/>
 <strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
 <br/>
+<strong>Time shift: </strong>&nbsp;&nbsp;<tt>${time_shift}</tt>
+<br/>
 <br/>
 <strong>Context settings</strong>
 <hr/>

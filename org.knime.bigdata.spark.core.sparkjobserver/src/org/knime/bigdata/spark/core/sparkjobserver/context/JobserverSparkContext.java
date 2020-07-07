@@ -51,6 +51,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.request.GetContextsRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.GetJarsRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.UploadFileRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -380,5 +381,10 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
             buf.append("\n");
         }
         return buf.toString();
+    }
+
+    @Override
+    public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
+        return KNIMEToIntermediateConverterParameter.DEFAULT;
     }
 }

@@ -29,6 +29,7 @@ import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
@@ -167,13 +168,15 @@ public final class SparkDataTableUtil {
         final DataTableSpec spec = getTransferredSparkDataTableSpec(sparkDataTabe.getTableSpec());
         final KNIMEToIntermediateConverter[] converter =
             KNIMEToIntermediateConverterRegistry.getConverters(spec);
+        final KNIMEToIntermediateConverterParameter converterParameter =
+            SparkContextUtil.getConverterParameter(sparkDataTabe.getContextID());
         final DataCell[][] rows = new DataCell[intermediateTypeRows.size()][spec.getNumColumns()];
 
         int rowIndex = 0;
         for (List<Serializable> row : intermediateTypeRows) {
             int columnIndex = 0;
             for (Serializable cellValue : row) {
-                rows[rowIndex][columnIndex] = converter[columnIndex].convert(cellValue);
+                rows[rowIndex][columnIndex] = converter[columnIndex].convert(cellValue, converterParameter);
                 columnIndex++;
             }
             rowIndex++;

@@ -35,6 +35,7 @@ import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -77,10 +78,11 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
      * {@inheritDoc}
      */
     @Override
-    public void runWithRowInput(final RowInput rowInput, final ExecutionContext exec) throws FileNotFoundException,
-        IOException, InterruptedException, CanceledExecutionException, KNIMESparkException {
+    public void runWithRowInput(final RowInput rowInput, final ExecutionContext exec,
+        final KNIMEToIntermediateConverterParameter converterParameter) throws FileNotFoundException, IOException,
+        InterruptedException, CanceledExecutionException, KNIMESparkException {
 
-        super.runWithRowInput(rowInput, exec);
+        super.runWithRowInput(rowInput, exec, converterParameter);
 
         // addendum to the default runWithRowInput() method because we need to execute a Spark job now to upload the data
         executeSparkJob(exec, rowInput.getDataTableSpec());

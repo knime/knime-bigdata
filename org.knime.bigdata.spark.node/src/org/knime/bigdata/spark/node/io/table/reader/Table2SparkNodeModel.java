@@ -24,10 +24,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.node.SparkNodePlugin;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -109,9 +111,11 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         //Check that the context is available before doing all the work
         final SparkContextID contextID = getContextID(inData);
         final BufferedDataTable inputTable = (BufferedDataTable)inData[0];
+        final KNIMEToIntermediateConverterParameter converterParameter =
+            SparkContextUtil.getConverterParameter(contextID);
 
         final AbstractTable2SparkStreamableOperator streamableOp = createStreamableOperatorInternal(contextID);
-        streamableOp.runWithRowInput(new DataTableRowInput(inputTable), exec);
+        streamableOp.runWithRowInput(new DataTableRowInput(inputTable), exec, converterParameter);
 
         // if you change the spec behavior, you also need to change the behavior in the streamable operator implementation and in configureInternal()
         return new PortObject[]{new SparkDataPortObject(

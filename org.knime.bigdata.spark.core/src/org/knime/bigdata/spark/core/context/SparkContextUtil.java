@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
 import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -96,5 +97,13 @@ public class SparkContextUtil {
      */
     public static SparkVersion getSparkVersion(final SparkContextID contextID) {
         return SparkContextManager.getOrCreateSparkContext(contextID).getSparkVersion();
+    }
+
+    /**
+     * @param contextID the unique {@link SparkContextID}
+     * @return the {@link KNIMEToIntermediateConverterParameter} for the given context
+     */
+    public static KNIMEToIntermediateConverterParameter getConverterParameter(final SparkContextID contextID) {
+        return SparkContextManager.getOrCreateSparkContext(contextID).getConverterPrameter();
     }
 }

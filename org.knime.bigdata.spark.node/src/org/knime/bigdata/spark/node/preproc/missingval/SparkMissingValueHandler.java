@@ -26,6 +26,7 @@ import org.knime.base.data.statistics.Statistic;
 import org.knime.base.node.preproc.pmml.missingval.DataColumnWindow;
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandler;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -70,10 +71,12 @@ public abstract class SparkMissingValueHandler extends MissingCellHandler {
      * Creates a column configuration to be used with {@link SparkMissingValueJobInput}.
      *
      * @param converter The {@link KNIMEToIntermediateConverter} to use for this column.
+     * @param converterParameter The {@link KNIMEToIntermediateConverterParameter} to use for this column.
      * @return the column configuration.
      * @throws InvalidSettingsException if the job contains invalid configurations
      */
-    public abstract Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) throws InvalidSettingsException;
+    public abstract Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter,
+        final KNIMEToIntermediateConverterParameter converterParameter) throws InvalidSettingsException;
 
     /**
      * Creates a derived field for the documentation of the operation in PMML.

@@ -43,6 +43,7 @@ import org.knime.bigdata.spark.core.livy.node.create.ui.SettingsModelKeyValue;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.util.context.create.TimeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -182,6 +183,8 @@ public class LivySparkContextCreatorNodeSettings {
         // blacklisted because they only pertain to yarn-client or Mesos deploy modes, which Livy does not support
         "spark.yarn.am.memory", "spark.yarn.am.cores", "spark.yarn.am.memoryOverhead", "spark.yarn.am.extraJavaOptions",
         "spark.yarn.am.extraLibraryPath"));
+    
+    private final TimeSettings m_timeShiftSettings = new TimeSettings();
 
     /**
      * Constructor.
@@ -214,6 +217,7 @@ public class LivySparkContextCreatorNodeSettings {
         m_driverResources.updateEnabledness();
         m_customSparkSettings.setEnabled(m_overrideSparkSettings.getBooleanValue());
         m_stagingAreaFolder.setEnabled(m_setStagingAreaFolder.getBooleanValue());
+        m_timeShiftSettings.updateEnabledness();
     }
 
     /**
@@ -495,6 +499,13 @@ public class LivySparkContextCreatorNodeSettings {
     }
 
     /**
+     * @return the time shift settings model
+     */
+    public TimeSettings getTimeShiftSettings() {
+        return m_timeShiftSettings;
+    }
+
+    /**
      * Saves the the settings of this instance to the given {@link NodeSettingsWO}.
      * 
      * @param settings the NodeSettingsWO to write to.
@@ -521,6 +532,8 @@ public class LivySparkContextCreatorNodeSettings {
         m_connectTimeout.saveSettingsTo(settings);
         m_responseTimeout.saveSettingsTo(settings);
         m_jobCheckFrequency.saveSettingsTo(settings);
+
+        m_timeShiftSettings.saveSettingsTo(settings.addNodeSettings("timeshift"));
     }
 
     /**
@@ -555,6 +568,10 @@ public class LivySparkContextCreatorNodeSettings {
         m_connectTimeout.validateSettings(settings);
         m_responseTimeout.validateSettings(settings);
         m_jobCheckFrequency.validateSettings(settings);
+
+        if (settings.containsKey("timeshift")) { // added in 4.2
+            m_timeShiftSettings.validateSettings(settings.getNodeSettings("timeshift"));
+        }
 
         final LivySparkContextCreatorNodeSettings tmpSettings = new LivySparkContextCreatorNodeSettings();
         tmpSettings.loadSettingsFrom(settings);
@@ -619,6 +636,11 @@ public class LivySparkContextCreatorNodeSettings {
         m_connectTimeout.loadSettingsFrom(settings);
         m_responseTimeout.loadSettingsFrom(settings);
         m_jobCheckFrequency.loadSettingsFrom(settings);
+
+        if (settings.containsKey("timeshift")) { // added in 4.2
+            m_timeShiftSettings.loadSettingsFrom(settings.getNodeSettings("timeshift"));
+        }
+
         updateEnabledness();
     }
 
@@ -646,11 +668,14 @@ public class LivySparkContextCreatorNodeSettings {
 
         return new LivySparkContextConfig(getSparkVersion(), livyUrl, getAuthenticationType(),
             (isStagingAreaFolderSet()) ? getStagingAreaFolder() : null, getConnectTimeout(), getResponseTimeout(),
-            getJobCheckFrequency(), sparkSettings, contextId, connInfo);
+            getJobCheckFrequency(), sparkSettings, contextId, connInfo, m_timeShiftSettings.getTimeShiftStrategy(),
+            m_timeShiftSettings.getFixedTimeZoneId(), m_timeShiftSettings.failOnDifferentClusterTZ());
     }
 
     private Map<String, String> generateSparkSettings() {
         final Map<String, String> toReturn = new HashMap<>();
+
+        m_timeShiftSettings.addSparkSettings(toReturn);
 
         if (useCustomSparkSettings()) {
             toReturn.putAll(getCustomSparkSettings());

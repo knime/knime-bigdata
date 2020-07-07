@@ -68,6 +68,7 @@ import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksStagingAreaTeste
 import org.knime.bigdata.spark.core.exception.InvalidJobJarException;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.core.node.CanceledExecutionException;
@@ -425,5 +426,10 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
      */
     public DatabricksClusterStatusProvider getClusterStatusHandler() {
         return new DatabricksClusterStatusProvider(m_databricksClient);
+    }
+
+    @Override
+    public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
+        return KNIMEToIntermediateConverterParameter.DEFAULT;
     }
 }

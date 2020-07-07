@@ -44,7 +44,8 @@ public class StringType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
+    protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject,
+        final KNIMEToIntermediateConverterParameter parameter) {
         return new StringCell(intermediateTypeObject.toString());
     }
 
@@ -52,10 +53,13 @@ public class StringType extends AbstractKNIMEToIntermediateConverter {
      * {@inheritDoc}
      */
     @Override
-    protected Serializable convertNoneMissingCell(final DataCell cell) {
+    protected Serializable convertNoneMissingCell(final DataCell cell,
+        final KNIMEToIntermediateConverterParameter parameter) {
+
         if (cell instanceof StringValue) {
             return ((StringValue)cell).getStringValue();
         }
+
         //this converter should work with all data types since it is the default converter
         return cell.toString();
     }
