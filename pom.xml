@@ -54,6 +54,7 @@
 		<module>org.knime.bigdata.spark2_4</module>
 		<module>org.knime.bigdata.testing</module>
 		<module>org.knime.features.bigdata.connectors</module>
+		<module>org.knime.features.bigdata.commons</module>
 		<module>org.knime.features.bigdata.commons.windows</module>
 		<module>org.knime.features.bigdata.databricks</module>
 		<module>org.knime.features.bigdata.fileformats</module>

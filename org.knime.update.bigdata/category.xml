@@ -3,6 +3,9 @@
    <feature id="org.knime.features.bigdata.connectors" >
           <category name="knime-bigdata" />
    </feature>
+   <feature id="org.knime.features.bigdata.commons" >
+          <category name="knime-bigdata" />
+   </feature>
    <feature id="org.knime.features.bigdata.commons.windows" >
           <category name="knime-bigdata" />
    </feature>
@@ -19,6 +22,9 @@
           <category name="knime-bigdata" />
    </feature>
    <feature id="org.knime.features.bigdata.connectors.source" >
+          <category name="knime-bigdata" />
+   </feature>
+   <feature id="org.knime.features.bigdata.commons.source" >
           <category name="knime-bigdata" />
    </feature>
    <feature id="org.knime.features.bigdata.commons.windows.source" >

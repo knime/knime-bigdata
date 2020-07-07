@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.knime.features.bigdata.spark.local"
-      label="KNIME Extension for Local Big Data Environments"
+      id="org.knime.features.bigdata.commons"
+      label="KNIME Extension for Big Data Commons"
       version="4.2.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME node to create a completely local big data environment
-with Apache Spark, Apache Hive and Apache HDFS.
+     Features require by Big Data Commons extension.
    </description>
 
    <copyright>
@@ -729,11 +728,11 @@ propagated with or for interoperation with KNIME.
    </license>
 
    <includes
-         id="org.knime.features.bigdata.spark"
+         id="org.knime.features.bigdata.commons.windows"
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark.local"
+         id="org.knime.bigdata.commons"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

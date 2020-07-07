@@ -20,16 +20,16 @@
  */
 package org.knime.bigdata.commons.hadoop;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.util.FileUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -88,7 +88,7 @@ public class HadoopInitializer {
      * @throws IOException
      */
     private static String createHadoopHome() throws IOException {
-        final Path tmpHadoopDir = Files.createTempDirectory("hadoop_home_");
+        final Path tmpHadoopDir = FileUtil.createTempDir("hadoop_home_").toPath();
         final Path tmpHadoopBinDir = Files.createDirectories(tmpHadoopDir.resolve("bin"));
         final Bundle bundle = FrameworkUtil.getBundle(HadoopInitializer.class);
 
@@ -97,11 +97,8 @@ public class HadoopInitializer {
                 .resolve(FileLocator.find(bundle, new org.eclipse.core.runtime.Path("hadoop_home/bin/" + filename)));
 
             if (localUrl != null) {
-                try {
-                    Files.copy(Paths.get(localUrl.toURI()), tmpHadoopBinDir.resolve(filename));
-                } catch (URISyntaxException e) {
-                    throw new IOException(e);
-                }
+                final Path localPath = new File(localUrl.getPath()).toPath();
+                Files.copy(localPath, tmpHadoopBinDir.resolve(filename));
             } else {
                 LOG.warn(String.format("Unable to find '%s' at hadoop home creation.", filename));
             }

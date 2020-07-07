@@ -732,10 +732,6 @@ propagated with or for interoperation with KNIME.
          id="org.knime.features.bigdata.spark"
          version="0.0.0"/>
 
-   <includes
-         id="org.knime.features.bigdata.connectors"
-         version="0.0.0"/>
-
    <plugin
          id="org.knime.bigdata.databricks"
          download-size="0"
