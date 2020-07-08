@@ -28,6 +28,7 @@ import java.nio.file.Path;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
+import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
 import org.osgi.framework.Bundle;
@@ -88,7 +89,8 @@ public class HadoopInitializer {
      * @throws IOException
      */
     private static String createHadoopHome() throws IOException {
-        final Path tmpHadoopDir = FileUtil.createTempDir("hadoop_home_").toPath();
+        final File globalTmpDir = KNIMEConstants.getKNIMETempPath().toFile();
+        final Path tmpHadoopDir = FileUtil.createTempDir("hadoop_home_", globalTmpDir).toPath();
         final Path tmpHadoopBinDir = Files.createDirectories(tmpHadoopDir.resolve("bin"));
         final Bundle bundle = FrameworkUtil.getBundle(HadoopInitializer.class);
 
