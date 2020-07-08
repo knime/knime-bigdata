@@ -68,7 +68,18 @@ public class UserGroupUtil {
             UserGroupInformation.setConfiguration(ConfigurationFactory.createBaseConfigurationWithSimpleAuth());
         }
         UserGroupInformation
-            .setLoginUser(UserGroupInformation.createRemoteUser(System.getProperty("user.name", "knime")));
+            .setLoginUser(UserGroupInformation.createRemoteUser(getOSUserName()));
+    }
+
+    private static String getOSUserName() {
+        String osUserName = System.getProperty("user.name");
+
+        // in the build system this System.getProperty("user.name") strangely returns an empty string.
+        if (osUserName == null || osUserName.isEmpty()) {
+            osUserName = "knime";
+        }
+
+        return osUserName;
     }
 
     private static void ensureSecureHadoopConfiguration() {
