@@ -12,7 +12,6 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
-import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 
 /**
@@ -201,14 +200,12 @@ public class LivySparkContextConfig implements SparkContextConfig {
     }
 
     /**
-     * @return Time shift ZoneId in {@link TimeShiftStrategy#FIXED} or  {@link TimeShiftStrategy#DEFAULT_CLIENT} mode.
+     * @return Time shift ZoneId in {@link TimeShiftStrategy#FIXED} mode.
      * @throws KNIMESparkException on other time shift strategy
      */
     protected ZoneId getTimeShiftZone() throws KNIMESparkException{
         if (m_timeShiftStrategy == TimeShiftStrategy.FIXED) {
             return m_timeShiftZoneId;
-        } else if (m_timeShiftStrategy == TimeShiftStrategy.DEFAULT_CLIENT ) {
-            return ZoneId.systemDefault();
         } else {
             throw new KNIMESparkException(
                 "Unsupported time zone parameter on " + m_timeShiftStrategy + " time shift strategy.");
@@ -231,8 +228,6 @@ public class LivySparkContextConfig implements SparkContextConfig {
                 return KNIMEToIntermediateConverterParameter.DEFAULT;
             case FIXED:
                 return new KNIMEToIntermediateConverterParameter(m_timeShiftZoneId);
-            case DEFAULT_CLIENT:
-                return new KNIMEToIntermediateConverterParameter(ZoneId.systemDefault());
             case DEFAULT_CLUSTER:
                 if (sparkConf.containsKey("spark.sql.session.timeZone")) {
                     return new KNIMEToIntermediateConverterParameter(

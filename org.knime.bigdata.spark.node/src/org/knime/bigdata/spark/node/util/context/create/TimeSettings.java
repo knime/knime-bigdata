@@ -35,11 +35,6 @@ public class TimeSettings {
             FIXED,
 
             /**
-             * Use default time zone from JVM running KNIME.
-             */
-            DEFAULT_CLIENT,
-
-            /**
              * Use default time zone from JVM running Spark driver.
              */
             DEFAULT_CLUSTER;
@@ -48,15 +43,13 @@ public class TimeSettings {
         public String getText() {
             switch (this) {
                 case NONE:
-                    return "No time shift";
+                    return "Do not set";
                 case FIXED:
-                    return "Fixed:";
-                case DEFAULT_CLIENT:
-                    return "Client: Use default time zone from KNIME (" + ZoneId.systemDefault() + ")";
+                    return "Use fixed time zone:";
                 case DEFAULT_CLUSTER:
-                    return "Cluster: Use default time zone from Spark driver";
+                    return "Use default time zone from Spark cluster";
                 default:
-                    throw new IllegalArgumentException("Unknown allocation strategy: " + toString());
+                    throw new IllegalArgumentException("Unknown time shift strategy: " + toString());
             }
         }
 
@@ -77,16 +70,13 @@ public class TimeSettings {
     }
 
     private final SettingsModelString m_timeShiftStrategy =
-        new SettingsModelString("timeShiftStrategy", TimeShiftStrategy.NONE.getActionCommand());
+        new SettingsModelString("timeShiftStrategy", TimeShiftStrategy.DEFAULT_CLUSTER.getActionCommand());
 
     private final SettingsModelTimeZone m_fixedTimeZone =
         new SettingsModelTimeZone("timeShiftFixedTimeZone", ZoneId.systemDefault());
 
     private final SettingsModelBoolean m_fixedTZFailOnDifferenClusterTZ =
         new SettingsModelBoolean("failOnDifferentFixedVsClusterTimeZone", true);
-
-    private final SettingsModelBoolean m_clientTZFailOnDifferenClusterTZ =
-        new SettingsModelBoolean("failOnDifferentClientVsClusterTimeZone", true);
 
     /**
      * @return the time shift strategy model
@@ -123,12 +113,6 @@ public class TimeSettings {
         return m_fixedTZFailOnDifferenClusterTZ;
     }
 
-    /**
-     * @return the clientTZFailOnDifferenClusterTZ
-     */
-    public SettingsModelBoolean getClientTZFailOnDifferenClusterTZModel() {
-        return m_clientTZFailOnDifferenClusterTZ;
-    }
 
     /**
      * @return {@code true} if the node should fail on a different cluster default time zone
@@ -136,8 +120,6 @@ public class TimeSettings {
     public boolean failOnDifferentClusterTZ() {
         if (getTimeShiftStrategy() == TimeShiftStrategy.FIXED) {
             return m_fixedTZFailOnDifferenClusterTZ.getBooleanValue();
-        } else if (getTimeShiftStrategy() == TimeShiftStrategy.DEFAULT_CLIENT) {
-            return m_clientTZFailOnDifferenClusterTZ.getBooleanValue();
         } else {
             return false;
         }
@@ -152,7 +134,6 @@ public class TimeSettings {
         m_timeShiftStrategy.saveSettingsTo(settings);
         m_fixedTimeZone.saveSettingsTo(settings);
         m_fixedTZFailOnDifferenClusterTZ.saveSettingsTo(settings);
-        m_clientTZFailOnDifferenClusterTZ.saveSettingsTo(settings);
     }
 
     /**
@@ -165,7 +146,6 @@ public class TimeSettings {
         m_timeShiftStrategy.validateSettings(settings);
         m_fixedTimeZone.validateSettings(settings);
         m_fixedTZFailOnDifferenClusterTZ.validateSettings(settings);
-        m_clientTZFailOnDifferenClusterTZ.validateSettings(settings);
     }
 
     /**
@@ -178,7 +158,6 @@ public class TimeSettings {
         m_timeShiftStrategy.loadSettingsFrom(settings);
         m_fixedTimeZone.loadSettingsFrom(settings);
         m_fixedTZFailOnDifferenClusterTZ.loadSettingsFrom(settings);
-        m_clientTZFailOnDifferenClusterTZ.loadSettingsFrom(settings);
     }
 
     /**
@@ -187,7 +166,6 @@ public class TimeSettings {
     public void updateEnabledness() {
         m_fixedTimeZone.setEnabled(getTimeShiftStrategy() == TimeShiftStrategy.FIXED);
         m_fixedTZFailOnDifferenClusterTZ.setEnabled(getTimeShiftStrategy() == TimeShiftStrategy.FIXED);
-        m_clientTZFailOnDifferenClusterTZ.setEnabled(getTimeShiftStrategy() == TimeShiftStrategy.DEFAULT_CLIENT);
     }
 
     /**
@@ -198,9 +176,13 @@ public class TimeSettings {
     public void addSparkSettings(final Map<String, String> settings) {
         if (getTimeShiftStrategy() == TimeShiftStrategy.FIXED) {
             settings.put("spark.sql.session.timeZone", m_fixedTimeZone.getZone().getId());
-        } else if (getTimeShiftStrategy() == TimeShiftStrategy.DEFAULT_CLIENT) {
-            settings.put("spark.sql.session.timeZone", ZoneId.systemDefault().getId());
         }
+    }
+
+    public void loadPreKNIME4_2Default() {
+        // for workflows that were created prior to KNIME 4.2 we will use the NONE timeshift strategy
+        // in order to not change the behavior of existing workflows
+        m_timeShiftStrategy.setStringValue(TimeShiftStrategy.NONE.getActionCommand());
     }
 
 }

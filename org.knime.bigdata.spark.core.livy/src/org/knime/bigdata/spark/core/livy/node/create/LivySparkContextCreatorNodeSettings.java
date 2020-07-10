@@ -639,6 +639,8 @@ public class LivySparkContextCreatorNodeSettings {
 
         if (settings.containsKey("timeshift")) { // added in 4.2
             m_timeShiftSettings.loadSettingsFrom(settings.getNodeSettings("timeshift"));
+        } else {
+            m_timeShiftSettings.loadPreKNIME4_2Default();
         }
 
         updateEnabledness();

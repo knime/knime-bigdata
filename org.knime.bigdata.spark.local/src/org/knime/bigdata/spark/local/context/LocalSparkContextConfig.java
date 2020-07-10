@@ -188,8 +188,6 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     public void addSparkSettings(final Map<String, String> sparkConf) {
         if (m_timeShiftStrategy == TimeShiftStrategy.FIXED) {
             sparkConf.put("spark.sql.session.timeZone", m_timeShiftZoneId.getId());
-        } else if (m_timeShiftStrategy == TimeShiftStrategy.DEFAULT_CLIENT) {
-            sparkConf.put("spark.sql.session.timeZone", ZoneId.systemDefault().toString());
         }
 
         if (m_useCustomSparkSettings) {
@@ -212,8 +210,6 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     protected ZoneId getTimeShiftZone() throws KNIMESparkException{
         if (m_timeShiftStrategy == TimeShiftStrategy.FIXED) {
             return m_timeShiftZoneId;
-        } else if (m_timeShiftStrategy == TimeShiftStrategy.DEFAULT_CLIENT ) {
-            return ZoneId.systemDefault();
         } else {
             throw new KNIMESparkException(
                 "Unsupported time zone parameter on " + m_timeShiftStrategy + " time shift strategy.");
@@ -232,7 +228,6 @@ public class LocalSparkContextConfig implements SparkContextConfig {
                 return KNIMEToIntermediateConverterParameter.DEFAULT;
             case FIXED:
                 return new KNIMEToIntermediateConverterParameter(m_timeShiftZoneId);
-            case DEFAULT_CLIENT:
             case DEFAULT_CLUSTER:
                 return new KNIMEToIntermediateConverterParameter(ZoneId.systemDefault());
             default:

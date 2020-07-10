@@ -134,7 +134,7 @@ public class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements
         panel.add(new DialogComponentBoolean(m_settings.getHideExistsWarningModel(),
                 "Hide warning about an existing local Spark context").getComponentPanel(), c);
 
-        addTab("Local Big Data Environment Settings", panel);
+        addTab("Settings", panel);
 
         m_timeShift = new TimeDialogPanel(m_settings.getTimeShiftSettings());
         addTab("Time", m_timeShift);

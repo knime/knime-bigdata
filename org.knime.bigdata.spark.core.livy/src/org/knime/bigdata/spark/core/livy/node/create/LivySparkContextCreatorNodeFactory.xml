@@ -80,6 +80,32 @@
                 <i>spark.hadoop</i>.
             </option>
         </tab>
+        <tab name="Time">
+            <description>
+                This tab allows to set a time zone that is applied in two cases:
+                <ul>
+                <li>To set the Spark SQL session time zone, which is relevant in Spark SQL, when parsing <i>Strings</i> such as '2020-03-27 08:00:00' into <i>Timestamps</i> (<i>to_timestamp</i>) and vice versa, as well as datetime manipulations.</li>
+                <li>In KNIME, when mapping between Spark <i>Timestamps</i> and the KNIME (legacy) Date and Time type column type. Here, the specified time zone will be used to make the Date and Time value in KNIME equal to what would be displayed when displaying a <i>Timestamp</i> in Spark.</li>
+                </ul>
+            </description>
+
+            <option name="Do not set">
+                Leaves the Spark SQL session time zone unchanged and does <b>not</b> align the display of KNIME (legacy) Date and Time columns.
+            </option>
+            
+            <option name="Use default time zone from Spark cluster">
+                Leaves the Spark SQL session time zone unchanged but aligns the display of KNIME (legacy) Date and Time columns, based on the Spark SQL session timezone. This is the default.
+            </option>
+            
+            <option name="Use fixed time zone">
+                Allows to specify a time zone that will be set as the Spark SQL session time zone. The same time zone and which will be used to align the display of KNIME (legacy) Date and Time columns.
+            </option>
+            
+            <option name="Fail on different cluster default time zone">
+                Allows to specify whether this node should fail, when the cluster-side default time zone is different from the fixed time zone that was specified.
+            </option>
+
+        </tab>
     </fullDescription>
     
     <ports>

@@ -31,8 +31,6 @@ public class TimeDialogPanel extends JPanel {
 
     private final DialogComponentBoolean m_failOnDiffFixedTimeZone;
 
-    private final DialogComponentBoolean m_failOnDiffClientTimeZone;
-
     /**
      * Default constructor.
      *
@@ -51,9 +49,7 @@ public class TimeDialogPanel extends JPanel {
         });
         m_fixedTimeZone = new DialogComponentTimeZoneSelection(settings.getFixedTimeZoneModel(), null, null);
         m_failOnDiffFixedTimeZone = new DialogComponentBoolean(settings.getFixedTZFailOnDifferenClusterTZModel(),
-                "fail on different cluster default time zone");
-        m_failOnDiffClientTimeZone = new DialogComponentBoolean(settings.getClientTZFailOnDifferenClusterTZModel(),
-                "fail on different cluster default time zone");
+                "Fail on different cluster default time zone");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -73,7 +69,7 @@ public class TimeDialogPanel extends JPanel {
 
     private JPanel createTimeShiftPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Time shift between KNIME and Spark"));
+        panel.setBorder(BorderFactory.createTitledBorder("Spark session time zone and Date and Time column alignment"));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -103,16 +99,6 @@ public class TimeDialogPanel extends JPanel {
         gbc.gridy++;
         gbc.insets = new Insets(0, 20, 0, 20);
         panel.add(m_failOnDiffFixedTimeZone.getComponentPanel(), gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.insets = new Insets(5, 20, 0, 20);
-        panel.add(m_timeShiftStrategy.getButton(TimeShiftStrategy.DEFAULT_CLIENT.getActionCommand()), gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.insets = new Insets(0, 20, 0, 20);
-        panel.add(m_failOnDiffClientTimeZone.getComponentPanel(), gbc);
 
         gbc.gridx++;
         gbc.fill = GridBagConstraints.HORIZONTAL;
