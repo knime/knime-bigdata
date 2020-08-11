@@ -80,7 +80,7 @@ public class BigDataFileFormatException extends RuntimeException {
      * @param cause the cause
      */
     public BigDataFileFormatException(Throwable cause) {
-        super(cause.getMessage());
+        super(cause.getMessage(), cause);
     }
 
 }
