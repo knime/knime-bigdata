@@ -397,6 +397,8 @@ public class FlowVariableReader {
             final File env = new File(System.getenv("FLOWVARS"));
             if (env.exists() && env.canRead()) {
                 return env;
+            } else {
+                throw new FileNotFoundException("Unable to locate: " + System.getenv("FLOWVARS"));
             }
         }
 
