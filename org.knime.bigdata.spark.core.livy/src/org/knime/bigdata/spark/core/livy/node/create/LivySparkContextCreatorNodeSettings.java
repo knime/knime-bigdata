@@ -604,6 +604,18 @@ public class LivySparkContextCreatorNodeSettings {
         if (getDynamicExecutorsMax() < getDynamicExecutorsMin()) {
             errors.add("Maximum number of Spark executors to allocate must not be smaller than the minimum.");
         }
+        
+        if (m_authentication.getAuthenticationType() == AuthenticationType.USER || m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
+            if (m_authentication.getUsername() == null || m_authentication.getUsername().trim().isEmpty()) {
+                errors.add("Username must not be empty.");
+            }
+        }
+        
+        if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
+            if (m_authentication.getPassword() == null || m_authentication.getPassword().trim().isEmpty()) {
+                errors.add("Password must not be empty.");
+            }
+        }
 
         if (!errors.isEmpty()) {
             throw new InvalidSettingsException(SparkPreferenceValidator.mergeErrors(errors));

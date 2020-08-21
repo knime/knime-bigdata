@@ -22,8 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
@@ -207,13 +209,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         } else {
             livyHttpConf.setProperty("livy.client.http.spnego.enable", "false");
         }
-        final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
-        if (userToImpersonate.isPresent()) {
-            LOGGER.info(String.format(
-                "Running on KNIME Server. Opening Spark context with proxyUser=%s to impersonate the workflow user",
-                userToImpersonate.get()));
-            livyHttpConf.setProperty("livy.client.http.proxyUser", userToImpersonate.get());
-        }
+
+        setProxyUserIfNecessary(config, livyHttpConf);
 
         // transfer all custom Spark settings
         for (final Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
@@ -231,6 +228,37 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
 
         return livyHttpConf;
+    }
+
+    private static void setProxyUserIfNecessary(final LivySparkContextConfig config, final Properties livyHttpConf) {
+        final String proxyUser;
+
+        switch (config.getAuthenticationType()) {
+            case KERBEROS:
+                proxyUser = CommonConfigContainer.getInstance().getUserToImpersonate().orElse(null);
+                break;
+            case USER:
+                proxyUser = extractUserFromLivyUrl(config);
+                break;
+            default:
+                proxyUser = null;
+                break;
+        }
+
+        if (proxyUser != null) {
+            LOGGER.info(String.format("Opening Spark context with proxyUser=%s", proxyUser));
+            livyHttpConf.setProperty("livy.client.http.proxyUser", proxyUser);
+        }
+    }
+
+    private static String extractUserFromLivyUrl(final LivySparkContextConfig config) {
+        final String urlUserInfo;
+        try {
+            urlUserInfo = new URL(config.getLivyUrlWithAuthentication()).getUserInfo();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid URL: " + config.getLivyUrlWithAuthentication(), e);
+        }
+        return urlUserInfo.split(":")[0];
     }
 
     private static LivyClient buildLivyClient(final Properties livyHttpConf, final String livyUrl)

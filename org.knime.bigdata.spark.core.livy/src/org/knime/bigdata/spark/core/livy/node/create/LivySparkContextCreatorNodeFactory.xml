@@ -27,15 +27,15 @@
             <option name="Livy URL">
                 The URL of Livy including protocol and port e.g. http://localhost:8998.
             </option>
-            <option name="Auhtentication">
+            <option name="Authentication">
                 Select
                 <ul>
 		            <li><i>None</i>, if Livy does not require any credentials.</li>
-		            <li><i>Credentials</i>, if Livy uses HTTP basic based authentication and a credentials variable
-		            should be used to determine username and password.</li>
-		            <li><i>Username</i>, if Livy uses HTTP basic based authentication without a password.</li>
-		            <li><i>Username &amp; password</i>, if Livy uses HTTP basic based authentication.</li>
-		            <li><i>Kerberos</i>, if Livy uses Kerberos based authentication.</li>
+		            <li><i>Credentials</i>, if Livy requires HTTP "Basic" authentication and a credentials variable
+		           should be used to determine username and password.</li>
+		            <li><i>Username</i>, if Livy does not require authentication, but the Spark context should run as a particular user.</li>
+		            <li><i>Username &amp; password</i>, if Livy requires HTTP "Basic" authentication.</li>
+		            <li><i>Kerberos</i>, if Livy requires Kerberos authentication.</li>
 		        </ul>
             </option>
             <option name="Spark executor resources">
