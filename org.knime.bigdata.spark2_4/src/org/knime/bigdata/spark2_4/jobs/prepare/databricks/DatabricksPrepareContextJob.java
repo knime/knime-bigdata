@@ -34,6 +34,7 @@ import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksStagingAreaTeste
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark2_4.api.DistributedFileUtils;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
 import org.knime.bigdata.spark2_4.api.SparkJob;
 import org.knime.bigdata.spark2_4.api.TypeConverters;
@@ -55,6 +56,8 @@ public class DatabricksPrepareContextJob implements SparkJob<DatabricksPrepareCo
     @Override
     public DatabricksPrepareContextJobOutput runJob(final SparkContext sparkContext, final DatabricksPrepareContextJobInput input,
         final NamedObjects namedObjects) throws Exception {
+
+        DistributedFileUtils.ensureInitialized(DatabricksSparkSideStagingArea.SINGLETON_INSTANCE);
 
         sparkContext.addSparkListener(new KNIMEDatabricksSparkListener());
 

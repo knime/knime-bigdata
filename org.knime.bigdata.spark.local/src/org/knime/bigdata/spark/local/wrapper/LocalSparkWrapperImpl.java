@@ -38,6 +38,7 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.WrapperJobOutput;
+import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
@@ -314,6 +315,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.master(String.format("local[%d]", workerThreads))
 				.config("spark.knime.knosp.localBigDataEnv", "true")
 				.config("spark.knime.pythonpath", pythonPath)
+				.config(SparkDistributedTempProvider.DISTRIBUTED_TMP_DIR_KEY, m_sparkTmpDir.toURI().toString())
 				.config("spark.logConf", "true")
 				.config("spark.kryo.unsafe", "true")
 				.config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")

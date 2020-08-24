@@ -43,6 +43,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils.StagingAreaAccess;
+import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 
 /**
  * Spark-side utility class to access to staging area.
@@ -50,7 +51,7 @@ import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils.Stagin
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
-public class SparkSideStagingArea implements StagingAreaAccess {
+public class SparkSideStagingArea implements StagingAreaAccess, SparkDistributedTempProvider {
     
     public static final SparkSideStagingArea SINGLETON_INSTANCE = new SparkSideStagingArea();
     
@@ -211,4 +212,8 @@ public class SparkSideStagingArea implements StagingAreaAccess {
         }
     }
 
+    @Override
+    public URI getDistributedTempDirURI() {
+        return stagingAreaURI;
+    }
 }

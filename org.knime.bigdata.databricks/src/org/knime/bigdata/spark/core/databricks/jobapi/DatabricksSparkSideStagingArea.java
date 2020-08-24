@@ -43,6 +43,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksJobSerializationUtils.StagingAreaAccess;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 
 /**
  * Spark-side utility class to access to staging area.
@@ -50,7 +51,7 @@ import org.knime.bigdata.spark.core.job.SparkClass;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
-public class DatabricksSparkSideStagingArea implements StagingAreaAccess {
+public class DatabricksSparkSideStagingArea implements StagingAreaAccess, SparkDistributedTempProvider {
 
     public static final DatabricksSparkSideStagingArea SINGLETON_INSTANCE = new DatabricksSparkSideStagingArea();
 
@@ -223,5 +224,10 @@ public class DatabricksSparkSideStagingArea implements StagingAreaAccess {
         for (java.nio.file.Path fileToDelete : filesToDelete) {
             Files.deleteIfExists(fileToDelete);
         }
+    }
+
+    @Override
+    public URI getDistributedTempDirURI() {
+        return stagingAreaURI;
     }
 }

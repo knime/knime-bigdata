@@ -42,6 +42,7 @@ import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.SparkSideStagingArea;
 import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaTester;
+import org.knime.bigdata.spark2_3.api.DistributedFileUtils;
 import org.knime.bigdata.spark2_3.api.NamedObjects;
 import org.knime.bigdata.spark2_3.api.SparkJob;
 import org.knime.bigdata.spark2_3.api.TypeConverters;
@@ -69,6 +70,7 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
 
         SparkSideStagingArea.ensureInitialized(input.getStagingArea(), input.stagingAreaIsPath(),
             determineSparkLocalDir(sparkContext), sparkContext.hadoopConfiguration());
+        DistributedFileUtils.ensureInitialized(SparkSideStagingArea.SINGLETON_INSTANCE);
 
         sparkContext.addSparkListener(new KNIMELivySparkListener());
 
