@@ -252,13 +252,15 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     }
 
     private static String extractUserFromLivyUrl(final LivySparkContextConfig config) {
-        final String urlUserInfo;
         try {
-            urlUserInfo = new URL(config.getLivyUrlWithAuthentication()).getUserInfo();
+            final URL livyUrl = new URL(config.getLivyUrlWithAuthentication());
+            final String encodedUser = livyUrl.getUserInfo().split(":", 2)[0];
+            return URLDecoder.decode(encodedUser, StandardCharsets.UTF_8.name());
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL: " + config.getLivyUrlWithAuthentication(), e);
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Invalid encoded username in URL: " + config.getLivyUrlWithAuthentication(), e);
         }
-        return urlUserInfo.split(":")[0];
     }
 
     private static LivyClient buildLivyClient(final Properties livyHttpConf, final String livyUrl)
