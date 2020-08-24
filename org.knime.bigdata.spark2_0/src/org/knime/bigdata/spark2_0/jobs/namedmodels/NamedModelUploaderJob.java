@@ -27,7 +27,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.model.NamedModelUploaderJobInput;
-import org.knime.bigdata.spark2_0.api.FileUtils;
+import org.knime.bigdata.spark2_0.api.DistributedFileUtils;
 import org.knime.bigdata.spark2_0.api.NamedObjects;
 import org.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
@@ -47,16 +47,8 @@ public class NamedModelUploaderJob implements SimpleSparkJob<NamedModelUploaderJ
         final NamedObjects namedObjects) throws Exception {
 
         final Path zippedModelPipeline = input.getZippedModelPipeline();
-
-        Path unzippedModelDir = null;
-        try {
-            unzippedModelDir = FileUtils.createTempDir(sparkContext, "namedmodel");
-            FileUtils.unzipToDirectory(zippedModelPipeline, unzippedModelDir);
-            final PipelineModel model = PipelineModel.load(unzippedModelDir.toUri().toString());
-            namedObjects.add(input.getNamedModelId(), model);
-            LOG.info("Added named model with ID " + input.getNamedModelId());
-        } finally {
-            FileUtils.deleteRecursively(unzippedModelDir);
-        }
+        final PipelineModel model = DistributedFileUtils.unzipModel(sparkContext, zippedModelPipeline);
+        namedObjects.add(input.getNamedModelId(), model);
+        LOG.info("Added named model with ID " + input.getNamedModelId());
     }
 }

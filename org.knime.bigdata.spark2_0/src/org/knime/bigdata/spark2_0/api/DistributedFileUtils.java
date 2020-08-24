@@ -19,8 +19,15 @@ package org.knime.bigdata.spark2_0.api;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -112,9 +119,7 @@ public final class DistributedFileUtils {
     private Path zipModelViaDistributedFS(final SparkContext sparkContext, final PipelineModel model) throws IOException {
         final Configuration hadoopConf = sparkContext.hadoopConfiguration();
         final FileSystem fs = FileSystem.get(m_stagingAreaURI, hadoopConf);
-        final org.apache.hadoop.fs.Path modelPath = new org.apache.hadoop.fs.Path( //
-            new org.apache.hadoop.fs.Path(m_stagingAreaURI), //
-            new org.apache.hadoop.fs.Path("ml-model-" + UUID.randomUUID().toString()));
+        final org.apache.hadoop.fs.Path modelPath = toHadoopPath(Paths.get("ml-model-" + UUID.randomUUID().toString()));
 
         model.write().overwrite().save(modelPath.toUri().toString());
 
@@ -146,5 +151,113 @@ public final class DistributedFileUtils {
                 zipOutput.closeEntry();
             }
         }
+    }
+
+    /**
+     * Unzips a local ZIP of a given model to the staging area and loads a {@link PipelineModel} from there.
+     *
+     * Note: Do not close the Hadoop file system here, it might be in use in a parallel running job.
+     *
+     * @param sparkContext current spark context
+     * @param modelZip The zipped pipeline model.
+     * @return a {@link PipelineModel} loaded from the given zip file.
+     * @throws IOException When something went wrong while unzipping or loading the given model.
+     */
+    public static PipelineModel unzipModel(final SparkContext sparkContext, final Path modelZip) throws IOException {
+        ensureInitialized(sparkContext);
+        return singletonInstance.unzipModelViaDistributedFS(sparkContext, modelZip);
+    }
+
+    @SuppressWarnings("resource")
+    private PipelineModel unzipModelViaDistributedFS(final SparkContext sparkContext, final Path modelZip) throws IOException {
+        final Configuration hadoopConf = sparkContext.hadoopConfiguration();
+        final FileSystem fs = FileSystem.get(m_stagingAreaURI, hadoopConf);
+        final org.apache.hadoop.fs.Path hadoopModelPath =
+            toHadoopPath(Paths.get("ml-model-" + UUID.randomUUID().toString()));
+
+        Path unzippedModelDir = null;
+        try {
+            unzippedModelDir = FileUtils.createTempDir(sparkContext, "namedmodel");
+            FileUtils.unzipToDirectory(modelZip, unzippedModelDir);
+            final List<Path> unzippedModelFiles = listUnzippedModelFiles(unzippedModelDir);
+
+            fs.mkdirs(hadoopModelPath);
+            for (final Path currUnzippedModelFile : unzippedModelFiles) {
+                uploadUnzippedModelFile(fs, hadoopModelPath, unzippedModelDir, currUnzippedModelFile);
+            }
+
+            return PipelineModel.load(hadoopModelPath.toUri().toString());
+
+        } finally {
+            FileUtils.deleteRecursively(unzippedModelDir);
+        }
+    }
+
+    private static void uploadUnzippedModelFile(final FileSystem fs, final org.apache.hadoop.fs.Path hadoopModelPath,
+        final Path unzippedModelDir, final Path currUnzippedModelFile) throws IOException {
+
+        final Path relLocalModelFile = unzippedModelDir.relativize(currUnzippedModelFile);
+        final org.apache.hadoop.fs.Path hadoopModelFile = toHadoopPath(hadoopModelPath, relLocalModelFile);
+
+        if (Files.isDirectory(currUnzippedModelFile)) {
+            fs.mkdirs(hadoopModelFile);
+        } else {
+            fs.copyFromLocalFile(new org.apache.hadoop.fs.Path(currUnzippedModelFile.toAbsolutePath().toUri()),
+                hadoopModelFile);
+        }
+    }
+
+    private static List<Path> listUnzippedModelFiles(final Path unzippedModelDir) throws IOException {
+        final List<Path> localModelFiles = new ArrayList<>();
+
+        Files.walkFileTree(unzippedModelDir, new FileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+                localModelFiles.add(dir);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+                localModelFiles.add(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(final Path file, final IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+        Collections.sort(localModelFiles);
+
+        // remove the first entry as it is the unzippedModelDir itself
+        localModelFiles.remove(0);
+
+        return localModelFiles;
+    }
+
+    private org.apache.hadoop.fs.Path toHadoopPath(final Path relLocalFile) {
+        return toHadoopPath(new org.apache.hadoop.fs.Path(m_stagingAreaURI), relLocalFile);
+    }
+
+    private static org.apache.hadoop.fs.Path toHadoopPath(final org.apache.hadoop.fs.Path parent,
+        final Path relLocalFile) {
+        if (relLocalFile.isAbsolute()) {
+            throw new IllegalArgumentException("Given path must be relative");
+        }
+
+        org.apache.hadoop.fs.Path currHadoopFile = parent;
+        for (final Path pathComp : relLocalFile) {
+            currHadoopFile = new org.apache.hadoop.fs.Path(currHadoopFile, pathComp.toString());
+        }
+
+        return currHadoopFile;
     }
 }
