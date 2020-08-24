@@ -46,7 +46,7 @@ import org.knime.bigdata.spark.core.job.MLModelLearnerJobOutput;
 import org.knime.bigdata.spark.core.job.NamedModelLearnerJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
-import org.knime.bigdata.spark2_0.api.FileUtils;
+import org.knime.bigdata.spark2_0.api.DistributedFileUtils;
 import org.knime.bigdata.spark2_0.api.MLUtils;
 import org.knime.bigdata.spark2_0.api.NamedObjects;
 import org.knime.bigdata.spark2_0.api.SparkJob;
@@ -83,25 +83,10 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         final Pipeline pipeline = new Pipeline();
         pipeline.setStages(stages.toArray(new PipelineStage[0]));
         final PipelineModel model = pipeline.fit(withoutMissingValues);
-
-        Path serializedModelDir = null;
-        Path serializedModelZip = null;
-        try {
-            serializedModelDir = FileUtils.createTempDir(sparkContext, "mlmodel");
-            model.write().overwrite().save(serializedModelDir.toUri().toString());
-
-            serializedModelZip = FileUtils.createTempFile(sparkContext, "mlmodel", ".zip");
-            FileUtils.zipDirectory(serializedModelDir, serializedModelZip);
-        } finally {
-            if (serializedModelDir != null) {
-                FileUtils.deleteRecursively(serializedModelDir);
-            }
-        }
-
         namedObjects.add(input.getNamedModelId(), model);
 
+        final Path serializedModelZip = DistributedFileUtils.zipModel(sparkContext, model);
         final MLMetaData modelMetaData = createModelMetaData(model);
-
         final Path modelInterpreterData = generateModelInterpreterData(sparkContext, model);
 
         return new MLModelLearnerJobOutput(serializedModelZip, modelInterpreterData, modelMetaData);
