@@ -11,4 +11,8 @@
   <artifactId>org.knime.update.bigdata</artifactId>
   <packaging>eclipse-repository</packaging>
   <name>org.knime.update.bigdata</name>
+
+  <properties>
+    <revision>4.3.0</revision>
+  </properties>
 </project>
