@@ -329,6 +329,7 @@ public class HiveLoader {
                     + settings.valueDelimiter()
                     + "' ESCAPED BY '\\\\'\n");
         buf.append("STORED AS TEXTFILE");
+        buf.append(" TBLPROPERTIES (\"transactional\"=\"false\")");
         return buf.toString();
     }
 

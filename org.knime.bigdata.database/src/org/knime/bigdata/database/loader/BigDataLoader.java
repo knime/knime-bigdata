@@ -146,7 +146,7 @@ public class BigDataLoader implements DBLoader {
         exec.setProgress(0, "Creating temporary table");
         final DBTable tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName());
 
-        final String storedAsString = "STORED AS PARQUET";
+        final String storedAsString = "STORED AS PARQUET TBLPROPERTIES (\"transactional\"=\"false\") ";
         final SQLCommand createTableCmd = getDialect().dataDefinition().getCreateTableStatement(CreateTableParameters
             .builder(tempTable, columns, new DBUniqueConstraint[0]).withAdditionalSQLStatement(storedAsString).build());
         try (final Connection connection = getSession().getConnectionProvider().getConnection(exec);
