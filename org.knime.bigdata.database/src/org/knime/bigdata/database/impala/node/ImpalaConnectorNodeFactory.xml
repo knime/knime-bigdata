@@ -86,9 +86,9 @@
             		<b>Proprietary Impala Drivers (provided by Amazon/Hortonworks/Cloudera)</b>
             		<ul>
             			<li>AuthMech: 1</li>
-            			<li>KrbHostFQDN: full qualified hostname of Hive</li>
-            			<li>KrbRealm: REALM (Kerberos realm of Hive)</li>
-            			<li>KrbServiceName: hive (Kerberos service name of Hive)</li>
+            			<li>KrbHostFQDN: full qualified hostname of Impala</li>
+            			<li>KrbRealm: REALM (Kerberos realm of Impala)</li>
+            			<li>KrbServiceName: impala (Kerberos service name of Impala)</li>
             		</ul>
             	</p>
             </option>
