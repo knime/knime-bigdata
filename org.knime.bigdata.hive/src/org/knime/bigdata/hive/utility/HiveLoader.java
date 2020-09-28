@@ -294,7 +294,7 @@ public class HiveLoader {
     }
 
 
-    private static String buildCreateTableCommand(
+    private String buildCreateTableCommand(
         final String tableName,
         final Collection<String> columnNames,
         final Collection<String> partitionColumns,
@@ -329,7 +329,14 @@ public class HiveLoader {
                     + settings.valueDelimiter()
                     + "' ESCAPED BY '\\\\'\n");
         buf.append("STORED AS TEXTFILE");
-        buf.append(" TBLPROPERTIES (\"transactional\"=\"false\")");
+
+        // Starting with CDH 7, Impala blocks LOAD INTO on transactional tables.
+        // HDP 3.1 requires by default transactional tables and allows LOAD INTO.
+        // That's why we disable transactions in Impala, but not in Hive.
+        if (isImpala()) {
+            buf.append(" TBLPROPERTIES (\"transactional\"=\"false\")");
+        }
+
         return buf.toString();
     }
 

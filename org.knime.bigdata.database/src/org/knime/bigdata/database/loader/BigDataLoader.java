@@ -146,7 +146,7 @@ public class BigDataLoader implements DBLoader {
         exec.setProgress(0, "Creating temporary table");
         final DBTable tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName());
 
-        final String storedAsString = "STORED AS PARQUET TBLPROPERTIES (\"transactional\"=\"false\") ";
+        final String storedAsString = "STORED AS PARQUET " + createTempTableAdditionalSQLStatement() + " ";
         final SQLCommand createTableCmd = getDialect().dataDefinition().getCreateTableStatement(CreateTableParameters
             .builder(tempTable, columns, new DBUniqueConstraint[0]).withAdditionalSQLStatement(storedAsString).build());
         try (final Connection connection = getSession().getConnectionProvider().getConnection(exec);
@@ -162,6 +162,13 @@ public class BigDataLoader implements DBLoader {
 
         LOGGER.debug("Temporary table sucessful created");
         return tempTable;
+    }
+
+    /**
+     * @return additional SQL statement, appended to the temporary create table statement or empty string
+     */
+    protected String createTempTableAdditionalSQLStatement() {
+        return "";
     }
 
     private void insertIntoTable(final ExecutionMonitor exec,
