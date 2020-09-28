@@ -42,51 +42,36 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- *
- * History
- *   08.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.impala;
+package org.knime.bigdata.database.impala.agent;
 
-import org.knime.bigdata.database.hive.agent.HiveSampling;
-import org.knime.bigdata.database.impala.agent.ImpalaCaseSupportedBinner;
-import org.knime.bigdata.database.impala.agent.ImpalaLoader;
-import org.knime.database.agent.AbstractDBAgentFactory;
-import org.knime.database.agent.DBAgentFactory;
-import org.knime.database.agent.binning.DBBinner;
-import org.knime.database.agent.loader.DBLoader;
-import org.knime.database.agent.sampling.DBSampling;
-import org.knime.database.agent.sampling.impl.DefaultDBSampling;
-import org.knime.database.attribute.AttributeCollection;
-import org.knime.database.attribute.AttributeCollection.Accessibility;
+import org.knime.bigdata.database.loader.BigDataLoader;
+import org.knime.database.session.DBSessionReference;
 
 /**
- * {@linkplain DBAgentFactory Agent factory} for Impala that does not support random sampling.
+ * Impala version of the {@link BigDataLoader} that uses a temporary table with transactions disabled (see {@link
+ * ImpalaLoader#createTempTableAdditionalSQLStatement()}).
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class ImpalaAgentFactory extends AbstractDBAgentFactory {
+public class ImpalaLoader extends BigDataLoader {
 
-
-    private static final AttributeCollection SAMPLING_ATTRIBUTES;
-
-    static {
-        final AttributeCollection.Builder builder = AttributeCollection.builder(DefaultDBSampling.ATTRIBUTES);
-        builder.add(Accessibility.HIDDEN, DefaultDBSampling.ATTRIBUTE_CAPABILITY_RANDOM, false);
-        builder.add(Accessibility.HIDDEN, DefaultDBSampling.ATTRIBUTE_CAPABILITY_RANDOM_SEED, false);
-        SAMPLING_ATTRIBUTES = builder.build();
+    /**
+     * Creates a hive loader
+     *
+     * @param sessionReference the {@link DBSessionReference} object
+     */
+    public ImpalaLoader(final DBSessionReference sessionReference) {
+        super(sessionReference);
     }
 
-   /**
-    * Constructs a {@link ImpalaAgentFactory}.
-    */
-   public ImpalaAgentFactory() {
-        putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
-        putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
-        putCreator(DBLoader.class, parameters -> new ImpalaLoader(parameters.getSessionReference()));
-        putCreator(DBBinner.class, parameters -> {
-            return new ImpalaCaseSupportedBinner(parameters.getSessionReference());
-        });
-   }
-
+    /**
+     * Starting with CDH 7, Impala blocks LOAD INTO on transactional tables.
+     * HDP 3.1 requires by default transactional tables and allows LOAD INTO.
+     * That's why we disable transactions in Impala, but not in Hive.
+     */
+    @Override
+    protected String createTempTableAdditionalSQLStatement() {
+        return "TBLPROPERTIES (\"transactional\"=\"false\")";
+    }
 }
