@@ -52,6 +52,7 @@ import java.io.IOException;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -60,6 +61,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.hadoop.hdfs.web.resources.DeleteOpParam;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam;
+import org.apache.hadoop.hdfs.web.resources.PostOpParam;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam;
 
 /**
@@ -78,6 +80,14 @@ public interface WebHDFSAPI {
     @GET
     @Path("{path}")
     FileStatuses listStatus(@PathParam("path") String path, @QueryParam("op") GetOpParam.Op op) throws IOException;
+
+    @GET
+    @Path("{path}")
+    ContentSummary getContentSummary(@PathParam("path") String path, @QueryParam("op") GetOpParam.Op op) throws IOException;
+
+    @GET
+    @Path("{path}")
+    void checkAccess(@PathParam("path") String path, @QueryParam("op") GetOpParam.Op op, @QueryParam("fsaction") String action) throws IOException;
 
     @GET
     org.apache.hadoop.fs.Path getHomeDirectory(@QueryParam("op") GetOpParam.Op op) throws IOException;
@@ -110,4 +120,9 @@ public interface WebHDFSAPI {
     @Path("{path}")
     Response create(@PathParam("path") String path, @QueryParam("op") PutOpParam.Op op,
         @QueryParam("buffersize") long buffersize, @QueryParam("overwrite") boolean overwrite);
+
+    @POST
+    @Path("{path}")
+    Response append(@PathParam("path") String path, @QueryParam("op") PostOpParam.Op op,
+        @QueryParam("buffersize") long buffersize);
 }

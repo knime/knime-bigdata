@@ -51,101 +51,53 @@ package org.knime.bigdata.filehandling.knox.rest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * JSON mapping of FileStatus object.
+ * JSON mapping of ContentSummary object.
  *
- * @see <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#FileStatus_JSON_Schema">FileStatus Properties</a>
+ * @see <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#ContentSummary_JSON_Schema">FileStatus Properties</a>
  * @author Sascha Wolke, KNIME GmbH
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class FileStatus {
+public class ContentSummary {
 
     /**
-     * Type of the path.
+     * The number of directories.
      */
-    public enum Type {
-        /** A file. */
-        FILE,
-
-        /** A directory */
-        DIRECTORY,
-
-        /** A symlink */
-        SYMLINK
-    }
+    public int directoryCount;
 
     /**
-     * The access time.
+     * The number of files.
      */
-    public long accessTime;
+    public int fileCount;
 
     /**
-     * The group owner.
+     * The number of bytes used by the content.
      */
-    public String group;
+    public int length;
 
     /**
-     * The number of bytes in a file.
+     * The namespace quota of this directory.
      */
-    public long length;
+    public int quota;
 
     /**
-     * The block size of a file.
+     * The disk space consumed by the content.
      */
-    public long blockSize;
+    public int spaceConsumed;
 
     /**
-     * The modification time.
+     * The disk space quota.
      */
-    public long modificationTime;
+    public int spaceQuota;
 
-    /**
-     * The user who is the owner.
-     */
-    public String owner;
-
-    /**
-     * The path suffix.
-     */
-    public String pathSuffix;
-
-    /**
-     * The permission represented as a octal string.
-     */
-    public String permission;
-
-    /**
-     * The number of replication of a file.
-     */
-    public int replication;
-
-    /**
-     * The link target of a symlink.
-     */
-    public String symlink;
-
-    /**
-     * The type of the path object.
-     */
-    public Type type;
-
-    /**
-     * @return {@code true} if type indicates a file, {@code false} otherwise
-     */
-    public boolean isFile() {
-        return type == Type.FILE;
-    }
-
-    /**
-     * @return {@code true} if type indicates a directory, {@code false} otherwise
-     */
-    public boolean isDirectory() {
-        return type == Type.DIRECTORY;
-    }
-
-    /**
-     * @return {@code true} if type indicates a symbolic link, {@code false} otherwise
-     */
-    public boolean isSymlink() {
-        return type == Type.SYMLINK;
+    @Override
+    public String toString() {
+        return new StringBuilder("ContentSummary (")
+            .append("directoryCount=").append(directoryCount)
+            .append(",fileCount=").append(fileCount)
+            .append(",length=").append(length)
+            .append(",quota=").append(quota)
+            .append(",spaceConsumed=").append(spaceConsumed)
+            .append(",spaceQuota=").append(spaceQuota)
+            .append(")").toString();
     }
 }

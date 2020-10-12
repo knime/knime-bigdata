@@ -46,12 +46,14 @@
 package org.knime.bigdata.filehandling.knox;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
@@ -59,6 +61,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -75,11 +78,13 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam;
+import org.apache.hadoop.hdfs.web.resources.PostOpParam;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.filehandling.knox.rest.RemoteException;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -89,7 +94,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class KnoxHDFSClient extends AbstractRESTClient {
+public class KnoxHDFSClient extends AbstractRESTClient {
 
     private static final NodeLogger LOG = NodeLogger.getLogger(KnoxHDFSClient.class);
 
@@ -199,7 +204,7 @@ class KnoxHDFSClient extends AbstractRESTClient {
     /**
      * Read a file.
      */
-    static InputStream openFile(final WebHDFSAPI proxyImpl, final String path) throws IOException {
+    public static InputStream openFile(final WebHDFSAPI proxyImpl, final String path) throws IOException {
 
         final Response respOpen = proxyImpl.open(path, GetOpParam.Op.OPEN, CHUNK_LENGTH);
         validateStatusCode(respOpen, 307);
@@ -219,27 +224,66 @@ class KnoxHDFSClient extends AbstractRESTClient {
     }
 
     /**
-     * Create and upload files asynchron.
+     * Create files asynchrony.
      *
      * The JAX-RS/CXF client supports async execution only at response receive time and not in the request/send time.
      * The implementation use an {@link ExecutorService} to run the upload in the background to avoid the blocking
      * upload call and returns the output stream immediately. The status code of the response will be checked after the
      * output stream was closed.
+     *
+     * @param proxyImpl client to use
+     * @param executor executor service to run the asynchrony upload
+     * @param path destination path
+     * @param overwrite {@code true} if an existing file should be overwritten
+     * @return output stream to append data to
+     * @throws IOException
      */
+    public static OutputStream createFile(final WebHDFSAPI proxyImpl, final ExecutorService executor, final String path,
+        final boolean overwrite) throws IOException {
+
+        try (final Response respCreate = proxyImpl.create(path, PutOpParam.Op.CREATE, CHUNK_LENGTH, overwrite)) {
+            validateStatusCode(respCreate, 307);
+            return uploadFile(proxyImpl, HttpMethod.PUT, respCreate.getLocation(), 201, executor);
+        }
+    }
+
+    /**
+     * Append asynchrony to files.
+     *
+     * The JAX-RS/CXF client supports async execution only at response receive time and not in the request/send time.
+     * The implementation use an {@link ExecutorService} to run the upload in the background to avoid the blocking
+     * upload call and returns the output stream immediately. The status code of the response will be checked after the
+     * output stream was closed.
+     *
+     * @param proxyImpl client to use
+     * @param executor executor service to run the asynchrony upload
+     * @param path destination path
+     * @return output stream to append data to
+     * @throws IOException
+     */
+    public static OutputStream appendFile(final WebHDFSAPI proxyImpl, final ExecutorService executor, final String path)
+        throws IOException {
+
+        try (Response respCreate = proxyImpl.append(path, PostOpParam.Op.APPEND, CHUNK_LENGTH)) {
+            validateStatusCode(respCreate, 307);
+            return uploadFile(proxyImpl, HttpMethod.POST, respCreate.getLocation(), 200, executor);
+        }
+    }
+
     @SuppressWarnings("resource")
-    static OutputStream createFile(final WebHDFSAPI proxyImpl, final ExecutorService executor, final String path, final boolean overwrite) throws IOException {
+    static OutputStream uploadFile(final WebHDFSAPI proxyImpl, final String method, final URI location,
+        final int expectedResponseCode, final ExecutorService executor) throws IOException {
 
-        final Response respCreate = proxyImpl.create(path, PutOpParam.Op.CREATE, CHUNK_LENGTH, overwrite);
-        validateStatusCode(respCreate, 307);
-
-        final UploadOutputStream outputStream = new UploadOutputStream(201);
+        final UploadOutputStream outputStream = new UploadOutputStream(expectedResponseCode);
         final PipedInputStream inputStream = new PipedInputStream(outputStream, CHUNK_LENGTH);
-        final Future<Response> respWrite = executor.submit(() ->
-            WebClient.fromClient(WebClient.client(proxyImpl), true)
-                .to(respCreate.getLocation().toString(), false)
-                .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                .put(Entity.entity(inputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE))
-        );
+        final Future<Response> respWrite = executor.submit(() -> {
+            try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+                return WebClient.fromClient(WebClient.client(proxyImpl), true)
+                    .to(location.toString(), false)
+                    .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                    .invoke(method, Entity.entity(inputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+            }
+        });
         outputStream.setUploadResponse(respWrite);
 
         return outputStream;
