@@ -45,14 +45,14 @@
 package org.knime.bigdata.commons.config.eclipse;
 
 import org.apache.hadoop.security.UserGroupInformation;
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
-import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.knime.bigdata.commons.CommonsPlugin;
@@ -65,21 +65,11 @@ import org.knime.bigdata.commons.hadoop.UserGroupUtil;
  */
 public class HadoopPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+    private static final String SSL_INFO =
+        "The SSL settings are removed in KNIME 4.2 rom this preferences page and the new HDFS Connector uses the JVM SSL settings instead.";
+
     private FileFieldEditor m_coreSiteConf;
     private FileFieldEditor m_hdfsSiteConf;
-
-    private BooleanFieldEditor m_enableTruststore;
-    private ComboFieldEditor m_hostnameVerifier;
-    private FileFieldEditor m_truststoreLocation;
-    private StringFieldEditor m_truststorePassword;
-    private ComboFieldEditor m_truststoreType;
-    private IntegerFieldEditor m_truststoreReloadInterval;
-
-    private BooleanFieldEditor m_enableKeystore;
-    private FileFieldEditor m_keystoreLocation;
-    private StringFieldEditor m_keystorePassword;
-    private StringFieldEditor m_keystoreKeypassword;
-    private ComboFieldEditor m_keystoreType;
 
     /**
      * Creates a new hadoop preference page.
@@ -115,131 +105,22 @@ public class HadoopPreferencePage extends FieldEditorPreferencePage implements I
             m_hdfsSiteConf.setFileExtensions(new String[] { "*.xml" });
             addField(m_hdfsSiteConf);
 
-            addSSLTruststoreEditors();
-            addSSLKeystoreFields();
+            createInfoHeader(getFieldEditorParent(), SSL_INFO);
         }
     }
 
-    @Override
-    public void propertyChange(final PropertyChangeEvent event) {
-        super.propertyChange(event);
+    private static void createInfoHeader(final Composite mainContainer, final String message) {
+        Composite deprecationContainer = new Composite(mainContainer, SWT.NONE);
+        deprecationContainer.setLayout(new GridLayout(2, false));
+        deprecationContainer.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 2, 1));
 
-        if (event.getSource().equals(m_enableTruststore)) {
-            setTruststoreEnabled((boolean) event.getNewValue());
-        }
+        Label image = new Label(deprecationContainer, SWT.NONE);
+        image.setImage(mainContainer.getDisplay().getSystemImage(SWT.ICON_INFORMATION));
+        image.setLayoutData(new GridData(SWT.NONE, SWT.FILL, true, true));
 
-        if (event.getSource().equals(m_enableKeystore)) {
-            setKeystoreEnabled((boolean) event.getNewValue());
-        }
-    }
-
-    @Override
-    protected void performDefaults() {
-        super.performDefaults();
-        setTruststoreEnabled(m_enableTruststore.getBooleanValue());
-        setKeystoreEnabled(m_enableKeystore.getBooleanValue());
-    }
-
-    /** Enable or disable truststore fields */
-    private void setTruststoreEnabled(final boolean enabled) {
-        m_hostnameVerifier.setEnabled(enabled, getFieldEditorParent());
-        m_truststoreLocation.setEnabled(enabled, getFieldEditorParent());
-        m_truststorePassword.setEnabled(enabled, getFieldEditorParent());
-        m_truststoreType.setEnabled(enabled, getFieldEditorParent());
-        m_truststoreReloadInterval.setEnabled(enabled, getFieldEditorParent());
-    }
-
-    private void addSSLTruststoreEditors() {
-        m_enableTruststore = new BooleanFieldEditor(
-            CommonPreferenceInitializer.PREF_TRUSTSTORE_ENABLE,
-            "Use SSL truststore:", getFieldEditorParent());
-        addField(m_enableTruststore);
-
-        m_hostnameVerifier = new ComboFieldEditor(
-            CommonPreferenceInitializer.PREF_TRUSTSTORE_HOSTNAME_VERIFIER,
-            "Hostname verifier:",
-            new String[][] {
-                { "Default", "DEFAULT" },
-                { "Default and localhost", "DEFAULT_AND_LOCALHOST" },
-                { "Strict", "STRICT" },
-                { "Strict IE6", "STRICT_IE6" },
-                { "Allow all", "ALLOW_ALL" }
-            },
-            getFieldEditorParent());
-        addField(m_hostnameVerifier);
-
-        m_truststoreLocation = new FileFieldEditor(
-            CommonPreferenceInitializer.PREF_TRUSTSTORE_LOCATION,
-            "Truststore file:", true, getFieldEditorParent());
-        m_truststoreLocation.setFileExtensions(new String[] { "*.jks", "*.jceks", "*.dks", "*.pkcs11", "*.pkcs12", "*" });
-        addField(m_truststoreLocation);
-
-        m_truststorePassword = new StringFieldEditor(
-            CommonPreferenceInitializer.PREF_TRUSTSTORE_PASSWORD,
-            "Truststore password:", getFieldEditorParent());
-        m_truststorePassword.getTextControl(getFieldEditorParent()).setEchoChar('*');
-        addField(m_truststorePassword);
-
-        m_truststoreType = new ComboFieldEditor(CommonPreferenceInitializer.PREF_TRUSTSTORE_TYPE,
-            "Tuststore type:",
-            new String[][] {
-                { "jks (default)", "jks" }, { "jceks", "jceks" }, { "dks", "dks" },
-                { "pkcs11", "pkcs11" }, { "pkcs12", "pkcs12" }
-            },
-            getFieldEditorParent());
-        addField(m_truststoreType);
-
-        m_truststoreReloadInterval = new IntegerFieldEditor(
-            CommonPreferenceInitializer.PREF_TRUSTSTORE_RELOAD_INTERVAL,
-            "Truststore reload interval (ms):", getFieldEditorParent(), 10);
-        m_truststoreReloadInterval.setValidRange(0, 100000000);
-        addField(m_truststoreReloadInterval);
-
-        setTruststoreEnabled(CommonConfigContainer.getInstance().hasSSLTruststoreConfig());
-    }
-
-    /** Enable or disable keystore fields */
-    private void setKeystoreEnabled(final boolean enabled) {
-        m_keystoreLocation.setEnabled(enabled, getFieldEditorParent());
-        m_keystorePassword.setEnabled(enabled, getFieldEditorParent());
-        m_keystoreKeypassword.setEnabled(enabled, getFieldEditorParent());
-        m_keystoreType.setEnabled(enabled, getFieldEditorParent());
-    }
-
-    private void addSSLKeystoreFields() {
-        m_enableKeystore = new BooleanFieldEditor(
-            CommonPreferenceInitializer.PREF_KEYSTORE_ENABLE,
-            "Use SSL keystore:", getFieldEditorParent());
-        addField(m_enableKeystore);
-
-        m_keystoreLocation = new FileFieldEditor(
-            CommonPreferenceInitializer.PREF_KEYSTORE_LOCATION,
-            "Keystore file:", true, getFieldEditorParent());
-        m_keystoreLocation.setFileExtensions(new String[] { "*.jks", "*.jceks", "*.dks", "*.pkcs11", "*.pkcs12", "*" });
-        addField(m_keystoreLocation);
-
-        m_keystorePassword = new StringFieldEditor(
-            CommonPreferenceInitializer.PREF_KEYSTORE_PASSWORD,
-            "Keystore password:", getFieldEditorParent());
-        m_keystorePassword.getTextControl(getFieldEditorParent()).setEchoChar('*');
-        addField(m_keystorePassword);
-
-        m_keystoreKeypassword = new StringFieldEditor(
-            CommonPreferenceInitializer.PREF_KEYSTORE_KEYPASSWORD,
-            "Keystore key password:", getFieldEditorParent());
-        m_keystoreKeypassword.getTextControl(getFieldEditorParent()).setEchoChar('*');
-        addField(m_keystoreKeypassword);
-
-        m_keystoreType = new ComboFieldEditor(CommonPreferenceInitializer.PREF_KEYSTORE_TYPE,
-            "Keystore type:",
-            new String[][] {
-                { "jks (default)", "jks" }, { "jceks", "jceks" }, { "dks", "dks" },
-                { "pkcs11", "pkcs11" }, { "pkcs12", "pkcs12" }
-            },
-            getFieldEditorParent());
-        addField(m_keystoreType);
-
-        setKeystoreEnabled(CommonConfigContainer.getInstance().hasSSLKeystoreConfig());
+        Label text = new Label(deprecationContainer, SWT.NONE);
+        text.setText(message);
+        text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
     }
 
     /**
