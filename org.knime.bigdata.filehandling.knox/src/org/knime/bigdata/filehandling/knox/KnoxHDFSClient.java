@@ -120,10 +120,14 @@ public class KnoxHDFSClient extends AbstractRESTClient {
                 }
             }
 
-            if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
+            if (response.getStatus() == 401 && !StringUtils.isBlank(message)) {
+                return new KnoxAuthenticationException(message);
+            } else if (response.getStatus() == 401) {
+                return new KnoxAuthenticationException("Invalid or missing authentication data");
+            } else if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
                 return new AccessDeniedException(message);
             } else if (response.getStatus() == 403) {
-                return new AccessDeniedException("Invalid or missing authentication data");
+                return new AccessDeniedException("Access forbidden");
             } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
                 return new FileNotFoundException(message);
             } else if (response.getStatus() == 404) {
