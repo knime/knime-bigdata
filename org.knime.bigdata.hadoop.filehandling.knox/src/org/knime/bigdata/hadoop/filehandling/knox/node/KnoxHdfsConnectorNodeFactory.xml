@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./knoxconnection16x16.png"
+		type="Source"
+		xmlns="http://knime.org/node/v4.1"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd">
+    <name>WebHDFS via KNOX Connector (Labs)</name>
+    
+    <shortDescription>
+       	Creates a WebHDFS connection using a Apache KNOX gateway in order to read/write files in downstream nodes.
+    </shortDescription>
+    
+    <fullDescription>
+         <intro>
+            <p>This node connects to a Hadoop Distributed File System using a Apache KNOX gateway.
+            The resulting output port allows downstream nodes to access
+            the <i>files</i> of the remote file system, e.g. to read or write,
+            or to perform other file system operations (browse/list files, copy, move, ...).
+            </p>
+            
+            <p><b>Path syntax:</b> Paths are specified with a UNIX-like syntax, /myfolder/myfile. An absolute
+            for KNOX consists of:
+                <ol>
+                    <li>A leading slash ("/").</li>
+                    <li>Followed by the path to the file ("myfolder/myfile" in the above example).</li>
+                </ol>
+            </p>
+
+            <p><b>SSL:</b> This node uses the JVM SSL settings.</p>
+        </intro>
+        
+        <tab name="Settings">
+   			<option name="URL">
+				Full KNOX deployment URL including cluster name e.g. https://&lt;server&gt;:8443/gateway/&lt;default&gt;/webhdfs/v1
+				(replace &lt;server&gt; with the fully qualified hostname and &lt;default&gt; with you cluster/topology name).
+				Protocol should be <i>https</i> and port <i>8443</i> on most deployments.
+			</option>
+	        <option name="Authentication">
+	        	This node supports only HTTP basic authentication using workflow credentials or a given username and password.
+	        </option>
+		    <option name="Working directory">
+		        Specify the <i>working directory</i> of the resulting file system connection, using the <b>Path syntax</b> explained above. The working
+		        directory must be specified as an absolute path. A working directory allows downstream nodes to access files/folders using <i>relative</i>
+		        paths, i.e. paths that do not have a leading slash. The default working directory is the root "/", under which all the
+		        document libraries are located.
+		    </option>
+	    </tab>
+	    
+        <tab name="Advanced">
+		    <option name="Connection timeout (seconds)">
+    	        Timeout in seconds to establish a connection or 0 for an infinite timeout. 
+		    </option>
+		    <option name="Receive timeout (seconds)">
+      	        Timeout in seconds on established connections or 0 for an infinite timeout. 
+  		    </option>
+		</tab>
+    </fullDescription>
+
+    <ports>
+   		<outPort index="0" name="WebHDFS via KNOX File System Connection">
+   			WebHDFS via KNOX File System Connection.
+   		</outPort>
+    </ports>    
+</knimeNode>

@@ -33,6 +33,7 @@
 		<module>org.knime.bigdata.filehandling</module>
 		<module>org.knime.bigdata.filehandling.knox</module>
 		<module>org.knime.bigdata.hadoop.filehandling</module>
+		<module>org.knime.bigdata.hadoop.filehandling.knox</module>
 		<module>org.knime.bigdata.hive</module>
 		<module>org.knime.bigdata.impala</module>
 		<module>org.knime.bigdata.scripting</module>
@@ -59,6 +60,7 @@
 		<module>org.knime.features.bigdata.databricks</module>
 		<module>org.knime.features.bigdata.fileformats</module>
 		<module>org.knime.features.bigdata.hadoop.filehandling</module>
+		<module>org.knime.features.bigdata.hadoop.filehandling.knox</module>
 		<module>org.knime.features.bigdata.spark</module>
 		<module>org.knime.features.bigdata.spark.local</module>
 		<module>org.knime.features.bigdata.testing</module>
