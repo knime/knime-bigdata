@@ -43,58 +43,45 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.hadoop.filehandling.fs;
+package org.knime.bigdata.hadoop.filesystem.testing;
 
 import java.io.IOException;
-import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
+import org.knime.filehandling.core.connections.FSCategory;
+import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.connections.local.LocalFSConnection;
+import org.knime.filehandling.core.connections.local.LocalFileSystem;
+import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
- * HDFS implementation of {@link FSConnection} interface.
+ * HDFS wrapper wrapper test initializer provider.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnection implements FSConnection {
+public class LocalHdfsTestInitializerProvider extends DefaultFSTestInitializerProvider {
 
-    private static final long CACHE_TTL_MILLIS = 60000;
+    private static final String FS_TYPE = "hdfs-wrapper-wrapper";
 
-    private final HdfsFileSystem m_filesystem;
-
-    /**
-     * Default constructor.
-     *
-     * @param settings Connection settings.
-     * @throws IOException
-     */
-    public HdfsConnection(final HdfsConnectorNodeSettings settings) throws IOException {
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, settings);
-    }
-
-    /**
-     * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
-     *
-     * @param workingDirectory working directory to use
-     * @param hadoopFileSystem already initialized and open Hadoop file system to use
-     */
-    public HdfsConnection(final String workingDirectory, final FileSystem hadoopFileSystem) {
-        final String host = "localhost";
-        final URI uri = URI.create(HdfsFileSystem.FS_TYPE + "://" + host);
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, uri, host, workingDirectory, hadoopFileSystem);
+    @SuppressWarnings("resource")
+    @Override
+    public LocalHdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
+        final Path workingDir = Files.createTempDirectory("knime-hadoop-wrapper-wrapper-test");
+        final LocalFSConnection localFsConnection =
+            new LocalFSConnection(workingDir.toString(), LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+        return new LocalHdfsTestInitializer(new LocalHdfsFSConnection(localFsConnection));
     }
 
     @Override
-    public HdfsFileSystem getFileSystem() {
-        return m_filesystem;
+    public String getFSType() {
+        return FS_TYPE;
     }
 
     @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
+        return new DefaultFSLocationSpec(FSCategory.CONNECTED, FS_TYPE);
     }
-
 }

@@ -113,15 +113,16 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
     /**
      * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
      **/
-    HdfsFileSystem(final long cacheTTL, final HdfsConnectorNodeSettings settings, final FileSystem hadoopFileSystem)
-        throws IOException {
-        super(new HdfsFileSystemProvider(), //
-            createURI(settings), //
-            cacheTTL, //
-            settings.getWorkingDirectory(), //
-            createFSLocationSpec(settings.getHost()));
+    HdfsFileSystem(final long cacheTTL, final URI uri, final String host, final String workingDirectory,
+        final FileSystem hadoopFileSystem) {
 
-        m_host = settings.getHost();
+        super(new HdfsFileSystemProvider(), //
+            uri, //
+            cacheTTL, //
+            workingDirectory, //
+            createFSLocationSpec(host));
+
+        m_host = host;
         m_hadoopFileSystem = hadoopFileSystem;
     }
 

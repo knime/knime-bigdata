@@ -43,58 +43,67 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.hadoop.filehandling.fs;
+package org.knime.bigdata.hadoop.filesystem;
 
 import java.io.IOException;
-import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.apache.hadoop.fs.FSInputStream;
 
 /**
- * HDFS implementation of {@link FSConnection} interface.
+ * A {@link FSInputStream} implementations that wraps a {@link SeekableByteChannel}.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnection implements FSConnection {
+public class NioFSInputStream extends FSInputStream {
 
-    private static final long CACHE_TTL_MILLIS = 60000;
+    private final SeekableByteChannel m_byteChannel;
+    private final ByteBuffer m_singleByteBuffer = ByteBuffer.allocate(1);
 
-    private final HdfsFileSystem m_filesystem;
-
-    /**
-     * Default constructor.
-     *
-     * @param settings Connection settings.
-     * @throws IOException
-     */
-    public HdfsConnection(final HdfsConnectorNodeSettings settings) throws IOException {
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, settings);
-    }
-
-    /**
-     * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
-     *
-     * @param workingDirectory working directory to use
-     * @param hadoopFileSystem already initialized and open Hadoop file system to use
-     */
-    public HdfsConnection(final String workingDirectory, final FileSystem hadoopFileSystem) {
-        final String host = "localhost";
-        final URI uri = URI.create(HdfsFileSystem.FS_TYPE + "://" + host);
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, uri, host, workingDirectory, hadoopFileSystem);
+    NioFSInputStream(final SeekableByteChannel byteChannel) {
+        m_byteChannel = byteChannel;
     }
 
     @Override
-    public HdfsFileSystem getFileSystem() {
-        return m_filesystem;
+    public void seek(final long pos) throws IOException {
+        m_byteChannel.position(pos);
     }
 
     @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    public long getPos() throws IOException {
+        return m_byteChannel.position();
     }
 
+    @Override
+    public boolean seekToNewSource(final long targetPos) throws IOException {
+        return false;
+    }
+
+    @Override
+    public int read() throws IOException {
+        m_singleByteBuffer.clear();
+        if (m_byteChannel.read(m_singleByteBuffer) > 0) {
+            m_singleByteBuffer.flip();
+            // return byte as int between 0 and 255
+            return m_singleByteBuffer.get() & 0xff;
+        } else {
+            return -1;
+        }
+    }
+
+    @Override
+    public int read(final byte[] b) throws IOException {
+        return m_byteChannel.read(ByteBuffer.wrap(b));
+    }
+
+    @Override
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        return m_byteChannel.read(ByteBuffer.wrap(b, off, len));
+    }
+
+    @Override
+    public void close() throws IOException {
+        m_byteChannel.close();
+    }
 }

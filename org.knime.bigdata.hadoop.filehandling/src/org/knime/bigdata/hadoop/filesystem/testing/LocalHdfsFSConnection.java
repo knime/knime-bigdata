@@ -42,59 +42,59 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   Aug 31, 2020 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.hadoop.filehandling.fs;
+package org.knime.bigdata.hadoop.filesystem.testing;
 
 import java.io.IOException;
-import java.net.URI;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
+import org.apache.hadoop.conf.Configuration;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
+import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
+import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.local.LocalFSConnection;
+import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
- * HDFS implementation of {@link FSConnection} interface.
+ * A connection that contains a {@link HdfsFileSystem}, that contains a {@link NioFileSystem}, that
+ * contains a {@link LocalFileSystem}.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnection implements FSConnection {
+class LocalHdfsFSConnection implements FSConnection {
 
-    private static final long CACHE_TTL_MILLIS = 60000;
+    private final HdfsFileSystem m_hdfsFileSystem;
+    private final NioFileSystem m_hadoopFileSystem;
+    private final LocalFileSystem m_localFileSystem;
 
-    private final HdfsFileSystem m_filesystem;
-
-    /**
-     * Default constructor.
-     *
-     * @param settings Connection settings.
-     * @throws IOException
-     */
-    public HdfsConnection(final HdfsConnectorNodeSettings settings) throws IOException {
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, settings);
-    }
-
-    /**
-     * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
-     *
-     * @param workingDirectory working directory to use
-     * @param hadoopFileSystem already initialized and open Hadoop file system to use
-     */
-    public HdfsConnection(final String workingDirectory, final FileSystem hadoopFileSystem) {
-        final String host = "localhost";
-        final URI uri = URI.create(HdfsFileSystem.FS_TYPE + "://" + host);
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, uri, host, workingDirectory, hadoopFileSystem);
+    @SuppressWarnings("resource")
+    LocalHdfsFSConnection(final LocalFSConnection localFsConnection) throws IOException {
+        m_localFileSystem = (LocalFileSystem)localFsConnection.getFileSystem();
+        final String workingDirectory = m_localFileSystem.getWorkingDirectory().toString();
+        final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
+        m_hadoopFileSystem = (NioFileSystem)NioFileSystemUtil //
+                .getHadoopPath(m_localFileSystem.getWorkingDirectory(), hadoopFileSystemConfig) //
+                .getFileSystem(hadoopFileSystemConfig);
+        m_hdfsFileSystem = new HdfsConnection(workingDirectory, m_hadoopFileSystem).getFileSystem();
     }
 
     @Override
     public HdfsFileSystem getFileSystem() {
-        return m_filesystem;
+        return m_hdfsFileSystem;
+    }
+
+    LocalFileSystem getLocalFileSystem() {
+        return m_localFileSystem;
     }
 
     @Override
     public FileSystemBrowser getFileSystemBrowser() {
         return new NioFileSystemBrowser(this);
     }
-
 }
