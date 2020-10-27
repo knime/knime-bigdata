@@ -297,6 +297,8 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_settings.validateValues();
+
         m_settings.getHadoopProtocolSettingsModel().saveSettingsTo(settings);
         m_host.saveSettingsTo(settings);
         m_settings.getUseCustomPortSettingsModel().saveSettingsTo(settings);

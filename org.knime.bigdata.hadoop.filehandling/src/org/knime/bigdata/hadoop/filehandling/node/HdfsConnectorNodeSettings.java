@@ -168,6 +168,10 @@ public class HdfsConnectorNodeSettings {
         m_customPort.validateSettings(settings);
         m_auth.validateSettings(settings);
         m_workingDirectory.validateSettings(settings);
+
+        final HdfsConnectorNodeSettings temp = new HdfsConnectorNodeSettings();
+        temp.loadSettingsFrom(settings);
+        temp.validateValues();
     }
 
     /**

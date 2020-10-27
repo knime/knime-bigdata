@@ -135,7 +135,7 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
         try {
             return new URI(FS_TYPE, null, settings.getHost(), settings.getPort(), null, null, null);
         } catch (final URISyntaxException e) {
-            throw new IOException("Failed to create file system URI", e);
+            throw new IOException("Failed to create file system URI: " + e.getMessage(), e);
         }
     }
 
