@@ -86,8 +86,6 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
      */
     public static final String PATH_SEPARATOR = "/";
 
-    private final String m_host;
-
     private final FileSystem m_hadoopFileSystem;
 
     /**
@@ -104,7 +102,6 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
             settings.getWorkingDirectory(), //
             createFSLocationSpec(settings.getHost()));
 
-        m_host = settings.getHost();
         final URI fsURI = settings.getHadopURI();
         final Configuration hadoopConf = createHadoopConfiguration(settings, fsURI);
         m_hadoopFileSystem = openHadoopFileSystem(settings, hadoopConf, fsURI);
@@ -122,7 +119,6 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
             workingDirectory, //
             createFSLocationSpec(host));
 
-        m_host = host;
         m_hadoopFileSystem = hadoopFileSystem;
     }
 
@@ -201,16 +197,6 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
      */
     public FileSystem getHadoopFileSystem() {
         return m_hadoopFileSystem;
-    }
-
-    @Override
-    public String getSchemeString() {
-        return FS_TYPE;
-    }
-
-    @Override
-    public String getHostString() {
-        return m_host;
     }
 
     @Override
