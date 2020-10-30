@@ -52,10 +52,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -65,6 +65,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.common.util.Base64Utility;
@@ -104,7 +105,37 @@ public class KnoxHDFSClient extends AbstractRESTClient {
     static class KNOXResponseExceptionMapper implements ResponseExceptionMapper<IOException> {
         @Override
         public IOException fromResponse(final Response response) {
-            String message = "";
+            final String message = extractMessage(response);
+
+            final IOException toReturn;
+            switch (Status.fromStatusCode(response.getStatus())) {
+                case UNAUTHORIZED:
+                    toReturn =
+                        new KnoxAuthenticationException(makeMessage(message, "Invalid or missing authentication data"));
+                    break;
+                case FORBIDDEN:
+                    toReturn = new AccessDeniedException(makeMessage(message, "Access forbidden"));
+                    break;
+                case NOT_FOUND:
+                    toReturn = new FileNotFoundException(makeMessage(message, "Resource not found"));
+                    break;
+                default:
+                    toReturn = new IOException(makeMessage(message, "Server error: " + response.getStatus()));
+            }
+
+            return toReturn;
+        }
+
+        private static String makeMessage(final String serverProvidedMessage, final String defaultMessage) {
+            if (!StringUtils.isBlank(serverProvidedMessage)) {
+                return serverProvidedMessage;
+            } else {
+                return defaultMessage;
+            }
+        }
+
+        private static String extractMessage(final Response response) {
+            String message = null;
 
             // try to parse remote exceptions
             if (response.getMediaType() != null && response.getMediaType().getSubtype().toLowerCase().contains("json")) {
@@ -115,28 +146,11 @@ public class KnoxHDFSClient extends AbstractRESTClient {
                     } else {
                         message = response.getStatusInfo().getReasonPhrase();
                     }
-                } catch (Exception e) {
+                } catch (Exception e) { // NOSONAR
                     message = e.getMessage();
                 }
             }
-
-            if (response.getStatus() == 401 && !StringUtils.isBlank(message)) {
-                return new KnoxAuthenticationException(message);
-            } else if (response.getStatus() == 401) {
-                return new KnoxAuthenticationException("Invalid or missing authentication data");
-            } else if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
-                return new AccessDeniedException(message);
-            } else if (response.getStatus() == 403) {
-                return new AccessDeniedException("Access forbidden");
-            } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
-                return new FileNotFoundException(message);
-            } else if (response.getStatus() == 404) {
-                return new FileNotFoundException("Resource not found");
-            } else if (!StringUtils.isBlank(message)) {
-                return new IOException("Server error: " + message);
-            } else {
-                return new IOException("Server error: " + response.getStatus());
-            }
+            return message;
         }
     }
 
@@ -196,9 +210,9 @@ public class KnoxHDFSClient extends AbstractRESTClient {
 
         final WebHDFSAPI proxyImpl = createClient(baseUrl, receiveTimeoutMillis, connectionTimeoutMillis);
         if (!StringUtils.isBlank(user) && !StringUtils.isBlank(password)) {
-            WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
+            WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":" + password).getBytes(StandardCharsets.UTF_8)));
         } else if (!StringUtils.isBlank(user)) {
-            WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":").getBytes("UTF-8")));
+            WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":").getBytes(StandardCharsets.UTF_8)));
         }
         return proxyImpl;
     }
