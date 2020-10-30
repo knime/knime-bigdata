@@ -87,12 +87,12 @@ public class KnoxHdfsAuthenticationSettings {
         /**
          * Username and password authentication.
          */
-        USER_PASS("Username/Password", "Authentication using a username and password."),
+        USER_PASS("Username & password", "Authentication using a username and password."),
 
         /**
          * Authentication using a workflow credentials.
          */
-        CREDENTIALS("Credentials", "Authentication using a workflow credentials.");
+        CREDENTIALS("Credentials", "Authentication with the username and password of a credentials flow variable.");
 
         private final String m_toolTip;
         private final String m_text;

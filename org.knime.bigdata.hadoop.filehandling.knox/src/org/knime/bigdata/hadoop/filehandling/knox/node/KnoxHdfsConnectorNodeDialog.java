@@ -59,7 +59,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
-import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnection;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -245,7 +245,7 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
 
     private FSConnection createFSConnection() throws IOException {
         KnoxHdfsConnectorNodeSettings clonedSettings = new KnoxHdfsConnectorNodeSettings(m_settings);
-        return new KnoxHdfsConnection(clonedSettings, getCredentialsProvider());
+        return new KnoxHdfsFSConnection(clonedSettings, getCredentialsProvider());
     }
 
     @Override

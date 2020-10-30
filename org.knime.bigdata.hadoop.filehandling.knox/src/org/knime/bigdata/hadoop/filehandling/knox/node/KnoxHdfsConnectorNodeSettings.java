@@ -47,6 +47,7 @@ package org.knime.bigdata.hadoop.filehandling.knox.node;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
@@ -81,11 +82,11 @@ public class KnoxHdfsConnectorNodeSettings {
 
     /** Connection timeout in seconds */
     private final SettingsModelIntegerBounded m_connectionTimeout =
-        new SettingsModelIntegerBounded("connectionTimeout", DEFAULT_TIMEOUT, 1, Integer.MAX_VALUE);
+        new SettingsModelIntegerBounded("connectionTimeout", DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
 
     /** Receive timeout in seconds */
     private final SettingsModelIntegerBounded m_receiveTimeout =
-        new SettingsModelIntegerBounded("receiveTimeout", DEFAULT_TIMEOUT, 1, Integer.MAX_VALUE);
+        new SettingsModelIntegerBounded("receiveTimeout", DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
 
     /**
      * Default constructor.
@@ -179,18 +180,12 @@ public class KnoxHdfsConnectorNodeSettings {
         try {
             final URI uri = new URI(m_url.getStringValue());
 
-            if (uri.getScheme() == null) {
-                throw new InvalidSettingsException("Empty or invalid scheme in URL");
-            } else if (StringUtils.isBlank(uri.getScheme())) {
-                throw new InvalidSettingsException("Empty or invalid scheme in URL: '" + uri.getScheme() + "'");
-            } else if (uri.getHost() == null) {
-                throw new InvalidSettingsException("Empty or invalid host in URL");
+           if (StringUtils.isBlank(uri.getScheme())) {
+                throw new InvalidSettingsException("Empty scheme in URL " +  uri.toString());
             } else if (StringUtils.isBlank(uri.getHost())) {
-                throw new InvalidSettingsException("Empty or invalid host in URL: '" + uri.getHost() + "'");
-            } else if (uri.getPath() == null) {
-                throw new InvalidSettingsException("Empty or invalid path in URL");
+                throw new InvalidSettingsException("Empty host in URL " +  uri.toString());
             } else if (StringUtils.isBlank(uri.getPath())) { // NOSONAR no else required
-                throw new InvalidSettingsException("Empty or invalid path in URL: '" + uri.getPath() + "'");
+                throw new InvalidSettingsException("Empty path in URL " +  uri.toString());
             }
 
         } catch (final URISyntaxException e) {
@@ -266,8 +261,8 @@ public class KnoxHdfsConnectorNodeSettings {
     /**
      * @return connection timeout in seconds
      */
-    public int getConnectionTimeout() {
-        return m_connectionTimeout.getIntValue();
+    public Duration getConnectionTimeout() {
+        return Duration.ofSeconds(m_connectionTimeout.getIntValue());
     }
 
     /**
@@ -278,10 +273,10 @@ public class KnoxHdfsConnectorNodeSettings {
     }
 
     /**
-     * @return receive timeout in seconds
+     * @return receive timeout
      */
-    public int getReceiveTimeout() {
-        return m_receiveTimeout.getIntValue();
+    public Duration getReceiveTimeout() {
+        return Duration.ofSeconds(m_receiveTimeout.getIntValue());
     }
 
     /**

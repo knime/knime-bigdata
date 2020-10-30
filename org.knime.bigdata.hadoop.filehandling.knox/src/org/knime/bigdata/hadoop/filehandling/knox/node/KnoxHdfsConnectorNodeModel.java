@@ -50,7 +50,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 
-import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -77,7 +77,7 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
 
     private String m_fsId;
 
-    private KnoxHdfsConnection m_connection;
+    private KnoxHdfsFSConnection m_connection;
 
     private KnoxHdfsConnectorNodeSettings m_settings = new KnoxHdfsConnectorNodeSettings();
 
@@ -96,7 +96,7 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_connection = new KnoxHdfsConnection(m_settings, getCredentialsProvider());
+        m_connection = new KnoxHdfsFSConnection(m_settings, getCredentialsProvider());
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
         testConnection(m_connection);
         return new PortObject[]{new FileSystemPortObject(createSpec())};
@@ -119,7 +119,7 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
-        setWarningMessage("KNOX connection no longer available. Please re-execute the node.");
+        setWarningMessage("Connection no longer available. Please re-execute the node.");
     }
 
     @Override

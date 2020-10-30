@@ -45,7 +45,6 @@
  */
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
-import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,11 +73,10 @@ import org.apache.hadoop.hdfs.web.resources.DeleteOpParam;
 import org.apache.hadoop.hdfs.web.resources.FsActionParam;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam;
-import org.knime.bigdata.filehandling.knox.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.ContentSummary;
 import org.knime.bigdata.filehandling.knox.rest.FileStatus;
+import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
-import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
@@ -112,12 +110,12 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     protected void moveInternal(final KnoxHdfsPath source, final KnoxHdfsPath target, final CopyOption... options)
         throws IOException {
 
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            // remove target if required
-            if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
-                delete(target);
-            }
+        // remove target if required
+        if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
+            delete(target);
+        }
 
+        try {
             if (!getClient().rename(source.toString(), PutOpParam.Op.RENAME, target.toString())) {
                 throw new IOException("Failed to move '" + source + "' to '" + target + "' (hadoop returns false).");
             }
@@ -128,24 +126,21 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Note: HDFS does not support copy and therefore the file will be downloaded and uploaded again.
-     */
     @Override
     protected void copyInternal(final KnoxHdfsPath source, final KnoxHdfsPath target, final CopyOption... options)
         throws IOException {
 
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            // remove target if required
-            if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
-                delete(target);
-            }
+        // remove target if required
+        if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
+            delete(target);
+        }
+
+        try {
 
             if (Files.isDirectory(source)) {
                 createDirectoryInternal(target);
             } else {
+                // Note: HDFS does not support copy and therefore the file will be downloaded and uploaded again.
                 copyFile(source, target);
             }
         } catch (final AccessDeniedException e) { // NOSONAR
@@ -173,7 +168,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
      * @return {@code true} if the given path contains at least one child file or directory, {@code false} otherwise
      */
     private boolean isNonEmptyDir(final KnoxHdfsPath path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try  {
             // The summary includes the target in the file count, if it is a file
             // or the directory in the directory count if it is a directory.
             final ContentSummary summary = getClient().getContentSummary(path.toString(), GetOpParam.Op.GETCONTENTSUMMARY);
@@ -185,7 +180,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @Override
     protected InputStream newInputStreamInternal(final KnoxHdfsPath path, final OpenOption... options) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             return KnoxHDFSClient.openFile(getClient(), path.toString());
         } catch (final AccessDeniedException e) { // NOSONAR
             throw ExceptionUtil.createAccessDeniedException(path);
@@ -197,7 +192,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     @SuppressWarnings("resource")
     @Override
     protected OutputStream newOutputStreamInternal(final KnoxHdfsPath path, final OpenOption... options) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             if (ArrayUtils.contains(options, StandardOpenOption.APPEND)) {
                 return path.getFileSystem().appendFile(path.toString());
             } else {
@@ -217,7 +212,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     }
 
     FileStatus[] listFiles(final KnoxHdfsPath path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             final FileStatus[] files = getClient().listStatus(path.toString(), GetOpParam.Op.LISTSTATUS).fileStatus;
             return files != null ? files : new FileStatus[0];
         } catch (final AccessDeniedException e) { // NOSONAR
@@ -229,7 +224,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @Override
     protected void createDirectoryInternal(final KnoxHdfsPath path, final FileAttribute<?>... attrs) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             getClient().mkdirs(path.toString(), PutOpParam.Op.MKDIRS);
         } catch (final AccessDeniedException e) { // NOSONAR
             throw ExceptionUtil.createAccessDeniedException(path);
@@ -240,7 +235,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @Override
     protected boolean exists(final KnoxHdfsPath path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             return getFileStatus(path) != null;
         } catch (FileNotFoundException e) { // NOSONAR
             return false;
@@ -253,7 +248,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @Override
     protected BaseFileAttributes fetchAttributesInternal(final KnoxHdfsPath path, final Class<?> type) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             return toBaseFileAttributes(path, getFileStatus(path));
         } catch (final AccessDeniedException e) { // NOSONAR
             throw ExceptionUtil.createAccessDeniedException(path);
@@ -305,7 +300,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @Override
     protected void checkAccessInternal(final KnoxHdfsPath path, final AccessMode... modes) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             for (final AccessMode mode : modes) {
                 final FsActionParam fsAction = new FsActionParam(mapAccessModeToFsAction(mode));
                 getClient().checkAccess(path.toString(), GetOpParam.Op.CHECKACCESS, fsAction.getValue());
@@ -328,7 +323,7 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @Override
     protected void deleteInternal(final KnoxHdfsPath path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             final boolean recursive = false;
             getClient().delete(path.toString(), DeleteOpParam.Op.DELETE, recursive);
         } catch (final AccessDeniedException e) { // NOSONAR

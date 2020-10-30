@@ -48,14 +48,15 @@ package org.knime.bigdata.hadoop.filehandling.knox.testing;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.hadoop.hdfs.web.resources.DeleteOpParam;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam;
-import org.knime.bigdata.filehandling.knox.KnoxHDFSClient;
+import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
-import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsPath;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
@@ -77,7 +78,7 @@ public class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPa
      *
      * @param fsConnection {@link FSConnection} to use
      */
-    public KnoxHdfsTestInitializer(final KnoxHdfsConnection fsConnection) {
+    public KnoxHdfsTestInitializer(final KnoxHdfsFSConnection fsConnection) {
         super(fsConnection);
         m_client = fsConnection.getRestClient();
         m_uploadExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "knox-webhdfs-test-uploader"));
@@ -89,7 +90,7 @@ public class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPa
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             m_client.mkdirs(path.getParent().toUri().getPath(), PutOpParam.Op.MKDIRS);
             try (final OutputStream stream = KnoxHDFSClient.createFile(m_client, m_uploadExecutor, path.toUri().getPath(), false)) {
-                stream.write(content.getBytes());
+                stream.write(content.getBytes(StandardCharsets.UTF_8));
             }
         }
         return path;

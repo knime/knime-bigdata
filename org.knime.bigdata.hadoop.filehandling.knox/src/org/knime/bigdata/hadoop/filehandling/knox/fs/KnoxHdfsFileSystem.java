@@ -52,9 +52,12 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
-import org.knime.bigdata.filehandling.knox.KnoxHDFSClient;
+import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSettings;
 import org.knime.core.node.workflow.CredentialsProvider;
@@ -81,8 +84,6 @@ public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
      */
     public static final String PATH_SEPARATOR = "/";
 
-    private final String m_host;
-
     private final WebHDFSAPI m_client;
 
     private final ExecutorService m_uploadExecutor;
@@ -104,18 +105,28 @@ public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
             settings.getWorkingDirectory(), //
             createFSLocationSpec(settings.getHost()));
 
-        try {
-            m_host = settings.getHost();
-            m_client = KnoxHDFSClient.createClientBasicAuth(
-                settings.getURL(),
-                settings.getUser(cp),
-                settings.getPassword(cp),
-                settings.getReceiveTimeout() * 1000,
-                settings.getConnectionTimeout() * 1000);
-            m_uploadExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "knox-webhdfs-uploader"));
-        } catch (final URISyntaxException e) {
-            throw new IOException(e);
+        m_client = KnoxHDFSClient.createClientBasicAuth( //
+            getRESTEndpointURL(settings.getURL()), //
+            settings.getUser(cp), //
+            settings.getPassword(cp), //
+            settings.getReceiveTimeout(), //
+            settings.getConnectionTimeout()); //
+        m_uploadExecutor = new ThreadPoolExecutor(0, 10, //
+            10L, TimeUnit.SECONDS, //
+            new SynchronousQueue<Runnable>());
+    }
+
+    private static String getRESTEndpointURL(final String userProvidedUrl) {
+        final String toReturn;
+        if (Pattern.matches("^.*/webhdfs/v1/?$", userProvidedUrl)) {
+            toReturn = userProvidedUrl;
+        } else if (userProvidedUrl.endsWith("/")) {
+            toReturn = userProvidedUrl + "webhdfs/v1";
+        } else {
+            toReturn = userProvidedUrl + "/webhdfs/v1";
         }
+
+        return toReturn;
     }
 
     /**
@@ -150,16 +161,6 @@ public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
 
     OutputStream appendFile(final String path) throws IOException {
         return KnoxHDFSClient.appendFile(m_client, m_uploadExecutor, path);
-    }
-
-    @Override
-    public String getSchemeString() {
-        return FS_TYPE;
-    }
-
-    @Override
-    public String getHostString() {
-        return m_host;
     }
 
     @Override

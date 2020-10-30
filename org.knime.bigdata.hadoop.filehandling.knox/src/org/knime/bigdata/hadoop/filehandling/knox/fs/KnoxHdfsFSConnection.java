@@ -59,9 +59,9 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class KnoxHdfsConnection implements FSConnection {
+public class KnoxHdfsFSConnection implements FSConnection {
 
-    private static final long CACHE_TTL_MILLIS = 60000;
+    private static final long CACHE_TTL_MILLIS = 6000;
 
     private final KnoxHdfsFileSystem m_filesystem;
 
@@ -72,7 +72,7 @@ public class KnoxHdfsConnection implements FSConnection {
      * @param cp credentials provider to use, might be {@code null} if not required
      * @throws IOException
      */
-    public KnoxHdfsConnection(final KnoxHdfsConnectorNodeSettings settings, final CredentialsProvider cp) throws IOException {
+    public KnoxHdfsFSConnection(final KnoxHdfsConnectorNodeSettings settings, final CredentialsProvider cp) throws IOException {
         m_filesystem = new KnoxHdfsFileSystem(CACHE_TTL_MILLIS, settings, cp);
     }
 

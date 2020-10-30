@@ -51,7 +51,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSettings;
 import org.knime.filehandling.core.connections.FSLocationSpec;
@@ -82,7 +82,7 @@ public class KnoxHdfsTestInitializerProvider extends DefaultFSTestInitializerPro
             getTimeout(configuration),
             getTimeout(configuration));
 
-        return new KnoxHdfsTestInitializer(new KnoxHdfsConnection(settings, null));
+        return new KnoxHdfsTestInitializer(new KnoxHdfsFSConnection(settings, null));
     }
 
     private static void validateConfiguration(final Map<String, String> configuration) {
@@ -101,7 +101,7 @@ public class KnoxHdfsTestInitializerProvider extends DefaultFSTestInitializerPro
 
         try {
             if (configuration.containsKey("timeout") && Integer.parseInt(configuration.get("timeout")) < 0) {
-                throw new IllegalArgumentException("Timeout must be a positv integer.");
+                throw new IllegalArgumentException("Timeout must be a positive integer.");
             }
         } catch (final NumberFormatException e) {
             throw new IllegalArgumentException("Invalid timeout format.", e);
