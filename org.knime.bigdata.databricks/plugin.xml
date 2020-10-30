@@ -31,6 +31,10 @@
          category-path="/io/filehandling/remote/connections"
          factory-class="org.knime.bigdata.dbfs.node.connector.DBFSConnectionInformationNodeFactory">
     </node>
+    <node
+          category-path="/labs/file-handling-prototype"
+          factory-class="org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorNodeFactory">
+    </node>
   </extension>
   
   <!--************************** DB Extensions **************************-->
