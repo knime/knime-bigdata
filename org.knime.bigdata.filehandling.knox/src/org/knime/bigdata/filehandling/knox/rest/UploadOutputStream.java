@@ -46,7 +46,7 @@
  * History
  *   Nov 8, 2019 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.filehandling.knox;
+package org.knime.bigdata.filehandling.knox.rest;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;

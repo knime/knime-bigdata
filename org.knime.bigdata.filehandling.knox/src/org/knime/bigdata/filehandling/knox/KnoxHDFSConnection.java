@@ -45,7 +45,6 @@
  */
 package org.knime.bigdata.filehandling.knox;
 
-import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,10 +64,10 @@ import org.apache.hadoop.hdfs.web.resources.PutOpParam;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.bigdata.filehandling.knox.rest.FileStatus;
+import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnection;
 import org.knime.core.util.KnimeEncryption;
-import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
  * Web HDFS via KNOX connection implementation.
@@ -96,51 +95,37 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized boolean delete(final String path, final boolean recursive) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return m_client.delete(path, DeleteOpParam.Op.DELETE, recursive);
-        }
+        return m_client.delete(path, DeleteOpParam.Op.DELETE, recursive);
     }
 
     synchronized void move(final String source, final String destination) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            m_client.rename(source, PutOpParam.Op.RENAME, destination);
-        }
+        m_client.rename(source, PutOpParam.Op.RENAME, destination);
     }
 
     synchronized boolean mkdirs(final String path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return m_client.mkdirs(path, PutOpParam.Op.MKDIRS);
-        }
+        return m_client.mkdirs(path, PutOpParam.Op.MKDIRS);
     }
 
     synchronized InputStream open(final String path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return KnoxHDFSClient.openFile(m_client, path);
-        }
+        return KnoxHDFSClient.openFile(m_client, path);
     }
 
     synchronized OutputStream create(final String path, final boolean overwrite) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return KnoxHDFSClient.createFile(m_client, m_uploadExecutor, path, overwrite);
-        }
+        return KnoxHDFSClient.createFile(m_client, m_uploadExecutor, path, overwrite);
     }
 
     synchronized FileStatus getFileStatus(final String path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return m_client.getFileStatus(path, GetOpParam.Op.GETFILESTATUS);
-        }
+        return m_client.getFileStatus(path, GetOpParam.Op.GETFILESTATUS);
     }
 
     synchronized FileStatus[] listFiles(final String path) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final FileStatus[] files = m_client.listStatus(path, GetOpParam.Op.LISTSTATUS).fileStatus;
-            return files != null ? files : new FileStatus[0];
-        }
+        final FileStatus[] files = m_client.listStatus(path, GetOpParam.Op.LISTSTATUS).fileStatus;
+        return files != null ? files : new FileStatus[0];
     }
 
     @Override
     public synchronized boolean exists(final URI uri) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+        try {
             return getFileStatus(uri.getPath()) != null;
         } catch (FileNotFoundException|NotFoundException e) {
             return false;
@@ -149,19 +134,15 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
 
     @Override
     public synchronized URI getHomeDirectory() throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final URI baseURI = m_connectionInformation.toURI();
-            return baseURI.resolve(m_client.getHomeDirectory(GetOpParam.Op.GETHOMEDIRECTORY).toUri().getPath());
-        }
+        final URI baseURI = m_connectionInformation.toURI();
+        return baseURI.resolve(m_client.getHomeDirectory(GetOpParam.Op.GETHOMEDIRECTORY).toUri().getPath());
     }
 
     @Override
     public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            final int n = FsPermission.valueOf(unixSymbolicPermission).toShort();
-            final int octal = (n>>>9&1)*1000 + (n>>>6&7)*100 + (n>>>3&7)*10 + (n&7);
-            m_client.setPermission(uri.getPath(), PutOpParam.Op.SETPERMISSION, (short) octal);
-        }
+        final int n = FsPermission.valueOf(unixSymbolicPermission).toShort();
+        final int octal = (n>>>9&1)*1000 + (n>>>6&7)*100 + (n>>>3&7)*10 + (n&7);
+        m_client.setPermission(uri.getPath(), PutOpParam.Op.SETPERMISSION, (short) octal);
     }
 
     @Override

@@ -46,7 +46,7 @@
  * History
  *   Oct 26, 2020 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.filehandling.knox;
+package org.knime.bigdata.filehandling.knox.rest;
 
 import java.io.IOException;
 

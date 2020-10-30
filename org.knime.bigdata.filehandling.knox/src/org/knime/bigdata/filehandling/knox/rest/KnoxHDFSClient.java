@@ -43,7 +43,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.filehandling.knox;
+package org.knime.bigdata.filehandling.knox.rest;
 
 import java.io.BufferedInputStream;
 import java.io.Closeable;
@@ -82,8 +82,6 @@ import org.apache.hadoop.hdfs.web.resources.GetOpParam;
 import org.apache.hadoop.hdfs.web.resources.PostOpParam;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
-import org.knime.bigdata.filehandling.knox.rest.RemoteException;
-import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
@@ -163,8 +161,7 @@ public class KnoxHDFSClient extends AbstractRESTClient {
      * @see KnoxHDFSClient#createClientBasicAuth(String, String, String, int, int)
      * @return WebHDFS REST API proxy
      */
-    @SuppressWarnings("javadoc")
-    public static WebHDFSAPI createClient(final String baseUrl,
+    private static WebHDFSAPI createClient(final String baseUrl,
         final Duration receiveTimeoutMillis, final Duration connectionTimeoutMillis) {
 
         final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeoutMillis, connectionTimeoutMillis);
@@ -214,7 +211,7 @@ public class KnoxHDFSClient extends AbstractRESTClient {
         } else if (!StringUtils.isBlank(user)) {
             WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":").getBytes(StandardCharsets.UTF_8)));
         }
-        return proxyImpl;
+        return new WebHDFSAPIWrapper(proxyImpl);
     }
 
     /**
@@ -293,8 +290,12 @@ public class KnoxHDFSClient extends AbstractRESTClient {
         final UploadOutputStream outputStream = new UploadOutputStream(expectedResponseCode);
         final PipedInputStream inputStream = new PipedInputStream(outputStream, CHUNK_LENGTH);
         final Future<Response> respWrite = executor.submit(() -> {
+            final WebHDFSAPI proxyToUse = (proxyImpl instanceof WebHDFSAPIWrapper) //
+                    ? ((WebHDFSAPIWrapper)proxyImpl).getWrappedWebHDFsAPI() //
+                    : proxyImpl;
+
             try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-                return WebClient.fromClient(WebClient.client(proxyImpl), true)
+                return WebClient.fromClient(WebClient.client(proxyToUse), true)
                     .to(location.toString(), false)
                     .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE)
                     .invoke(method, Entity.entity(inputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
