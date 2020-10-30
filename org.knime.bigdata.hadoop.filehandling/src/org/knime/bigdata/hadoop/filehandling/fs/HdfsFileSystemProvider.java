@@ -180,7 +180,7 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
         try {
             return getHadoopFS().open(path.toHadoopPath());
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
+            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
@@ -197,7 +197,7 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
                 return getHadoopFS().create(path.toHadoopPath(), overwrite);
             }
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
+            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
@@ -211,7 +211,7 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             final FileStatus[] stats = getHadoopFS().listStatus(hadoopPath);
             return new HdfsPathIterator(path, hadoopPath, stats, filter);
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
+            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
@@ -225,7 +225,7 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
                 throw new IOException("Failed to create directory '" + path + "' (hadoop returns false).");
             }
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
+            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
@@ -244,7 +244,7 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
                     && e.getMessage().startsWith(parent + " (is not a directory)")) {
                 return false;
             } else {
-                throw ExceptionUtil.createAccessDeniedException(path);
+                throw new AccessDeniedException(path.toString());
             }
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
@@ -258,7 +258,7 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             final FileStatus status = getHadoopFS().getFileStatus(path.toHadoopPath());
             return toBaseFileAttributes(path, status);
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
+            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
@@ -313,9 +313,14 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             final boolean recursive = false;
             getHadoopFS().delete(path.toHadoopPath(), recursive);
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
+            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
+    }
+
+    @Override
+    protected boolean isHiddenInternal(final HdfsPath path) throws IOException {
+        return path.getFileName().toString().startsWith(".");
     }
 }

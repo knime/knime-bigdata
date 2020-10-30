@@ -47,6 +47,7 @@ package org.knime.bigdata.hadoop.filehandling.fs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.OpenOption;
 import java.util.Set;
 
@@ -86,7 +87,7 @@ public class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPat
             final boolean useRawLocalFileSystem = true;
             remoteFile.getFileSystem().getHadoopFileSystem().copyToLocalFile(deleteSource, src, dst, useRawLocalFileSystem);
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(remoteFile);
+            throw new AccessDeniedException(remoteFile.toString());
         } catch (final FileNotFoundException e) { // NOSONAR
             // source file does not exists
         } catch (final Exception e) { // NOSONAR
@@ -104,7 +105,7 @@ public class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPat
             final boolean overwrite = true;
             remoteFile.getFileSystem().getHadoopFileSystem().copyFromLocalFile(deleteSource, overwrite, src, dst);
         } catch (final AccessControlException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(remoteFile);
+            throw new AccessDeniedException(remoteFile.toString());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionUtil.wrapAsIOException(e);
         }
