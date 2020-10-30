@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.ws.rs.ProcessingException;
@@ -81,7 +82,7 @@ class WsRsRestClient extends AbstractRESTClient implements IRestClient {
 
         // Chunk transfer policy
         final long timeout = contextConfig.getReceiveTimeout().toMillis();
-        m_clientPolicy = createClientPolicy(timeout, timeout);
+        m_clientPolicy = createClientPolicy(Duration.ofMillis(timeout), Duration.ofMillis(timeout));
         m_proxyAuthPolicy = configureProxyIfNecessary(contextConfig.getJobServerUrl(), m_clientPolicy);
     }
 

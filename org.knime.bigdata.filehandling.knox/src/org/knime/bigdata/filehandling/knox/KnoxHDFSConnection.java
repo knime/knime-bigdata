@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.security.InvalidParameterException;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -178,8 +179,8 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
                 m_connectionInformation.getURL().toString(),
                 m_connectionInformation.getUser(),
                 KnimeEncryption.decrypt(m_connectionInformation.getPassword()),
-                m_connectionInformation.getTimeout(),
-                m_connectionInformation.getTimeout());
+                Duration.ofMillis(m_connectionInformation.getTimeout()),
+                Duration.ofMillis(m_connectionInformation.getTimeout()));
         }
     }
 

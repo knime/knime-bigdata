@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.AccessDeniedException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -142,7 +143,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
 
         final String baseUrl = deploymentUrl + "/api/";
 
-        final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeoutMillis, connectionTimeoutMillis);
+        final HTTPClientPolicy clientPolicy =
+            createClientPolicy(Duration.ofMillis(receiveTimeoutMillis), Duration.ofMillis(connectionTimeoutMillis));
         final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
 
         // Create the API Proxy

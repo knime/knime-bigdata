@@ -49,6 +49,7 @@
 package org.knime.bigdata.commons.rest;
 
 import java.net.URI;
+import java.time.Duration;
 
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
@@ -92,17 +93,17 @@ public class AbstractRESTClient {
     }
 
     /**
-     * @param receiveTimeoutMillis receive timeout in milliseconds
-     * @param connectionTimeoutMillis connection timeout in milliseconds
+     * @param receiveTimeoutMillis receive timeout
+     * @param connectionTimeoutMillis connection timeout
      * @return default {@link HTTPClientPolicy} to use REST clients
      */
-    protected static HTTPClientPolicy createClientPolicy(final long receiveTimeoutMillis, final long connectionTimeoutMillis) {
+    protected static HTTPClientPolicy createClientPolicy(final Duration receiveTimeoutMillis, final Duration connectionTimeoutMillis) {
         final HTTPClientPolicy clientPolicy = new HTTPClientPolicy();
         clientPolicy.setAllowChunking(true);
         clientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
         clientPolicy.setChunkLength(CHUNK_LENGTH);
-        clientPolicy.setReceiveTimeout(receiveTimeoutMillis);
-        clientPolicy.setConnectionTimeout(connectionTimeoutMillis);
+        clientPolicy.setReceiveTimeout(receiveTimeoutMillis.toMillis());
+        clientPolicy.setConnectionTimeout(connectionTimeoutMillis.toMillis());
         return clientPolicy;
     }
 

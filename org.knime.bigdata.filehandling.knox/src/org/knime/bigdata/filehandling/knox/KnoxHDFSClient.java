@@ -144,14 +144,14 @@ public class KnoxHDFSClient extends AbstractRESTClient {
      * Creates a service proxy for WebHDFS REST API interface without any authentication data.
      *
      * @param baseUrl https://...:8433/gateway/.../webhdfs/v1/
-     * @param receiveTimeoutMillis Receive timeout in milliseconds
-     * @param connectionTimeoutMillis connection timeout in milliseconds
+     * @param receiveTimeoutMillis Receive timeout
+     * @param connectionTimeoutMillis connection timeout
      * @see KnoxHDFSClient#createClientBasicAuth(String, String, String, int, int)
      * @return WebHDFS REST API proxy
      */
     @SuppressWarnings("javadoc")
     public static WebHDFSAPI createClient(final String baseUrl,
-            final int receiveTimeoutMillis, final int connectionTimeoutMillis) {
+        final Duration receiveTimeoutMillis, final Duration connectionTimeoutMillis) {
 
         final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeoutMillis, connectionTimeoutMillis);
         final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
@@ -187,14 +187,12 @@ public class KnoxHDFSClient extends AbstractRESTClient {
      * @param baseUrl https://...:8433/gateway/.../webhdfs/v1/
      * @param user Username for authentication
      * @param password Password for authentication
-     * @param receiveTimeoutMillis Receive timeout in milliseconds
-     * @param connectionTimeoutMillis connection timeout in milliseconds
+     * @param receiveTimeoutMillis Receive timeout
+     * @param connectionTimeoutMillis connection timeout
      * @return WebHDFS REST API proxy
-     * @throws UnsupportedEncodingException if given user and password can't be encoded as UTF-8
-     * @throws URISyntaxException
      */
     public static WebHDFSAPI createClientBasicAuth(final String baseUrl, final String user, final String password,
-        final int receiveTimeoutMillis, final int connectionTimeoutMillis) throws UnsupportedEncodingException, URISyntaxException {
+        final Duration receiveTimeoutMillis, final Duration connectionTimeoutMillis) {
 
         final WebHDFSAPI proxyImpl = createClient(baseUrl, receiveTimeoutMillis, connectionTimeoutMillis);
         if (!StringUtils.isBlank(user) && !StringUtils.isBlank(password)) {
