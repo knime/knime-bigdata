@@ -50,11 +50,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -80,7 +80,6 @@ import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
-import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 
 /**
  * {@link KnoxHdfsFileSystem} file system provider.
@@ -119,10 +118,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
             if (!getClient().rename(source.toString(), PutOpParam.Op.RENAME, target.toString())) {
                 throw new IOException("Failed to move '" + source + "' to '" + target + "' (hadoop returns false).");
             }
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw new AccessDeniedException(source.toString(), target.toString(), "Unable to move path");
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, source, target);
         }
     }
 
@@ -143,10 +140,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
                 // Note: HDFS does not support copy and therefore the file will be downloaded and uploaded again.
                 copyFile(source, target);
             }
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw new AccessDeniedException(source.toString(), target.toString(), "Unable to copy path");
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, source, target);
         }
     }
 
@@ -182,10 +177,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     protected InputStream newInputStreamInternal(final KnoxHdfsPath path, final OpenOption... options) throws IOException {
         try {
             return KnoxHDFSClient.openFile(getClient(), path.toString());
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 
@@ -199,10 +192,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
                 final boolean overwrite = ArrayUtils.contains(options, StandardOpenOption.TRUNCATE_EXISTING);
                 return path.getFileSystem().createFile(path.toString(), overwrite);
             }
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 
@@ -215,10 +206,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
         try {
             final FileStatus[] files = getClient().listStatus(path.toString(), GetOpParam.Op.LISTSTATUS).fileStatus;
             return files != null ? files : new FileStatus[0];
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 
@@ -226,10 +215,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     protected void createDirectoryInternal(final KnoxHdfsPath path, final FileAttribute<?>... attrs) throws IOException {
         try {
             getClient().mkdirs(path.toString(), PutOpParam.Op.MKDIRS);
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 
@@ -237,12 +224,13 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     protected boolean exists(final KnoxHdfsPath path) throws IOException {
         try {
             return getFileStatus(path) != null;
-        } catch (FileNotFoundException e) { // NOSONAR
-            return false;
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            final IOException mapped = ExceptionMapper.mapException(e, path, null);
+            if (mapped instanceof NoSuchFileException) {
+                return false;
+            } else {
+                throw mapped;
+            }
         }
     }
 
@@ -250,10 +238,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
     protected BaseFileAttributes fetchAttributesInternal(final KnoxHdfsPath path, final Class<?> type) throws IOException {
         try {
             return toBaseFileAttributes(path, getFileStatus(path));
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 
@@ -305,10 +291,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
                 final FsActionParam fsAction = new FsActionParam(mapAccessModeToFsAction(mode));
                 getClient().checkAccess(path.toString(), GetOpParam.Op.CHECKACCESS, fsAction.getValue());
             }
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 
@@ -326,10 +310,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
         try {
             final boolean recursive = false;
             getClient().delete(path.toString(), DeleteOpParam.Op.DELETE, recursive);
-        } catch (final AccessDeniedException e) { // NOSONAR
-            throw ExceptionUtil.createAccessDeniedException(path);
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path, null);
         }
     }
 }

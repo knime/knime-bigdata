@@ -52,8 +52,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.AccessDeniedException;
 
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
@@ -117,7 +115,7 @@ public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
                 m_fileInfoLoaded = true;
             } catch (AccessDeniedException e) {
                 throw new RemoteFile.AccessControlException(e);
-            } catch (NotFoundException e) {
+            } catch (FileNotFoundException e) { // NOSONAR
                 m_fileInfoLoaded = true;
                 m_fileStatus = null;
                 throw new FileNotFoundException(getURI().getPath());
@@ -167,7 +165,7 @@ public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
             invalidateCachedFileInfo();
             getFileStatus();
             return true;
-        } catch (FileNotFoundException|NotFoundException e) {
+        } catch (FileNotFoundException e) { // NOSONAR
             return false;
         }
     }

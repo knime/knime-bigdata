@@ -61,7 +61,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -100,55 +104,25 @@ public class KnoxHDFSClient extends AbstractRESTClient {
     /**
      * Map response HTTP status codes to {@link IOException}s with error message from JSON response if possible.
      */
-    static class KNOXResponseExceptionMapper implements ResponseExceptionMapper<IOException> {
+    static class KNOXResponseExceptionMapper implements ResponseExceptionMapper<ClientErrorException> {
         @Override
-        public IOException fromResponse(final Response response) {
-            final String message = extractMessage(response);
-
-            final IOException toReturn;
+        public ClientErrorException fromResponse(final Response response) {
+            final ClientErrorException toReturn;
             switch (Status.fromStatusCode(response.getStatus())) {
                 case UNAUTHORIZED:
-                    toReturn =
-                        new KnoxAuthenticationException(makeMessage(message, "Invalid or missing authentication data"));
+                    toReturn = new NotAuthorizedException(response);
                     break;
                 case FORBIDDEN:
-                    toReturn = new AccessDeniedException(makeMessage(message, "Access forbidden"));
+                    toReturn = new ForbiddenException(response);
                     break;
                 case NOT_FOUND:
-                    toReturn = new FileNotFoundException(makeMessage(message, "Resource not found"));
+                    toReturn = new NotFoundException(response);
                     break;
                 default:
-                    toReturn = new IOException(makeMessage(message, "Server error: " + response.getStatus()));
+                    toReturn = new ClientErrorException(response);
             }
 
             return toReturn;
-        }
-
-        private static String makeMessage(final String serverProvidedMessage, final String defaultMessage) {
-            if (!StringUtils.isBlank(serverProvidedMessage)) {
-                return serverProvidedMessage;
-            } else {
-                return defaultMessage;
-            }
-        }
-
-        private static String extractMessage(final Response response) {
-            String message = null;
-
-            // try to parse remote exceptions
-            if (response.getMediaType() != null && response.getMediaType().getSubtype().toLowerCase().contains("json")) {
-                try {
-                    final RemoteException remoteException = response.readEntity(RemoteException.class);
-                    if (!StringUtils.isBlank(remoteException.message)) {
-                        message = remoteException.message;
-                    } else {
-                        message = response.getStatusInfo().getReasonPhrase();
-                    }
-                } catch (Exception e) { // NOSONAR
-                    message = e.getMessage();
-                }
-            }
-            return message;
         }
     }
 
@@ -222,18 +196,24 @@ public class KnoxHDFSClient extends AbstractRESTClient {
         final Response respOpen = proxyImpl.open(path, GetOpParam.Op.OPEN, CHUNK_LENGTH);
         validateStatusCode(respOpen, 307);
 
-        final Response respRead = WebClient.fromClient(WebClient.client(proxyImpl), true)
-                .to(respOpen.getLocation().toString(), false)
-                .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                .get();
-        validateStatusCode(respRead, 200);
+       try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+           final WebHDFSAPI proxyToUse = (proxyImpl instanceof WebHDFSAPIWrapper) //
+                   ? ((WebHDFSAPIWrapper)proxyImpl).getWrappedWebHDFsAPI() //
+                   : proxyImpl;
 
-        final Object entity = respRead.getEntity();
-        if (entity instanceof InputStream) {
-            return new BufferedInputStream((InputStream) entity, CHUNK_LENGTH);
-        } else {
-            throw new IOException("Unknown entity received: " + entity.getClass().getName());
-        }
+           final Response respRead = WebClient.fromClient(WebClient.client(proxyToUse), true)
+                   .to(respOpen.getLocation().toString(), false)
+                   .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                   .get();
+           validateStatusCode(respRead, 200);
+
+           final Object entity = respRead.getEntity();
+           if (entity instanceof InputStream) {
+               return new BufferedInputStream((InputStream) entity, CHUNK_LENGTH);
+           } else {
+               throw new IOException("Unknown entity received: " + entity.getClass().getName());
+           }
+       }
     }
 
     /**

@@ -55,8 +55,6 @@ import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.ws.rs.NotFoundException;
-
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.web.resources.DeleteOpParam;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam;
@@ -95,15 +93,27 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized boolean delete(final String path, final boolean recursive) throws IOException {
-        return m_client.delete(path, DeleteOpParam.Op.DELETE, recursive);
+        try {
+            return m_client.delete(path, DeleteOpParam.Op.DELETE, recursive);
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
     }
 
     synchronized void move(final String source, final String destination) throws IOException {
-        m_client.rename(source, PutOpParam.Op.RENAME, destination);
+        try {
+            m_client.rename(source, PutOpParam.Op.RENAME, destination);
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
     }
 
     synchronized boolean mkdirs(final String path) throws IOException {
-        return m_client.mkdirs(path, PutOpParam.Op.MKDIRS);
+        try {
+            return m_client.mkdirs(path, PutOpParam.Op.MKDIRS);
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
     }
 
     synchronized InputStream open(final String path) throws IOException {
@@ -115,34 +125,52 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized FileStatus getFileStatus(final String path) throws IOException {
-        return m_client.getFileStatus(path, GetOpParam.Op.GETFILESTATUS);
+        try {
+            return m_client.getFileStatus(path, GetOpParam.Op.GETFILESTATUS);
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
     }
 
     synchronized FileStatus[] listFiles(final String path) throws IOException {
-        final FileStatus[] files = m_client.listStatus(path, GetOpParam.Op.LISTSTATUS).fileStatus;
-        return files != null ? files : new FileStatus[0];
+        try {
+            final FileStatus[] files = m_client.listStatus(path, GetOpParam.Op.LISTSTATUS).fileStatus;
+            return files != null ? files : new FileStatus[0];
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
+
     }
 
     @Override
     public synchronized boolean exists(final URI uri) throws IOException {
         try {
             return getFileStatus(uri.getPath()) != null;
-        } catch (FileNotFoundException|NotFoundException e) {
+        } catch (FileNotFoundException e) { // NOSONAR
             return false;
         }
     }
 
     @Override
     public synchronized URI getHomeDirectory() throws IOException {
-        final URI baseURI = m_connectionInformation.toURI();
-        return baseURI.resolve(m_client.getHomeDirectory(GetOpParam.Op.GETHOMEDIRECTORY).toUri().getPath());
+        try {
+            final URI baseURI = m_connectionInformation.toURI();
+            return baseURI.resolve(m_client.getHomeDirectory(GetOpParam.Op.GETHOMEDIRECTORY).toUri().getPath());
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
     }
 
     @Override
     public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
-        final int n = FsPermission.valueOf(unixSymbolicPermission).toShort();
-        final int octal = (n>>>9&1)*1000 + (n>>>6&7)*100 + (n>>>3&7)*10 + (n&7);
-        m_client.setPermission(uri.getPath(), PutOpParam.Op.SETPERMISSION, (short) octal);
+        try {
+            final int n = FsPermission.valueOf(unixSymbolicPermission).toShort();
+            final int octal = (n >>> 9 & 1) * 1000 + (n >>> 6 & 7) * 100 + (n >>> 3 & 7) * 10 + (n & 7);
+            m_client.setPermission(uri.getPath(), PutOpParam.Op.SETPERMISSION, (short)octal);
+        } catch (Exception e) { // NOSONAR
+            throw ExceptionMapper.mapException(e);
+        }
+
     }
 
     @Override
