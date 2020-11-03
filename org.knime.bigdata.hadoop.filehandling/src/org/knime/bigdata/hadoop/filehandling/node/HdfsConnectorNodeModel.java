@@ -47,6 +47,8 @@ package org.knime.bigdata.hadoop.filehandling.node;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
@@ -103,7 +105,13 @@ public class HdfsConnectorNodeModel extends NodeModel {
 
     @SuppressWarnings("resource")
     private static void testConnection(final HdfsConnection connection) throws IOException {
-        Files.getLastModifiedTime(connection.getFileSystem().getPath("/"));
+        try {
+            Files.getLastModifiedTime(connection.getFileSystem().getPath("/"));
+        } catch (AccessDeniedException e) {
+            throw new IOException(String.format("Authentication failure (Response: %s)", e.getReason()), e);
+        } catch (ConnectException e) {
+            throw new IOException("Unable to connect: Probably the host and/or port are incorrect.", e);
+        }
     }
 
     private FileSystemPortObjectSpec createSpec() {

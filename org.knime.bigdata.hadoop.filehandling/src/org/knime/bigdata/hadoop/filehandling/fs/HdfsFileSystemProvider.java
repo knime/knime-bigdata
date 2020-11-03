@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
@@ -75,7 +74,6 @@ import org.apache.hadoop.security.AccessControlException;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
-import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 
 /**
  * {@link HdfsFileSystem} file system provider.
@@ -117,10 +115,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             if (!fs.rename(sourcePath, targetPath)) {
                 throw new IOException("Failed to move '" + source + "' to '" + target + "' (hadoop returns false).");
             }
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(source.toString(), target.toString(), "Unable to move path");
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, source, target);
         }
     }
 
@@ -138,12 +134,12 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
         final Path sourcePath = source.toHadoopPath();
         final Path targetPath = target.toHadoopPath();
 
-        try {
-            // remove target if required
-            if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
-                delete(target);
-            }
+        // remove target if required
+        if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
+            delete(target);
+        }
 
+        try {
             if (Files.isDirectory(source)) {
                 createDirectoryInternal(target);
             } else if (!FileUtil.copy(fs, sourcePath, fs, targetPath, deleteSource, overwrite, fs.getConf())) {
@@ -151,10 +147,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             } else {
                 // copy was successful
             }
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(source.toString(), target.toString(), "Unable to copy path");
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, source, target);
         }
     }
 
@@ -179,10 +173,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
     protected InputStream newInputStreamInternal(final HdfsPath path, final OpenOption... options) throws IOException {
         try {
             return getHadoopFS().open(path.toHadoopPath());
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 
@@ -196,10 +188,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
                 final boolean overwrite = ArrayUtils.contains(options, StandardOpenOption.TRUNCATE_EXISTING);
                 return getHadoopFS().create(path.toHadoopPath(), overwrite);
             }
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 
@@ -210,10 +200,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             final Path hadoopPath = path.toHadoopPath();
             final FileStatus[] stats = getHadoopFS().listStatus(hadoopPath);
             return new HdfsPathIterator(path, hadoopPath, stats, filter);
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 
@@ -224,10 +212,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
             if (!getHadoopFS().mkdirs(path.toHadoopPath())) {
                 throw new IOException("Failed to create directory '" + path + "' (hadoop returns false).");
             }
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 
@@ -244,10 +230,10 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
                     && e.getMessage().startsWith(parent + " (is not a directory)")) {
                 return false;
             } else {
-                throw new AccessDeniedException(path.toString());
+                throw ExceptionMapper.mapException(e, path);
             }
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 
@@ -257,10 +243,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
         try {
             final FileStatus status = getHadoopFS().getFileStatus(path.toHadoopPath());
             return toBaseFileAttributes(path, status);
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 
@@ -312,10 +296,8 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
         try {
             final boolean recursive = false;
             getHadoopFS().delete(path.toHadoopPath(), recursive);
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(path.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, path);
         }
     }
 

@@ -47,14 +47,11 @@ package org.knime.bigdata.hadoop.filehandling.fs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.OpenOption;
 import java.util.Set;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.security.AccessControlException;
 import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
-import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 
 
 /**
@@ -86,12 +83,10 @@ public class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPat
             // (the temporary file might be modified without using the hadoop api's and without updating the checksum)
             final boolean useRawLocalFileSystem = true;
             remoteFile.getFileSystem().getHadoopFileSystem().copyToLocalFile(deleteSource, src, dst, useRawLocalFileSystem);
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(remoteFile.toString());
         } catch (final FileNotFoundException e) { // NOSONAR
             // source file does not exists
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, remoteFile);
         }
     }
 
@@ -104,10 +99,8 @@ public class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPat
             final boolean deleteSource = false;
             final boolean overwrite = true;
             remoteFile.getFileSystem().getHadoopFileSystem().copyFromLocalFile(deleteSource, overwrite, src, dst);
-        } catch (final AccessControlException e) { // NOSONAR
-            throw new AccessDeniedException(remoteFile.toString());
         } catch (final Exception e) { // NOSONAR
-            throw ExceptionUtil.wrapAsIOException(e);
+            throw ExceptionMapper.mapException(e, remoteFile);
         }
     }
 }
