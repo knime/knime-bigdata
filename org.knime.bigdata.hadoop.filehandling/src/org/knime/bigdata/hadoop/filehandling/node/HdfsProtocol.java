@@ -53,8 +53,8 @@ package org.knime.bigdata.hadoop.filehandling.node;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-enum HdfsProtocol {
-    HDFS, WEBHDFS, SWEBHDFS, HTTPFS, HTTPSFS;
+public enum HdfsProtocol {
+    HDFS, WEBHDFS, WEBHDFS_SSL, HTTPFS, HTTPFS_SSL;
 
     /**
      * @return Hadoop compatible scheme
@@ -66,8 +66,8 @@ enum HdfsProtocol {
             case WEBHDFS:
             case HTTPFS:
                 return "webhdfs";
-            case SWEBHDFS:
-            case HTTPSFS:
+            case WEBHDFS_SSL:
+            case HTTPFS_SSL:
                 return "swebhdfs";
             default:
                 throw new IllegalArgumentException();
@@ -77,18 +77,18 @@ enum HdfsProtocol {
     /**
      * @return default port of this protocol
      */
-    int getDefaultPort() { // NOSONAR ignore complexity warning
+    public int getDefaultPort() { // NOSONAR ignore complexity warning
         switch (this) {
             case HDFS:
                 return 8020;
             case WEBHDFS:
                 /* 50070 on Hadoop 2.x */
                 return 9870;
-            case SWEBHDFS:
+            case WEBHDFS_SSL:
                 /* 50470 on Hadoop 2.x */
                 return 9871;
             case HTTPFS:
-            case HTTPSFS:
+            case HTTPFS_SSL:
                 return 14000;
             default:
                 throw new IllegalArgumentException();
@@ -98,17 +98,17 @@ enum HdfsProtocol {
     /**
      * @return human readable description of this protocol
      */
-    String getText() { // NOSONAR ignore complexity warning
+    public String getText() { // NOSONAR ignore complexity warning
         switch (this) {
             case HDFS:
                 return "HDFS";
             case WEBHDFS:
                 return "WebHDFS";
-            case SWEBHDFS:
+            case WEBHDFS_SSL:
                 return "WebHDFS with SSL";
             case HTTPFS:
                 return "HttpFS";
-            case HTTPSFS:
+            case HTTPFS_SSL:
                 return "HttpFS with SSL";
             default:
                 throw new IllegalArgumentException();

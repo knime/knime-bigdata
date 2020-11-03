@@ -47,7 +47,6 @@ package org.knime.bigdata.hadoop.filehandling.testing;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +54,7 @@ import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsAuthenticationSettings.AuthType;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
+import org.knime.bigdata.hadoop.filehandling.node.HdfsProtocol;
 import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
@@ -70,15 +70,17 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
     public HdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
         validateConfiguration(configuration);
 
-        final URI uri = URI.create(configuration.get("uri"));
         final String workingDirPrefix = configuration.get("workingDirPrefix");
         final String workingDir = generateRandomizedWorkingDir(workingDirPrefix, HdfsFileSystem.PATH_SEPARATOR);
 
+        final HdfsProtocol protocol = HdfsProtocol.valueOf(configuration.get("protocol"));
+        int port = configuration.containsKey("port") ? Integer.parseInt(configuration.get("port")) : protocol.getDefaultPort();
+
         final HdfsConnectorNodeSettings settings = new HdfsConnectorNodeSettings( //
-            uri.getScheme().toUpperCase(), //
-            uri.getHost(), //
+            protocol.toString(), //
+            configuration.get("host"), //
             true, // custom port
-            uri.getPort(), //
+            port, //
             AuthType.valueOf(configuration.get("auth").toUpperCase()), //
             configuration.get("user"), //
             workingDir);
@@ -87,16 +89,17 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
     }
 
     private static void validateConfiguration(final Map<String, String> configuration) {
-        checkArgumentNotBlank(configuration.get("uri"), "uri must be specified.");
+        checkArgumentNotBlank(configuration.get("protocol"), "protocol must be specified (one of HDFS, WEBHDFS, WEBHDFS_SSL, HTTPFS, HTTPFS_SSL)");
         try {
-            final URI fsURI = new URI(configuration.get("uri"));
-            checkArgumentNotBlank(fsURI.getScheme(), "Invalid or missing scheme in file system URI.");
-            checkArgumentNotBlank(fsURI.getHost(), "Invalid or missing host in system scheme URI.");
-            if (fsURI.getPort() <= 0) {
-                throw new IllegalArgumentException("Invalid or missing port in system scheme URI.");
-            }
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid file system URI", e);
+            HdfsProtocol.valueOf(configuration.get("protocol"));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown protocol: " + configuration.get("protocol"));
+        }
+
+        checkArgumentNotBlank(configuration.get("host"), "host must be specified");
+
+        if (configuration.containsKey("port")) {
+            checkArgumentNotBlank(configuration.get("port"), "port is optional, but must not be blank if set");
         }
 
         checkArgumentNotBlank(configuration.get("workingDirPrefix"), "Working directory prefix must be specified.");
@@ -107,14 +110,6 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
             checkArgumentNotBlank(configuration.get("user"), "User must be specified.");
         } else if (authType != AuthType.KERBEROS) { // NOSONAR
             throw new IllegalArgumentException("Unknown authentication type.");
-        }
-
-        try {
-            if (configuration.containsKey("timeout") && Integer.parseInt(configuration.get("timeout")) < 0) {
-                throw new IllegalArgumentException("Timeout must be a positv integer.");
-            }
-        } catch (final NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid timeout format.", e);
         }
     }
 
