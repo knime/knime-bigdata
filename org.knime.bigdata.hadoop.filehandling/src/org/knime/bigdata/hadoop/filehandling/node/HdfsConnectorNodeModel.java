@@ -74,8 +74,6 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  */
 public class HdfsConnectorNodeModel extends NodeModel {
 
-    private static final String FILE_SYSTEM_NAME = HdfsFileSystem.FS_TYPE;
-
     private String m_fsId;
 
     private HdfsConnection m_connection;
@@ -115,7 +113,7 @@ public class HdfsConnectorNodeModel extends NodeModel {
     }
 
     private FileSystemPortObjectSpec createSpec() {
-        return new FileSystemPortObjectSpec(FILE_SYSTEM_NAME, m_fsId,
+        return new FileSystemPortObjectSpec(m_settings.getProtocol().getText(), m_fsId,
             HdfsFileSystem.createFSLocationSpec(m_settings.getHost()));
     }
 
