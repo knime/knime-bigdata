@@ -66,7 +66,7 @@ import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 public class HadoopPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
     private static final String SSL_INFO =
-        "The SSL settings are removed in KNIME 4.2 rom this preferences page and the new HDFS Connector uses the JVM SSL settings instead.";
+        "SSL trust- and keystore settings for HDFS have been removed with KNIME Analytics Platform 4.3.\nThe new HDFS Connector nodes use the default Java SSL trust- and keystore.";
 
     private FileFieldEditor m_coreSiteConf;
     private FileFieldEditor m_hdfsSiteConf;
