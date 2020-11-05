@@ -129,10 +129,7 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
         gbc.gridx = gbc.gridy = 0;
         gbc.weightx = gbc.weighty = 0;
 
-        // space top side
-        gbc.insets = new Insets(10, 0, 0, 0);
-        panel.add(new JLabel(), gbc);
-
+        panel.setBorder(createTitledBorder("Connection settings"));
         addLine(panel, gbc, "URL: ", m_url.getComponentPanel());
 
         return panel;
