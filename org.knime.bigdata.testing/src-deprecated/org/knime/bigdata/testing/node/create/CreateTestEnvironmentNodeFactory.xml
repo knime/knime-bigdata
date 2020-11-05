@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+    <name>Create Big Data Test Environment (legacy DB port)</name>
+    
+    <shortDescription>Creates big data test environment based on flow variable configuration.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a fully functional big data environment for testing purposes, including Apache Hive, Apache Spark and a remote
+            file system. This node has no own configuration, instead it will read its configuration from a file called <i>flowvariables.csv</i>
+            from the root of the KNIME workspace. This file is expected two provide keys and values. These can be used to control
+            what this node does.
+            <p>
+            <i>Note:</i> This node only creates a new Spark context upon its first execution after KNIME has started, or
+            after the context has been destroyed. The Spark context created by during its first execution is meant to be shared between
+            KNIME testflows.
+            </p>
+            <p>
+            <i>Note:</i> This node uses the old database connection based Hive output port.
+            </p>
+        </intro>
+    </fullDescription>
+
+	<ports>
+		<outPort index="0" name="Hive Connection">JDBC connection to a Hive instance.
+			This port can be connected to the KNIME database nodes.
+		</outPort>
+		<outPort index="1" name="Remote file system Connection">
+			Remote file system connection that can be used with the Spark nodes that read/write files.
+		</outPort>
+		<outPort index="2" name="Spark Context">
+			Spark context, that can be connected to all Spark nodes.
+		</outPort>
+	</ports>    
+</knimeNode>

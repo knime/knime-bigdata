@@ -121,10 +121,10 @@ public class HdfsConnectorNodeSettings {
      * @param user username to use
      * @param workingDir current working directory
      */
-    public HdfsConnectorNodeSettings(final String protocol, final String host, final boolean useCustomPort,
+    public HdfsConnectorNodeSettings(final HdfsProtocol protocol, final String host, final boolean useCustomPort,
         final int customPort, final AuthType authType, final String user, final String workingDir) {
 
-        m_protocol.setStringValue(protocol);
+        m_protocol.setStringValue(protocol.toString());
         m_host.setStringValue(host);
         m_useCustomPort.setBooleanValue(useCustomPort);
         m_customPort.setIntValue(customPort);

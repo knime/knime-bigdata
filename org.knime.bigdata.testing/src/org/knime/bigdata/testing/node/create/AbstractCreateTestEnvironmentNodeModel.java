@@ -22,21 +22,8 @@ package org.knime.bigdata.testing.node.create;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
-import org.knime.base.filehandling.remote.files.Connection;
-import org.knime.base.filehandling.remote.files.ConnectionMonitor;
-import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.base.filehandling.remote.files.RemoteFileFactory;
-import org.knime.bigdata.commons.testing.TestflowVariable;
-import org.knime.bigdata.dbfs.testing.TestingDBFSConnectionInformationFactory;
-import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
-import org.knime.bigdata.filehandling.testing.TestingConnectionInformationFactory;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
@@ -46,7 +33,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.testing.FlowVariableReader;
-import org.knime.core.node.BufferedDataTable;
+import org.knime.bigdata.testing.node.create.utils.CreateTestPortUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -56,32 +43,40 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
- * Node model for the "Create Big Data Test Environment" node.
+ * Abstract node model for the "Create Big Data Test Environment" node implementations.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH
  */
 public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeModel {
 
-    /**
-     * Logger for the node execution
-     */
-    protected static final NodeLogger LOGGER = NodeLogger.getLogger(AbstractCreateTestEnvironmentNodeModel.class);
-
-    private ConnectionInformation m_fsConnectionInfo;
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(AbstractCreateTestEnvironmentNodeModel.class);
 
     private SparkContextConfig m_sparkConfig;
 
     /**
      * Default constructor.
      *
-     * @param inPortTypes The input port types.
-     * @param outPortTypes The output port types.     */
-    protected AbstractCreateTestEnvironmentNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
-        super(inPortTypes, outPortTypes);
+     * @param dbPortType database port type
+     * @param fsPortType file system port type
+     */
+    protected AbstractCreateTestEnvironmentNodeModel(final PortType dbPortType, final PortType fsPortType) {
+        super(new PortType[]{}, new PortType[]{dbPortType, fsPortType, SparkContextPortObject.TYPE});
     }
+
+    /**
+     * @return database port utility
+     */
+    protected abstract CreateTestPortUtil getDatabasePortUtil();
+
+    /**
+     * @return file system port utility
+     */
+    protected abstract CreateTestPortUtil getFileSystemPortUtil();
 
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
@@ -94,48 +89,20 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
         }
 
         final SparkContextConfig sparkConfig = TestingSparkContextConfigFactory.create(flowVars);
-        configureSparkContext(sparkConfig);
-
         final SparkContextIDScheme sparkScheme = sparkConfig.getSparkContextID().getScheme();
-        final ConnectionInformation fsConnectionInfo;
-        switch (sparkScheme) {
-            case SPARK_LOCAL:
-                fsConnectionInfo = HDFSLocalConnectionInformation.getInstance();
-                break;
-            case SPARK_JOBSERVER:
-            case SPARK_LIVY:
-                fsConnectionInfo =
-                    TestingConnectionInformationFactory.create(HDFSRemoteFileHandler.HTTPFS_PROTOCOL, flowVars);
-                break;
-            case SPARK_DATABRICKS:
-                fsConnectionInfo = TestingDBFSConnectionInformationFactory.create(flowVars);
-                break;
-            default:
-                throw new InvalidSettingsException(
-                    "Spark context ID scheme not supported: " + sparkConfig.getSparkContextID().getScheme());
-        }
+        final PortObjectSpec dbPortSpec = getDatabasePortUtil().configure(sparkScheme, flowVars);
+        final PortObjectSpec fsPortSpec = getFileSystemPortUtil().configure(sparkScheme, flowVars);
+        configureSparkContext(sparkConfig);
+        final SparkContextPortObjectSpec sparkPortSpec = new SparkContextPortObjectSpec(sparkConfig.getSparkContextID());
 
         // everything seems valid, now we can update the node model state and return port object specs
-        m_fsConnectionInfo = fsConnectionInfo;
         m_sparkConfig = sparkConfig;
 
-        return new PortObjectSpec[]{createHivePortSpec(sparkScheme, flowVars),
-            new ConnectionInformationPortObjectSpec(m_fsConnectionInfo),
-            new SparkContextPortObjectSpec(sparkConfig.getSparkContextID())};
+        return new PortObjectSpec[]{dbPortSpec, fsPortSpec, sparkPortSpec};
     }
 
-    /**
-     * Create the Hive {@link PortObjectSpec}.
-     * @param sparkScheme spark scheme to use
-     * @param flowVars current flow variables
-     * @return Hive {@link PortObjectSpec}
-     * @throws InvalidSettingsException
-     */
-    protected abstract PortObjectSpec createHivePortSpec(final SparkContextIDScheme sparkScheme,
-        final Map<String, FlowVariable> flowVars) throws InvalidSettingsException;
-
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void configureSparkContext(SparkContextConfig config) throws InvalidSettingsException {
+    private static void configureSparkContext(final SparkContextConfig config) throws InvalidSettingsException {
         final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(config.getSparkContextID());
         final boolean configApplied = sparkContext.ensureConfigured(config, true);
         if (!configApplied) {
@@ -146,12 +113,13 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final Map<String, FlowVariable> flowVars = getAvailableFlowVariables();
+        final SparkContextIDScheme sparkScheme = m_sparkConfig.getSparkContextID().getScheme();
+        final CredentialsProvider credentialsProvider = getCredentialsProvider();
 
         // test remote fs first because it is quick and does not require any resources
         exec.setProgress(0, "Opening remote file system connection");
-        testRemoteFsConnection(m_fsConnectionInfo);
-        final ConnectionInformationPortObject fsPortObject =
-                new ConnectionInformationPortObject(new ConnectionInformationPortObjectSpec(m_fsConnectionInfo));
+        final PortObject fsPortObject =
+            getFileSystemPortUtil().execute(sparkScheme, flowVars, exec, credentialsProvider);
 
         // then try to open the Spark context
         exec.setProgress(0.1, "Configuring Spark context");
@@ -161,57 +129,51 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
         SparkContextManager.getOrCreateSparkContext(m_sparkConfig.getSparkContextID()).ensureOpened(true, exec.createSubProgress(0.7));
 
         // finally, open the DB connection
-        final PortObject dbPortObject = createHivePort(exec, m_sparkConfig.getSparkContextID().getScheme(), flowVars);
+        final PortObject dbPortObject =
+            getDatabasePortUtil().execute(sparkScheme, flowVars, exec, credentialsProvider);
 
         return new PortObject[]{dbPortObject, fsPortObject, sparkPortObject};
     }
 
     /**
-     * Create the Hive {@link PortObject}.
-     *
-     * @param exec For {@link BufferedDataTable} creation and progress.
-     * @param sparkScheme spark scheme to use
-     * @param flowVars current flow variables
-     * @return the Hive {@link PortObject}
-     * @throws Exception
+     * Set a node warning, useful in {@link CreateTestPortUtil} implementations.
+     * @param warningMessage message to show
      */
-    protected abstract PortObject createHivePort(final ExecutionContext exec, final SparkContextIDScheme sparkScheme,
-        final Map<String, FlowVariable> flowVars) throws Exception;
-
-    private static void testRemoteFsConnection(final ConnectionInformation connInfo) throws Exception {
-        final ConnectionMonitor<?> monitor = new ConnectionMonitor<>();
-
-        try {
-            final URI uri = connInfo.toURI().resolve("/");
-            final RemoteFile<? extends Connection> file = RemoteFileFactory.createRemoteFile(uri, connInfo, monitor);
-            if (file != null) {
-                //perform a simple operation to check that the connection really exists and is valid
-                file.exists();
-            }
-        } finally {
-            monitor.closeAll();
-        }
+    public void setNodeWarning(final String warningMessage) {
+        setWarningMessage(warningMessage);
     }
 
     /**
-     * @param flowVars
-     * @return <code>true</code> if running in local spark mode with enabled thrift server.
+     * Get the node logger, useful in {@link CreateTestPortUtil} implementations.
+     * @return the node logger of this node
      */
-    protected static boolean isLocalSparkWithThriftserver(final Map<String, FlowVariable> flowVars) {
-        return TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, "HIVEQL_WITH_JDBC", flowVars);
+    public NodeLogger getNodeLogger() {
+        return LOGGER;
     }
 
     @Override
-    protected void loadAdditionalInternals(File nodeInternDir, ExecutionMonitor exec)
+    protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
 
         throw new IOException("Big Data Test Environment can not restored from disk! Please reset the node.");
     }
 
     @Override
-    protected void saveAdditionalInternals(File nodeInternDir, ExecutionMonitor exec)
+    protected void saveAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
 
         throw new IOException("Big Data Test Environment can not be saved to disk! Please reset the node.");
+    }
+
+    @Override
+    protected void onDisposeInternal() {
+        getDatabasePortUtil().onDispose();
+        getFileSystemPortUtil().onDispose();
+    }
+
+    @Override
+    protected void resetInternal() {
+        getDatabasePortUtil().reset();
+        getFileSystemPortUtil().reset();
     }
 }

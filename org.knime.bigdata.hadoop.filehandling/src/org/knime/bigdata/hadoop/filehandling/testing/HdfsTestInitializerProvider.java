@@ -73,11 +73,11 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
         final String workingDirPrefix = configuration.get("workingDirPrefix");
         final String workingDir = generateRandomizedWorkingDir(workingDirPrefix, HdfsFileSystem.PATH_SEPARATOR);
 
-        final HdfsProtocol protocol = HdfsProtocol.valueOf(configuration.get("protocol"));
+        final HdfsProtocol protocol = HdfsProtocol.valueOf(configuration.get("protocol").toUpperCase());
         int port = configuration.containsKey("port") ? Integer.parseInt(configuration.get("port")) : protocol.getDefaultPort();
 
         final HdfsConnectorNodeSettings settings = new HdfsConnectorNodeSettings( //
-            protocol.toString(), //
+            protocol, //
             configuration.get("host"), //
             true, // custom port
             port, //
@@ -91,7 +91,7 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
     private static void validateConfiguration(final Map<String, String> configuration) {
         checkArgumentNotBlank(configuration.get("protocol"), "protocol must be specified (one of HDFS, WEBHDFS, WEBHDFS_SSL, HTTPFS, HTTPFS_SSL)");
         try {
-            HdfsProtocol.valueOf(configuration.get("protocol"));
+            HdfsProtocol.valueOf(configuration.get("protocol").toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown protocol: " + configuration.get("protocol"));
         }

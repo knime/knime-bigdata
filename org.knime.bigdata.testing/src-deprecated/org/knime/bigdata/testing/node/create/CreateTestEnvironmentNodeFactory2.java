@@ -20,19 +20,22 @@
  */
 package org.knime.bigdata.testing.node.create;
 
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.database.port.DBSessionPortObject;
 
 /**
- * Node factory for the "Create Big Data Test Environment" node.
+ * Node factory for the "Create Big Data Test Environment" node using a Hive {@link DBSessionPortObject} and a
+ * file system {@link ConnectionInformationPortObject} output port.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class CreateTestEnvironmentNodeFactory extends DefaultSparkNodeFactory<CreateTestEnvironmentNodeModel> {
+public class CreateTestEnvironmentNodeFactory2 extends DefaultSparkNodeFactory<CreateTestEnvironmentNodeModel2> {
 
     /**
      * Constructor.
      */
-    public CreateTestEnvironmentNodeFactory() {
+    public CreateTestEnvironmentNodeFactory2() {
         super("");
     }
 
@@ -40,8 +43,8 @@ public class CreateTestEnvironmentNodeFactory extends DefaultSparkNodeFactory<Cr
      * {@inheritDoc}
      */
     @Override
-    public CreateTestEnvironmentNodeModel createNodeModel() {
-        return new CreateTestEnvironmentNodeModel();
+    public CreateTestEnvironmentNodeModel2 createNodeModel() {
+        return new CreateTestEnvironmentNodeModel2();
     }
 
     /**

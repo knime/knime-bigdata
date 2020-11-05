@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Big Data Test Environment (legacy)</name>
+    <name>Create Big Data Test Environment (legacy FS port)</name>
     
     <shortDescription>Creates big data test environment based on flow variable configuration.</shortDescription>
     
@@ -12,9 +12,12 @@
             from the root of the KNIME workspace. This file is expected two provide keys and values. These can be used to control
             what this node does.
             <p>
-            <i>Note</i>This node only creates a new Spark context upon its first execution after KNIME has started, or
+            <i>Note:</i> This node only creates a new Spark context upon its first execution after KNIME has started, or
             after the context has been destroyed. The Spark context created by during its first execution is meant to be shared between
             KNIME testflows.
+            </p>
+            <p>
+            <i>Note:</i> This node uses the old connection information based file system output port.
             </p>
         </intro>
     </fullDescription>

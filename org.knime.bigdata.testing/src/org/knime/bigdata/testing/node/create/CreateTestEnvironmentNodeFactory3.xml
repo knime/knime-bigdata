@@ -12,7 +12,7 @@
             from the root of the KNIME workspace. This file is expected two provide keys and values. These can be used to control
             what this node does.
             <p>
-            <i>Note</i>This node only creates a new Spark context upon its first execution after KNIME has started, or
+            <i>Note:</i> This node only creates a new Spark context upon its first execution after KNIME has started, or
             after the context has been destroyed. The Spark context created by during its first execution is meant to be shared between
             KNIME testflows.
             </p>
@@ -23,8 +23,8 @@
 		<outPort index="0" name="Hive Connection">JDBC connection to a Hive instance.
 			This port can be connected to the KNIME database nodes.
 		</outPort>
-		<outPort index="1" name="Remote file system Connection">
-			Remote file system connection that can be used with the Spark nodes that read/write files.
+		<outPort index="1" name="File system Connection">
+			File system connection that can be used with the Spark nodes that read/write files.
 		</outPort>
 		<outPort index="2" name="Spark Context">
 			Spark context, that can be connected to all Spark nodes.
