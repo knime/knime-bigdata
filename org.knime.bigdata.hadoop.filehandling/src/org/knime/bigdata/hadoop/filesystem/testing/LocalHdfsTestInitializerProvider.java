@@ -50,26 +50,30 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
+import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.local.LocalFSConnection;
 import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
+import org.knime.filehandling.core.testing.FSTestInitializerProvider;
 
 /**
- * HDFS wrapper wrapper test initializer provider.
+ * {@link FSTestInitializerProvider} that creates a {@link HdfsFileSystem}, that wraps a {@link NioFileSystem}, that
+ * wraps a {@link LocalFileSystem}. The only purpose of this is to test the {@link NioFileSystem}).
  *
  * @author Sascha Wolke, KNIME GmbH
  */
 public class LocalHdfsTestInitializerProvider extends DefaultFSTestInitializerProvider {
 
-    private static final String FS_TYPE = "hdfs-wrapper-wrapper";
+    private static final String FS_TYPE = "hdfs-local-nio-wrapper";
 
     @SuppressWarnings("resource")
     @Override
     public LocalHdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
-        final Path workingDir = Files.createTempDirectory("knime-hadoop-wrapper-wrapper-test");
+        final Path workingDir = Files.createTempDirectory("knime-hdfs-nio-wrapper-local-test");
         final LocalFSConnection localFsConnection =
             new LocalFSConnection(workingDir.toString(), LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
         return new LocalHdfsTestInitializer(new LocalHdfsFSConnection(localFsConnection));

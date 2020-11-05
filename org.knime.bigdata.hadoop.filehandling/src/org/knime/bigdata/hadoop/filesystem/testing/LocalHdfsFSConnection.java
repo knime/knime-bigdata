@@ -62,8 +62,8 @@ import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
- * A connection that contains a {@link HdfsFileSystem}, that contains a {@link NioFileSystem}, that
- * contains a {@link LocalFileSystem}.
+ * Provides a {@link HdfsFileSystem}, that wraps a {@link NioFileSystem}, that wraps a {@link LocalFileSystem}. This
+ * {@link FSConnection} only exists for testing purposes (to easily test the {@link NioFileSystem}).
  *
  * @author Sascha Wolke, KNIME GmbH
  */
@@ -76,12 +76,11 @@ class LocalHdfsFSConnection implements FSConnection {
     @SuppressWarnings("resource")
     LocalHdfsFSConnection(final LocalFSConnection localFsConnection) throws IOException {
         m_localFileSystem = (LocalFileSystem)localFsConnection.getFileSystem();
-        final String workingDirectory = m_localFileSystem.getWorkingDirectory().toString();
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
         m_hadoopFileSystem = (NioFileSystem)NioFileSystemUtil //
                 .getHadoopPath(m_localFileSystem.getWorkingDirectory(), hadoopFileSystemConfig) //
                 .getFileSystem(hadoopFileSystemConfig);
-        m_hdfsFileSystem = new HdfsConnection(workingDirectory, m_hadoopFileSystem).getFileSystem();
+        m_hdfsFileSystem = new HdfsConnection(m_hadoopFileSystem).getFileSystem();
     }
 
     @Override

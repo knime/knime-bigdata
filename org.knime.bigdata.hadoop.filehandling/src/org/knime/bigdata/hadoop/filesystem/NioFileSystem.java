@@ -59,7 +59,7 @@ public class NioFileSystem extends FileSystem {
     /**
      * Scheme of this file system.
      */
-    public static final String SCHEME = "knime-fs-wrapper";
+    public static final String SCHEME = "nio-wrapper";
 
     /**
      * A {@link ThreadLocal} to transfer the {@link FSFileSystem} into a new instance of this file system.
@@ -102,12 +102,21 @@ public class NioFileSystem extends FileSystem {
     }
 
     private FSPath toFSPath(final Path p) {
-        return m_fsFileSystem.getPath(p.toUri().getPath());
+        final String absolutPath = p.toString();
+
+        // on windows we have to remove the leading / before the drive
+        if (absolutPath.startsWith("/") && Path.isWindowsAbsolutePath(absolutPath, true)) {
+            return m_fsFileSystem.getPath(absolutPath.substring(1));
+        } else {
+            return m_fsFileSystem.getPath(absolutPath);
+        }
     }
 
     private Path toHadoopPath(final FSPath p) throws IOException {
         try {
-            return new Path(new URI(SCHEME, m_uri.getHost(), p.toString(), null));
+            // the underling file system might use an other separator,
+            // convert the path to a compatible URI syntax instead of p.toString here.
+            return new Path(new URI(SCHEME, m_uri.getHost(), p.toUri().getPath(), null));
         } catch (URISyntaxException e) {
             throw new IOException(e);
         }
@@ -170,14 +179,20 @@ public class NioFileSystem extends FileSystem {
 
     @Override
     public FileStatus[] listStatus(final Path p) throws IOException {
-        final ArrayList<FileStatus> status = new ArrayList<>();
-        try (final DirectoryStream<java.nio.file.Path> stream =
-            Files.newDirectoryStream(toFSPath(p), f -> true)) {
-            for (final java.nio.file.Path javaPath : stream) {
-                final FSPath fsPath = (FSPath) javaPath;
-                status.add(getFileStatus(toHadoopPath(fsPath), fsPath));
+        final FileStatus pathStatus = getFileStatus(p);
+
+        if (pathStatus.isDirectory()) {
+            final ArrayList<FileStatus> status = new ArrayList<>();
+            try (final DirectoryStream<java.nio.file.Path> stream =
+                Files.newDirectoryStream(toFSPath(p), f -> true)) {
+                for (final java.nio.file.Path javaPath : stream) {
+                    final FSPath fsPath = (FSPath) javaPath;
+                    status.add(getFileStatus(toHadoopPath(fsPath), fsPath));
+                }
+                return status.toArray(new FileStatus[0]);
             }
-            return status.toArray(new FileStatus[0]);
+        } else {
+            return new FileStatus[] { pathStatus };
         }
     }
 
@@ -189,9 +204,8 @@ public class NioFileSystem extends FileSystem {
     @Override
     public Path getWorkingDirectory() {
         try {
-            final String path = m_fsFileSystem.getWorkingDirectory().toString();
-            return new Path(new URI(SCHEME, m_uri.getHost(), path, null));
-        } catch (final URISyntaxException e) {
+            return toHadoopPath(m_fsFileSystem.getWorkingDirectory());
+        } catch (final IOException e) {
             throw new UncheckedIOException(new IOException(e));
         }
     }

@@ -13,7 +13,7 @@
             ProviderClass="org.knime.bigdata.hadoop.filehandling.testing.HdfsTestInitializerProvider">
       </FSTestInitializerProvider>
       <FSTestInitializerProvider
-            ProviderClass="org.knime.bigdata.hadoop.filesystem.testing.HdfsWrapperWrapperTestInitializerProvider">
+            ProviderClass="org.knime.bigdata.hadoop.filesystem.testing.LocalHdfsTestInitializerProvider">
       </FSTestInitializerProvider>
    </extension>
 </plugin>

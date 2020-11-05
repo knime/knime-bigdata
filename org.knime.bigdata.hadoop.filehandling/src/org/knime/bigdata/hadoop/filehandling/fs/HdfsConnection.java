@@ -81,9 +81,10 @@ public class HdfsConnection implements FSConnection {
      * @param workingDirectory working directory to use
      * @param hadoopFileSystem already initialized and open Hadoop file system to use
      */
-    public HdfsConnection(final String workingDirectory, final FileSystem hadoopFileSystem) {
+    public HdfsConnection(final FileSystem hadoopFileSystem) {
         final String host = "localhost";
         final URI uri = URI.create(HdfsFileSystem.FS_TYPE + "://" + host);
+        final String workingDirectory = hadoopFileSystem.getWorkingDirectory().toUri().getPath();
         m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, uri, host, workingDirectory, hadoopFileSystem);
     }
 

@@ -89,13 +89,11 @@ public class LocalHdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath,
 
     @Override
     protected void beforeTestCaseInternal() throws IOException {
-        final String scratchDir = getTestCaseScratchDir().toString();
-        Files.createDirectories(m_localFileSystem.getPath(scratchDir));
+        Files.createDirectories(getTestCaseScratchDir());
     }
 
     @Override
     protected void afterTestCaseInternal() throws IOException {
-        final String scratchDir = getTestCaseScratchDir().toString();
-        FSFiles.deleteRecursively(m_localFileSystem.getPath(scratchDir));
+        FSFiles.deleteRecursively(getTestCaseScratchDir());
     }
 }
