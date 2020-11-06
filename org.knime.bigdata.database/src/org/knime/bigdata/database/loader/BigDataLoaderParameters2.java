@@ -42,36 +42,62 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   20.05.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.impala.agent;
+package org.knime.bigdata.database.loader;
 
-import org.knime.bigdata.database.loader.BigDataLoader;
-import org.knime.database.session.DBSessionReference;
+import java.util.List;
+
+import org.knime.database.dialect.DBColumn;
 
 /**
- * Impala version of the {@link BigDataLoader} that uses a temporary table with transactions disabled (see {@link
- * ImpalaLoader#createTempTableAdditionalSQLStatement()}).
+ * Class for parameters used in the Hive/Impala loader
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
  */
-public class ImpalaLoader extends BigDataLoader {
+public class BigDataLoaderParameters2 {
+
+    private final List<DBColumn> m_partitionColumns;
+
+    private final DBColumn[] m_tempTableColumns;
+
+    private final List<String> m_selectOrderColumnNames;
 
     /**
-     * Creates a hive loader
+     * Creates Loader parameters for the BigData implementation of the DB Loader
      *
-     * @param sessionReference the {@link DBSessionReference} object
+     * @param partitionColumns list of partition columns
+     * @param tempTableColumns list of columns for the temporary table
+     * @param selectOrderColumnNames List of column names in the order they must be selected for the insert
      */
-    public ImpalaLoader(final DBSessionReference sessionReference) {
-        super(sessionReference);
+    public BigDataLoaderParameters2(final List<DBColumn> partitionColumns, final DBColumn[] tempTableColumns,
+        final List<String> selectOrderColumnNames) {
+        m_partitionColumns = partitionColumns;
+        m_selectOrderColumnNames = selectOrderColumnNames;
+        m_tempTableColumns = tempTableColumns;
     }
 
     /**
-     * Starting with CDH 7, Impala blocks LOAD INTO on transactional tables.
-     * HDP 3.1 requires by default transactional tables and allows LOAD INTO.
-     * That's why we disable transactions in Impala, but not in Hive.
+     * @return the partitionColums
      */
-    @Override
-    protected String createTempTableAdditionalSQLStatement() {
-        return "TBLPROPERTIES (\"transactional\"=\"false\")";
+    public List<DBColumn> getPartitionColumns() {
+        return m_partitionColumns;
+    }
+
+    /**
+     * @return the inputColumns
+     */
+    public DBColumn[] getTempTableColumns() {
+        return m_tempTableColumns;
+    }
+
+    /**
+     * @return the selectOrderColumnNames
+     */
+    public List<String> getSelectOrderColumnNames() {
+        return m_selectOrderColumnNames;
     }
 }
