@@ -8,7 +8,22 @@
          deprecated="true"
          factory-class="org.knime.bigdata.fileformats.orc.writer.OrcWriterNodeFactory"/>
    <node category-path="/io/read" factory-class="org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory"/>
-   <node category-path="/io/write" factory-class="org.knime.bigdata.fileformats.parquet.writer.ParquetWriterNodeFactory"/>
+   <node
+         category-path="/io/write"
+         deprecated="true"
+         factory-class="org.knime.bigdata.fileformats.parquet.writer.ParquetWriterNodeFactory"/>
+   <node
+         category-path="/io/write"
+         deprecated="false"
+         factory-class="org.knime.bigdata.fileformats.orc.writer2.ORCWriter2NodeFactory"
+         hidden="false">
+   </node>
+   <node
+         category-path="/io/write"
+         deprecated="false"
+         factory-class="org.knime.bigdata.fileformats.parquet.writer2.ParquetWriter2NodeFactory"
+         hidden="false">
+   </node>
    <node
          category-path="/io/write"
          deprecated="false"

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./parquetwriter-icon.png" type="Sink" 
+xmlns="http://knime.org/node/v3.1" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+    <name>Parquet Writer</name>
+    
+    <shortDescription>
+        Writes KNIME tables into a Parquet File
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node writes the KNIME data table into a Parquet file. The Parquet file can be written locally or on a remote file system.
+        <p>
+        For remote connections, the writer stores chunks locally and uploads them in parallel into a folder with the given name. 
+        The chunks size and the number of chunks that are allowed on local disc, are configurable in the "Chunk Upload" 
+        tab which is only enabled for remote file systems.
+        </p>
+        </intro>
+        <tab name="Options">
+       	 <option name="Output location">A path on the local machine or remote server where the file is written.</option>
+       	 <option name="Overwrite">If this option is selected the file will be overwritten if it exists</option>
+       	 <option name="Check directory content">Enabled when using a remote connection and enabling the overwrite option. 
+       	 With this option enabled the node will fail if the content of the directory contains files that do not fit the file format suffix</option>
+       	 <option name="File Compression">The compression codec used to write the Parquet file.</option>
+        </tab>
+        <tab name="Chunk Upload">
+      	  <option name="Chunk size in MB">The maximum size for an individual chunk.</option>
+      	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
+    	</tab>
+    	<tab name="Output Type Mapping">
+    	   <description>
+	            Change the KNIME to Parquet type mapping configuration
+	            for subsequent nodes by selecting a Parquet type to the given
+	            KNIME Type.
+	            The dialog allows you to add new or change existing type mapping rules.
+            </description>
+	         <option name="Mapping by Name">
+	            Columns that match the given name (or regular expression) and KNIME type will be mapped
+	            to the specified Parquet type.
+	         </option>
+	         <option name="Mapping by Type">
+	            Columns that match the given KNIME type will be mapped to the specified Parquet type.
+	         </option>
+        </tab>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Remote connection">An optional connection to the remote file system </inPort>   
+        <inPort index="1" name="Data">The data table that should be written</inPort>        
+    </ports>    
+
+</knimeNode>
