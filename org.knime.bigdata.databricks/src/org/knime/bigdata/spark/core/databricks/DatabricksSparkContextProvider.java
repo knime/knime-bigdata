@@ -145,7 +145,7 @@ public class DatabricksSparkContextProvider implements SparkContextProvider<Data
         }
 
         final URI uri = contextID.asURI();
-        return String.format("%s on Databricks cluster at %s:%d", uri.getFragment(), uri.getHost(), uri.getPort());
+        return String.format("%s on Databricks cluster", uri.getHost());
     }
 
     /**

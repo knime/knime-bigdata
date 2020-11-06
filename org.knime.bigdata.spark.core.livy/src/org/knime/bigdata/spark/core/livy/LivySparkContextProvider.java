@@ -110,7 +110,7 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
             }
 
             final URI uri = contextID.asURI();
-            return String.format("%s on Apache Livy server at %s:%d", uri.getFragment(), uri.getHost(), uri.getPort());
+            return String.format("%s on Apache Livy server", uri.getHost());
 
         } catch (IllegalArgumentException e) {
             // should never happen
