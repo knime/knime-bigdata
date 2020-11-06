@@ -23,3 +23,4 @@ Require-Bundle: org.knime.workbench.repository;bundle-version="[4.2.0,5.0.0)",
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
+Export-Package: org.knime.bigdata.hadoop.filesystem
