@@ -45,24 +45,43 @@
 package org.knime.bigdata.fileformats.orc;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.CompressionKind;
+import org.apache.orc.OrcFile;
+import org.apache.orc.OrcFile.WriterOptions;
 import org.apache.orc.TypeDescription;
+import org.apache.orc.Writer;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
+import org.knime.bigdata.fileformats.node.writer.FileFormatWriter;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCParameter;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.SettingsModelORCDataTypeMapping;
 import org.knime.bigdata.fileformats.orc.reader.OrcKNIMEReader;
 import org.knime.bigdata.fileformats.orc.writer.OrcKNIMEWriter;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
+import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.KnimeToExternalMapper;
+import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.util.Pair;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.filehandling.core.connections.FSPath;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -71,6 +90,8 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
+
+    private static final String STRIPE = "Stripe";
 
     private static final String SUFFIX = ".orc";
 
@@ -121,10 +142,125 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
         return ORCTypeMappingService.getInstance();
     }
 
+    @Deprecated
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
         final int chunkSize, final String compression,
         final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
         return new OrcKNIMEWriter(file, spec, chunkSize, compression, typeMappingConf);
+    }
+
+    @Override
+    public FileFormatWriter getWriter(final FSPath path, final DataTableSpec spec, final int chunkSize,
+        final String compression, final DataTypeMappingConfiguration<TypeDescription> typeMappingConf)
+        throws IOException {
+        final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
+        return new OrcFileFormatWriter(NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig), spec, chunkSize,
+            compression, typeMappingConf);
+    }
+
+    private final static class OrcFileFormatWriter implements FileFormatWriter {
+
+        private final CompressionKind m_compression;
+
+        private final ORCParameter[] m_params;
+
+        private final ConsumptionPath[] m_consumptionPaths;
+
+        private final KnimeToExternalMapper<ORCDestination, ORCParameter> m_knimeToExternalMapper;
+
+        private final int m_chunkSize;
+
+        private final Path m_path;
+
+        private final DataTableSpec m_spec;
+
+        private List<Pair<String, TypeDescription>> m_fields;
+
+        private Writer m_writer;
+
+        private VectorizedRowBatch m_rowBatch;
+
+        private ORCDestination m_destination;
+
+        private OrcFileFormatWriter(final Path path, final DataTableSpec spec, final int chunkSize,
+            final String compression, final DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
+            throws IOException {
+            m_path = path;
+            m_spec = spec;
+            m_chunkSize = chunkSize;
+            m_compression = CompressionKind.valueOf(compression);
+            m_params = new ORCParameter[spec.getNumColumns()];
+            for (int i = 0; i < spec.getNumColumns(); i++) {
+                m_params[i] = new ORCParameter(i);
+            }
+            try {
+                m_consumptionPaths = inputputDataTypeMappingConfiguration.getConsumptionPathsFor(spec);
+            } catch (final InvalidSettingsException e) {
+                throw new BigDataFileFormatException(e);
+            }
+            m_knimeToExternalMapper = MappingFramework.createMapper(m_consumptionPaths);
+            initWriter();
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (m_rowBatch.size != 0) {
+                m_writer.addRowBatch(m_rowBatch);
+                m_rowBatch.reset();
+            }
+            m_writer.close();
+        }
+
+        @Override
+        public void writeRow(final DataRow row) {
+            m_destination.next();
+            try {
+                m_knimeToExternalMapper.map(row, m_destination, m_params);
+
+                if (m_rowBatch.size == m_chunkSize - 1) {
+                    m_writer.addRowBatch(m_rowBatch);
+                    m_rowBatch.reset();
+                }
+            } catch (Exception ex) {
+                throw new IllegalStateException("Exception while writing row to ORC.", ex);
+            }
+        }
+
+        /** Internal helper */
+        private TypeDescription deriveTypeDescription() {
+            final TypeDescription schema = TypeDescription.createStruct();
+
+            for (final Pair<String, TypeDescription> colEntry : m_fields) {
+                schema.addField(colEntry.getFirst(), colEntry.getSecond());
+            }
+            return schema;
+        }
+
+        private void initWriter() throws IOException {
+            m_fields = new ArrayList<>();
+            for (int i = 0; i < m_spec.getNumColumns(); i++) {
+                final TypeDescription orcType =
+                    (TypeDescription)m_consumptionPaths[i].getConsumerFactory().getDestinationType();
+                final String colName = m_spec.getColumnSpec(i).getName();
+                m_fields.add(new Pair<>(colName, TypeDescription.fromString(orcType.toString())));
+            }
+            final Configuration conf = new Configuration();
+            final TypeDescription schema = deriveTypeDescription();
+            final WriterOptions orcConf =
+                OrcFile.writerOptions(conf).setSchema(schema).compress(m_compression).version(OrcFile.Version.CURRENT);
+            if (m_chunkSize > -1) {
+                orcConf.stripeSize(m_chunkSize);
+            }
+
+            m_writer = OrcFile.createWriter(m_path, orcConf);
+            m_rowBatch = schema.createRowBatch();
+            m_destination = new ORCDestination(m_rowBatch, m_rowBatch.size);
+        }
+    }
+
+    @Override
+    public String getChunkUnit() {
+        return STRIPE;
     }
 }

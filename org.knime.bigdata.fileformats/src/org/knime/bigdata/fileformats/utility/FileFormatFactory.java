@@ -50,12 +50,15 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
+import org.knime.bigdata.fileformats.node.writer.FileFormatWriter;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
+import org.knime.database.util.DataRows;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
+import org.knime.filehandling.core.connections.FSPath;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -70,17 +73,22 @@ public interface FileFormatFactory<X> {
     /**
      * @return String containing the chunksizeUnit
      */
-    public String getChunkSizeUnit();
+    String getChunkSizeUnit();
 
     /**
      * Returns a list of Strings containing all compressionCodecs supported by the specified file format.
      *
      * @return the list of available compressions
      */
-    public String[] getCompressionList();
+    String[] getCompressionList();
 
     /** @return file name suffix for files, e.g. 'bin' or 'orc'. */
     String getFilenameSuffix();
+
+    /**
+     * @return the unit of a chunk
+     */
+    String getChunkUnit();
 
     /**
      * @return non-blank short name shown in dialogs
@@ -96,7 +104,7 @@ public interface FileFormatFactory<X> {
      * @param useKerberos
      * @return the reader
      */
-    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
+    AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
         DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration, boolean useKerberos);
 
     /**
@@ -106,27 +114,41 @@ public interface FileFormatFactory<X> {
      * @param mappingDirection the direction to map
      * @return the settings model
      */
-    public SettingsModelDataTypeMapping<X> getTypeMappingModel(String cfkeyTypeMapping,
+    SettingsModelDataTypeMapping<X> getTypeMappingModel(String cfkeyTypeMapping,
         DataTypeMappingDirection mappingDirection);
 
     /**
      * @return the {@link DataTypeMappingService} for this file format.
      */
-    public DataTypeMappingService<X, ?, ?> getTypeMappingService();
+    DataTypeMappingService<X, ?, ?> getTypeMappingService();
 
     /**
      * Returns a writer that writes KNIME {@link DataRow}s to an specific file format
      *
      * @param file the target file
      * @param spec the data table spec
-     * @param batchSize size of the batch
+     * @param chunkSize size of the batch
      * @param compression the compression to use for writing
      * @param typeMappingConf the type mapping configuration
      * @return the writer
      * @throws IOException throw if writer cannot be created
      */
-    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-        final int batchSize, final String compression, DataTypeMappingConfiguration<X> typeMappingConf)
-        throws IOException;
+    @Deprecated
+    AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final int chunkSize,
+        final String compression, DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
+
+    /**
+     * Returns a writer that writes {@link DataRows} to a specific file format to the provided {@link FSPath}
+     *
+     * @param path the {@link FSPath} to write to
+     * @param spec the actual {@link DataTableSpec}
+     * @param chunkSize size of a chunk. unit defined by individual formats.
+     * @param compression compression type
+     * @param typeMappingConf configuration of the type mapping
+     * @return the file format writer
+     * @throws IOException
+     */
+    FileFormatWriter getWriter(FSPath path, DataTableSpec spec, int chunkSize, String compression,
+        DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
 
 }
