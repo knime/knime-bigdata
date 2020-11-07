@@ -57,7 +57,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
-import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -67,6 +66,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
@@ -110,7 +110,7 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs)
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
 
         // general settings & filtering
@@ -119,6 +119,8 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
         } catch (InvalidSettingsException ex) {
             throw new NotConfigurableException("Error during node configuration.", ex);
         }
+
+        m_filePanel.loadSettingsFrom(settings, specs);
 
         // type mapping settings
         final DataTypeMappingService<T, ?, ?> mappingService = m_writerConfig.getTypeMappingService();

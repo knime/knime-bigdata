@@ -72,8 +72,8 @@ public abstract class AbstractFileFormatWriter2NodeFactory extends ConfigurableN
     @Override
     protected final Optional<PortsConfigurationBuilder> createPortsConfigBuilder() {
         final PortsConfigurationBuilder builder = new PortsConfigurationBuilder();
-        builder.addOptionalInputPortGroup(CONNECTION_INPUT_PORT_GRP_NAME, FileSystemPortObject.TYPE);
         builder.addFixedInputPortGroup(DATA_TABLE_INPUT_PORT_GRP_NAME, BufferedDataTable.TYPE);
+        builder.addOptionalInputPortGroup(CONNECTION_INPUT_PORT_GRP_NAME, FileSystemPortObject.TYPE);
         return Optional.of(builder);
     }
 
