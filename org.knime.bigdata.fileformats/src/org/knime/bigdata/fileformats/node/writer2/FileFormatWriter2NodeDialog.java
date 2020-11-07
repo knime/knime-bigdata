@@ -49,7 +49,9 @@
 package org.knime.bigdata.fileformats.node.writer2;
 
 import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -138,26 +140,29 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
     }
 
     private Component createSettingsPanel() {
-        final Box settings = new Box(BoxLayout.Y_AXIS);
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.weightx = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+        gbc.insets = new Insets(5, 0, 5, 0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        final JPanel filePanel = new JPanel();
-        filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.X_AXIS));
+        final JPanel mainOptionsPanel  = new JPanel(new GridBagLayout());
+
+        final JPanel filePanel = m_filePanel.getComponentPanel();
         filePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Output location"));
-        filePanel.setMaximumSize(
-            new Dimension(Integer.MAX_VALUE, m_filePanel.getComponentPanel().getPreferredSize().height));
-        filePanel.add(m_filePanel.getComponentPanel());
-        filePanel.add(Box.createHorizontalGlue());
+        mainOptionsPanel.add(filePanel, gbc);
 
-        filePanel.add(new DialogComponentStringSelection(m_writerConfig.getCompressionModel(), "File Compression: ",
-            m_writerConfig.getCompressionList()).getComponentPanel());
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.NONE;
+        mainOptionsPanel.add(new DialogComponentStringSelection(m_writerConfig.getCompressionModel(),
+            "File Compression: ", m_writerConfig.getCompressionList()).getComponentPanel(), gbc);
 
-        final JPanel chunkPanel = new JPanel();
-        chunkPanel.add(new DialogComponentNumberEdit(m_writerConfig.getChunkSizeModel(),
-            m_chunkUnit + " size in " + m_writerConfig.getChunkSizeUnit() + ":").getComponentPanel());
+        gbc.gridy++;
+        mainOptionsPanel.add(new DialogComponentNumberEdit(m_writerConfig.getChunkSizeModel(),
+            m_chunkUnit + " size in " + m_writerConfig.getChunkSizeUnit() + ":", 6).getComponentPanel(), gbc);
 
-        settings.add(filePanel);
-        settings.add(chunkPanel);
-
-        return settings;
+        return mainOptionsPanel;
     }
 }
