@@ -102,7 +102,7 @@ public class NioFileSystem extends FileSystem {
     }
 
     private FSPath toFSPath(final Path p) {
-        final String absolutPath = p.toString();
+        final String absolutPath = p.toUri().getPath();
 
         // on windows we have to remove the leading / before the drive
         if (absolutPath.startsWith("/") && Path.isWindowsAbsolutePath(absolutPath, true)) {
