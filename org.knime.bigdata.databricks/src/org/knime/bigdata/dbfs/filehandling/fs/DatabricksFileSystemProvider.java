@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,12 +56,16 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
+import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 
@@ -111,20 +116,42 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
     @Override
     protected Iterator<DatabricksPath> createPathIterator(final DatabricksPath dir, final Filter<? super Path> filter)
             throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return new DatabricksPathIterator(dir, filter);
     }
 
+    @SuppressWarnings("resource")
     @Override
     protected void createDirectoryInternal(final DatabricksPath dir, final FileAttribute<?>... attrs) throws IOException {
-        // TODO Auto-generated method stub
-
+        dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
     }
 
+    @SuppressWarnings("resource")
     @Override
     protected BaseFileAttributes fetchAttributesInternal(final DatabricksPath path, final Class<?> type) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            FileInfo info = path.getFileSystem().getClient().getStatus(path.toString());
+            return createBaseFileAttrs(info, path);
+        } catch (FileNotFoundException e) {
+            throw toNSFException(e, path.toString());
+        }
+    }
+
+    private static NoSuchFileException toNSFException(final FileNotFoundException cause, final String path) {
+        NoSuchFileException nsfe = new NoSuchFileException(path);
+        nsfe.initCause(cause);
+        return nsfe;
+    }
+
+    /**
+     * Creates {@link BaseFileAttributes} instance from a given {@link FileInfo} for a given path.
+     *
+     * @param info The {@link FileInfo} object instance.
+     * @param path The path.
+     * @return The attributes.
+     */
+    public static BaseFileAttributes createBaseFileAttrs(final FileInfo info, final DatabricksPath path) {
+        FileTime time = FileTime.fromMillis(0);
+        return new BaseFileAttributes(!info.is_dir, path, time, time, time, info.file_size, false, false, null);
     }
 
     @Override

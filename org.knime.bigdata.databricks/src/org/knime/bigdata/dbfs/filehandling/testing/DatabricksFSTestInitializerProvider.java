@@ -44,57 +44,51 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-10-14 (Alexander Bondaletov): created
+ *   2020-11-01 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandling.fs;
+package org.knime.bigdata.dbfs.filehandling.testing;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Map;
 
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystemProvider;
+import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
- * Databricks DBFS implementation of the {@link FSConnection} interface.
+ * Test initializer provider for Databricks DBFS
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFSConnection implements FSConnection {
-    private static final long CACHE_TTL = 6000;
+public class DatabricksFSTestInitializerProvider extends DefaultFSTestInitializerProvider {
+    private static final String KEY_HOST = "host";
 
-    private final DatabricksFileSystem m_filesystem;
+    private static final String KEY_TOKEN = "token";
 
-    /**
-     * Creates new instance.
-     *
-     * @param deployment Databricks deployment host.
-     * @param workDir Working directory.
-     *
-     * @throws IOException
-     *
-     */
-    public DatabricksFSConnection(final String deployment, final String workDir) throws IOException {
-        URI uri = null;
-        try {
-            uri = new URI(DatabricksFileSystemProvider.FS_TYPE, deployment, null, null);
-        } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid hostname: " + deployment);
-        }
+    private static final String KEY_WORKDIR_PREFIX = "workingDirPrefix";
 
-        m_filesystem = new DatabricksFileSystem(uri, workDir, CACHE_TTL);
+    @SuppressWarnings("resource")
+    @Override
+    public DatabricksFSTestInitializer setup(final Map<String, String> configuration) throws IOException {
+        System.setProperty("dbfs.token", getParameter(configuration, KEY_TOKEN));
+        String workDir =
+            generateRandomizedWorkingDir(getParameter(configuration, KEY_WORKDIR_PREFIX), DatabricksFileSystem.PATH_SEPARATOR);
+
+        DatabricksFSConnection fsConnection =
+            new DatabricksFSConnection(getParameter(configuration, KEY_HOST), workDir);
+        return new DatabricksFSTestInitializer(fsConnection);
     }
 
     @Override
-    public FSFileSystem<?> getFileSystem() {
-        return m_filesystem;
+    public String getFSType() {
+        return DatabricksFileSystemProvider.FS_TYPE;
     }
 
     @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
+        return DatabricksFileSystem.createFSLocationSpec(getParameter(configuration, KEY_HOST));
     }
 
 }

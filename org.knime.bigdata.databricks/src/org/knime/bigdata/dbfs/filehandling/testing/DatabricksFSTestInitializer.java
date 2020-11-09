@@ -44,57 +44,64 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-10-14 (Alexander Bondaletov): created
+ *   2020-11-01 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandling.fs;
+package org.knime.bigdata.dbfs.filehandling.testing;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Base64;
 
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
+import org.knime.bigdata.databricks.rest.dbfs.Close;
+import org.knime.bigdata.databricks.rest.dbfs.Create;
+import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.bigdata.databricks.rest.dbfs.Delete;
+import org.knime.bigdata.databricks.rest.dbfs.FileHandle;
+import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksPath;
+import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
 
 /**
- * Databricks DBFS implementation of the {@link FSConnection} interface.
+ * Databricks DBFS test initializer.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFSConnection implements FSConnection {
-    private static final long CACHE_TTL = 6000;
+public class DatabricksFSTestInitializer extends DefaultFSTestInitializer<DatabricksPath, DatabricksFileSystem> {
 
-    private final DatabricksFileSystem m_filesystem;
+    private final DBFSAPI m_client;
 
     /**
-     * Creates new instance.
+     * Creates test initializer.
      *
-     * @param deployment Databricks deployment host.
-     * @param workDir Working directory.
-     *
-     * @throws IOException
-     *
+     * @param fsConnection FS connection.
      */
-    public DatabricksFSConnection(final String deployment, final String workDir) throws IOException {
-        URI uri = null;
-        try {
-            uri = new URI(DatabricksFileSystemProvider.FS_TYPE, deployment, null, null);
-        } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid hostname: " + deployment);
-        }
-
-        m_filesystem = new DatabricksFileSystem(uri, workDir, CACHE_TTL);
+    protected DatabricksFSTestInitializer(final DatabricksFSConnection fsConnection) {
+        super(fsConnection);
+        m_client = getFileSystem().getClient();
     }
 
     @Override
-    public FSFileSystem<?> getFileSystem() {
-        return m_filesystem;
+    public DatabricksPath createFileWithContent(final String content, final String... pathComponents) throws IOException {
+        DatabricksPath path = makePath(pathComponents);
+
+        FileHandle handle = m_client.create(Create.create(path.toString(), true));
+        m_client.addBlock(AddBlock.create(handle.handle, Base64.getEncoder().encodeToString(content.getBytes())));//NOSONAR
+        m_client.close(Close.create(handle.handle));
+        return path;
     }
 
     @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    protected void beforeTestCaseInternal() throws IOException {
+        DatabricksPath scratchDir = getTestCaseScratchDir();
+        m_client.mkdirs(Mkdir.create(scratchDir.toString()));
+    }
+
+    @Override
+    protected void afterTestCaseInternal() throws IOException {
+        DatabricksPath scratchDir = getTestCaseScratchDir();
+        m_client.delete(Delete.create(scratchDir.toString(), true));
     }
 
 }

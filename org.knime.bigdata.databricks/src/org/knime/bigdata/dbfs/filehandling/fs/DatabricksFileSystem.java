@@ -77,15 +77,14 @@ public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
     private final DBFSAPI m_client;
 
     /**
-     * @param uri
-     *            the URI for the file system
-     * @param cacheTTL
-     *            The time to live for cached elements in milliseconds.
+     * @param uri the URI for the file system
+     * @param workDir Working directory.
+     * @param cacheTTL The time to live for cached elements in milliseconds.
      * @throws IOException
      */
-    protected DatabricksFileSystem(final URI uri, final long cacheTTL)
+    protected DatabricksFileSystem(final URI uri, final String workDir, final long cacheTTL)
             throws IOException {
-        super(new DatabricksFileSystemProvider(), uri, cacheTTL, PATH_SEPARATOR, createFSLocationSpec(uri.getHost()));
+        super(new DatabricksFileSystemProvider(), uri, cacheTTL, workDir, createFSLocationSpec(uri.getHost()));
 
         m_client = DatabricksRESTClient.create("https://" + uri.getHost(), DBFSAPI.class,
             System.getProperty("dbfs.token"), 30000, 30000);

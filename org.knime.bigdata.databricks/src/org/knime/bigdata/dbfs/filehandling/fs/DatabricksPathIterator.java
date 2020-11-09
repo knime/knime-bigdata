@@ -44,57 +44,54 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-10-14 (Alexander Bondaletov): created
+ *   2020-10-31 (Alexander Bondaletov): created
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Iterator;
 
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
+import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
+import org.knime.filehandling.core.connections.base.BasePathIterator;
 
 /**
- * Databricks DBFS implementation of the {@link FSConnection} interface.
+ * Class to iterate through the files and folders in the path
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFSConnection implements FSConnection {
-    private static final long CACHE_TTL = 6000;
-
-    private final DatabricksFileSystem m_filesystem;
+public class DatabricksPathIterator extends BasePathIterator<DatabricksPath> {
 
     /**
-     * Creates new instance.
+     * Creates iterator instance.
      *
-     * @param deployment Databricks deployment host.
-     * @param workDir Working directory.
-     *
+     * @param path path to iterate.
+     * @param filter {@link Filter} instance.
      * @throws IOException
-     *
      */
-    public DatabricksFSConnection(final String deployment, final String workDir) throws IOException {
-        URI uri = null;
-        try {
-            uri = new URI(DatabricksFileSystemProvider.FS_TYPE, deployment, null, null);
-        } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid hostname: " + deployment);
-        }
+    public DatabricksPathIterator(final DatabricksPath path, final Filter<? super Path> filter) throws IOException {
+        super(path, filter);
 
-        m_filesystem = new DatabricksFileSystem(uri, workDir, CACHE_TTL);
+        @SuppressWarnings("resource")
+        FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
+        FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
+
+        Iterator<DatabricksPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
+
+        setFirstPage(iterator);//NOSONAR
     }
 
-    @Override
-    public FSFileSystem<?> getFileSystem() {
-        return m_filesystem;
-    }
+    @SuppressWarnings("resource")
+    private DatabricksPath toPath(final FileInfo file) {
+        DatabricksFileSystem fs = m_path.getFileSystem();
+        DatabricksPath path = new DatabricksPath(fs, file.path);
 
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+        fs.addToAttributeCache(path, DatabricksFileSystemProvider.createBaseFileAttrs(file, path));
+
+        return path;
     }
 
 }

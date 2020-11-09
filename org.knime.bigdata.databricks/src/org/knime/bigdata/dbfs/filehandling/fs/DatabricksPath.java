@@ -63,15 +63,16 @@ public class DatabricksPath extends UnixStylePath {
     /**
      * Creates path from the given path string.
      *
-     * @param fileSystem
-     *            the file system.
-     * @param first
-     *            The first name component.
-     * @param more
-     *            More name components. the string representation of the path.
+     * @param fileSystem the file system.
+     * @param first The first name component.
+     * @param more More name components. the string representation of the path.
      */
-    protected DatabricksPath(final BaseFileSystem<?> fileSystem, final String first, final String[] more) {
+    protected DatabricksPath(final BaseFileSystem<?> fileSystem, final String first, final String... more) {
         super(fileSystem, first, more);
     }
 
+    @Override
+    public DatabricksFileSystem getFileSystem() {
+        return (DatabricksFileSystem)super.getFileSystem();
+    }
 }

@@ -89,7 +89,7 @@ public class DatabricksConnectorNodeModel extends NodeModel {
     @SuppressWarnings("resource")
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_fsConnection = new DatabricksFSConnection(getDeploymentHost());
+        m_fsConnection = new DatabricksFSConnection(getDeploymentHost(), DatabricksFileSystem.PATH_SEPARATOR);
 
         ((DatabricksFileSystem)m_fsConnection.getFileSystem()).getClient().list(DatabricksFileSystem.PATH_SEPARATOR);
 

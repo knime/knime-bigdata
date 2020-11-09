@@ -180,4 +180,10 @@
    <extension point="org.knime.database.nodes.LoaderNode">
       <LoaderNode dbTypes="databricks" class="org.knime.bigdata.database.loader.BigDataLoaderNode"/>
    </extension>
+   <extension
+         point="org.knime.filehandling.FSTestInitializerProvider">
+         <FSTestInitializerProvider
+               ProviderClass="org.knime.bigdata.dbfs.filehandling.testing.DatabricksFSTestInitializerProvider">
+         </FSTestInitializerProvider>         
+   </extension>
 </plugin>
