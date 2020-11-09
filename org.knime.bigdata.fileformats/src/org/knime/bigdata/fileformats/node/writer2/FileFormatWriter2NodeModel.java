@@ -50,8 +50,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.function.Consumer;
 
-import org.knime.bigdata.fileformats.node.writer.FileFormatWriter;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
@@ -79,8 +80,11 @@ import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.WritePathAccessor;
+import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.defaultnodesettings.status.NodeModelStatusConsumer;
+import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage.MessageType;
 
 /*
@@ -104,7 +108,7 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         super(config.getInputPorts(), config.getOutputPorts());
         m_writerConfig = new FileFormatWriter2Config<>(config, factory);
         m_statusConsumer = new NodeModelStatusConsumer(EnumSet.of(MessageType.ERROR, MessageType.WARNING));
-
+        m_statusConsumer.setWarningsIfRequired(this::setWarningMessage);
         m_factory = factory;
 
         // save since this port is fixed, see the Factory class
@@ -149,28 +153,13 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         throws IOException, CanceledExecutionException {
     }
 
-    @Override
-    protected BufferedDataTable[] execute(final PortObject[] data, final ExecutionContext exec) throws Exception {
-        try (final WritePathAccessor accessor = m_writerConfig.getFileChooserModel().createWritePathAccessor()) {
-            final FSPath outputPath = accessor.getOutputPath(m_statusConsumer);
-            m_statusConsumer.setWarningsIfRequired(this::setWarningMessage);
-            createParentDirIfRequired(outputPath);
-            final BufferedDataTable tbl = (BufferedDataTable)data[m_dataInputPortIdx];
-            final DataTableRowInput rowInput = new DataTableRowInput(tbl);
-            try {
-                return writeToFile(rowInput, exec, outputPath);
-            } catch (FileAlreadyExistsException e) {
-                throw new IOException("File '" + outputPath.toString() + "' already exists", e);
-            }
-        }
-    }
-
     // TODO Framework code?
-    private void createParentDirIfRequired(final Path outputPath) throws IOException {
+    private static void createParentDirIfRequired(final FileFormatWriter2Config<?> config, final Path outputPath)
+            throws IOException {
         // create parent directories according to the state of m_createDirectoryConfig.
         final Path parentPath = outputPath.getParent();
         if (parentPath != null && !FSFiles.exists(parentPath)) {
-            if (m_writerConfig.getFileChooserModel().isCreateMissingFolders()) {
+            if (config.getFileChooserModel().isCreateMissingFolders()) {
                 FSFiles.createDirectories(parentPath);
             } else {
                 throw new IOException(String.format(
@@ -189,49 +178,88 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
     }
 
     @Override
+    protected BufferedDataTable[] execute(final PortObject[] data, final ExecutionContext exec) throws Exception {
+        final BufferedDataTable tbl = (BufferedDataTable)data[m_dataInputPortIdx];
+        final DataTableRowInput rowInput = new DataTableRowInput(tbl);
+        write(exec, m_writerConfig, m_factory, m_statusConsumer, rowInput, tbl.size());
+        return new BufferedDataTable[0];
+    }
+
+    @Override
     public StreamableOperator createStreamableOperator(final PartitionInfo partitionInfo,
         final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         return new StreamableOperator() {
             @Override
             public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
                 throws Exception {
-                try (final WritePathAccessor accessor =
-                    m_writerConfig.getFileChooserModel().createWritePathAccessor()) {
-                    final FSPath outputPath = accessor.getOutputPath(m_statusConsumer);
-                    m_statusConsumer.setWarningsIfRequired(s -> setWarningMessage(s));
-                    createParentDirIfRequired(outputPath);
-                    final RowInput input = (RowInput)inputs[m_dataInputPortIdx];
-                    writeToFile(input, exec, outputPath);
-                }
+                final RowInput input = (RowInput)inputs[m_dataInputPortIdx];
+                write(exec, m_writerConfig, m_factory, m_statusConsumer, input, -1);
             }
         };
     }
 
-    private BufferedDataTable[] writeToFile(final RowInput input, final ExecutionContext exec, final FSPath outputPath)
+    private static <T> void write(final ExecutionMonitor exec, final FileFormatWriter2Config<T> config,
+        final FileFormatFactory<T> factory, final Consumer<StatusMessage> statusConsumer, final RowInput rowInput,
+        final long rowCount)
+        throws InvalidSettingsException, IOException, CanceledExecutionException, InterruptedException {
+        final SettingsModelWriterFileChooser fileChooserModel = config.getFileChooserModel();
+        try (final WritePathAccessor accessor = fileChooserModel.createWritePathAccessor()) {
+            final FSPath outputPath = accessor.getOutputPath(statusConsumer);
+            createParentDirIfRequired(config, outputPath);
+            try {
+                if (writeMultipleFiles(config)) {
+                    writeToDir(exec, config, factory, outputPath, rowInput, rowCount);
+                } else {
+                    writeToFile(exec, config, factory, outputPath, rowInput, rowCount, new MutableLong(0));
+                }
+            } catch (FileAlreadyExistsException e) {
+                throw new IOException("File '" + outputPath.toString() + "' already exists", e);
+            }
+        }
+    }
+
+    private static <T> void writeToDir(final ExecutionMonitor exec, final FileFormatWriter2Config<T> config,
+        final FileFormatFactory<T> factory, final FSPath outputRootPath, final RowInput input, final long rowCount)
+                throws InvalidSettingsException, IOException, CanceledExecutionException, InterruptedException {
+        if (!FSFiles.exists(outputRootPath)) {
+                FSFiles.createDirectories(outputRootPath);
+        } else {
+            if (FileOverwritePolicy.FAIL == config.getFileChooserModel().getFileOverwritePolicy()) {
+                throw new IOException("Folder already exists and must not be overwritten due to user settings.");
+            }
+        }
+        final Path rootDir = outputRootPath.getFileName();
+        int fileCounter = 0;
+        final MutableLong rowCounter = new MutableLong(0);
+        boolean moreData = true;
+        while (moreData) {
+            final String fileName = String.format("%s_%05d%s", rootDir, fileCounter, factory.getFilenameSuffix());
+            final FSPath outputPath = (FSPath) outputRootPath.resolve(fileName);
+            Files.createFile(outputPath);
+            moreData = writeToFile(exec, config, factory, outputPath, input, rowCount, rowCounter);
+            fileCounter++;
+        }
+    }
+
+    private static <T> boolean writeToFile(final ExecutionMonitor exec, final FileFormatWriter2Config<T> config,
+        final FileFormatFactory<T> factory, final FSPath outputPath, final RowInput input, final long rowCount,
+        final MutableLong rowCounter)
         throws InvalidSettingsException, IOException, CanceledExecutionException, InterruptedException {
 
         exec.setMessage("Starting to write File.");
         final boolean isNewFile = !FSFiles.exists(outputPath);
-
-        final DataTypeMappingService<T, ?, ?> mappingService = m_factory.getTypeMappingService();
-        final DataTypeMappingConfiguration<T> mappingConfiguration =
-            m_writerConfig.getMappingModel().getDataTypeMappingConfiguration(mappingService);
-        final FileOverwritePolicy overwritePolicy = m_writerConfig.getFileChooserModel().getFileOverwritePolicy();
+        final boolean writeMultipleFiles = writeMultipleFiles(config);
         try (final FileFormatWriter formatWriter =
-                createWriter(outputPath, overwritePolicy, input, mappingConfiguration)) {
-
-            long rowsWritten = 0;
+                createWriter(outputPath, input, config, factory)) {
             for (DataRow row; (row = input.poll()) != null;) {
-
-                if (rowsWritten % PROGRESS_UPDATE_ROW_COUNT == 0) {
-                    exec.setProgress(String.format("Written row %d.", rowsWritten));
+                reportProgress(rowCount, rowCounter, exec);
+                boolean writeRow = formatWriter.writeRow(row);
+                if (writeMultipleFiles && writeRow) {
+                    return true;
                 }
-                formatWriter.writeRow(row);
-                rowsWritten++;
-                exec.checkCanceled();
+                rowCounter.increment();
             }
-
-            return new BufferedDataTable[0];
+            return false;
         } catch (final CanceledExecutionException e) {
             if (isNewFile) {
                 deleteIncompleteFile(outputPath);
@@ -243,10 +271,32 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         }
     }
 
-    private FileFormatWriter createWriter(final FSPath path, final FileOverwritePolicy overwritePolicy,
-        final RowInput input, final DataTypeMappingConfiguration<T> mappingConfiguration) throws IOException {
-        return m_factory.getWriter(path, overwritePolicy, input.getDataTableSpec(), m_writerConfig.getChunkSize(),
-            m_writerConfig.getSelectedCompression(), mappingConfiguration);
+    private static <T> boolean writeMultipleFiles(final FileFormatWriter2Config<T> config) {
+        return FilterMode.FOLDER == config.getFileChooserModel().getFilterMode();
+    }
+
+    private static <T> FileFormatWriter createWriter(final FSPath path, final RowInput input,
+        final FileFormatWriter2Config<T> config, final FileFormatFactory<T> factory)
+                throws IOException, InvalidSettingsException {
+        final FileOverwritePolicy overwritePolicy = config.getFileChooserModel().getFileOverwritePolicy();
+        final DataTypeMappingService<T, ?, ?> mappingService = factory.getTypeMappingService();
+        final DataTypeMappingConfiguration<T> mappingConfiguration =
+                config.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+        return factory.getWriter(path, overwritePolicy, input.getDataTableSpec(), config.getFileSize(),
+            config.getChunkSize(), config.getSelectedCompression(), mappingConfiguration);
+    }
+
+    private static void reportProgress(final long rowCount, final MutableLong rowCounter, final ExecutionMonitor exec)
+            throws CanceledExecutionException {
+        if (rowCounter.longValue() % PROGRESS_UPDATE_ROW_COUNT == 0) {
+            if (rowCount > 0) {
+                exec.setProgress(rowCounter.doubleValue() / rowCount,
+                    String.format("Written row %d of %d.", rowCounter.longValue(), rowCount));
+            } else {
+                exec.setProgress(String.format("Written row %d.", rowCounter.longValue()));
+            }
+        }
+        exec.checkCanceled();
     }
 
     private static void deleteIncompleteFile(final Path outputPath) {

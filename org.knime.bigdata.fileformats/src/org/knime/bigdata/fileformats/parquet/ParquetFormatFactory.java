@@ -61,7 +61,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
-import org.knime.bigdata.fileformats.node.writer.FileFormatWriter;
+import org.knime.bigdata.fileformats.node.writer2.FileFormatWriter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetTypeMappingService;
@@ -97,6 +97,11 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     private static final String NAME = "Parquet";
 
     private static final int TO_BYTE = 1024 * 1024;
+
+    @Override
+    public String getChunkUnit() {
+        return ROW_GROUP;
+    }
 
     @Override
     public String getChunkSizeUnit() {
@@ -155,12 +160,12 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
     @Override
     public FileFormatWriter getWriter(final FSPath path, final FileOverwritePolicy overwritePolicy,
-        final DataTableSpec spec, final int chunkSize, final String compression,
-        final DataTypeMappingConfiguration<ParquetType> typeMappingConf) throws IOException {
+        final DataTableSpec spec, final long fileSize, final int chunkSize,
+        final String compression, final DataTypeMappingConfiguration<ParquetType> typeMappingConf) throws IOException {
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
         final Mode writeMode = OVERWRITE == overwritePolicy ? Mode.OVERWRITE : Mode.CREATE;
         return new ParquetFileFormatWriter(NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig), writeMode,
-            spec, compression, chunkSize * TO_BYTE, typeMappingConf);
+            spec, compression, fileSize * TO_BYTE, chunkSize * TO_BYTE, typeMappingConf);
     }
 
     /* Parquet implemenation for FileFormatWriter */
@@ -172,10 +177,13 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
         private final ParquetParameter[] m_params;
 
+        private final long m_fileSize;
+
         public ParquetFileFormatWriter(final Path outputPath, final Mode writeMode, final DataTableSpec spec,
-            final String compression, final int rowGroupSize,
+            final String compression, final long fileSize, final int rowGroupSize,
             final DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
             throws IOException {
+            m_fileSize = fileSize;
             final CompressionCodecName codec = CompressionCodecName.fromConf(compression);
             m_mappingConfig = inputputDataTypeMappingConfiguration;
             m_params = new ParquetParameter[spec.getNumColumns()];
@@ -199,8 +207,9 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
         }
 
         @Override
-        public void writeRow(final DataRow row) throws IOException {
+        public boolean writeRow(final DataRow row) throws IOException {
             m_writer.write(row);
+            return m_writer.getDataSize() >= m_fileSize;
         }
 
         /* Helper class to build ParquetWriters */
@@ -224,11 +233,6 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
             }
         }
 
-    }
-
-    @Override
-    public String getChunkUnit() {
-        return ROW_GROUP;
     }
 
 }

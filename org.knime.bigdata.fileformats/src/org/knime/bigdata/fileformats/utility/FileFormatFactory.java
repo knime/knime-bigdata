@@ -52,7 +52,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
-import org.knime.bigdata.fileformats.node.writer.FileFormatWriter;
+import org.knime.bigdata.fileformats.node.writer2.FileFormatWriter;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -79,6 +79,11 @@ public interface FileFormatFactory<X> {
     String getChunkSizeUnit();
 
     /**
+     * @return the unit of a chunk
+     */
+    String getChunkUnit();
+
+    /**
      * Returns a list of Strings containing all compressionCodecs supported by the specified file format.
      *
      * @return the list of available compressions
@@ -94,11 +99,6 @@ public interface FileFormatFactory<X> {
     default Set<FileOverwritePolicy> getSupportedPolicies() {
         return EnumSet.of(FileOverwritePolicy.FAIL);
     }
-
-    /**
-     * @return the unit of a chunk
-     */
-    String getChunkUnit();
 
     /**
      * @return non-blank short name shown in dialogs
@@ -153,13 +153,14 @@ public interface FileFormatFactory<X> {
      * @param path the {@link FSPath} to write to
      * @param overwritePolicy {@link FileOverwritePolicy}
      * @param spec the actual {@link DataTableSpec}
+     * @param fileSize total size of a file when writing into a directory
      * @param chunkSize size of a chunk. unit defined by individual formats.
      * @param compression compression type
      * @param typeMappingConf configuration of the type mapping
      * @return the file format writer
      * @throws IOException
      */
-    FileFormatWriter getWriter(FSPath path, FileOverwritePolicy overwritePolicy, DataTableSpec spec, int chunkSize,
-        String compression, DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
+    FileFormatWriter getWriter(FSPath path, FileOverwritePolicy overwritePolicy, DataTableSpec spec, long fileSize,
+        int chunkSize, String compression, DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
 
 }

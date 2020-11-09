@@ -61,7 +61,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
-import org.knime.bigdata.fileformats.node.writer.FileFormatWriter;
+import org.knime.bigdata.fileformats.node.writer2.FileFormatWriter;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCParameter;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
@@ -75,6 +75,7 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.convert.map.ConsumptionPath;
 import org.knime.core.data.convert.map.KnimeToExternalMapper;
+import org.knime.core.data.convert.map.MappingException;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -104,6 +105,11 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
     @Override
     public String getChunkSizeUnit() {
         return "rows";
+    }
+
+    @Override
+    public String getChunkUnit() {
+        return STRIPE;
     }
 
     @Override
@@ -153,12 +159,12 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
 
     @Override
     public FileFormatWriter getWriter(final FSPath path, final FileOverwritePolicy overwritePolicy,
-        final DataTableSpec spec, final int chunkSize, final String compression,
-        final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
+        final DataTableSpec spec, final long fileSize, final int chunkSize,
+        final String compression, final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
     	//overwritePolicy can be ignored since ORC only supports creation of new files
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
-        return new OrcFileFormatWriter(NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig), spec, chunkSize,
-            compression, typeMappingConf);
+        return new OrcFileFormatWriter(NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig), spec, fileSize,
+            chunkSize, compression, typeMappingConf);
     }
 
     private final static class OrcFileFormatWriter implements FileFormatWriter {
@@ -170,6 +176,8 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
         private final ConsumptionPath[] m_consumptionPaths;
 
         private final KnimeToExternalMapper<ORCDestination, ORCParameter> m_knimeToExternalMapper;
+
+        private final long m_fileSize;
 
         private final int m_chunkSize;
 
@@ -183,13 +191,16 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
 
         private VectorizedRowBatch m_rowBatch;
 
+        private long m_noOfRowsWritten = 0;
+
         private ORCDestination m_destination;
 
-        private OrcFileFormatWriter(final Path path, final DataTableSpec spec, final int chunkSize,
+        private OrcFileFormatWriter(final Path path, final DataTableSpec spec, final long fileSize, final int chunkSize,
             final String compression, final DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
             throws IOException {
             m_path = path;
             m_spec = spec;
+            m_fileSize = fileSize;
             m_chunkSize = chunkSize;
             m_compression = CompressionKind.valueOf(compression);
             m_params = new ORCParameter[spec.getNumColumns()];
@@ -215,16 +226,17 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
         }
 
         @Override
-        public void writeRow(final DataRow row) {
+        public boolean writeRow(final DataRow row) {
             m_destination.next();
             try {
                 m_knimeToExternalMapper.map(row, m_destination, m_params);
-
-                if (m_rowBatch.size == m_chunkSize - 1) {
+                m_noOfRowsWritten++;
+                if (m_noOfRowsWritten % m_chunkSize == 0) {
                     m_writer.addRowBatch(m_rowBatch);
                     m_rowBatch.reset();
                 }
-            } catch (Exception ex) {
+                return m_noOfRowsWritten >= m_fileSize;
+            } catch (IOException | MappingException ex) {
                 throw new IllegalStateException("Exception while writing row to ORC.", ex);
             }
         }
@@ -259,10 +271,5 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
             m_rowBatch = schema.createRowBatch();
             m_destination = new ORCDestination(m_rowBatch, m_rowBatch.size);
         }
-    }
-
-    @Override
-    public String getChunkUnit() {
-        return STRIPE;
     }
 }

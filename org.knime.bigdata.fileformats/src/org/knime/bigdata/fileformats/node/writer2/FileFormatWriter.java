@@ -46,7 +46,7 @@
  * History
  *   Nov 3, 2020 (dietzc): created
  */
-package org.knime.bigdata.fileformats.node.writer;
+package org.knime.bigdata.fileformats.node.writer2;
 
 import java.io.IOException;
 
@@ -73,8 +73,9 @@ public interface FileFormatWriter extends AutoCloseable {
      * Write a new data row into the file
      *
      * @param row to write
+     * @return <code>true</code> if the total file size is reached and a new file should be written
      * @throws IOException
      */
-    void writeRow(DataRow row) throws IOException;
+    boolean writeRow(DataRow row) throws IOException;
 
 }

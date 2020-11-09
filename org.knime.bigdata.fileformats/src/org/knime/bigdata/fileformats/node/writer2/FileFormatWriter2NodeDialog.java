@@ -68,11 +68,13 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelNumber;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.DialogComponentWriterFileChooser;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
@@ -89,21 +91,39 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
 
     private final DialogComponentDataTypeMapping<T> m_inputTypeMappingComponent;
 
-    private final String m_chunkUnit;
+    private final SettingsModelWriterFileChooser m_fileChooserModel;
+
+    private final SettingsModelNumber m_fileSizeModel;
+
+    private DialogComponentNumberEdit m_fileSizeComponent;
 
     FileFormatWriter2NodeDialog(final PortsConfiguration portsConfig, final FileFormatFactory<T> factory) {
-        m_writerConfig = new FileFormatWriter2Config<T>(portsConfig, factory);
-
-        m_chunkUnit = factory.getChunkUnit();
+        m_writerConfig = new FileFormatWriter2Config<>(portsConfig, factory);
+        m_fileChooserModel = m_writerConfig.getFileChooserModel();
+        m_fileSizeModel = m_writerConfig.getFileSizeModel();
+        m_fileSizeComponent = new DialogComponentNumberEdit(m_fileSizeModel,
+            "Split data into files of size (" + m_writerConfig.getChunkSizeUnit() + "): ", 6);
+        m_fileChooserModel.addChangeListener(e -> updateFileSizeComponent());
+        updateFileSizeComponent();
 
         final FlowVariableModel fvm =
             createFlowVariableModel(m_writerConfig.getLocationKeyChain(), FSLocationVariableType.INSTANCE);
-        m_filePanel = new DialogComponentWriterFileChooser(m_writerConfig.getFileChooserModel(), FILE_HISTORY_ID, fvm,
-            FilterMode.FILE);
-        m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<T>(m_writerConfig.getMappingModel(), true);
+        m_filePanel = new DialogComponentWriterFileChooser(m_fileChooserModel, FILE_HISTORY_ID, fvm, FilterMode.FILE,
+            FilterMode.FOLDER);
+        m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_writerConfig.getMappingModel(), true);
 
         addTab("Settings", createSettingsPanel());
         addTab("Type Mapping", createTypeMappingPanel());
+    }
+
+    private void updateFileSizeComponent() {
+        if (FilterMode.FOLDER == m_fileChooserModel.getFilterMode()) {
+            m_fileSizeModel.setEnabled(true);
+            m_fileSizeComponent.setToolTipText(null);
+        } else {
+            m_fileSizeModel.setEnabled(false);
+            m_fileSizeComponent.setToolTipText("Only available when writing to a folder");
+        }
     }
 
     @Override
@@ -148,7 +168,7 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
         gbc.insets = new Insets(5, 0, 5, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        final JPanel mainOptionsPanel  = new JPanel(new GridBagLayout());
+        final JPanel mainOptionsPanel = new JPanel(new GridBagLayout());
 
         final JPanel filePanel = m_filePanel.getComponentPanel();
         filePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Output location"));
@@ -160,8 +180,12 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
             "File Compression: ", m_writerConfig.getCompressionList()).getComponentPanel(), gbc);
 
         gbc.gridy++;
+        mainOptionsPanel.add(m_fileSizeComponent.getComponentPanel(), gbc);
+
+        gbc.gridy++;
         mainOptionsPanel.add(new DialogComponentNumberEdit(m_writerConfig.getChunkSizeModel(),
-            m_chunkUnit + " size in " + m_writerConfig.getChunkSizeUnit() + ":", 6).getComponentPanel(), gbc);
+            "Within file " + m_writerConfig.getChunkUnit().toLowerCase()
+            + " size (" + m_writerConfig.getChunkSizeUnit() + "): ", 6).getComponentPanel(), gbc);
 
         return mainOptionsPanel;
     }

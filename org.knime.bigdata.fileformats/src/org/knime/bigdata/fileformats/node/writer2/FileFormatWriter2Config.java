@@ -56,7 +56,10 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.context.ports.PortsConfiguration;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelLong;
+import org.knime.core.node.defaultnodesettings.SettingsModelLongBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
@@ -86,15 +89,21 @@ final class FileFormatWriter2Config<T> {
     /** The settings key for chunk size */
     private static final String CFG_CHUNK_SIZE = "file_format_writer_chunk_size";
 
+    /** The settings key for block size */
+    private static final String CFG_FILE_SIZE = "file_format_writer_file_size";
+
     private final SettingsModelWriterFileChooser m_fileChooserModel;
 
     private final SettingsModelString m_compression;
 
     private final SettingsModelIntegerBounded m_chunkSize; // default 512MB, min 20MB
 
+    private SettingsModelLongBounded m_fileSize;
+
     private final SettingsModelDataTypeMapping<T> m_mappingModel;
 
     private final FileFormatFactory<T> m_formatFactory;
+
 
     public FileFormatWriter2Config(final PortsConfiguration portsConfig, final FileFormatFactory<T> factory) {
         m_formatFactory = factory;
@@ -110,6 +119,8 @@ final class FileFormatWriter2Config<T> {
         m_compression = new SettingsModelString(CFG_COMPRESSION, "UNCOMPRESSED");
 
         m_chunkSize = new SettingsModelIntegerBounded(CFG_CHUNK_SIZE, 100, 1, Integer.MAX_VALUE);
+
+        m_fileSize = new SettingsModelLongBounded(CFG_FILE_SIZE, 100, 1, Long.MAX_VALUE);
 
         m_mappingModel = factory.getTypeMappingModel(CFG_TYPE_MAPPING, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
     }
@@ -136,6 +147,7 @@ final class FileFormatWriter2Config<T> {
         m_fileChooserModel.loadSettingsFrom(settings);
         m_compression.loadSettingsFrom(settings);
         m_chunkSize.loadSettingsFrom(settings);
+        m_fileSize.loadSettingsFrom(settings);
     }
 
     private final void loadTypeMappingTab(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -150,6 +162,7 @@ final class FileFormatWriter2Config<T> {
         m_fileChooserModel.saveSettingsTo(settings);
         m_compression.saveSettingsTo(settings);
         m_chunkSize.saveSettingsTo(settings);
+        m_fileSize.saveSettingsTo(settings);
     }
 
     private final void validateTypeMappingTab(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -160,6 +173,13 @@ final class FileFormatWriter2Config<T> {
         m_fileChooserModel.validateSettings(settings);
         m_compression.validateSettings(settings);
         m_chunkSize.validateSettings(settings);
+        m_fileSize.validateSettings(settings);
+        final int chunkSize = m_chunkSize.<SettingsModelInteger>createCloneWithValidatedValue(settings).getIntValue();
+        final long fileSize = m_fileSize.<SettingsModelLong>createCloneWithValidatedValue(settings).getLongValue();
+        if (chunkSize > fileSize) {
+            throw new InvalidSettingsException("File size must be greater or equals the "
+                    + getChunkUnit().toLowerCase() + " size");
+        }
     }
 
     // show flowvariable models whcih flowvariables can be overriden
@@ -184,6 +204,10 @@ final class FileFormatWriter2Config<T> {
         return m_chunkSize;
     }
 
+    SettingsModelNumber getFileSizeModel() {
+        return m_fileSize;
+    }
+
     SettingsModelDataTypeMapping<T> getMappingModel() {
         return m_mappingModel;
     }
@@ -195,12 +219,15 @@ final class FileFormatWriter2Config<T> {
         return m_formatFactory.getCompressionList();
     }
 
+    String getChunkUnit() {
+        return m_formatFactory.getChunkUnit();
+    }
+
     String getChunkSizeUnit() {
         return m_formatFactory.getChunkSizeUnit();
     }
 
     DataTypeMappingService<T, ?, ?> getTypeMappingService() {
-        // TODO
         return m_formatFactory.getTypeMappingService();
     }
 
@@ -210,5 +237,9 @@ final class FileFormatWriter2Config<T> {
 
     int getChunkSize() {
         return m_chunkSize.getIntValue();
+    }
+
+    long getFileSize() {
+        return m_fileSize.getLongValue();
     }
 }
