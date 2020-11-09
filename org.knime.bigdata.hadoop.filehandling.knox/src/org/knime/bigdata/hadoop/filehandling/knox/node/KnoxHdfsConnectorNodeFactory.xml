@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./knoxconnection16x16.png"
+<knimeNode icon="./file_system_connector.png"
 		type="Source"
 		xmlns="http://knime.org/node/v4.1"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
