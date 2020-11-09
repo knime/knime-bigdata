@@ -45,6 +45,8 @@
 package org.knime.bigdata.fileformats.utility;
 
 import java.io.IOException;
+import java.util.EnumSet;
+import java.util.Set;
 
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
@@ -59,6 +61,7 @@ import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -84,6 +87,13 @@ public interface FileFormatFactory<X> {
 
     /** @return file name suffix for files, e.g. 'bin' or 'orc'. */
     String getFilenameSuffix();
+
+    /**
+     * @return the supported {@link FileOverwritePolicy}s
+     */
+    default Set<FileOverwritePolicy> getSupportedPolicies() {
+        return EnumSet.of(FileOverwritePolicy.FAIL);
+    }
 
     /**
      * @return the unit of a chunk
@@ -141,6 +151,7 @@ public interface FileFormatFactory<X> {
      * Returns a writer that writes {@link DataRows} to a specific file format to the provided {@link FSPath}
      *
      * @param path the {@link FSPath} to write to
+     * @param overwritePolicy {@link FileOverwritePolicy}
      * @param spec the actual {@link DataTableSpec}
      * @param chunkSize size of a chunk. unit defined by individual formats.
      * @param compression compression type
@@ -148,7 +159,7 @@ public interface FileFormatFactory<X> {
      * @return the file format writer
      * @throws IOException
      */
-    FileFormatWriter getWriter(FSPath path, DataTableSpec spec, int chunkSize, String compression,
-        DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
+    FileFormatWriter getWriter(FSPath path, FileOverwritePolicy overwritePolicy, DataTableSpec spec, int chunkSize,
+        String compression, DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
 
 }

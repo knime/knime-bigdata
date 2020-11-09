@@ -45,6 +45,7 @@ package org.knime.bigdata.fileformats.node.writer2;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -77,6 +78,7 @@ import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.WritePathAccessor;
 import org.knime.filehandling.core.defaultnodesettings.status.NodeModelStatusConsumer;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage.MessageType;
@@ -155,7 +157,11 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
             createParentDirIfRequired(outputPath);
             final BufferedDataTable tbl = (BufferedDataTable)data[m_dataInputPortIdx];
             final DataTableRowInput rowInput = new DataTableRowInput(tbl);
-            return writeToFile(rowInput, exec, outputPath);
+            try {
+                return writeToFile(rowInput, exec, outputPath);
+            } catch (FileAlreadyExistsException e) {
+                throw new IOException("File '" + outputPath.toString() + "' already exists", e);
+            }
         }
     }
 
@@ -210,7 +216,9 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         final DataTypeMappingService<T, ?, ?> mappingService = m_factory.getTypeMappingService();
         final DataTypeMappingConfiguration<T> mappingConfiguration =
             m_writerConfig.getMappingModel().getDataTypeMappingConfiguration(mappingService);
-        try (final FileFormatWriter formatWriter = createWriter(outputPath, input, mappingConfiguration)) {
+        final FileOverwritePolicy overwritePolicy = m_writerConfig.getFileChooserModel().getFileOverwritePolicy();
+        try (final FileFormatWriter formatWriter =
+                createWriter(outputPath, overwritePolicy, input, mappingConfiguration)) {
 
             long rowsWritten = 0;
             for (DataRow row; (row = input.poll()) != null;) {
@@ -235,9 +243,9 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         }
     }
 
-    private FileFormatWriter createWriter(final FSPath path, final RowInput input,
-        final DataTypeMappingConfiguration<T> mappingConfiguration) throws IOException {
-        return m_factory.getWriter(path, input.getDataTableSpec(), m_writerConfig.getChunkSize(),
+    private FileFormatWriter createWriter(final FSPath path, final FileOverwritePolicy overwritePolicy,
+        final RowInput input, final DataTypeMappingConfiguration<T> mappingConfiguration) throws IOException {
+        return m_factory.getWriter(path, overwritePolicy, input.getDataTableSpec(), m_writerConfig.getChunkSize(),
             m_writerConfig.getSelectedCompression(), mappingConfiguration);
     }
 

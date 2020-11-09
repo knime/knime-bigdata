@@ -82,6 +82,7 @@ import org.knime.core.util.Pair;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -151,9 +152,10 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
     }
 
     @Override
-    public FileFormatWriter getWriter(final FSPath path, final DataTableSpec spec, final int chunkSize,
-        final String compression, final DataTypeMappingConfiguration<TypeDescription> typeMappingConf)
-        throws IOException {
+    public FileFormatWriter getWriter(final FSPath path, final FileOverwritePolicy overwritePolicy,
+        final DataTableSpec spec, final int chunkSize, final String compression,
+        final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
+    	//overwritePolicy can be ignored since ORC only supports creation of new files
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
         return new OrcFileFormatWriter(NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig), spec, chunkSize,
             compression, typeMappingConf);

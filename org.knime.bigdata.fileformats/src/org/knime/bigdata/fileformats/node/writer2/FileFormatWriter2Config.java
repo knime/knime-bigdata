@@ -49,7 +49,6 @@
 package org.knime.bigdata.fileformats.node.writer2;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.stream.Stream;
 
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
@@ -62,7 +61,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
-import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.util.SettingsUtils;
@@ -99,31 +97,21 @@ final class FileFormatWriter2Config<T> {
     private final FileFormatFactory<T> m_formatFactory;
 
     public FileFormatWriter2Config(final PortsConfiguration portsConfig, final FileFormatFactory<T> factory) {
+        m_formatFactory = factory;
+
         m_fileChooserModel = new SettingsModelWriterFileChooser(CFG_FILE_CHOOSER, portsConfig,
             AbstractFileFormatWriter2NodeFactory.CONNECTION_INPUT_PORT_GRP_NAME, FilterMode.FILE,
             org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy.FAIL,
-            EnumSet.of(FileOverwritePolicy.FAIL, FileOverwritePolicy.OVERWRITE, FileOverwritePolicy.APPEND),
+            m_formatFactory.getSupportedPolicies(),
             // TODO limit to this suffix?
             new String[]{factory.getFilenameSuffix()});
 
-        m_formatFactory = factory;
 
         m_compression = new SettingsModelString(CFG_COMPRESSION, "UNCOMPRESSED");
 
         m_chunkSize = new SettingsModelIntegerBounded(CFG_CHUNK_SIZE, 100, 1, Integer.MAX_VALUE);
 
         m_mappingModel = factory.getTypeMappingModel(CFG_TYPE_MAPPING, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
-    }
-
-    SettingsModelWriterFileChooser getFileChooserModel() {
-        return m_fileChooserModel;
-    }
-
-    // show flowvariable models whcih flowvariables can be overriden
-    String[] getLocationKeyChain() {
-        return Stream
-            .concat(Stream.of(SettingsUtils.CFG_SETTINGS_TAB), Arrays.stream(m_fileChooserModel.getKeysForFSLocation()))
-            .toArray(String[]::new);
     }
 
     /*
@@ -174,6 +162,17 @@ final class FileFormatWriter2Config<T> {
         m_chunkSize.validateSettings(settings);
     }
 
+    // show flowvariable models whcih flowvariables can be overriden
+    String[] getLocationKeyChain() {
+        return Stream
+            .concat(Stream.of(SettingsUtils.CFG_SETTINGS_TAB), Arrays.stream(m_fileChooserModel.getKeysForFSLocation()))
+            .toArray(String[]::new);
+    }
+
+    SettingsModelWriterFileChooser getFileChooserModel() {
+        return m_fileChooserModel;
+    }
+
     /*
      * ACCESS TO MODELS
      */
@@ -183,10 +182,6 @@ final class FileFormatWriter2Config<T> {
 
     SettingsModelNumber getChunkSizeModel() {
         return m_chunkSize;
-    }
-
-    SettingsModelWriterFileChooser getWriterFileChooserModel() {
-        return m_fileChooserModel;
     }
 
     SettingsModelDataTypeMapping<T> getMappingModel() {
