@@ -173,14 +173,14 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
                 RemoteFile<? extends Connection> remoteFile = RemoteFileFactory.createRemoteFile(knimeUri, connectionInfo, connectionMonitor);
                 CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>) remoteFile;
                 final String inputPath = cloudRemoteFile.getHadoopFilesystemString();
-                jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath, false);
+                jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath);
             } catch(UnsupportedOperationException e) {
                 throw new InvalidSettingsException("Unsupported remote file connection.");
             }
 
         } else {
             final String inputPath = settings.getInputPath();
-            jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath, true);
+            jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath);
         }
 
         settings.addReaderOptions(jobInput);

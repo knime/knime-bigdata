@@ -20,21 +20,19 @@
  */
 package org.knime.bigdata.spark.node.io.genericdatasource.writer;
 
+import static org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeFactory.FS_INPUT_PORT_GRP_NAME;
+import static org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeFactory.SPARK_INPUT_PORT_GRP_NAME;
+
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.URIUtil;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
-import org.knime.base.filehandling.remote.files.Connection;
-import org.knime.base.filehandling.remote.files.ConnectionMonitor;
-import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.base.filehandling.remote.files.RemoteFileFactory;
-import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.jar.bundle.BundleGroupSparkJarRegistry;
@@ -46,63 +44,71 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.cloud.core.file.CloudRemoteFile;
-import org.knime.cloud.core.util.port.CloudConnectionInformation;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.PortType;
+import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.FSFiles;
+import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.WritePathAccessor;
+import org.knime.filehandling.core.defaultnodesettings.status.NodeModelStatusConsumer;
+import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage.MessageType;
+import org.knime.filehandling.core.port.FileSystemPortObject;
+
 
 /**
+ * Spark to generic node model using NIO file system connections.
+ *
  * @author Sascha Wolke, KNIME.com
  * @param <T> Settings type of this node
  */
-public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceSettings> extends SparkNodeModel {
+public class NioSpark2GenericDataSourceNodeModel<T extends NioSpark2GenericDataSourceSettings> extends SparkNodeModel {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark2GenericDataSourceNodeModel.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(NioSpark2GenericDataSourceNodeModel.class);
+
+    private final int m_fsInputPortIndex;
+
+    private final int m_sparkInputPortIndex;
 
     /** The unique Spark job id. */
     public static final String JOB_ID = Spark2GenericDataSourceNodeModel.class.getCanonicalName();
 
     /** Internal settings object. */
-    private final Spark2GenericDataSourceSettings m_settings;
+    private final T m_settings;
+
+    private final NodeModelStatusConsumer m_statusConsumer;
 
     /**
      * Default Constructor
      *
+     * @param portsConfig current port configuration
      * @param settings - Initial settings
      */
-    public Spark2GenericDataSourceNodeModel(final Spark2GenericDataSourceSettings settings) {
-        super(new PortType[]{ConnectionInformationPortObject.TYPE, SparkDataPortObject.TYPE}, new PortType[0]);
-
+    public NioSpark2GenericDataSourceNodeModel(final PortsConfiguration portsConfig, final T settings) {
+        super(portsConfig.getInputPorts(), portsConfig.getOutputPorts());
         m_settings = settings;
+        m_fsInputPortIndex = portsConfig.getInputPortLocation().get(FS_INPUT_PORT_GRP_NAME)[0];
+        m_sparkInputPortIndex = portsConfig.getInputPortLocation().get(SPARK_INPUT_PORT_GRP_NAME)[0];
+        m_statusConsumer = new NodeModelStatusConsumer(EnumSet.of(MessageType.ERROR, MessageType.WARNING));
     }
 
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length != 2 || inSpecs[0] == null || inSpecs[1] == null) {
-            throw new InvalidSettingsException("Connection or input data missing");
+            throw new InvalidSettingsException("File system or Spark data  input missing");
         }
 
-        final ConnectionInformationPortObjectSpec object = (ConnectionInformationPortObjectSpec)inSpecs[0];
-        final ConnectionInformation connInfo = object.getConnectionInformation();
-        final SparkDataPortObjectSpec dataPortObjectSpec = (SparkDataPortObjectSpec)inSpecs[1];
+        m_settings.getFileChooserModel().configureInModel(inSpecs, m_statusConsumer);
+        m_statusConsumer.setWarningsIfRequired(createWarningMessageConsumer());
+
+        final SparkDataPortObjectSpec dataPortObjectSpec = (SparkDataPortObjectSpec)inSpecs[m_sparkInputPortIndex];
         final DataTableSpec tableSpec = dataPortObjectSpec.getTableSpec();
-
-        if (connInfo == null) {
-            throw new InvalidSettingsException("No connection information available");
-        }
-
-        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo) && !(connInfo instanceof CloudConnectionInformation)
-                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))
-                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().equalsIgnoreCase("dbfs"))) {
-            throw new InvalidSettingsException("HDFS, DBFS or cloud connection required");
-        }
 
         m_settings.loadDefault(tableSpec);
         m_settings.validateSettings();
@@ -133,57 +139,46 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         return new PortObjectSpec[0];
     }
 
+    @SuppressWarnings("resource") // unclosable connection
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
 
-        final ConnectionInformationPortObject object = (ConnectionInformationPortObject)inData[0];
-        final ConnectionInformation connectionInfo = object.getConnectionInformation();
-
         final String format = m_settings.getFormat();
-        final String outputPath = m_settings.getDirectory() + "/" + m_settings.getName();
         final String saveMode = m_settings.getSaveMode();
         final boolean uploadDriver = m_settings.uploadDriver();
 
-        final SparkDataPortObject rdd = (SparkDataPortObject)inData[1];
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
+        final FileSystemPortObject fsPort = (FileSystemPortObject)inData[m_fsInputPortIndex];
 
-        LOGGER.info("Writing " + rdd.getData().getID() + " rdd into " + outputPath);
+        final SparkDataPortObject sparkData = (SparkDataPortObject)inData[m_sparkInputPortIndex];
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(sparkData.getTableSpec());
+
         final JobWithFilesRunFactory<Spark2GenericDataSourceJobInput, EmptyJobOutput> runFactory =
-            SparkContextUtil.getJobWithFilesRunFactory(rdd.getContextID(), JOB_ID);
+            SparkContextUtil.getJobWithFilesRunFactory(sparkData.getContextID(), JOB_ID);
         final Spark2GenericDataSourceJobInput jobInput;
 
-        if (connectionInfo instanceof CloudConnectionInformation) {
-            try {
-                URI outURI = URIUtil.fromString(outputPath);
-                URI knimeUri = connectionInfo.toURI().resolve(outURI);
-                ConnectionMonitor<? extends Connection> connectionMonitor = new ConnectionMonitor<Connection>();
-                RemoteFile<? extends Connection> remoteFile =
-                    RemoteFileFactory.createRemoteFile(knimeUri, connectionInfo, connectionMonitor);
-                CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>)remoteFile;
-                final String clusterOutputPath = cloudRemoteFile.getHadoopFilesystemString();
-                jobInput = new Spark2GenericDataSourceJobInput(rdd.getData().getID(), format, uploadDriver,
-                    clusterOutputPath, schema, saveMode);
-            } catch (UnsupportedOperationException e) {
-                throw new InvalidSettingsException("Unsupported remote file connection.");
-            }
-
-        } else {
-            jobInput = new Spark2GenericDataSourceJobInput(rdd.getData().getID(), format, uploadDriver, outputPath,
-                schema, saveMode);
+        try (final WritePathAccessor accessor = m_settings.getFileChooserModel().createWritePathAccessor()) {
+            final FSPath outputFSPath = accessor.getOutputPath(m_statusConsumer);
+            checkOutputPath(outputFSPath);
+            final FSConnection fsConnection = fsPort.getFileSystemConnection().get(); // NOSONAR present check done in getOutputPath
+            final URI clusterOutputURI = fsConnection.getDefaultURIExporter().toUri(outputFSPath);
+            final String clusterOutputPath = URIUtil.toUnencodedString(clusterOutputURI);
+            jobInput = new Spark2GenericDataSourceJobInput(sparkData.getData().getID(), format, uploadDriver,
+                clusterOutputPath, schema, saveMode);
         }
 
-        addPartitioning(rdd.getTableSpec(), jobInput);
+        addPartitioning(sparkData.getTableSpec(), jobInput);
         m_settings.addWriterOptions(jobInput);
 
         final List<File> toUpload = new ArrayList<>();
         if (jobInput.uploadDriver()) {
             toUpload.addAll(BundleGroupSparkJarRegistry
-                .getBundledDriverJars(SparkContextUtil.getSparkVersion(rdd.getContextID()), jobInput.getFormat()));
+                .getBundledDriverJars(SparkContextUtil.getSparkVersion(sparkData.getContextID()), jobInput.getFormat()));
         }
 
         try {
-            runFactory.createRun(jobInput, toUpload).run(rdd.getContextID(), exec);
+            LOGGER.info("Writing Spark data " + sparkData.getData().getID() + " into '" + jobInput.getOutputPath() + "'.");
+            runFactory.createRun(jobInput, toUpload).run(sparkData.getContextID(), exec);
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
             if (message != null && message.contains("Failed to find data source:")) {
@@ -197,6 +192,15 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         }
 
         return new PortObject[0];
+    }
+
+    private Consumer<String> createWarningMessageConsumer() {
+        return new Consumer<String>() {
+            @Override
+            public void accept(final String warningMessage) {
+                setWarningMessage(warningMessage);
+            }
+        };
     }
 
     /** Add partitioning columns and number to job input if present in settings */
@@ -213,9 +217,29 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         }
     }
 
+    private void checkOutputPath(final Path outputPath) throws IOException {
+        final Path parentPath = outputPath.toAbsolutePath().getParent();
+
+        if (parentPath != null && !FSFiles.exists(parentPath)) {
+            if (m_settings.getFileChooserModel().isCreateMissingFolders()) {
+                FSFiles.createDirectories(parentPath);
+            } else {
+                throw new IOException(String.format(
+                    "The directory '%s' does not exist and must not be created due to user settings.", parentPath));
+            }
+
+        } else if (parentPath != null && !FSFiles.isDirectory(parentPath)) {
+            throw new IOException(String.format("The parent output path '%s' must be a directory.", outputPath));
+
+        } else if (m_settings.isAppendMode() && FSFiles.exists(outputPath) && !FSFiles.isDirectory(outputPath)) { // NOSONAR no else block
+            throw new IOException(
+                String.format("The output path '%s' must be a directory in append mode.", outputPath));
+        }
+    }
+
     @Override
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
+        m_settings.saveSettingsToModel(settings);
     }
 
     @Override
@@ -225,6 +249,6 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
 
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadValidatedSettingsFrom(settings);
+        m_settings.loadValidatedSettingsFromModel(settings);
     }
 }

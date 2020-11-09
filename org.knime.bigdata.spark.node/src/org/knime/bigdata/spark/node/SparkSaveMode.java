@@ -18,6 +18,8 @@
  */
 package org.knime.bigdata.spark.node;
 
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
+
 /**
  * Maps spark save modes into KNIME.
  *
@@ -85,6 +87,27 @@ public class SparkSaveMode {
             }
         }
         return null;
+    }
+
+    /**
+     * Convert a given {@link FileOverwritePolicy} into a Spark save mode.
+     *
+     * @param policy policy to convert
+     * @return spark save mode as string
+     */
+    public static String toSparkSaveModeKey(final FileOverwritePolicy policy) { // NOSONAR more than three return statements
+        switch (policy) {
+            case APPEND:
+                return APPEND.toSparkKey();
+            case FAIL:
+                return ERROR_IF_EXISTS.toSparkKey();
+            case IGNORE:
+                return IGNORE.toSparkKey();
+            case OVERWRITE:
+                return OVERWRITE.toSparkKey();
+            default:
+                throw new IllegalArgumentException("Unknown policy: " + policy);
+        }
     }
 
     @Override

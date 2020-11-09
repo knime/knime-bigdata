@@ -37,7 +37,6 @@ public class Spark2GenericDataSourceJobInput extends JobInput {
     private static final String KEY_FORMAT = "format";
     private static final String KEY_UPLOAD_DRIVER = "uploadDriver";
     private static final String KEY_OUTPUT_PATH = "outputPath";
-    private static final String KEY_USE_DEFAULT_FS = "useDefaultFS";
     private static final String KEY_SAVE_MODE = "saveMode";
     private static final String KEY_USE_HIVE_CONTEXT = "useHiveContext";
     private static final String KEY_OPTIONS = "options";
@@ -54,19 +53,17 @@ public class Spark2GenericDataSourceJobInput extends JobInput {
      * @param format - fully qualified or short format name (e.g. parquet)
      * @param uploadDriver - Upload local jar files or depend on cluster version.
      * @param outputPath - the name of the output directory to be created
-     * @param useDefaultFS - if false, input path should be a full URI
      * @param spec the {@link IntermediateSpec} of the table
      * @param saveMode Spark save mode
      */
     public Spark2GenericDataSourceJobInput(final String namedObject, final String format, final boolean uploadDriver,
-            final String outputPath, final boolean useDefaultFS, final IntermediateSpec spec, final String saveMode) {
+            final String outputPath, final IntermediateSpec spec, final String saveMode) {
 
         addNamedInputObject(namedObject);
         withSpec(namedObject, spec);
         set(KEY_FORMAT, format);
         set(KEY_UPLOAD_DRIVER, uploadDriver);
         set(KEY_OUTPUT_PATH, outputPath);
-        set(KEY_USE_DEFAULT_FS, useDefaultFS);
         set(KEY_SAVE_MODE, saveMode);
     }
 
@@ -78,9 +75,6 @@ public class Spark2GenericDataSourceJobInput extends JobInput {
 
     /** @return output path */
     public String getOutputPath() { return get(KEY_OUTPUT_PATH); }
-
-    /** @return false, if input path is already a full URI */
-    public boolean useDefaultFS() { return get(KEY_USE_DEFAULT_FS); }
 
     /** @param useHiveContext - use hive context if true, SQL context otherwise */
     public void setUseHiveContext(final boolean useHiveContext) { set(KEY_USE_HIVE_CONTEXT, useHiveContext); }

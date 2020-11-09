@@ -38,6 +38,7 @@ import org.knime.bigdata.spark.node.io.genericdatasource.reader.parquet.Parquet2
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.text.Text2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.avro.Spark2AvroNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.csv.Spark2CSVNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.json.NioSpark2JsonNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.json.Spark2JsonNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.orc.Spark2OrcNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.parquet.Spark2ParquetNodeFactory;
@@ -159,6 +160,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new DBSpark2ImpalaNodeFactory(),
             new Json2SparkNodeFactory2(),
             new Spark2JsonNodeFactory(),
+            new NioSpark2JsonNodeFactory(),
             new Table2SparkNodeFactory2(),
             new Spark2TableNodeFactory(),
             new Text2SparkNodeFactory2(),

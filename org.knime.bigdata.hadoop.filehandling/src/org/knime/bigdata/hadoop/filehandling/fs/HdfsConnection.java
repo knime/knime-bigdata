@@ -52,6 +52,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
 import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporter;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -96,6 +98,11 @@ public class HdfsConnection implements FSConnection {
     @Override
     public FileSystemBrowser getFileSystemBrowser() {
         return new NioFileSystemBrowser(this);
+    }
+
+    @Override
+    public URIExporter getDefaultURIExporter() {
+        return PathURIExporter.getInstance();
     }
 
 }
