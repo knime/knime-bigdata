@@ -12,6 +12,12 @@
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory"
          hidden="false">
    </node>
+   <node
+         category-path="/labs/file-handling-prototype/file-handling-IO/file-handling-Read"
+         deprecated="false"
+         factory-class="org.knime.bigdata.fileformats.filehandling.reader.orc.OrcTableReaderNodeFactory"
+         hidden="false">
+   </node>
 </extension>
    
 </plugin>
