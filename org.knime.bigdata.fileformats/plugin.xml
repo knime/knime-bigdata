@@ -6,6 +6,12 @@
    <node category-path="/io/write" factory-class="org.knime.bigdata.fileformats.orc.writer.OrcWriterNodeFactory"/>
    <node category-path="/io/read" factory-class="org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory"/>
    <node category-path="/io/write" factory-class="org.knime.bigdata.fileformats.parquet.writer.ParquetWriterNodeFactory"/>
+   <node
+         category-path="/labs/file-handling-prototype/file-handling-IO/file-handling-Read"
+         deprecated="false"
+         factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory"
+         hidden="false">
+   </node>
 </extension>
    
 </plugin>
