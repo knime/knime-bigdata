@@ -76,6 +76,7 @@ import org.knime.filehandling.core.data.location.variable.FSLocationVariableType
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.DialogComponentWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
+import org.knime.filehandling.core.util.SettingsUtils;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /*
@@ -142,7 +143,7 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
             throw new NotConfigurableException("Error during node configuration.", ex);
         }
 
-        m_filePanel.loadSettingsFrom(settings, specs);
+        m_filePanel.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
 
         // type mapping settings
         final DataTypeMappingService<T, ?, ?> mappingService = m_writerConfig.getTypeMappingService();
