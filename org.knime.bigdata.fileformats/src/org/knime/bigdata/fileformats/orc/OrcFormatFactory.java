@@ -112,6 +112,19 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
         return STRIPE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getDefaultFileSize() {
+        return 250;
+    }
+
+    @Override
+    public int getDefaultChunkSize() {
+        return VectorizedRowBatch.DEFAULT_SIZE;
+    }
+
     @Override
     public String[] getCompressionList() {
         return Stream.of(CompressionKind.values()).map(Enum::name).toArray(String[]::new);
@@ -167,7 +180,7 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
             chunkSize, compression, typeMappingConf);
     }
 
-    private final static class OrcFileFormatWriter implements FileFormatWriter {
+    private static final class OrcFileFormatWriter implements FileFormatWriter {
 
         private final CompressionKind m_compression;
 
@@ -263,12 +276,9 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
             final TypeDescription schema = deriveTypeDescription();
             final WriterOptions orcConf =
                 OrcFile.writerOptions(conf).setSchema(schema).compress(m_compression).version(OrcFile.Version.CURRENT);
-            if (m_chunkSize > -1) {
-                orcConf.stripeSize(m_chunkSize);
-            }
 
             m_writer = OrcFile.createWriter(m_path, orcConf);
-            m_rowBatch = schema.createRowBatch();
+            m_rowBatch = schema.createRowBatch(m_chunkSize);
             m_destination = new ORCDestination(m_rowBatch, m_rowBatch.size);
         }
     }

@@ -75,7 +75,7 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 final class FileFormatWriter2Config<T> {
 
     /** name of the settings */
-    private static final String CFG_TYPE_MAPPING_TAB = "typemapping";
+    private static final String CFG_TYPE_MAPPING_TAB = "type_mapping";
 
     /** The settings key for the file chooser dialog */
     private static final String CFG_FILE_CHOOSER = "file_chooser_settings";
@@ -83,20 +83,24 @@ final class FileFormatWriter2Config<T> {
     /** The settings for type mapping */
     private static final String CFG_TYPE_MAPPING = "input_type_mapping";
 
+    private static final String CFG_FILE_NAME_PREFIX = "file_name_prefix";
+
     /** The settings key for compression type */
-    private static final String CFG_COMPRESSION = "file_format_writer_compression";
+    private static final String CFG_COMPRESSION = "file_compression";
 
     /** The settings key for chunk size */
-    private static final String CFG_CHUNK_SIZE = "file_format_writer_chunk_size";
+    private static final String CFG_CHUNK_SIZE = "within_file_chunk_size";
 
     /** The settings key for block size */
-    private static final String CFG_FILE_SIZE = "file_format_writer_file_size";
+    private static final String CFG_FILE_SIZE = "file_size";
 
     private final SettingsModelWriterFileChooser m_fileChooserModel;
 
+    private final SettingsModelString m_fileNamePrefix;
+
     private final SettingsModelString m_compression;
 
-    private final SettingsModelIntegerBounded m_chunkSize; // default 512MB, min 20MB
+    private final SettingsModelIntegerBounded m_chunkSize;
 
     private SettingsModelLongBounded m_fileSize;
 
@@ -115,12 +119,14 @@ final class FileFormatWriter2Config<T> {
             // TODO limit to this suffix?
             new String[]{factory.getFilenameSuffix()});
 
+        m_fileNamePrefix = new SettingsModelString(CFG_FILE_NAME_PREFIX, "part_");
 
         m_compression = new SettingsModelString(CFG_COMPRESSION, "UNCOMPRESSED");
 
-        m_chunkSize = new SettingsModelIntegerBounded(CFG_CHUNK_SIZE, 100, 1, Integer.MAX_VALUE);
+        m_chunkSize =
+                new SettingsModelIntegerBounded(CFG_CHUNK_SIZE, factory.getDefaultChunkSize(), 1, Integer.MAX_VALUE);
 
-        m_fileSize = new SettingsModelLongBounded(CFG_FILE_SIZE, 100, 1, Long.MAX_VALUE);
+        m_fileSize = new SettingsModelLongBounded(CFG_FILE_SIZE, factory.getDefaultFileSize(), 1, Long.MAX_VALUE);
 
         m_mappingModel = factory.getTypeMappingModel(CFG_TYPE_MAPPING, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
     }
@@ -146,8 +152,9 @@ final class FileFormatWriter2Config<T> {
     private final void loadSettingsTab(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_fileChooserModel.loadSettingsFrom(settings);
         m_compression.loadSettingsFrom(settings);
-        m_chunkSize.loadSettingsFrom(settings);
         m_fileSize.loadSettingsFrom(settings);
+        m_fileNamePrefix.loadSettingsFrom(settings);
+        m_chunkSize.loadSettingsFrom(settings);
     }
 
     private final void loadTypeMappingTab(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -161,8 +168,9 @@ final class FileFormatWriter2Config<T> {
     private void saveSettingsTab(final NodeSettingsWO settings) {
         m_fileChooserModel.saveSettingsTo(settings);
         m_compression.saveSettingsTo(settings);
-        m_chunkSize.saveSettingsTo(settings);
         m_fileSize.saveSettingsTo(settings);
+        m_fileNamePrefix.saveSettingsTo(settings);
+        m_chunkSize.saveSettingsTo(settings);
     }
 
     private final void validateTypeMappingTab(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -174,6 +182,7 @@ final class FileFormatWriter2Config<T> {
         m_compression.validateSettings(settings);
         m_chunkSize.validateSettings(settings);
         m_fileSize.validateSettings(settings);
+        m_fileNamePrefix.validateSettings(settings);
         final int chunkSize = m_chunkSize.<SettingsModelInteger>createCloneWithValidatedValue(settings).getIntValue();
         final long fileSize = m_fileSize.<SettingsModelLong>createCloneWithValidatedValue(settings).getLongValue();
         if (chunkSize > fileSize) {
@@ -182,13 +191,17 @@ final class FileFormatWriter2Config<T> {
         }
     }
 
-    // show flowvariable models whcih flowvariables can be overriden
+
+    // show flowvariable models which flowvariables can be overriden
     String[] getLocationKeyChain() {
         return Stream
             .concat(Stream.of(SettingsUtils.CFG_SETTINGS_TAB), Arrays.stream(m_fileChooserModel.getKeysForFSLocation()))
             .toArray(String[]::new);
     }
 
+    String[] getPrefixKeyChain() {
+        return new String[] {SettingsUtils.CFG_SETTINGS_TAB, m_fileNamePrefix.getKey()};
+    }
     SettingsModelWriterFileChooser getFileChooserModel() {
         return m_fileChooserModel;
     }
@@ -241,5 +254,13 @@ final class FileFormatWriter2Config<T> {
 
     long getFileSize() {
         return m_fileSize.getLongValue();
+    }
+
+    String getFileNamePrefix() {
+        return m_fileNamePrefix.getStringValue();
+    }
+
+    SettingsModelString getfileNamePrefixModel() {
+        return m_fileNamePrefix;
     }
 }

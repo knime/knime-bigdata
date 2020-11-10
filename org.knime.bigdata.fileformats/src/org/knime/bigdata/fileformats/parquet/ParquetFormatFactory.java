@@ -109,6 +109,19 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     }
 
     @Override
+    public long getDefaultFileSize() {
+        return 1024;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getDefaultChunkSize() {
+        return ParquetWriter.DEFAULT_BLOCK_SIZE / TO_BYTE;
+    }
+
+    @Override
     public String[] getCompressionList() {
         return Stream.of(CompressionCodecName.values()).filter(i -> i != CompressionCodecName.LZO).map(Enum::name)
             .toArray(String[]::new);

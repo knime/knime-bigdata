@@ -225,17 +225,22 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
                 FSFiles.createDirectories(outputRootPath);
         } else {
             if (FileOverwritePolicy.FAIL == config.getFileChooserModel().getFileOverwritePolicy()) {
-                throw new IOException("Folder already exists and must not be overwritten due to user settings.");
+                final String msg;
+                if (factory.getSupportedPolicies().contains(FileOverwritePolicy.OVERWRITE)) {
+                    msg = "Folder already exists and must not be overwritten due to user settings.";
+                } else {
+                    msg = "Folder already exists and cannot be overwritten.";
+                }
+                throw new IOException(msg);
             }
         }
-        final Path rootDir = outputRootPath.getFileName();
         int fileCounter = 0;
         final MutableLong rowCounter = new MutableLong(0);
         boolean moreData = true;
         while (moreData) {
-            final String fileName = String.format("%s_%05d%s", rootDir, fileCounter, factory.getFilenameSuffix());
+            final String fileName =
+                    String.format("%s_%05d%s", config.getFileNamePrefix(), fileCounter, factory.getFilenameSuffix());
             final FSPath outputPath = (FSPath) outputRootPath.resolve(fileName);
-            Files.createFile(outputPath);
             moreData = writeToFile(exec, config, factory, outputPath, input, rowCount, rowCounter);
             fileCounter++;
         }
@@ -245,8 +250,6 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         final FileFormatFactory<T> factory, final FSPath outputPath, final RowInput input, final long rowCount,
         final MutableLong rowCounter)
         throws InvalidSettingsException, IOException, CanceledExecutionException, InterruptedException {
-
-        exec.setMessage("Starting to write File.");
         final boolean isNewFile = !FSFiles.exists(outputPath);
         final boolean writeMultipleFiles = writeMultipleFiles(config);
         try (final FileFormatWriter formatWriter =
@@ -254,10 +257,10 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
             for (DataRow row; (row = input.poll()) != null;) {
                 reportProgress(rowCount, rowCounter, exec);
                 boolean writeRow = formatWriter.writeRow(row);
+                rowCounter.increment();
                 if (writeMultipleFiles && writeRow) {
                     return true;
                 }
-                rowCounter.increment();
             }
             return false;
         } catch (final CanceledExecutionException e) {

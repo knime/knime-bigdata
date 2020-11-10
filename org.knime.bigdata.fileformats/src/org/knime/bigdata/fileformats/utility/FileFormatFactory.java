@@ -84,6 +84,16 @@ public interface FileFormatFactory<X> {
     String getChunkUnit();
 
     /**
+     * @return the default file size to use
+     */
+    long getDefaultFileSize();
+
+    /**
+     * @return the default chunk size to use
+     */
+    int getDefaultChunkSize();
+
+    /**
      * Returns a list of Strings containing all compressionCodecs supported by the specified file format.
      *
      * @return the list of available compressions
