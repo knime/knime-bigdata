@@ -33,12 +33,14 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 
 import org.knime.core.data.DataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.util.SharedIcons;
 import org.knime.core.node.workflow.BufferedDataTableView;
 
 /**
@@ -55,6 +57,8 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
     final JButton m_loadButton;
     final JSpinner m_cacheRows;
 
+    final JLabel m_startupInfoLabel;
+
     final JPanel m_fetchingPanel;
     final JLabel m_fetchingLabel;
     final JButton m_cancelButton;
@@ -66,6 +70,7 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
     /** Default constructor. */
     public SparkDataPreviewPanel() {
         super(new BorderLayout());
+
         m_loadButton = new JButton("Cache no. of rows: ");
         m_loadButton.addActionListener(this);
         m_cacheRows = new JSpinner(new SpinnerNumberModel(100, 0, 10000, 10));
@@ -75,6 +80,9 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
         m_controlPanel.add(m_loadButton);
         m_controlPanel.add(m_cacheRows);
 
+        m_startupInfoLabel = new JLabel("CLick on the button above to load/refresh the preview.",
+            SharedIcons.INFO_BALLOON.get(), SwingConstants.CENTER);
+
         m_fetchingLabel = new JLabel();
         m_cancelButton = new JButton("Cancel");
         m_cancelButton.addActionListener(this);
@@ -82,7 +90,7 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
         m_fetchingPanel.add(m_fetchingLabel);
         m_fetchingPanel.add(m_cancelButton);
 
-        defaultLayout();
+        startLayout();
     }
 
     /**
@@ -93,10 +101,14 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
      */
     protected abstract SparkDataTable prepareDataTable(final ExecutionMonitor exec) throws Exception;
 
-    /** Reset layout (e.g. remove error messages and drop old data table) */
+    /**
+     * Reset the component (remove error messages, drop old data table and enable all buttons).
+     */
     public void reset() {
         m_dataTableView = new BufferedDataTableView(null);
-        defaultLayout();
+        m_loadButton.setEnabled(true);
+        m_cacheRows.setEnabled(true);
+        startLayout();
     }
 
     @Override
@@ -131,7 +143,7 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
                         m_dataTableView = new BufferedDataTableView(dataTable);
                         // count the rows so that the JScrollPane can set the correct size (AP-12613)
                         m_dataTableView.getTableView().countRowsInBackground();
-                        defaultLayout();
+                        tableLayout();
                     }
 
                 } catch (ExecutionException|InterruptedException ee) {
@@ -152,10 +164,19 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
     }
 
     /** Default layout with fetch button and (possible empty) table. */
-    private void defaultLayout() {
+    private void tableLayout() {
         removeAll();
         add(m_controlPanel, BorderLayout.NORTH);
         add(m_dataTableView, BorderLayout.CENTER);
+        repaint();
+        revalidate();
+    }
+
+    /** Layout that shows a startup info message. */
+    private void startLayout() {
+        removeAll();
+        add(m_controlPanel, BorderLayout.NORTH);
+        add(m_startupInfoLabel, BorderLayout.CENTER);
         repaint();
         revalidate();
     }
@@ -180,12 +201,30 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
         m_dataTableView = new BufferedDataTableView(null);
         removeAll();
         add(m_controlPanel, BorderLayout.NORTH);
-        JTextArea textArea = new JTextArea(message);
-        textArea.setWrapStyleWord(true);
-        textArea.setLineWrap(true);
-        textArea.setBackground(getBackground());
-        add(textArea, BorderLayout.CENTER);
+        if (message.length() < 100 && !message.contains("\n")) { // short message
+            final JLabel label = new JLabel(message, SwingConstants.CENTER);
+            label.setIcon(SharedIcons.ERROR.get());
+            add(label, BorderLayout.CENTER);
+        } else {
+            final JTextArea textArea = new JTextArea(message);
+            textArea.setWrapStyleWord(true);
+            textArea.setLineWrap(true);
+            textArea.setBackground(getBackground());
+            add(textArea, BorderLayout.CENTER);
+        }
         repaint();
         revalidate();
+    }
+
+    /**
+     * Disables the buttons and shows a given error message.
+     *
+     * @param message failure message to show
+     * @see #reset()
+     */
+    public void setDisabled(final String message) {
+        m_loadButton.setEnabled(false);
+        m_cacheRows.setEnabled(false);
+        errorLayout(message);
     }
 }

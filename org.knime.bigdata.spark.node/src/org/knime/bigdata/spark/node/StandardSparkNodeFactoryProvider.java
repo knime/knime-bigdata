@@ -30,6 +30,7 @@ import org.knime.bigdata.spark.node.io.database.impala.reader.DBImpala2SparkNode
 import org.knime.bigdata.spark.node.io.database.impala.writer.DBSpark2ImpalaNodeFactory;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.json.Json2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.csv.CSV2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.json.Json2SparkNodeFactory2;
@@ -158,6 +159,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Spark2HiveNodeFactory(),
             new DBSpark2HiveNodeFactory(),
             new DBSpark2ImpalaNodeFactory(),
+            new Json2SparkNodeFactory3(),
             new Json2SparkNodeFactory2(),
             new Spark2JsonNodeFactory(),
             new NioSpark2JsonNodeFactory(),
