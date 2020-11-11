@@ -29,6 +29,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.knime.bigdata.fileformats.node.writer,
  org.knime.bigdata.fileformats.orc.datatype.mapping,
  org.knime.bigdata.fileformats.orc.writer,
+ org.knime.bigdata.fileformats.parquet,
  org.knime.bigdata.fileformats.parquet.datatype.mapping,
  org.knime.bigdata.fileformats.parquet.writer
 Eclipse-BundleShape: dir

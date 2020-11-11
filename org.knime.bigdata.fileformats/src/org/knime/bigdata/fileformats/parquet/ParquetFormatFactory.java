@@ -51,31 +51,23 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.parquet.hadoop.ParquetFileWriter.Mode;
 import org.apache.parquet.hadoop.ParquetWriter;
-import org.apache.parquet.hadoop.api.WriteSupport;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
 import org.knime.bigdata.fileformats.node.writer2.FileFormatWriter;
-import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.SettingsModelParquetDataTypeMapping;
 import org.knime.bigdata.fileformats.parquet.reader.ParquetKNIMEReader;
-import org.knime.bigdata.fileformats.parquet.writer.DataRowWriteSupport;
 import org.knime.bigdata.fileformats.parquet.writer.ParquetKNIMEWriter;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
-import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.InvalidSettingsException;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
@@ -175,77 +167,10 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     public FileFormatWriter getWriter(final FSPath path, final FileOverwritePolicy overwritePolicy,
         final DataTableSpec spec, final long fileSize, final int chunkSize,
         final String compression, final DataTypeMappingConfiguration<ParquetType> typeMappingConf) throws IOException {
-        final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
         final Mode writeMode = OVERWRITE == overwritePolicy ? Mode.OVERWRITE : Mode.CREATE;
-        return new ParquetFileFormatWriter(NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig), writeMode,
-            spec, compression, fileSize * TO_BYTE, chunkSize * TO_BYTE, typeMappingConf);
-    }
-
-    /* Parquet implemenation for FileFormatWriter */
-    static final class ParquetFileFormatWriter implements FileFormatWriter {
-
-        private final ParquetWriter<DataRow> m_writer;
-
-        private final DataTypeMappingConfiguration<?> m_mappingConfig;
-
-        private final ParquetParameter[] m_params;
-
-        private final long m_fileSize;
-
-        public ParquetFileFormatWriter(final Path outputPath, final Mode writeMode, final DataTableSpec spec,
-            final String compression, final long fileSize, final int rowGroupSize,
-            final DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
-            throws IOException {
-            m_fileSize = fileSize;
-            final CompressionCodecName codec = CompressionCodecName.fromConf(compression);
-            m_mappingConfig = inputputDataTypeMappingConfiguration;
-            m_params = new ParquetParameter[spec.getNumColumns()];
-            for (int i = 0; i < spec.getNumColumns(); i++) {
-                m_params[i] = new ParquetParameter(i);
-            }
-
-            try {
-                m_writer = new DataRowParquetWriterBuilder(outputPath,
-                    new DataRowWriteSupport(spec.getName(), spec, m_mappingConfig.getConsumptionPathsFor(spec),
-                        m_params)).withCompressionCodec(codec).withDictionaryEncoding(true)
-                            .withRowGroupSize(rowGroupSize).withWriteMode(writeMode).build();
-            } catch (final InvalidSettingsException e) {
-                throw new BigDataFileFormatException(e);
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
-            m_writer.close();
-        }
-
-        @Override
-        public boolean writeRow(final DataRow row) throws IOException {
-            m_writer.write(row);
-            return m_writer.getDataSize() >= m_fileSize;
-        }
-
-        /* Helper class to build ParquetWriters */
-        static final class DataRowParquetWriterBuilder
-            extends ParquetWriter.Builder<DataRow, DataRowParquetWriterBuilder> {
-            private final WriteSupport<DataRow> m_writeSupport;
-
-            private DataRowParquetWriterBuilder(final Path hadoop, final WriteSupport<DataRow> writeSupport) {
-                super(hadoop);
-                m_writeSupport = writeSupport;
-            }
-
-            @Override
-            protected WriteSupport<DataRow> getWriteSupport(final Configuration conf) {
-                return m_writeSupport;
-            }
-
-            @Override
-            protected DataRowParquetWriterBuilder self() {
-                return this;
-            }
-        }
-
+        final CompressionCodecName compressionCodec = CompressionCodecName.fromConf(compression);
+        return new ParquetFileFormatWriter(path, writeMode, spec, compressionCodec, fileSize * TO_BYTE,
+            chunkSize * TO_BYTE, typeMappingConf);
     }
 
 }
