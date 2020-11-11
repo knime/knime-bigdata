@@ -239,7 +239,7 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
         boolean moreData = true;
         while (moreData) {
             final String fileName =
-                    String.format("%s_%05d%s", config.getFileNamePrefix(), fileCounter, factory.getFilenameSuffix());
+                    String.format("%s%05d%s", config.getFileNamePrefix(), fileCounter, factory.getFilenameSuffix());
             final FSPath outputPath = (FSPath) outputRootPath.resolve(fileName);
             moreData = writeToFile(exec, config, factory, outputPath, input, rowCount, rowCounter);
             fileCounter++;

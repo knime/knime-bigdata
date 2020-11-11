@@ -276,6 +276,8 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
             final TypeDescription schema = deriveTypeDescription();
             final WriterOptions orcConf =
                 OrcFile.writerOptions(conf).setSchema(schema).compress(m_compression).version(OrcFile.Version.CURRENT);
+            ////TODO: Supported with ORC 1.4.5 https://issues.apache.org/jira/browse/ORC-231
+            //orcConf.override();
 
             m_writer = OrcFile.createWriter(m_path, orcConf);
             m_rowBatch = schema.createRowBatch(m_chunkSize);

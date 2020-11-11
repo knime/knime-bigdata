@@ -112,9 +112,9 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
 
         final FlowVariableModel prefixFVM =
             createFlowVariableModel(m_writerConfig.getPrefixKeyChain(), VariableType.StringType.INSTANCE);
-        m_fileNamePrefix = new DialogComponentString(m_fileNamePrefixModel, "File name prefix: ", true, 10, prefixFVM);
+        m_fileNamePrefix = new DialogComponentString(m_fileNamePrefixModel, "File name prefix: ", true, 12, prefixFVM);
         m_fileSizeComponent = new DialogComponentNumberEdit(m_fileSizeModel,
-            "Split data into files of size (" + m_writerConfig.getChunkSizeUnit() + "): ", 5);
+            "Split data into files of size (" + m_writerConfig.getChunkSizeUnit() + "): ", 7);
         m_fileChooserModel.addChangeListener(e -> updateFileSizeComponent());
         updateFileSizeComponent();
 
@@ -229,7 +229,7 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
         gbc.gridy++;
         fileSettingsPanel.add(new DialogComponentNumberEdit(m_writerConfig.getChunkSizeModel(),
             "Within file " + m_writerConfig.getChunkUnit().toLowerCase()
-            + " size (" + m_writerConfig.getChunkSizeUnit() + "): ", 5).getComponentPanel(), gbc);
+            + " size (" + m_writerConfig.getChunkSizeUnit() + "): ", 7).getComponentPanel(), gbc);
 
         return fileSettingsPanel;
     }
