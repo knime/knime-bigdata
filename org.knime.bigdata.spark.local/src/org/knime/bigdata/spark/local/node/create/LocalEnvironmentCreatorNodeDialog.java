@@ -51,12 +51,12 @@ import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * Node dialog for the "Create Local Big Data Environment" node.
- * 
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
 
-    private LocalSparkContextSettings m_settings = new LocalSparkContextSettings();
+    private LocalSparkContextSettings m_settings = new LocalSparkContextSettings(false);
 
     private final FlowVariableModel m_hiveFolderFlowVariable;
 

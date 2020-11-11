@@ -2,11 +2,7 @@ package org.knime.bigdata.spark.local.node.create;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
-import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -18,6 +14,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.OnDisposeAction;
+import org.knime.bigdata.spark.local.node.create.utils.CreateLocalBDEPortUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -47,23 +44,36 @@ public abstract class AbstractLocalEnvironmentCreatorNodeModel extends SparkNode
     /**
      * Settings for the local Spark context
      */
-    protected final LocalSparkContextSettings m_settings = new LocalSparkContextSettings();
+    protected final LocalSparkContextSettings m_settings;
 
     /**
      * Id of the last opened context
      */
     protected SparkContextID m_lastContextID;
 
-
     /**
      * Creates a SparkNodeModel for the local environment node
      *
-     * @param inPortTypes array of input ports
-     * @param outPortTypes array of outputPorts
+     * @param dbPortType database port type
+     * @param fsPortType file system port type
+     * @param hasWorkingDirectorySetting {@code true} if the file system port requires a working directory
      */
-    protected AbstractLocalEnvironmentCreatorNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
-        super(inPortTypes, outPortTypes);
+    protected AbstractLocalEnvironmentCreatorNodeModel(final PortType dbPortType, final PortType fsPortType,
+        final boolean hasWorkingDirectorySetting) {
+
+        super(new PortType[]{}, new PortType[]{dbPortType, fsPortType, SparkContextPortObject.TYPE});
+        m_settings = new LocalSparkContextSettings(hasWorkingDirectorySetting);
     }
+
+    /**
+     * @return database output port utility
+     */
+    protected abstract CreateLocalBDEPortUtil getDatabasePortUtil();
+
+    /**
+     * @return file system output port utility
+     */
+    protected abstract CreateLocalBDEPortUtil getFileSystemPortUtil();
 
     /**
      * {@inheritDoc}
@@ -92,12 +102,17 @@ public abstract class AbstractLocalEnvironmentCreatorNodeModel extends SparkNode
 
         m_lastContextID = newContextID;
 
-        PortObjectSpec dbPortObjectObjectSpec = null;
-        if (!sparkContext.getConfiguration().startThriftserver()) {
+        final PortObjectSpec dbPortObjectObjectSpec;
+        if (sparkContext.getConfiguration().startThriftserver()) {
+            dbPortObjectObjectSpec = getDatabasePortUtil().configure();
+        } else {
             dbPortObjectObjectSpec = InactiveBranchPortObjectSpec.INSTANCE;
+
         }
 
-        return new PortObjectSpec[]{dbPortObjectObjectSpec, createHDFSConnectionSpec(),
+        return new PortObjectSpec[]{ //
+            dbPortObjectObjectSpec, //
+            getFileSystemPortUtil().configure(), //
             new SparkContextPortObjectSpec(m_settings.getSparkContextID())};
     }
 
@@ -128,37 +143,31 @@ public abstract class AbstractLocalEnvironmentCreatorNodeModel extends SparkNode
 
         final PortObject dbPortObject;
         if (sparkContext.getConfiguration().startThriftserver()) {
-            final int hiveserverPort = sparkContext.getHiveserverPort();
-            dbPortObject = createDBPort(exec, hiveserverPort);
+            dbPortObject = getDatabasePortUtil().execute(sparkContext, exec);
         } else {
             dbPortObject = InactiveBranchPortObject.INSTANCE;
         }
 
-        return new PortObject[]{dbPortObject, new ConnectionInformationPortObject(createHDFSConnectionSpec()),
+        return new PortObject[]{ //
+            dbPortObject, //
+            getFileSystemPortUtil().execute(sparkContext, exec), //
             new SparkContextPortObject(contextID)};
     }
 
     /**
-     * Creates the Port for the database connection
-     *
-     * @param exec the ExecutionContext to use
-     * @param hiveserverPort the HIVE server port
-     * @return the PortObject for the database port
-     * @throws CanceledExecutionException
-     * @throws SQLException
-     * @throws InvalidSettingsException
+     * Set a node warning, useful in {@link CreateLocalBDEPortUtil} implementations.
+     * @param warningMessage message to show
      */
-    protected abstract PortObject createDBPort(ExecutionContext exec, int hiveserverPort) throws CanceledExecutionException, SQLException, InvalidSettingsException;
-
+    public void setNodeWarning(final String warningMessage) {
+        setWarningMessage(warningMessage);
+    }
 
     /**
-     * Create the spec for the local hdfs.
-     *
-     * @return ...
-     * @throws InvalidSettingsException ...
+     * Get the node logger, useful in {@link CreateLocalBDEPortUtil} implementations.
+     * @return the node logger of this node
      */
-    private static ConnectionInformationPortObjectSpec createHDFSConnectionSpec() throws InvalidSettingsException {
-        return new ConnectionInformationPortObjectSpec(HDFSLocalConnectionInformation.getInstance());
+    public NodeLogger getNodeLogger() {
+        return LOGGER;
     }
 
     @Override
@@ -172,6 +181,15 @@ public abstract class AbstractLocalEnvironmentCreatorNodeModel extends SparkNode
                 LOGGER.debug("Failed to destroy context " + id + " on dispose.", e);
             }
         }
+
+        getDatabasePortUtil().onDispose();
+        getFileSystemPortUtil().onDispose();
+    }
+
+    @Override
+    protected void resetInternal() {
+        getDatabasePortUtil().reset();
+        getFileSystemPortUtil().reset();
     }
 
     @Override
@@ -179,17 +197,26 @@ public abstract class AbstractLocalEnvironmentCreatorNodeModel extends SparkNode
             throws IOException, CanceledExecutionException {
 
         final SparkContextID contextID = m_settings.getSparkContextID();
-        final SparkContext<LocalSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
-
+        final LocalSparkContext sparkContext =
+            (LocalSparkContext)SparkContextManager.<LocalSparkContextConfig> getOrCreateSparkContext(contextID);
         final LocalSparkContextConfig sparkContextConfig = m_settings.createContextConfig();
 
         final boolean configApplied = sparkContext.ensureConfigured(sparkContextConfig, true);
         if (!configApplied && !m_settings.hideExistsWarning()) {
             setWarningMessage("Local Spark context exists already. Settings were not applied.");
         }
+
+        getDatabasePortUtil().loadInternals(nodeInternDir, exec, sparkContext, sparkContextConfig);
+        getFileSystemPortUtil().loadInternals(nodeInternDir, exec, sparkContext, sparkContextConfig);
     }
 
+    @Override
+    protected void saveAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
+        throws IOException, CanceledExecutionException {
 
+        getDatabasePortUtil().saveInternals(nodeInternDir, exec);
+        getFileSystemPortUtil().saveInternals(nodeInternDir, exec);
+    }
 
     /**
      * {@inheritDoc}
@@ -214,6 +241,5 @@ public abstract class AbstractLocalEnvironmentCreatorNodeModel extends SparkNode
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
     }
-
 
 }

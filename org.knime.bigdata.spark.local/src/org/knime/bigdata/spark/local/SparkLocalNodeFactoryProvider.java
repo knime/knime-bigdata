@@ -7,6 +7,7 @@ import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory;
 import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory2;
+import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory3;
 
 /**
  * Node factory provider for Spark local.
@@ -19,7 +20,8 @@ public class SparkLocalNodeFactoryProvider extends DefaultSparkNodeFactoryProvid
 	 * Default constructor.
 	 */
     public SparkLocalNodeFactoryProvider() {
-        super(AllVersionCompatibilityChecker.INSTANCE, new LocalEnvironmentCreatorNodeFactory(), new LocalEnvironmentCreatorNodeFactory2());
+        super(AllVersionCompatibilityChecker.INSTANCE, new LocalEnvironmentCreatorNodeFactory(),
+            new LocalEnvironmentCreatorNodeFactory2(), new LocalEnvironmentCreatorNodeFactory3());
     }
 
 }

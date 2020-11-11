@@ -20,38 +20,39 @@
  */
 package org.knime.bigdata.spark.local.node.create;
 
-import java.sql.SQLException;
-
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
-import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
-import org.knime.bigdata.spark.local.database.LocalHiveConnectionSettings;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortType;
+import org.knime.bigdata.spark.local.node.create.utils.CreateConnectionInformationPortUtil;
+import org.knime.bigdata.spark.local.node.create.utils.CreateDatabaseConnectionPortUtil;
+import org.knime.bigdata.spark.local.node.create.utils.CreateLocalBDEPortUtil;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
-import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 
 /**
- * Node model for the "Create Local Big Data Environment" node.
+ * Node model for the "Create Local Big Data Environment" node using a Hive {@link DatabaseConnectionPortObject} and a
+ * file system {@link ConnectionInformationPortObject} output port.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LocalEnvironmentCreatorNodeModel extends AbstractLocalEnvironmentCreatorNodeModel {
 
+    private final CreateDatabaseConnectionPortUtil m_dbPortUtil = new CreateDatabaseConnectionPortUtil();
+
+    private final CreateConnectionInformationPortUtil m_fsPortUtil = new CreateConnectionInformationPortUtil();
+
 	/**
 	 * Constructor.
 	 */
 	LocalEnvironmentCreatorNodeModel() {
-		super(new PortType[]{}, new PortType[]{DatabaseConnectionPortObject.TYPE,
-				ConnectionInformationPortObject.TYPE, SparkContextPortObject.TYPE});
+		super(CreateDatabaseConnectionPortUtil.PORT_TYPE, CreateConnectionInformationPortUtil.PORT_TYPE, false);
 	}
 
     @Override
-    protected PortObject createDBPort(ExecutionContext exec, int hiveserverPort)
-        throws CanceledExecutionException, SQLException, InvalidSettingsException {
-        return new DatabaseConnectionPortObject(
-            new DatabaseConnectionPortObjectSpec(new LocalHiveConnectionSettings(hiveserverPort)));
+    protected CreateLocalBDEPortUtil getDatabasePortUtil() {
+        return m_dbPortUtil;
     }
+
+    @Override
+    protected CreateLocalBDEPortUtil getFileSystemPortUtil() {
+        return m_fsPortUtil;
+    }
+
 }

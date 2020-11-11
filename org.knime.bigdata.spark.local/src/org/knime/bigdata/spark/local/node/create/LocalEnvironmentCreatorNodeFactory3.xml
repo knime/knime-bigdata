@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Local Big Data Environment</name>
+    <name>Create Local Big Data Environment (Labs)</name>
     
     <shortDescription>Creates a fully functional local big data environment.</shortDescription>
     
@@ -25,7 +25,7 @@
         <option name="Context name">The unique name of the context. Only one Spark context will be created when you 
         execute several <i>Create Local Big Data Environment</i> nodes with the same context name.</option>
         <option name="Number of threads">The number of threads the local Spark runtime can be use.</option>
-        <option name="Action to perform on dispose">Decides what happens with the Spark context when the workflow or
+        <option name="On dispose">Decides what happens with the Spark context when the workflow or
         KNIME is closed.
         <ul>
             <li><b>Destroy Spark context:</b> Will destroy the Spark context and free up all allocated resources.</li>
@@ -34,10 +34,6 @@
             <li><b>Do nothing:</b> Leaves the Spark context and all created Spark DataFrames as is.</li>
         </ul>
         </option>
-        <option name="Use custom Spark settings">Select this option to specify additional Spark settings. For more
-        details see Custom Spark settings description.</option>
-        <option name="Custom Spark settings">Allows you to pass on any settings to the Spark context. 
-        Especially interesting if you want to add additional jars e.g. to test your own UDFs.</option>
         <option name="SQL Support">
         <ul>
             <li><b>Spark SQL only:</b> The Spark SQL node will only support Spark SQL syntax. 
@@ -49,15 +45,12 @@
             KNIME database nodes.</li>
         </ul>
         </option>
-        <option name="Use custom Hive data folder (Metastore DB &amp; Warehouse)">If selected, the Hive table definitions 
-        and data files are stored in the specified location and will be also available after a KNIME restart. 
-        If not selected, all Hive related information is stored in a temporary location which will be deleted when the
-        local Spark context is destroyed.
+        <option name="Working directory">
+            Specify the <i>working directory</i> of the resulting file system connection. The working
+	        directory must be specified as an absolute path. A working directory allows downstream nodes to access files/folders using <i>relative</i>
+	        paths, i.e. paths that do not have a leading slash. The default working directory is the root "/", under which all the
+	        document libraries are located.
         </option>
-	   <option name="Hide warning about an existing local Spark context">Enable this option to suppress a warning message
-		shown when the Spark context to be created by this node already
-		exists. For further details see the <i>Context name</i> option.
-		</option>
 		</tab>
 		
         <tab name="Time">
@@ -85,12 +78,33 @@
                 Allows to specify whether this node should fail, when the cluster-side default time zone is different from the fixed time zone that was specified.
             </option>
         </tab>
+        
+        <tab name="Advanced">
+			<option name="Use custom Spark settings">
+				Select this option to specify additional Spark
+				settings. For more details see Custom Spark settings description.
+			</option>
+			<option name="Custom Spark settings">
+				Allows you to pass on any settings to the Spark	context.
+				Especially interesting if you want to add additional jars e.g. to test your own	UDFs.
+			</option>
+  		    <option name="Hide warning about an existing local Spark context">
+  		    	Enable this option to suppress a warning message
+				shown when the Spark context to be created by this node already
+				exists. For further details see the <i>Context name</i> option.
+			</option>
+	        <option name="Use custom Hive data folder (Metastore DB &amp; Warehouse)">If selected, the Hive table definitions 
+	        and data files are stored in the specified location and will be also available after a KNIME restart. 
+	        If not selected, all Hive related information is stored in a temporary location which will be deleted when the
+	        local Spark context is destroyed.
+	        </option>
+        </tab>
 		
     </fullDescription>
     
     <ports>
     	<outPort index="0" name="Hive Connection">JDBC connection to a local Hive instance. This port can be connected to the KNIME database nodes.</outPort>
-	<outPort index="1" name="HDFS Connection">HDFS connection that points to the
+    	<outPort index="1" name="File System Connection">File System connection that points to the
 		local file system. This port can be connected for example to the Spark
 		nodes that read/write files.</outPort>
         <outPort index="2" name="Spark Context">Local Spark context, that can be connected to all Spark nodes.</outPort>

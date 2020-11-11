@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Local Big Data Environment (Legacy)</name>
+    <name>Create Local Big Data Environment (Legacy DB Port)</name>
     
     <shortDescription>Creates a fully functional local big data environment.</shortDescription>
     
@@ -18,6 +18,9 @@
             context. Whether closing the KNIME workflow will destroy the context or not, depends on the configured
             <i>Action to perform on dispose</i>. Spark contexts created by this node can be shared between
             KNIME workflows.
+            </p>
+            <p>
+            <i>Note:</i> This node uses the old database connection based Hive output port.
             </p>
         </intro>
         

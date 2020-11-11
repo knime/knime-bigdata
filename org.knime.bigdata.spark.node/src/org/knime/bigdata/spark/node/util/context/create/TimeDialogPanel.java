@@ -52,12 +52,12 @@ public class TimeDialogPanel extends JPanel {
                 "Fail on different cluster default time zone");
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(0, 0, 0, 0);
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.weightx = 0;
+        gbc.weightx = 1;
         gbc.weighty = 0;
 
         add(createTimeShiftPanel(), gbc);
@@ -72,7 +72,7 @@ public class TimeDialogPanel extends JPanel {
         panel.setBorder(BorderFactory.createTitledBorder("Spark session time zone and Date and Time column alignment"));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(5, 5, 0, 5);
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 0;
@@ -80,7 +80,6 @@ public class TimeDialogPanel extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(5, 20, 5, 20);
         panel.add(m_timeShiftStrategy.getButton(TimeShiftStrategy.NONE.getActionCommand()), gbc);
 
         gbc.gridx = 0;
@@ -89,7 +88,6 @@ public class TimeDialogPanel extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(5, 20, 0, 20);
         final JPanel box = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         box.add(m_timeShiftStrategy.getButton(TimeShiftStrategy.FIXED.getActionCommand()));
         box.add(m_fixedTimeZone.getComponentPanel());
@@ -97,7 +95,6 @@ public class TimeDialogPanel extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(0, 20, 0, 20);
         panel.add(m_failOnDiffFixedTimeZone.getComponentPanel(), gbc);
 
         gbc.gridx++;

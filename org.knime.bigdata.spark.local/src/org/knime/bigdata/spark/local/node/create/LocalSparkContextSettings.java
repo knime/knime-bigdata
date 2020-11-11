@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
@@ -162,7 +163,11 @@ public class LocalSparkContextSettings {
 
     private static final String DEFAULT_CONTEXT_NAME = "knimeSparkContext";
 
+    private static final String DEFAULT_WORKING_DIR = System.getProperty("user.home");
+
     private static final String DEFAULT_CUSTOM_SPARK_SETTINGS = "spark.jars: /path/to/some.jar\nspark.sql.shuffle.partitions: 100\n";
+
+    private final boolean m_hasWorkingDirectorySetting;
 
     // Spark context settings
     private final SettingsModelString m_contextName = new SettingsModelString("contextName", DEFAULT_CONTEXT_NAME);
@@ -191,10 +196,16 @@ public class LocalSparkContextSettings {
 
     private final TimeSettings m_timeShiftSettings = new TimeSettings();
 
+    private final SettingsModelString m_workingDirectory =
+        new SettingsModelString("workingDirectory", DEFAULT_WORKING_DIR);
+
     /**
-     * Constructor.
+     * Default constructor.
+     *
+     * @param hasWorkingDirectorySetting {@code true} if the working directory settings should be used
      */
-    public LocalSparkContextSettings() {
+    public LocalSparkContextSettings(final boolean hasWorkingDirectorySetting) {
+        m_hasWorkingDirectorySetting = hasWorkingDirectorySetting;
         updateEnabledness();
     }
 
@@ -374,6 +385,20 @@ public class LocalSparkContextSettings {
     }
 
     /**
+     * @return the working directory of the file system connection
+     */
+    public String getWorkingDirectory() {
+        return m_workingDirectory.getStringValue();
+    }
+
+    /**
+     * @return the working directory settings model
+     */
+    public SettingsModelString getWorkingDirectoryModel() {
+        return m_workingDirectory;
+    }
+
+    /**
      * @return the {@link SparkContextID} derived from the configuration settings.
      */
     public SparkContextID getSparkContextID() {
@@ -382,7 +407,7 @@ public class LocalSparkContextSettings {
 
     /**
      * Static method to derive a {@link SparkContextID} for the given chosen context name.
-     * 
+     *
      * @param ctxName User-defined name for the local Spark context.
      * @return the corresponding {@link SparkContextID}.
      */
@@ -419,6 +444,10 @@ public class LocalSparkContextSettings {
         m_hideExistsWarning.saveSettingsTo(settings);
 
         m_timeShiftSettings.saveSettingsTo(settings.addNodeSettings("timeshift"));
+
+        if (m_hasWorkingDirectorySetting) {
+            m_workingDirectory.saveSettingsTo(settings);
+        }
     }
 
     /**
@@ -447,7 +476,11 @@ public class LocalSparkContextSettings {
             m_timeShiftSettings.validateSettings(settings.getNodeSettings("timeshift"));
         }
 
-        final LocalSparkContextSettings tmpSettings = new LocalSparkContextSettings();
+        if (m_hasWorkingDirectorySetting) {
+            m_workingDirectory.validateSettings(settings);
+        }
+
+        final LocalSparkContextSettings tmpSettings = new LocalSparkContextSettings(m_hasWorkingDirectorySetting);
         tmpSettings.loadSettingsFrom(settings);
         tmpSettings.validateDeeper();
     }
@@ -473,6 +506,10 @@ public class LocalSparkContextSettings {
             } else if (!hiveDataFolder.canWrite()) {
                 errors.add("Cannot write to the configured Hive data folder.");
             }
+        }
+
+        if (m_hasWorkingDirectorySetting && StringUtils.isBlank(getWorkingDirectory())) {
+            errors.add("Working directory required.");
         }
 
         if (!errors.isEmpty()) {
@@ -501,6 +538,10 @@ public class LocalSparkContextSettings {
 
         if (settings.containsKey("timeshift")) { // added in 4.2
             m_timeShiftSettings.loadSettingsFrom(settings.getNodeSettings("timeshift"));
+        }
+
+        if (m_hasWorkingDirectorySetting) {
+            m_workingDirectory.loadSettingsFrom(settings);
         }
 
         updateEnabledness();

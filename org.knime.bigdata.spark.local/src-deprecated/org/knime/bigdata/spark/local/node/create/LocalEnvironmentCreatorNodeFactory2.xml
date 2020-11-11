@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+    <name>Create Local Big Data Environment (Legacy FS Port)</name>
+    
+    <shortDescription>Creates a fully functional local big data environment.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a fully functional local big data environment including Apache Hive, Apache Spark and HDFS.
+            <p>
+            The Spark WebUI of the created local Spark context is available via the Spark context outport view.
+            Simply click on the <i>Click here to open</i> link and the Spark WebUI is opened in the internal web browser.
+            </p>
+            <p>
+            <i>Note</i>: Executing this node only creates a new Spark context, when no local
+            Spark context with the same <i>Context name</i> currently exists. Resetting the node does not destroy the
+            context. Whether closing the KNIME workflow will destroy the context or not, depends on the configured
+            <i>Action to perform on dispose</i>. Spark contexts created by this node can be shared between
+            KNIME workflows.
+            </p>
+            <p>
+            <i>Note:</i> This node uses the old connection information based file system output port.
+            </p>
+        </intro>
+        
+        <tab name="Settings">
+        <option name="Context name">The unique name of the context. Only one Spark context will be created when you 
+        execute several <i>Create Local Big Data Environment</i> nodes with the same context name.</option>
+        <option name="Number of threads">The number of threads the local Spark runtime can be use.</option>
+        <option name="Action to perform on dispose">Decides what happens with the Spark context when the workflow or
+        KNIME is closed.
+        <ul>
+            <li><b>Destroy Spark context:</b> Will destroy the Spark context and free up all allocated resources.</li>
+            <li><b>Delete Spark DataFrames:</b> Will delete all Spark DataFrames but keeps the Spark context with all the 
+            allocated resources open.</li>
+            <li><b>Do nothing:</b> Leaves the Spark context and all created Spark DataFrames as is.</li>
+        </ul>
+        </option>
+        <option name="Use custom Spark settings">Select this option to specify additional Spark settings. For more
+        details see Custom Spark settings description.</option>
+        <option name="Custom Spark settings">Allows you to pass on any settings to the Spark context. 
+        Especially interesting if you want to add additional jars e.g. to test your own UDFs.</option>
+        <option name="SQL Support">
+        <ul>
+            <li><b>Spark SQL only:</b> The Spark SQL node will only support Spark SQL syntax. 
+            The Hive connection port will be disabled.</li>
+            <li><b>HiveQL:</b> The Spark SQL node will support HiveQL syntax.
+            The Hive connection port will be disabled.</li>
+            <li><b>HiveQL and provide JDBC connection:</b> The Spark SQL node will support HiveQL syntax.
+            The Hive connection port will be enabled, which allows you to also work with a local Hive instance using the 
+            KNIME database nodes.</li>
+        </ul>
+        </option>
+        <option name="Use custom Hive data folder (Metastore DB &amp; Warehouse)">If selected, the Hive table definitions 
+        and data files are stored in the specified location and will be also available after a KNIME restart. 
+        If not selected, all Hive related information is stored in a temporary location which will be deleted when the
+        local Spark context is destroyed.
+        </option>
+	   <option name="Hide warning about an existing local Spark context">Enable this option to suppress a warning message
+		shown when the Spark context to be created by this node already
+		exists. For further details see the <i>Context name</i> option.
+		</option>
+		</tab>
+		
+        <tab name="Time">
+            <description>
+                This tab allows to set a time zone that is applied in two cases:
+                <ul>
+                <li>To set the Spark SQL session time zone, which is relevant in Spark SQL, when parsing <i>Strings</i> such as '2020-03-27 08:00:00' into <i>Timestamps</i> (<i>to_timestamp</i>) and vice versa, as well as datetime manipulations.</li>
+                <li>In KNIME, when mapping between Spark <i>Timestamps</i> and the KNIME (legacy) Date and Time type column type. Here, the specified time zone will be used to make the Date and Time value in KNIME equal to what would be displayed when displaying a <i>Timestamp</i> in Spark.</li>
+                </ul>
+            </description>
+
+            <option name="Do not set">
+                Leaves the Spark SQL session time zone unchanged and does <b>not</b> align the display of KNIME (legacy) Date and Time columns.
+            </option>
+            
+            <option name="Use default time zone from Spark cluster">
+                Leaves the Spark SQL session time zone unchanged but aligns the display of KNIME (legacy) Date and Time columns, based on the Spark SQL session timezone. This is the default.
+            </option>
+            
+            <option name="Use fixed time zone">
+                Allows to specify a time zone that will be set as the Spark SQL session time zone. The same time zone and which will be used to align the display of KNIME (legacy) Date and Time columns.
+            </option>
+            
+            <option name="Fail on different cluster default time zone">
+                Allows to specify whether this node should fail, when the cluster-side default time zone is different from the fixed time zone that was specified.
+            </option>
+        </tab>
+		
+    </fullDescription>
+    
+    <ports>
+    	<outPort index="0" name="Hive Connection">JDBC connection to a local Hive instance. This port can be connected to the KNIME database nodes.</outPort>
+	<outPort index="1" name="HDFS Connection">HDFS connection that points to the
+		local file system. This port can be connected for example to the Spark
+		nodes that read/write files.</outPort>
+        <outPort index="2" name="Spark Context">Local Spark context, that can be connected to all Spark nodes.</outPort>
+    </ports>    
+</knimeNode>
