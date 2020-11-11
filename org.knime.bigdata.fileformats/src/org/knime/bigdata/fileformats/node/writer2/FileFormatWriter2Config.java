@@ -184,8 +184,9 @@ final class FileFormatWriter2Config<T> {
         m_fileSize.validateSettings(settings);
         m_fileNamePrefix.validateSettings(settings);
         final int chunkSize = m_chunkSize.<SettingsModelInteger>createCloneWithValidatedValue(settings).getIntValue();
-        final long fileSize = m_fileSize.<SettingsModelLong>createCloneWithValidatedValue(settings).getLongValue();
-        if (chunkSize > fileSize) {
+        final SettingsModelLong fileSizeModel = m_fileSize.<SettingsModelLong>createCloneWithValidatedValue(settings);
+        final long fileSize = fileSizeModel.getLongValue();
+        if (fileSizeModel.isEnabled() && chunkSize > fileSize) {
             throw new InvalidSettingsException("File size must be greater or equals the "
                     + getChunkUnit().toLowerCase() + " size");
         }

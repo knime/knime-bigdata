@@ -117,7 +117,7 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
      */
     @Override
     public long getDefaultFileSize() {
-        return 250;
+        return 1000000;
     }
 
     @Override
