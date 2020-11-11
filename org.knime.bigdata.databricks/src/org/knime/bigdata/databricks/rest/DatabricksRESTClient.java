@@ -71,6 +71,8 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
+import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
 import org.knime.core.node.NodeLogger;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -184,7 +186,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
 
         final T proxyImpl = create(deploymentUrl, proxy, receiveTimeoutMillis, connectionTimeoutMillis);
         WebClient.client(proxyImpl).header("Authorization", "Bearer " + token);
-        return proxyImpl;
+        return wrap(proxyImpl);
     }
 
     /**
@@ -205,7 +207,15 @@ public class DatabricksRESTClient extends AbstractRESTClient {
 
         final T proxyImpl = create(deploymentUrl, proxy, receiveTimeoutMillis, connectionTimeoutMillis);
         WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
-        return proxyImpl;
+        return wrap(proxyImpl);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T wrap(final T api) {
+        if (api instanceof DBFSAPI) {
+            return (T)new DBFSAPIWrapper((DBFSAPI)api);
+        }
+        return api;
     }
 
 

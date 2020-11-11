@@ -42,94 +42,49 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2020-11-02 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandler;
+package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Base64;
-import java.util.Base64.Decoder;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Set;
 
-import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.databricks.rest.dbfs.FileBlock;
+import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
 
 /**
- * {@link InputStream} to read files in 1MB blocks from DBFS.
+ * Databricks DBFS implementation of the {@link TempFileSeekableByteChannel}.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Alexander Bondaletov
  */
-public class DBFSInputStream extends InputStream {
-    private static final int BLOCK_SIZE = 1024 * 1024;
-
-    private final String m_path;
-
-    private final DBFSAPI m_api;
-
-    private long m_nextOffset;
-
-    private final Decoder m_decoder;
-
-    private final byte[] m_buffer;
-
-    private int m_bufferOffset;
-
-    private int m_bufferLength;
-
-    private boolean m_lastBlock;
+public class DatabricksSeekableByteChannel extends TempFileSeekableByteChannel<DatabricksPath> {
 
     /**
-     * @param path The file path.
-     * @param api The {@link DBFSAPI} instance.
+     * Creates new instance.
+     *
+     * @param file The file for the channel.
+     * @param options Open options.
      * @throws IOException
      */
-    public DBFSInputStream(final String path, final DBFSAPI api) throws IOException {
-        m_path = path;
-        m_api = api;
-        m_nextOffset = 0;
-        m_decoder = Base64.getDecoder();
-        m_buffer = new byte[BLOCK_SIZE];
-        m_bufferOffset = 0;
-        m_bufferLength = 0;
-        readNextBlockIfNecessary();
-    }
-
-    private void readNextBlockIfNecessary() throws IOException {
-        if (!m_lastBlock && m_bufferOffset == m_bufferLength) {
-            final FileBlock fileBlock = m_api.read(m_path, m_nextOffset, BLOCK_SIZE);
-            m_lastBlock = fileBlock.bytes_read < BLOCK_SIZE;
-            m_bufferOffset = m_bufferLength = 0;
-
-            if (fileBlock.bytes_read > 0) {
-                m_nextOffset += fileBlock.bytes_read;
-                m_bufferLength = m_decoder.decode(fileBlock.data.getBytes(), m_buffer);
-            }
-        }
+    protected DatabricksSeekableByteChannel(final DatabricksPath file, final Set<? extends OpenOption> options)
+        throws IOException {
+        super(file, options);
     }
 
     @Override
-    public synchronized int read() throws IOException {
-        readNextBlockIfNecessary();
-
-        if (m_lastBlock && m_bufferOffset == m_bufferLength) {
-            return -1;
-        } else {
-            // return byte as int between 0 and 255
-            return m_buffer[m_bufferOffset++] & 0xff;
-        }
+    public void copyFromRemote(final DatabricksPath remoteFile, final Path tempFile) throws IOException {
+        Files.copy(remoteFile, tempFile);
     }
 
     @Override
-    public int read(final byte[] dest, final int off, final int len) throws IOException {
+    public void copyToRemote(final DatabricksPath remoteFile, final Path tempFile) throws IOException {
+        Files.copy(tempFile, remoteFile, StandardCopyOption.REPLACE_EXISTING);
 
-        readNextBlockIfNecessary();
-
-        if (m_lastBlock && m_bufferOffset == m_bufferLength) {
-            return -1;
-        } else {
-            final int bytesToRead = Math.min(len, m_bufferLength - m_bufferOffset);
-            System.arraycopy(m_buffer, m_bufferOffset, dest, off, bytesToRead);
-            m_bufferOffset += bytesToRead;
-            return bytesToRead;
-        }
     }
+
 }

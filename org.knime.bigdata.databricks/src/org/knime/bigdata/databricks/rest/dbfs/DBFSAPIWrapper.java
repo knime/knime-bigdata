@@ -42,94 +42,104 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2020-11-10 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandler;
+package org.knime.bigdata.databricks.rest.dbfs;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Base64;
-import java.util.Base64.Decoder;
 
-import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.databricks.rest.dbfs.FileBlock;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
- * {@link InputStream} to read files in 1MB blocks from DBFS.
+ * Wrapper class for {@link DBFSAPI} that suppresses authentication popups.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Alexander Bondaletov
  */
-public class DBFSInputStream extends InputStream {
-    private static final int BLOCK_SIZE = 1024 * 1024;
-
-    private final String m_path;
+public class DBFSAPIWrapper implements DBFSAPI {
 
     private final DBFSAPI m_api;
 
-    private long m_nextOffset;
-
-    private final Decoder m_decoder;
-
-    private final byte[] m_buffer;
-
-    private int m_bufferOffset;
-
-    private int m_bufferLength;
-
-    private boolean m_lastBlock;
-
     /**
-     * @param path The file path.
-     * @param api The {@link DBFSAPI} instance.
-     * @throws IOException
+     * Creates new instance.
+     *
+     * @param api The {@link DBFSAPI} instance to be wrapped.
+     *
      */
-    public DBFSInputStream(final String path, final DBFSAPI api) throws IOException {
-        m_path = path;
+    public DBFSAPIWrapper(final DBFSAPI api) {
         m_api = api;
-        m_nextOffset = 0;
-        m_decoder = Base64.getDecoder();
-        m_buffer = new byte[BLOCK_SIZE];
-        m_bufferOffset = 0;
-        m_bufferLength = 0;
-        readNextBlockIfNecessary();
     }
 
-    private void readNextBlockIfNecessary() throws IOException {
-        if (!m_lastBlock && m_bufferOffset == m_bufferLength) {
-            final FileBlock fileBlock = m_api.read(m_path, m_nextOffset, BLOCK_SIZE);
-            m_lastBlock = fileBlock.bytes_read < BLOCK_SIZE;
-            m_bufferOffset = m_bufferLength = 0;
+    private interface Invoker<T> {
+        T invoke() throws IOException;
+    }
 
-            if (fileBlock.bytes_read > 0) {
-                m_nextOffset += fileBlock.bytes_read;
-                m_bufferLength = m_decoder.decode(fileBlock.data.getBytes(), m_buffer);
-            }
+    private static <T> T invoke(final Invoker<T> invoker) throws IOException {
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            return invoker.invoke();
         }
     }
 
     @Override
-    public synchronized int read() throws IOException {
-        readNextBlockIfNecessary();
-
-        if (m_lastBlock && m_bufferOffset == m_bufferLength) {
-            return -1;
-        } else {
-            // return byte as int between 0 and 255
-            return m_buffer[m_bufferOffset++] & 0xff;
-        }
+    public FileInfo getStatus(final String path) throws IOException {
+        return invoke(() -> m_api.getStatus(path));
     }
 
     @Override
-    public int read(final byte[] dest, final int off, final int len) throws IOException {
-
-        readNextBlockIfNecessary();
-
-        if (m_lastBlock && m_bufferOffset == m_bufferLength) {
-            return -1;
-        } else {
-            final int bytesToRead = Math.min(len, m_bufferLength - m_bufferOffset);
-            System.arraycopy(m_buffer, m_bufferOffset, dest, off, bytesToRead);
-            m_bufferOffset += bytesToRead;
-            return bytesToRead;
-        }
+    public FileInfoList list(final String path) throws IOException {
+        return invoke(() -> m_api.list(path));
     }
+
+    @Override
+    public void mkdirs(final Mkdir mkdir) throws IOException {
+        invoke(() -> {
+            m_api.mkdirs(mkdir);
+            return null;
+        });
+    }
+
+    @Override
+    public void move(final Move move) throws IOException {
+        invoke(() -> {
+            m_api.move(move);
+            return null;
+        });
+    }
+
+    @Override
+    public void delete(final Delete delete) throws IOException {
+        invoke(() -> {
+            m_api.delete(delete);
+            return null;
+        });
+    }
+
+    @Override
+    public FileBlock read(final String path, final long offset, final long length) throws IOException {
+        return invoke(() -> m_api.read(path, offset, length));
+    }
+
+    @Override
+    public FileHandle create(final Create create) throws IOException {
+        return invoke(() -> m_api.create(create));
+    }
+
+    @Override
+    public void addBlock(final AddBlock addBlock) throws IOException {
+        invoke(() -> {
+            m_api.addBlock(addBlock);
+            return null;
+        });
+    }
+
+    @Override
+    public void close(final Close close) throws IOException {
+        invoke(() -> {
+            m_api.close(close);
+            return null;
+        });
+    }
+
 }

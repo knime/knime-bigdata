@@ -162,13 +162,13 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
 
     @Override
     public InputStream openInputStream() throws Exception {
-        return new DBFSInputStream(getURI().getPath(), getOpenedConnection());
+        return new DBFSInputStream(getURI().getPath(), getOpenedConnection().getDbfsApi());
     }
 
     @Override
     public OutputStream openOutputStream() throws Exception {
         invalidateCachedFileInfo();
-        return new DBFSOutputStream(getURI().getPath(), getOpenedConnection(), true);
+        return new DBFSOutputStream(getURI().getPath(), getOpenedConnection().getDbfsApi(), true);
     }
 
     @Override

@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -59,13 +60,18 @@ import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
 import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
+import org.knime.bigdata.dbfs.filehandler.DBFSInputStream;
+import org.knime.bigdata.dbfs.filehandler.DBFSOutputStream;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 
@@ -83,8 +89,7 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
     @Override
     protected SeekableByteChannel newByteChannelInternal(final DatabricksPath path, final Set<? extends OpenOption> options,
             final FileAttribute<?>... attrs) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return new DatabricksSeekableByteChannel(path, options);
     }
 
     @Override
@@ -101,16 +106,23 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
 
     }
 
+    @SuppressWarnings("resource")
     @Override
     protected InputStream newInputStreamInternal(final DatabricksPath path, final OpenOption... options) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return new DBFSInputStream(path.toString(), path.getFileSystem().getClient());
     }
 
+    @SuppressWarnings("resource")
     @Override
     protected OutputStream newOutputStreamInternal(final DatabricksPath path, final OpenOption... options) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        final Set<OpenOption> opts = new HashSet<>(Arrays.asList(options));
+
+        if (opts.contains(StandardOpenOption.APPEND)) {
+            //Fallback to TempFileSeekableByteChannel because DBFSOutputStream doesn't support the APPEND mode
+            return Channels.newOutputStream(newByteChannel(path, opts));
+        } else {
+            return new DBFSOutputStream(path.toString(), path.getFileSystem().getClient(), true);
+        }
     }
 
     @Override

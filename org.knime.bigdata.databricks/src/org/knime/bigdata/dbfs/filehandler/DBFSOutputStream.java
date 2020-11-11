@@ -51,17 +51,22 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
+import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
+import org.knime.bigdata.databricks.rest.dbfs.Close;
+import org.knime.bigdata.databricks.rest.dbfs.Create;
+import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+
 /**
  * {@link OutputStream} to write files in 1MB blocks to DBFS.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class DBFSOutputStream extends OutputStream {
+public class DBFSOutputStream extends OutputStream {
     private static final int BLOCK_SIZE = 1024 * 1024;
 
     private final String m_path;
 
-    private final DBFSConnection m_connection;
+    private final DBFSAPI m_api;
 
     private boolean m_isOpen;
 
@@ -73,16 +78,23 @@ class DBFSOutputStream extends OutputStream {
 
     private int m_bufferOffset;
 
-    DBFSOutputStream(final String path, final DBFSConnection connection, final boolean overwrite) throws IOException {
+    /**
+     * @param path The file path.
+     * @param api The {@link DBFSAPI} instance.
+     * @param overwrite Whenever existing file should be overwritten.
+     * @throws IOException
+     */
+    public DBFSOutputStream(final String path, final DBFSAPI api, final boolean overwrite)
+        throws IOException {
         m_path = path;
-        m_connection = connection;
+        m_api = api;
         m_isOpen = true;
         m_encoder = Base64.getEncoder();
         m_buffer = new byte[BLOCK_SIZE];
         m_bufferOffset = 0;
 
         try {
-            m_handle = connection.createHandle(path, overwrite);
+            m_handle = m_api.create(Create.create(path, overwrite)).handle;
         } catch (Exception e) {
             throw new IOException("Failed to open handle for " + m_path, e);
         }
@@ -99,7 +111,7 @@ class DBFSOutputStream extends OutputStream {
                     base64Data = m_encoder.encodeToString(Arrays.copyOf(m_buffer, m_bufferOffset));
                 }
 
-                m_connection.addBlock(m_handle, base64Data);
+                m_api.addBlock(AddBlock.create(m_handle, base64Data));
                 m_bufferOffset = 0;
             }
         } catch (Exception e) {
@@ -150,7 +162,7 @@ class DBFSOutputStream extends OutputStream {
         if (m_isOpen) {
             try {
                 flush();
-                m_connection.closeHandle(m_handle);
+                m_api.close(Close.create(m_handle));
 
             } catch (Exception e) {
                 throw new IOException("Failed to close handle while writing " + m_path, e);
