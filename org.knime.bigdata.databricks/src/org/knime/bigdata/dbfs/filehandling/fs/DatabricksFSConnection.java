@@ -55,6 +55,8 @@ import java.net.URISyntaxException;
 import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
+import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporter;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -97,4 +99,8 @@ public class DatabricksFSConnection implements FSConnection {
         return new NioFileSystemBrowser(this);
     }
 
+    @Override
+    public URIExporter getDefaultURIExporter() {
+        return PathURIExporter.getInstance();
+    }
 }

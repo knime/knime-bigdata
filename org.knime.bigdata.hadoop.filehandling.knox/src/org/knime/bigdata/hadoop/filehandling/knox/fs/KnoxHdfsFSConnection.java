@@ -52,6 +52,8 @@ import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSett
 import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporter;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -93,4 +95,8 @@ public class KnoxHdfsFSConnection implements FSConnection {
         return m_filesystem.getClient();
     }
 
+    @Override
+    public URIExporter getDefaultURIExporter() {
+        return PathURIExporter.getInstance();
+    }
 }
