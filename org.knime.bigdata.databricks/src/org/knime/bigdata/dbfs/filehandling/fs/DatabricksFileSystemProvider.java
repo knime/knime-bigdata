@@ -57,9 +57,11 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
@@ -68,8 +70,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.bigdata.databricks.rest.dbfs.Delete;
 import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
 import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
+import org.knime.bigdata.databricks.rest.dbfs.Move;
 import org.knime.bigdata.dbfs.filehandler.DBFSInputStream;
 import org.knime.bigdata.dbfs.filehandler.DBFSOutputStream;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
@@ -92,18 +97,31 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
         return new DatabricksSeekableByteChannel(path, options);
     }
 
+    @SuppressWarnings("resource")
     @Override
     protected void moveInternal(final DatabricksPath source, final DatabricksPath target, final CopyOption... options)
             throws IOException {
-        // TODO Auto-generated method stub
+        if (existsCached(target)) {
+            delete(target);
+        }
 
+        DBFSAPI client = source.getFileSystem().getClient();
+        client.move(Move.create(source.toString(), target.toString()));
     }
 
     @Override
     protected void copyInternal(final DatabricksPath source, final DatabricksPath target, final CopyOption... options)
             throws IOException {
-        // TODO Auto-generated method stub
-
+        if (Files.isDirectory(source)) {
+            if (!existsCached(target)) {
+                createDirectory(target);
+            }
+        } else {
+            //DBFS API doesn't have a 'copy' method so we have to do it this way
+            try (InputStream in = newInputStream(source)) {
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
     }
 
     @SuppressWarnings("resource")
@@ -168,14 +186,14 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
 
     @Override
     protected void checkAccessInternal(final DatabricksPath path, final AccessMode... modes) throws IOException {
-        // TODO Auto-generated method stub
-
+        // nothing to do here
     }
 
+    @SuppressWarnings("resource")
     @Override
     protected void deleteInternal(final DatabricksPath path) throws IOException {
-        // TODO Auto-generated method stub
-
+        DBFSAPI client = path.getFileSystem().getClient();
+        client.delete(Delete.create(path.toString(), false));
     }
 
     @Override
