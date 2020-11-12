@@ -103,6 +103,8 @@ import org.knime.database.datatype.mapping.DBTypeMappingRegistry;
 import org.knime.database.dialect.DBColumn;
 import org.knime.database.model.DBTable;
 import org.knime.database.model.impl.DefaultDBColumn;
+import org.knime.database.node.io.load.DBLoaderNode2;
+import org.knime.database.node.io.load.DBLoaderNode2Factory;
 import org.knime.database.node.io.load.ExecutionParameters;
 import org.knime.database.node.io.load.impl.fs.ConnectableCsvLoaderNodeSettings2;
 import org.knime.database.node.io.load.impl.fs.ConnectedCsvLoaderNodeComponents2;
@@ -127,11 +129,9 @@ import org.knime.node.datatype.mapping.DataTypeMappingConfigurationData;
  * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
  */
 public class BigDataLoaderNode2
-    extends ConnectedLoaderNode2<ConnectedCsvLoaderNodeComponents2, ConnectableCsvLoaderNodeSettings2> {
+    extends ConnectedLoaderNode2<ConnectedCsvLoaderNodeComponents2, ConnectableCsvLoaderNodeSettings2>
+    implements DBLoaderNode2Factory<ConnectedCsvLoaderNodeComponents2, ConnectableCsvLoaderNodeSettings2> {
 
-    /**
-     * LOGGER for Big Data Loader nodes
-     */
     private static final NodeLogger LOGGER = NodeLogger.getLogger(BigDataLoaderNode2.class);
 
     private static final int TO_BYTE = 1024 * 1024;
@@ -299,6 +299,11 @@ public class BigDataLoaderNode2
             }
             return parquetTypes;
         }
+    }
+
+    @Override
+    public DBLoaderNode2<ConnectedCsvLoaderNodeComponents2, ConnectableCsvLoaderNodeSettings2> get() {
+        return new BigDataLoaderNode2();
     }
 
     /**
