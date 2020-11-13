@@ -180,7 +180,7 @@
 
     <ports>   
         <inPort index="0" name="Data">The data table that should be written</inPort>
-        <dynInPort insert-before="1" name="File system connection"
+        <dynInPort insert-before="0" name="File system connection"
             group-identifier="File System Connection">
             The file system connection.
         </dynInPort>        
