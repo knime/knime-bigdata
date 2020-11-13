@@ -10,27 +10,21 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node writes the KNIME data table into an ORC file. The ORC file can be written locally or on a remote file system.
-        <p>
-        For remote connections, the writer stores chunks locally and uploads them in parallel into a folder with the given name.
-        The chunks size and the number of chunks that are allowed on local disc, are configurable in the "Chunk Upload" 
-        tab which is only enabled for remote file systems.
-        </p>
+        <intro>This node writes the KNIME data table into an ORC file. Depending on the selected mode the node  
+        writes a single file or splits up the data into several files which are stored in the specified folder.
         </intro>
         <tab name="Settings">
             <description>
                 General settings regarding the output file location and storage configuration.
             </description>
             <option name="Write to">
-                Select a file system in which you want to store the file. There
-                are
+                Select a file system in which you want to store the file. There are
                 four default file system options to choose from:
                 <br />
                 <ul>
                     <li>
                         <i>Local File System:</i>
-                        Allows you to select a location in your
-                        local system.
+                        Allows you to select a location in your local system.
                     </li>
                     <li>
                         <i>Mountpoint:</i>
@@ -84,6 +78,10 @@
                 have to (re)execute the connector node first.
                 Note: The default file systems listed above can't be selected if a file
                 system is provided via the input port.
+            </option>
+            <option name="Mode">
+             Depending on the selected mode the node writes the input data into a single file or splits it up into
+             several files of the defined size which are then stored in the specified folder.
             </option>
             <option name="File/URL">
                 Enter a URL when writing to
