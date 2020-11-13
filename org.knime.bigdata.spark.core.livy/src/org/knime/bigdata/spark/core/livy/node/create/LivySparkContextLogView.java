@@ -53,7 +53,8 @@ import org.knime.core.node.NodeView;
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class LivySparkContextLogView extends NodeView<LivySparkContextCreatorNodeModel> implements ActionListener {
+public class LivySparkContextLogView<T extends AbstractLivySparkContextCreatorNodeModel> extends NodeView<T>
+    implements ActionListener {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(LivySparkContextLogView.class);
 
@@ -69,7 +70,7 @@ public class LivySparkContextLogView extends NodeView<LivySparkContextCreatorNod
 
     private final JScrollPane m_textScrollPane = new JScrollPane(m_textArea);
 
-    private final LivySparkContextCreatorNodeModel m_nodeModel;
+    private final T m_nodeModel;
 
     private boolean m_isFetching;
 
@@ -80,7 +81,7 @@ public class LivySparkContextLogView extends NodeView<LivySparkContextCreatorNod
      * 
      * @param model The node model.
      */
-    public LivySparkContextLogView(LivySparkContextCreatorNodeModel model) {
+    public LivySparkContextLogView(T model) {
         super(model);
 
         m_nodeModel = model;

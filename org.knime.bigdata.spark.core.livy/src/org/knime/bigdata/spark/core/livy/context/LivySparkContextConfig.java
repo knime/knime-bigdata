@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.util.Map;
 
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
@@ -18,7 +17,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.Authe
  * {@link SparkContextConfig} implementation for a Spark context running on Apache Livy. This class holds all required
  * information to create and configure such a context.
  */
-public class LivySparkContextConfig implements SparkContextConfig {
+public abstract class LivySparkContextConfig implements SparkContextConfig {
 
     private final SparkVersion m_sparkVersion;
 
@@ -37,8 +36,6 @@ public class LivySparkContextConfig implements SparkContextConfig {
     private final Map<String, String> m_customSparkSettings;
 
     private final SparkContextID m_sparkContextId;
-    
-    private final ConnectionInformation m_remoteFsConnectionInfo;
 
     private final TimeShiftStrategy m_timeShiftStrategy;
 
@@ -63,11 +60,10 @@ public class LivySparkContextConfig implements SparkContextConfig {
      * @param timeShiftZoneId optional time shift zone ID, might by {@code null}
      * @param failOnDifferentClusterTimeZone {@code true} if context creation should fail on different cluster time zone
      */
-    public LivySparkContextConfig(final SparkVersion sparkVersion, final String livyUrl,
+    LivySparkContextConfig(final SparkVersion sparkVersion, final String livyUrl,
         final AuthenticationType authenticationType, final String stagingAreaFolder, final int connectTimeoutSeconds,
         final int responseTimeoutSeconds, final int jobCheckFrequencySeconds,
         final Map<String, String> customSparkSettings, final SparkContextID sparkContextId,
-        final ConnectionInformation remoteFsConnectionInfo,
         final TimeShiftStrategy timeShiftStrategy, final ZoneId timeShiftZoneId,
         final boolean failOnDifferentClusterTimeZone) {
 
@@ -80,7 +76,6 @@ public class LivySparkContextConfig implements SparkContextConfig {
         m_jobCheckFrequencySeconds = jobCheckFrequencySeconds;
         m_customSparkSettings = customSparkSettings;
         m_sparkContextId = sparkContextId;
-        m_remoteFsConnectionInfo = remoteFsConnectionInfo;
         m_timeShiftStrategy = timeShiftStrategy;
         m_timeShiftZoneId = timeShiftZoneId;
         m_failOnDifferentClusterTimeZone = failOnDifferentClusterTimeZone;
@@ -127,12 +122,10 @@ public class LivySparkContextConfig implements SparkContextConfig {
     }
 
     /**
-     * 
-     * @return a {@link ConnectionInformation} object to use for the staging area
+     * @return {@link RemoteFSController} instance
+     * @throws KNIMESparkException
      */
-    public ConnectionInformation getRemoteFsConnectionInfo() {
-        return m_remoteFsConnectionInfo;
-    }
+    public abstract RemoteFSController createRemoteFSController() throws KNIMESparkException;
 
     /**
      * @return the http(s) URL for Livy without credentials

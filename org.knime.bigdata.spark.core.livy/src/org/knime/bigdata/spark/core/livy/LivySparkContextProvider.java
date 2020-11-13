@@ -20,6 +20,7 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContext;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
+import org.knime.bigdata.spark.core.livy.context.LivySparkContextConnInfoConfig;
 import org.knime.bigdata.spark.core.livy.node.create.LivySparkContextCreatorNodeSettings;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
@@ -169,7 +170,7 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
         final ZoneId timeShiftZoneId = null;
         final boolean failOnDifferentClusterTimeZone = false;
 
-        return new LivySparkContextConfig(sparkVersion, livyUrl, authenticationType, stagingAreaFolder,
+        return new LivySparkContextConnInfoConfig(sparkVersion, livyUrl, authenticationType, stagingAreaFolder,
             connectTimeoutSeconds, responseTimeoutSeconds, jobCheckFrequencySeconds, customSparkSettings,
             sparkContextId, remoteFsConnectionInfo, timeShiftStrategy, timeShiftZoneId, failOnDifferentClusterTimeZone);
     }

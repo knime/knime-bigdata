@@ -76,7 +76,7 @@ public class LivySparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<
     public NodeView<LivySparkContextCreatorNodeModel> createNodeView(final int viewIndex,
         final LivySparkContextCreatorNodeModel nodeModel) {
         if (viewIndex == 0) {
-            return new LivySparkContextLogView(nodeModel);
+            return new LivySparkContextLogView<>(nodeModel);
         } else {
             throw new IllegalArgumentException("No such view");
         }

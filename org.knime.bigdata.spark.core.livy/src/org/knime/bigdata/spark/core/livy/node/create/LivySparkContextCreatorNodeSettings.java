@@ -680,7 +680,7 @@ public class LivySparkContextCreatorNodeSettings {
         final String livyUrl = getLivyUrlWithAuthentication(credentialsProvider);
         final Map<String, String> sparkSettings = generateSparkSettings();
 
-        return new LivySparkContextConfig(getSparkVersion(), livyUrl, getAuthenticationType(),
+        return new LivySparkContextConnInfoConfig(getSparkVersion(), livyUrl, getAuthenticationType(),
             (isStagingAreaFolderSet()) ? getStagingAreaFolder() : null, getConnectTimeout(), getResponseTimeout(),
             getJobCheckFrequency(), sparkSettings, contextId, connInfo, m_timeShiftSettings.getTimeShiftStrategy(),
             m_timeShiftSettings.getFixedTimeZoneId(), m_timeShiftSettings.failOnDifferentClusterTZ());

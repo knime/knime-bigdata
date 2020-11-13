@@ -20,13 +20,6 @@
  */
 package org.knime.bigdata.spark.core.livy.node.create;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.UUID;
-
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -35,55 +28,30 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContext;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
-import org.knime.bigdata.spark.core.util.BackgroundTasks;
-import org.knime.bigdata.spark.node.util.context.create.DestroyAndDisposeSparkContextTask;
 import org.knime.cloud.core.util.port.CloudConnectionInformation;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.CredentialsProvider;
 
 /**
- * Node model of the "Create Spark Context (Livy)" node.
- * 
+ * Node model of the "Create Spark Context (Livy)" node using a {@link ConnectionInformation} based file system.
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
-
-    private final LivySparkContextCreatorNodeSettings m_settings = new LivySparkContextCreatorNodeSettings();
+public class LivySparkContextCreatorNodeModel extends AbstractLivySparkContextCreatorNodeModel {
 
     /**
-     * Created using the {@link #m_uniqueContextId} during the configure phase.
-     */
-    private SparkContextID m_sparkContextId;
-
-    /**
-     * Constructor.
+     * Default constructor.
      */
     LivySparkContextCreatorNodeModel() {
         super(new PortType[]{ConnectionInformationPortObject.TYPE}, new PortType[]{SparkContextPortObject.TYPE});
-        resetContextID();
     }
 
-    private void resetContextID() {
-        // An ID that is unique to this node model instance, i.e. no two instances of this node model
-        // have the same value here. Additionally, it's value changes during reset.
-        final String uniqueContextId = UUID.randomUUID().toString();
-        m_sparkContextId = LivySparkContextCreatorNodeSettings.createSparkContextID(uniqueContextId);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
@@ -95,21 +63,18 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         if (connInfo == null) {
             throw new InvalidSettingsException("No remote file handling connection information available");
         }
-        
+
         if (connInfo instanceof CloudConnectionInformation && !m_settings.isStagingAreaFolderSet()) {
             throw new InvalidSettingsException(
                 String.format("When connecting to %s a staging directory must be specified (see Advanced tab).",
                     ((CloudConnectionInformation)connInfo).getServiceName()));
-        }            
+        }
 
         m_settings.validateDeeper();
         configureSparkContext(m_sparkContextId, connInfo, m_settings, getCredentialsProvider());
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_sparkContextId)};
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
@@ -129,50 +94,23 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
     }
 
     @Override
-    protected void onDisposeInternal() {
-        BackgroundTasks.run(new DestroyAndDisposeSparkContextTask(m_sparkContextId));
-    }
-
-    @Override
-    protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
-        throws IOException, CanceledExecutionException {
-
-        ConnectionInformation dummyConnInfo = new ConnectionInformation();
-
-        // this is only to avoid errors about an unconfigured spark context. the spark context configured here is
-        // has and never will be opened because m_uniqueContextId has a new and unique value.
-        final String previousContextID = Files
-            .readAllLines(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"), Charset.forName("UTF-8")).get(0);
+    protected void createDummyContext(final String previousContextID) {
+        final ConnectionInformation dummyConnInfo = new ConnectionInformation();
         configureSparkContext(new SparkContextID(previousContextID), dummyConnInfo, m_settings,
             getCredentialsProvider());
     }
 
-    @Override
-    protected void saveAdditionalInternals(File nodeInternDir, ExecutionMonitor exec)
-        throws IOException, CanceledExecutionException {
-
-        // see loadAdditionalInternals() for why we are doing this
-        Files.write(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"),
-            m_sparkContextId.toString().getBytes(Charset.forName("UTF-8")));
-    }
-
-    @Override
-    protected void resetInternal() {
-        BackgroundTasks.run(new DestroyAndDisposeSparkContextTask(m_sparkContextId));
-        resetContextID();
-    }
-
     /**
      * Internal method to ensure that the given Spark context is configured.
-     * 
+     *
      * @param sparkContextId Identifies the Spark context to configure.
-     * @param connInfo 
+     * @param connInfo
      * @param settings The settings from which to configure the context.
      * @param credProv Credentials provider to use
      */
-    protected static void configureSparkContext(final SparkContextID sparkContextId, ConnectionInformation connInfo,
+    protected static void configureSparkContext(final SparkContextID sparkContextId, final ConnectionInformation connInfo,
         final LivySparkContextCreatorNodeSettings settings, final CredentialsProvider credProv) {
-        
+
         final SparkContext<LivySparkContextConfig> sparkContext =
             SparkContextManager.getOrCreateSparkContext(sparkContextId);
         final LivySparkContextConfig config = settings.createContextConfig(sparkContextId, connInfo, credProv);
@@ -184,35 +122,4 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
-    }
-
-    /**
-     * 
-     * @return the current Spark context ID.
-     */
-    public SparkContextID getSparkContextID() {
-        return m_sparkContextId;
-    }
 }

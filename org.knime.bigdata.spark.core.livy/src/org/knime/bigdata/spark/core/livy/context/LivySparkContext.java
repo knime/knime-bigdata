@@ -135,8 +135,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     }
 
     private void ensureRemoteFSConnection() throws KNIMESparkException {
-        final RemoteFSController tmpController = new RemoteFSController(getConfiguration().getRemoteFsConnectionInfo(),
-            getConfiguration().getStagingAreaFolder());
+        final RemoteFSController tmpController = getConfiguration().createRemoteFSController();
         tmpController.createStagingArea();
         m_remoteFSController = tmpController;
     }
