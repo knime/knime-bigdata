@@ -146,6 +146,8 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_inputTypeMappingComponent.saveSettingsTo(
+            SettingsUtils.getOrAdd(settings, FileFormatWriter2Config.CFG_TYPE_MAPPING_TAB));
         m_writerConfig.saveSettingsTo(settings);
     }
 
@@ -167,6 +169,8 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
         m_inputTypeMappingComponent.setMappingService(mappingService);
         m_inputTypeMappingComponent.setInputDataTypeMappingConfiguration(
             mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL));
+        m_inputTypeMappingComponent.loadSettingsFrom(
+            SettingsUtils.getOrEmpty(settings, FileFormatWriter2Config.CFG_TYPE_MAPPING_TAB), specs);
     }
 
     private Component createTypeMappingPanel() {

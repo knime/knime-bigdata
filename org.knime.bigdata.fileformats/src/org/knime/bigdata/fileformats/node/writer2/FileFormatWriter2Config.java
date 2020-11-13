@@ -75,7 +75,7 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 final class FileFormatWriter2Config<T> {
 
     /** name of the settings */
-    private static final String CFG_TYPE_MAPPING_TAB = "type_mapping";
+    public static final String CFG_TYPE_MAPPING_TAB = "type_mapping";
 
     /** The settings key for the file chooser dialog */
     private static final String CFG_FILE_CHOOSER = "file_chooser_settings";

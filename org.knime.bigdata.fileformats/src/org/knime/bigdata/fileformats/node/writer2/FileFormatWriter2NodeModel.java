@@ -136,6 +136,7 @@ class FileFormatWriter2NodeModel<T> extends NodeModel {
 
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        initializeTypeMappingIfNecessary();
         m_writerConfig.loadSettingsFrom(settings);
     }
 
