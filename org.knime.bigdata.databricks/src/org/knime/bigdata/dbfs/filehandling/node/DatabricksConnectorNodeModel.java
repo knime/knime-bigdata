@@ -76,6 +76,8 @@ public class DatabricksConnectorNodeModel extends NodeModel {
 
     private static final String FILE_SYSTEM_NAME = "Databricks DBFS";
 
+    private final DatabricksConnectorSettings m_settings = new DatabricksConnectorSettings();
+
     private String m_fsId;
     private DatabricksFSConnection m_fsConnection;
 
@@ -89,17 +91,13 @@ public class DatabricksConnectorNodeModel extends NodeModel {
     @SuppressWarnings("resource")
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_fsConnection = new DatabricksFSConnection(getDeploymentHost(), DatabricksFileSystem.PATH_SEPARATOR);
+        m_fsConnection = new DatabricksFSConnection(m_settings, getCredentialsProvider());
 
         ((DatabricksFileSystem)m_fsConnection.getFileSystem()).getClient().list(DatabricksFileSystem.PATH_SEPARATOR);
 
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
 
         return new PortObject[] { new FileSystemPortObject(createSpec()) };
-    }
-
-    private static String getDeploymentHost() {
-        return System.getProperty("dbfs.deployment");
     }
 
     @Override
@@ -109,7 +107,8 @@ public class DatabricksConnectorNodeModel extends NodeModel {
     }
 
     private FileSystemPortObjectSpec createSpec() {
-        return new FileSystemPortObjectSpec(FILE_SYSTEM_NAME, m_fsId, DatabricksFileSystem.createFSLocationSpec(getDeploymentHost()));
+        return new FileSystemPortObjectSpec(FILE_SYSTEM_NAME, m_fsId,
+            DatabricksFileSystem.createFSLocationSpec(m_settings.getHost()));
     }
 
 
@@ -127,17 +126,17 @@ public class DatabricksConnectorNodeModel extends NodeModel {
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        // TODO Auto-generated method stub
+        m_settings.saveSettingsForModel(settings);
     }
 
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // TODO Auto-generated method stub
+        m_settings.validateSettings(settings);
     }
 
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // TODO Auto-generated method stub
+        m_settings.loadSettingsForModel(settings);
     }
 
     @Override

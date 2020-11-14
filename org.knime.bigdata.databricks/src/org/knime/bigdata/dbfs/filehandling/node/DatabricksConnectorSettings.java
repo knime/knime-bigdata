@@ -48,9 +48,16 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
+import java.time.Duration;
+
+import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * Settings for the {@link DatabricksConnectorNodeModel} node.
@@ -60,13 +67,144 @@ import org.knime.core.node.NodeSettingsWO;
 public class DatabricksConnectorSettings {
 
     /**
-     * Saves the settings to the give {@link NodeSettingsWO}.
+     * Settings key for the authentication sub-settings. Must be public for dialog.
+     */
+    public static final String KEY_AUTH = "auth";
+
+    private static final String KEY_HOST = "host";
+    private static final String KEY_PORT = "port";
+
+    private static final String KEY_WORKING_DIRECTORY = "workingDirectory";
+    private static final String KEY_CONNECTION_TIMEOUT = "connectionTimeout";
+    private static final String KEY_READ_TIMEOUT = "readTimeout";
+
+    private static final int DEFAULT_TIMEOUT = 30;
+
+    private final SettingsModelString m_host;
+    private final SettingsModelIntegerBounded m_port;
+
+    private final SettingsModelString m_workingDirectory;
+    private final SettingsModelIntegerBounded m_connectionTimeout;
+    private final SettingsModelIntegerBounded m_readTimeout;
+
+    private final DbfsAuthenticationNodeSettings m_authSettings;
+
+    /**
+     * Creates new instance.
+     */
+    public DatabricksConnectorSettings() {
+        m_host = new SettingsModelString(KEY_HOST, "");
+        m_port = new SettingsModelIntegerBounded(KEY_PORT, 443, 0, 65535);
+        m_workingDirectory = new SettingsModelString(KEY_WORKING_DIRECTORY, DatabricksFileSystem.PATH_SEPARATOR);
+        m_connectionTimeout =
+            new SettingsModelIntegerBounded(KEY_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
+        m_readTimeout = new SettingsModelIntegerBounded(KEY_READ_TIMEOUT, DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
+        m_authSettings = new DbfsAuthenticationNodeSettings();
+    }
+
+    /**
+     * @return authentication settings.
+     */
+    public DbfsAuthenticationNodeSettings getAuthenticationSettings() {
+        return m_authSettings;
+    }
+
+    /**
+     * @return the host model
+     */
+    public SettingsModelString getHostModel() {
+        return m_host;
+    }
+
+    /**
+     * @return the host
+     */
+    public String getHost() {
+        return m_host.getStringValue();
+    }
+
+    /**
+     * @return the port model
+     */
+    public SettingsModelIntegerBounded getPortModel() {
+        return m_port;
+    }
+
+    /**
+     * @return The deployment URL consists of host and port from the settings.
+     */
+    public String getDeploymentUrl() {
+        return String.format("https://%s:%d", m_host.getStringValue(), m_port.getIntValue());
+    }
+
+    /**
+     * @return the workingDirectory model
+     */
+    public SettingsModelString getWorkingDirectoryModel() {
+        return m_workingDirectory;
+    }
+
+    /**
+     * @return the working directory
+     */
+    public String getWorkingDirectory() {
+        return m_workingDirectory.getStringValue();
+    }
+
+    /**
+     * @return the connectionTimeout model
+     */
+    public SettingsModelIntegerBounded getConnectionTimeoutModel() {
+        return m_connectionTimeout;
+    }
+
+    /**
+     * @return the connection timeout
+     */
+    public Duration getConnectionTimeout() {
+        return Duration.ofSeconds(m_connectionTimeout.getIntValue());
+    }
+
+    /**
+     * @return the readTimeout model
+     */
+    public SettingsModelIntegerBounded getReadTimeoutModel() {
+        return m_readTimeout;
+    }
+
+    /**
+     * @return the read timeout
+     */
+    public Duration getReadTimeout() {
+        return Duration.ofSeconds(m_readTimeout.getIntValue());
+    }
+
+    private void save(final NodeSettingsWO settings) {
+        m_host.saveSettingsTo(settings);
+        m_port.saveSettingsTo(settings);
+        m_workingDirectory.saveSettingsTo(settings);
+        m_connectionTimeout.saveSettingsTo(settings);
+        m_readTimeout.saveSettingsTo(settings);
+    }
+
+    /**
+     * Saves settings to the given {@link NodeSettingsWO} (to be called by the node dialog).
      *
      * @param settings
-     *            The settings.
      */
-    public void saveSettingsTo(final NodeSettingsWO settings) {
-        // to be implemented
+    public void saveSettingsForDialog(final NodeSettingsWO settings) {
+        save(settings);
+        // auth settings are saved by dialog
+    }
+
+    /**
+     * Saves settings to the given {@link NodeSettingsWO} (to be called by the node model).
+     *
+     * @param settings
+     */
+    public void saveSettingsForModel(final NodeSettingsWO settings) {
+        save(settings);
+        m_authSettings.saveSettingsForModel(settings.addNodeSettings(KEY_AUTH));
     }
 
     /**
@@ -77,7 +215,40 @@ public class DatabricksConnectorSettings {
      * @throws InvalidSettingsException
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // to be implemented
+        m_host.validateSettings(settings);
+        m_port.validateSettings(settings);
+        m_workingDirectory.validateSettings(settings);
+        m_connectionTimeout.validateSettings(settings);
+        m_readTimeout.validateSettings(settings);
+
+        m_authSettings.validateSettings(settings.getNodeSettings(KEY_AUTH));
+
+        DatabricksConnectorSettings temp = new DatabricksConnectorSettings();
+        temp.loadSettingsForModel(settings);
+        temp.validate();
+    }
+
+    /**
+     * Validates settings consistency for this instance.
+     *
+     * @throws InvalidSettingsException
+     */
+    public void validate() throws InvalidSettingsException {
+        if (StringUtils.isBlank(m_host.getStringValue())) {
+            throw new InvalidSettingsException("Please provide the hostname of your Databricks deployment.");
+        }
+
+        int port = m_port.getIntValue();
+        if (port <= 0 || port > 65535) {
+            throw new InvalidSettingsException(
+                "Please provide a valid port to connect to the REST interface of your Databricks deployment.");
+        }
+
+        if (!m_workingDirectory.getStringValue().startsWith(DatabricksFileSystem.PATH_SEPARATOR)) {
+            throw new InvalidSettingsException("Working directory must be an absolute path.");
+        }
+
+        m_authSettings.validate();
     }
 
     /**
@@ -87,7 +258,49 @@ public class DatabricksConnectorSettings {
      *            The settings.
      * @throws InvalidSettingsException
      */
-    public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // to be implemented
+    public void load(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_host.loadSettingsFrom(settings);
+        m_port.loadSettingsFrom(settings);
+        m_workingDirectory.loadSettingsFrom(settings);
+        m_connectionTimeout.loadSettingsFrom(settings);
+        m_readTimeout.loadSettingsFrom(settings);
+    }
+
+    /**
+     * Loads settings from the given {@link NodeSettingsRO} (to be called by the node dialog).
+     *
+     * @param settings
+     * @throws InvalidSettingsException
+     */
+    public void loadSettingsForDialog(final NodeSettingsRO settings) throws InvalidSettingsException {
+        load(settings);
+        // auth settings are loaded by dialog
+    }
+
+    /**
+     * Loads settings from the given {@link NodeSettingsRO} (to be called by the node model).
+     *
+     * @param settings
+     * @throws InvalidSettingsException
+     */
+    public void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+        load(settings);
+        m_authSettings.loadSettingsForModel(settings.getNodeSettings(KEY_AUTH));
+    }
+
+    /**
+     * @return a (deep) clone of this node settings object.
+     */
+    public DatabricksConnectorSettings createClone() {
+        final NodeSettings tempSettings = new NodeSettings("ignored");
+        saveSettingsForModel(tempSettings);
+
+        final DatabricksConnectorSettings toReturn = new DatabricksConnectorSettings();
+        try {
+            toReturn.loadSettingsForModel(tempSettings);
+        } catch (InvalidSettingsException ex) { // NOSONAR can never happen
+            // won't happen
+        }
+        return toReturn;
     }
 }

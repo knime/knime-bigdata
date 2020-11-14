@@ -4,16 +4,69 @@
 		xmlns="http://knime.org/node/v4.1"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd">
-    <name>Databricks Connector (Labs)</name>
+    <name>Databricks File System Connector (Labs)</name>
     
     <shortDescription>
-        Connects to Databricks in order to read/write files in downstream nodes.
+        Connects to Databricks File System (DBFS) in order to read/write files in downstream nodes.
     </shortDescription>
     
     <fullDescription>
         <intro>
- 
+            <p>
+                This node connects to the Databricks File System (DBFS) of a  Databricks deployment. The resulting
+                output port allows downstream nodes to access DBFS as a file system, e.g. to read or write files and folders,
+                or to perform other file system operations (browse/list files, copy, move, ...).
+            </p>
+            <p><b>Path syntax:</b> Paths for DBFS are specified with a UNIX-like syntax, for example
+            <tt>/myfolder/file.csv</tt>, which is an absolute path that consists of:
+                <ol>
+                    <li>A leading slash (<tt>/</tt>).</li>
+                    <li>The name of a folder (<tt>myfolder</tt>), followed by a slash.</li>
+                    <li>Followed by the name of a file (<tt>file.csv</tt>).</li>
+                </ol>
+            </p>
         </intro>
+        <tab name="Settings">
+            <option name="Host">
+                Full hostname (domain name) of the Databricks deployment. For example
+                <tt>&lt;id&gt;.cloud.databricks.com</tt> on AWS or <tt>&lt;region&gt;.azuredatabricks.net</tt> on Azure. 
+            </option>
+            <option name="Port">
+                Port to use. Should be 443 on most deployments.
+            </option>
+	        <option name="Authentication">
+	            Method of authentication to use.
+	            <ul>
+	            	<li>
+	            		<b>Credentials:</b> Authenticate with the username and password of the selected credentials flow variable.
+	            	</li>
+	            	<li>
+	            		<b>Username/password:</b> Authenticate with the provided <i>Username</i> and <i>Password</i>. If entered here,
+	            		the password is persistently stored (in encrypted form) in the settings of this node. Alternatively, if <i>Use credentials</i>
+	            		is selected, the username and password of the selected credentials flow variable will be used for authentication.
+	            	</li>
+	            	<li>
+	            		<b>Token:</b> Authenticate with the provided personal access <i>token</i>. If entered here,
+	            		the token is persistently stored (in encrypted form) in the settings of this node. Alternatively, if <i>Use credentials</i>
+	            		is selected, the password of the selected credentials flow variable will be used as the token for authentication
+	            		(username of the flow variable will be ignored).
+					</li>
+	           	</ul>
+	        </option>
+            <option name="Working directory">
+	            Specifies the <i>working directory</i> using the path syntax explained above. The working directory must be specified as an absolute path. A working directory allows downstream
+	            nodes to access files/folders using <i>relative</i> paths, i.e. paths that do not have a leading slash. If not specified, the default working directory
+	            is "/".
+	        </option>
+	   </tab>
+	   <tab name="Advanced">
+	        <option name="Connection timeout">
+	            Timeout in seconds to establish a connection, or 0 for an infinite timeout. 
+	        </option>
+	        <option name="Read timeout">
+	            Timeout in seconds to read data from an established connection, or 0 for an infinite timeout.
+	        </option>
+        </tab>
 
     </fullDescription>
     

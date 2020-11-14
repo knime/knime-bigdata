@@ -52,7 +52,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorSettings;
 import org.knime.core.node.util.FileSystemBrowser;
+import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
 import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
@@ -72,21 +74,22 @@ public class DatabricksFSConnection implements FSConnection {
     /**
      * Creates new instance.
      *
-     * @param deployment Databricks deployment host.
-     * @param workDir Working directory.
+     * @param settings The node settins.
+     * @param credentialsProvider The credential provider.
      *
      * @throws IOException
      *
      */
-    public DatabricksFSConnection(final String deployment, final String workDir) throws IOException {
+    public DatabricksFSConnection(final DatabricksConnectorSettings settings,
+        final CredentialsProvider credentialsProvider) throws IOException {
         URI uri = null;
         try {
-            uri = new URI(DatabricksFileSystemProvider.FS_TYPE, deployment, null, null);
+            uri = new URI(DatabricksFileSystemProvider.FS_TYPE, settings.getHost(), null, null);
         } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid hostname: " + deployment);
+            throw new IOException("Invalid hostname: " + settings.getHost());
         }
 
-        m_filesystem = new DatabricksFileSystem(uri, workDir, CACHE_TTL);
+        m_filesystem = new DatabricksFileSystem(uri, CACHE_TTL, settings, credentialsProvider);
     }
 
     @Override

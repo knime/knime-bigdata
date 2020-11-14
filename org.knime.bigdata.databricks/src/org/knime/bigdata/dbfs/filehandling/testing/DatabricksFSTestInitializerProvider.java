@@ -54,6 +54,8 @@ import java.util.Map;
 import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
 import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystemProvider;
+import org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorSettings;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
@@ -76,8 +78,13 @@ public class DatabricksFSTestInitializerProvider extends DefaultFSTestInitialize
         String workDir =
             generateRandomizedWorkingDir(getParameter(configuration, KEY_WORKDIR_PREFIX), DatabricksFileSystem.PATH_SEPARATOR);
 
-        DatabricksFSConnection fsConnection =
-            new DatabricksFSConnection(getParameter(configuration, KEY_HOST), workDir);
+        DatabricksConnectorSettings settings = new DatabricksConnectorSettings();
+        settings.getHostModel().setStringValue(getParameter(configuration, KEY_HOST));
+        settings.getAuthenticationSettings().setAuthType(AuthType.TOKEN);
+        settings.getAuthenticationSettings().getTokenModel().setStringValue(getParameter(configuration, KEY_TOKEN));
+        settings.getWorkingDirectoryModel().setStringValue(workDir);
+
+        DatabricksFSConnection fsConnection = new DatabricksFSConnection(settings, null);
         return new DatabricksFSTestInitializer(fsConnection);
     }
 

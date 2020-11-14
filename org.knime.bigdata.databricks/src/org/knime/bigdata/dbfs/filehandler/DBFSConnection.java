@@ -46,6 +46,7 @@
 package org.knime.bigdata.dbfs.filehandler;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
@@ -127,13 +128,14 @@ public class DBFSConnection extends Connection {
     @Override
     public synchronized void open() throws Exception {
         // token based authentication
+        Duration timeout = Duration.ofMillis(m_connectionInformation.getTimeout());
+
         if (m_dbfsApi == null && m_connectionInformation.useToken()) {
             m_dbfsApi = DatabricksRESTClient.create(
                 "https://" + m_connectionInformation.getHost() + ":" + m_connectionInformation.getPort(),
                 DBFSAPI.class,
                 KnimeEncryption.decrypt(m_connectionInformation.getToken()),
-                m_connectionInformation.getTimeout(),
-                m_connectionInformation.getTimeout());
+                timeout, timeout);
 
         // user+password based authentication
         } else if (m_dbfsApi == null) {
@@ -142,8 +144,7 @@ public class DBFSConnection extends Connection {
                 DBFSAPI.class,
                 m_connectionInformation.getUser(),
                 KnimeEncryption.decrypt(m_connectionInformation.getPassword()),
-                m_connectionInformation.getTimeout(),
-                m_connectionInformation.getTimeout());
+                timeout, timeout);
         }
     }
 

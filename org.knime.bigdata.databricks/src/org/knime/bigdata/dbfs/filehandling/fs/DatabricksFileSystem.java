@@ -49,6 +49,7 @@
 package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
@@ -56,6 +57,11 @@ import java.util.Collections;
 
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorSettings;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
+import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.workflow.ICredentials;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSLocationSpec;
@@ -78,16 +84,18 @@ public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
 
     /**
      * @param uri the URI for the file system
-     * @param workDir Working directory.
      * @param cacheTTL The time to live for cached elements in milliseconds.
+     * @param settings The settings.
+     * @param credentialsProvider The {@link CredentialsProvider}.
      * @throws IOException
      */
-    protected DatabricksFileSystem(final URI uri, final String workDir, final long cacheTTL)
+    protected DatabricksFileSystem(final URI uri, final long cacheTTL, final DatabricksConnectorSettings settings,
+        final CredentialsProvider credentialsProvider)
             throws IOException {
-        super(new DatabricksFileSystemProvider(), uri, cacheTTL, workDir, createFSLocationSpec(uri.getHost()));
+        super(new DatabricksFileSystemProvider(), uri, cacheTTL, settings.getWorkingDirectory(),
+            createFSLocationSpec(uri.getHost()));
 
-        m_client = DatabricksRESTClient.create("https://" + uri.getHost(), DBFSAPI.class,
-            System.getProperty("dbfs.token"), 30000, 30000);
+        m_client = createClient(settings, credentialsProvider);
     }
 
     /**
@@ -98,6 +106,47 @@ public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
         return new DefaultFSLocationSpec(FSCategory.CONNECTED,
             String.format("%s:%s", DatabricksFileSystemProvider.FS_TYPE, deployment));
     }
+
+    private static DBFSAPI createClient(final DatabricksConnectorSettings settings,
+        final CredentialsProvider credentialsProvider) throws UnsupportedEncodingException {
+
+        final DbfsAuthenticationNodeSettings authSettings = settings.getAuthenticationSettings();
+
+        if (authSettings.getAuthType() == AuthType.TOKEN) {
+
+            final String token = authSettings.useTokenCredentials() //
+                ? getCredentials(authSettings.getTokenCredentialsName(), credentialsProvider).getPassword()
+                : authSettings.getTokenModel().getStringValue();
+
+            return DatabricksRESTClient.create(settings.getDeploymentUrl(), DBFSAPI.class, token,
+                settings.getReadTimeout(), settings.getConnectionTimeout());
+        } else {
+            String username;
+            String password;
+
+            if (authSettings.useUserPassCredentials()) {
+                final ICredentials creds =
+                    getCredentials(authSettings.getUserPassCredentialsName(), credentialsProvider);
+                username = creds.getLogin();
+                password = creds.getPassword();
+            } else {
+                username = authSettings.getUserModel().getStringValue();
+                password = authSettings.getPasswordModel().getStringValue();
+            }
+
+            return DatabricksRESTClient.create(settings.getDeploymentUrl(), DBFSAPI.class, username, password,
+                settings.getReadTimeout(), settings.getConnectionTimeout());
+        }
+    }
+
+    private static ICredentials getCredentials(final String name, final CredentialsProvider credProvider) {
+        if (credProvider == null) {
+            throw new IllegalStateException("Credential provider is not available");
+        }
+        return credProvider.get(name);
+    }
+
+
 
     /**
      * @return the client

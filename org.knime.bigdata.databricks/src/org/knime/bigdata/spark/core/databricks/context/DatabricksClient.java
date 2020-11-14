@@ -52,6 +52,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.knime.bigdata.database.databricks.TableAccessControllException;
@@ -111,25 +112,27 @@ public class DatabricksClient {
      */
     DatabricksClient(final DatabricksSparkContextConfig config) throws UnsupportedEncodingException {
         m_config = config;
+        Duration receiveTimeout = Duration.ofSeconds(config.getReceiveTimeoutSeconds());
+        Duration connectionTimeout = Duration.ofSeconds(config.getConnectionTimeoutSeconds());
 
         if (config.useToken()) {
             m_clusterAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), ClusterAPI.class,
-                config.getAuthToken(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getAuthToken(), receiveTimeout, connectionTimeout);
             m_libraryAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), LibrariesAPI.class,
-                config.getAuthToken(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getAuthToken(), receiveTimeout, connectionTimeout);
             m_contextsAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), ContextsAPI.class,
-                config.getAuthToken(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getAuthToken(), receiveTimeout, connectionTimeout);
             m_commandsAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), CommandsAPI.class,
-                config.getAuthToken(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getAuthToken(), receiveTimeout, connectionTimeout);
         } else {
             m_clusterAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), ClusterAPI.class, config.getUser(),
-                config.getPassword(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getPassword(), receiveTimeout, connectionTimeout);
             m_libraryAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), LibrariesAPI.class, config.getUser(),
-                config.getPassword(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getPassword(), receiveTimeout, connectionTimeout);
             m_contextsAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), ContextsAPI.class, config.getUser(),
-                config.getPassword(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getPassword(), receiveTimeout, connectionTimeout);
             m_commandsAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), CommandsAPI.class, config.getUser(),
-                config.getPassword(), config.getReceiveTimeoutSeconds()*1000, config.getConnectionTimeoutSeconds()*1000);
+                config.getPassword(), receiveTimeout, connectionTimeout);
         }
     }
 

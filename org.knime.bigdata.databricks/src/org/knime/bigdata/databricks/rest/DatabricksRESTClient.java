@@ -136,17 +136,16 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      *
      * @param deploymentUrl https://...cloud.databricks.com
      * @param proxy Interface to create proxy for
-     * @param receiveTimeoutMillis Receive timeout in milliseconds
-     * @param connectionTimeoutMillis connection timeout in milliseconds
+     * @param receiveTimeout Receive timeout
+     * @param connectionTimeout connection timeout
      * @return Client implementation for given proxy interface
      */
     private static <T> T create(final String deploymentUrl, final Class<T> proxy,
-            final int receiveTimeoutMillis, final int connectionTimeoutMillis) {
+        final Duration receiveTimeout, final Duration connectionTimeout) {
 
         final String baseUrl = deploymentUrl + "/api/";
 
-        final HTTPClientPolicy clientPolicy =
-            createClientPolicy(Duration.ofMillis(receiveTimeoutMillis), Duration.ofMillis(connectionTimeoutMillis));
+        final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeout, connectionTimeout);
         final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
 
         // Create the API Proxy
@@ -177,14 +176,14 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * @param deploymentUrl https://...cloud.databricks.com
      * @param proxy Interface to create proxy for
      * @param token Authentication token
-     * @param receiveTimeoutMillis Receive timeout in milliseconds
-     * @param connectionTimeoutMillis connection timeout in milliseconds
+     * @param receiveTimeout Receive timeout
+     * @param connectionTimeout connection timeout
      * @return Client implementation for given proxy interface
      */
     public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String token,
-        final int receiveTimeoutMillis, final int connectionTimeoutMillis) {
+        final Duration receiveTimeout, final Duration connectionTimeout) {
 
-        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeoutMillis, connectionTimeoutMillis);
+        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout);
         WebClient.client(proxyImpl).header("Authorization", "Bearer " + token);
         return wrap(proxyImpl);
     }
@@ -197,15 +196,15 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * @param proxy Interface to create proxy for
      * @param user Username for authentication
      * @param password Password for authentication
-     * @param receiveTimeoutMillis Receive timeout in milliseconds
-     * @param connectionTimeoutMillis connection timeout in milliseconds
+     * @param receiveTimeout Receive timeout
+     * @param connectionTimeout connection timeout
      * @return Client implementation for given proxy interface
      * @throws UnsupportedEncodingException if given user and password can't be encoded as UTF-8
      */
     public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String user, final String password,
-        final int receiveTimeoutMillis, final int connectionTimeoutMillis) throws UnsupportedEncodingException {
+        final Duration receiveTimeout, final Duration connectionTimeout) throws UnsupportedEncodingException {
 
-        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeoutMillis, connectionTimeoutMillis);
+        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout);
         WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
         return wrap(proxyImpl);
     }

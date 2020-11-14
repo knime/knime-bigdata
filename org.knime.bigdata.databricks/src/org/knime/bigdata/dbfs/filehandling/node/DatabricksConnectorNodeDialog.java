@@ -48,9 +48,29 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.io.IOException;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 
 /**
  * Node dialog for the {@link DatabricksConnectorNodeModel} node.
@@ -59,10 +79,132 @@ import org.knime.core.node.NodeSettingsWO;
  */
 public class DatabricksConnectorNodeDialog extends NodeDialogPane {
 
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-        // TODO Auto-generated method stub
+    private final DatabricksConnectorSettings m_settings;
+    private final WorkingDirectoryChooser m_workingDirChooser;
+    private DbfsAuthenticationDialog m_authPanel;
 
+    /**
+     * Creates new instance
+     */
+    public DatabricksConnectorNodeDialog() {
+        m_settings = new DatabricksConnectorSettings();
+
+        m_authPanel = new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this);
+        m_workingDirChooser = new WorkingDirectoryChooser("dbfs.workingDir", this::createFSConnection);
+
+        addTab("Settings", createSettingsTab());
+        addTab("Advanced", createAdvancedTab());
     }
 
+    private JComponent createSettingsTab() {
+        Box box = new Box(BoxLayout.Y_AXIS);
+        box.add(createDeploymentPanel());
+        box.add(createAuthPanel());
+        box.add(createFilesystemPanel());
+        return box;
+    }
+
+    private JComponent createDeploymentPanel() {
+        DialogComponentString host = new DialogComponentString(m_settings.getHostModel(), "Host", true, 40);
+        DialogComponentNumber port = new DialogComponentNumber(m_settings.getPortModel(), "Port", 1);
+
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.add(host.getComponentPanel());
+        panel.add(port.getComponentPanel());
+        panel.setBorder(BorderFactory.createTitledBorder("Deployment URL"));
+        return panel;
+    }
+
+    private JComponent createAuthPanel() {
+        final JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createTitledBorder("Authentication"));
+        panel.add(m_authPanel);
+        return panel;
+    }
+
+    private JComponent createFilesystemPanel() {
+        m_workingDirChooser.setBorder(BorderFactory.createTitledBorder("File system settings"));
+        return m_workingDirChooser;
+    }
+
+    private JComponent createAdvancedTab() {
+        DialogComponentNumber connectionTimeout =
+            new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), "", 1);
+        DialogComponentNumber readTimeout =
+            new DialogComponentNumber(m_settings.getReadTimeoutModel(), "", 1);
+
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.NONE;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridx = 0;
+        c.gridy = 0;
+        panel.add(new JLabel("Connection timeout (seconds): "), c);
+
+        c.gridy = 1;
+        panel.add(new JLabel("Read timeout (seconds): "), c);
+
+        c.weightx = 1;
+        c.gridx = 1;
+        c.gridy = 0;
+        panel.add(connectionTimeout.getComponentPanel(), c);
+
+        c.gridy = 1;
+        panel.add(readTimeout.getComponentPanel(), c);
+
+        c.fill = GridBagConstraints.BOTH;
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        c.weighty = 1;
+        panel.add(Box.createVerticalGlue(), c);
+
+        panel.setBorder(BorderFactory.createTitledBorder("Connection settings"));
+        return panel;
+    }
+
+    private FSConnection createFSConnection() throws IOException {
+        return new DatabricksFSConnection(m_settings, getCredentialsProvider());
+    }
+
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        preSettingsSave();
+        validateBeforeSaving();
+        m_authPanel.saveSettingsTo(settings.addNodeSettings(DatabricksConnectorSettings.KEY_AUTH));
+        m_settings.saveSettingsForDialog(settings);
+    }
+
+    private void preSettingsSave() {
+        m_settings.getWorkingDirectoryModel().setStringValue(m_workingDirChooser.getSelectedWorkingDirectory());
+    }
+
+    private void validateBeforeSaving() throws InvalidSettingsException {
+        m_settings.validate();
+        m_workingDirChooser.addCurrentSelectionToHistory();
+    }
+
+    @Override
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+        throws NotConfigurableException {
+        try {
+            m_authPanel.loadSettingsFrom(settings.getNodeSettings(DatabricksConnectorSettings.KEY_AUTH), specs);
+            m_settings.loadSettingsForDialog(settings);
+        } catch (InvalidSettingsException ex) { // NOSONAR can be ignored
+        }
+    }
+
+    @Override
+    public void onOpen() {
+        m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
+        m_authPanel.onOpen();
+    }
+
+    @Override
+    public void onClose() {
+        m_workingDirChooser.onClose();
+    }
 }

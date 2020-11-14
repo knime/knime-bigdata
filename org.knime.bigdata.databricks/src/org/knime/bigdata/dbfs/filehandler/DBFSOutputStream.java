@@ -152,8 +152,6 @@ public class DBFSOutputStream extends OutputStream {
     public void flush() throws IOException {
         if (m_isOpen) {
             submitBufferIfNecessary(true);
-        } else {
-            throw new IOException("Stream already closed");
         }
     }
 
@@ -170,8 +168,6 @@ public class DBFSOutputStream extends OutputStream {
             } finally {
                 m_isOpen = false;
             }
-        } else {
-            throw new IOException("Stream already closed");
         }
     }
 }
