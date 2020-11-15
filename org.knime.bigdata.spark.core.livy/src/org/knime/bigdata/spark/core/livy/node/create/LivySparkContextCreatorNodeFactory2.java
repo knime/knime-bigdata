@@ -28,12 +28,12 @@ import org.knime.core.node.NodeView;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LivySparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<LivySparkContextCreatorNodeModel> {
+public class LivySparkContextCreatorNodeFactory2 extends DefaultSparkNodeFactory<LivySparkContextCreatorNodeModel2> {
 
     /**
      * Constructor.
      */
-    public LivySparkContextCreatorNodeFactory() {
+    public LivySparkContextCreatorNodeFactory2() {
         super("");
     }
 
@@ -41,8 +41,8 @@ public class LivySparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<
      * {@inheritDoc}
      */
     @Override
-    public LivySparkContextCreatorNodeModel createNodeModel() {
-        return new LivySparkContextCreatorNodeModel();
+    public LivySparkContextCreatorNodeModel2 createNodeModel() {
+        return new LivySparkContextCreatorNodeModel2();
     }
 
     /**
@@ -58,7 +58,7 @@ public class LivySparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new LivySparkContextCreatorNodeDialog(true);
+        return new LivySparkContextCreatorNodeDialog(false);
     }
 
     /**
@@ -73,8 +73,8 @@ public class LivySparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<
      * {@inheritDoc}
      */
     @Override
-    public NodeView<LivySparkContextCreatorNodeModel> createNodeView(final int viewIndex,
-        final LivySparkContextCreatorNodeModel nodeModel) {
+    public NodeView<LivySparkContextCreatorNodeModel2> createNodeView(final int viewIndex,
+        final LivySparkContextCreatorNodeModel2 nodeModel) {
         if (viewIndex == 0) {
             return new LivySparkContextLogView<>(nodeModel);
         } else {

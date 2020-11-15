@@ -38,6 +38,8 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.livy.LivySparkContextProvider;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
+import org.knime.bigdata.spark.core.livy.context.LivySparkContextConnInfoConfig;
+import org.knime.bigdata.spark.core.livy.context.LivySparkContextFileSystemConfig;
 import org.knime.bigdata.spark.core.livy.node.create.ui.KeyDescriptor;
 import org.knime.bigdata.spark.core.livy.node.create.ui.SettingsModelKeyValue;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
@@ -683,6 +685,24 @@ public class LivySparkContextCreatorNodeSettings {
         return new LivySparkContextConnInfoConfig(getSparkVersion(), livyUrl, getAuthenticationType(),
             (isStagingAreaFolderSet()) ? getStagingAreaFolder() : null, getConnectTimeout(), getResponseTimeout(),
             getJobCheckFrequency(), sparkSettings, contextId, connInfo, m_timeShiftSettings.getTimeShiftStrategy(),
+            m_timeShiftSettings.getFixedTimeZoneId(), m_timeShiftSettings.failOnDifferentClusterTZ());
+    }
+
+    /**
+     * @param contextId The ID of the Spark context for which to create the config object.
+     * @param fileSystemId The ID of the staging area file system.
+     * @param credentialsProvider Credentials provider to use to connect to Livy.
+     * @return a new {@link LivySparkContextConfig} derived from the current settings.
+     */
+    public LivySparkContextConfig createContextConfig(final SparkContextID contextId,
+        final String fileSystemId, final CredentialsProvider credentialsProvider) {
+
+        final String livyUrl = getLivyUrlWithAuthentication(credentialsProvider);
+        final Map<String, String> sparkSettings = generateSparkSettings();
+
+        return new LivySparkContextFileSystemConfig(getSparkVersion(), livyUrl, getAuthenticationType(),
+            (isStagingAreaFolderSet()) ? getStagingAreaFolder() : null, getConnectTimeout(), getResponseTimeout(),
+            getJobCheckFrequency(), sparkSettings, contextId, fileSystemId, m_timeShiftSettings.getTimeShiftStrategy(),
             m_timeShiftSettings.getFixedTimeZoneId(), m_timeShiftSettings.failOnDifferentClusterTZ());
     }
 

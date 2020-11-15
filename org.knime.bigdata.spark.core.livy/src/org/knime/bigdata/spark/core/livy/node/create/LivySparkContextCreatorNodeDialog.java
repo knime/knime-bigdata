@@ -29,6 +29,7 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -61,7 +62,12 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.util.FileSystemBrowser.DialogType;
+import org.knime.core.node.util.FileSystemBrowser.FileSelectionMode;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.filehandling.core.connections.FSConnectionRegistry;
+import org.knime.filehandling.core.defaultnodesettings.fileselection.FileSelectionDialog;
+import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
 /**
  * Node dialog of the "Create Spark Context (Livy)" node.
@@ -69,6 +75,8 @@ import org.knime.core.node.workflow.FlowVariable;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
+
+    private static final String STAGING_AREA_DIR_HISTORY_ID = "livyStagingArea";
 
     private final LivySparkContextCreatorNodeSettings m_settings = new LivySparkContextCreatorNodeSettings();
 
@@ -110,7 +118,11 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     private final DialogComponentBoolean m_setStagingAreaFolder =
         new DialogComponentBoolean(m_settings.getSetStagingAreaFolderModel(), "Set staging area for Spark jobs");
 
-    private RemoteFileChooserPanel m_stagingAreaFolder;
+    private final boolean m_deprecatedFileChooser;
+
+    private RemoteFileChooserPanel m_stagingAreaRemoteFile;
+
+    private FileSelectionDialog m_stagingAreaFileSelection;
 
     private final DialogComponentBoolean m_useCustomSparkSettings =
         new DialogComponentBoolean(m_settings.getUseCustomSparkSettingsModel(), "Set custom Spark settings");
@@ -134,7 +146,9 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     /**
      * Constructor.
      */
-    LivySparkContextCreatorNodeDialog() {
+    LivySparkContextCreatorNodeDialog(final boolean deprecatedFileChooser) {
+        m_deprecatedFileChooser = deprecatedFileChooser;
+
         addTab("General", createGeneralTab());
         addTab("Advanced", createAdvancedTab());
         addTab("Time", m_timeShift);
@@ -164,11 +178,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         gbc.gridy++;
         gbc.insets = new Insets(5, 25, 5, 20);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        m_stagingAreaFolder = new RemoteFileChooserPanel(panel, "Staging area folder", false,
-            "livyStagingAreaFolderHistory", RemoteFileChooser.SELECT_DIR,
-            createFlowVariableModel(m_settings.getStagingAreaFolderModel().getKey(), FlowVariable.Type.STRING), null);
-        panel.add(m_stagingAreaFolder.getPanel(), gbc);
-        m_settings.getStagingAreaFolderModel().addChangeListener(this);
+        panel.add(initStagingAreaChooser(panel), gbc);
         gbc.fill = GridBagConstraints.NONE;
 
         gbc.gridx = 0;
@@ -204,6 +214,26 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         addDialogComponentToPanel(m_jobCheckFrequency, panel, gbc);
 
         return panel;
+    }
+
+    private JPanel initStagingAreaChooser(final JPanel parent) {
+        if (m_deprecatedFileChooser) {
+            m_stagingAreaRemoteFile = new RemoteFileChooserPanel(parent, "Staging area folder", false,
+                "livyStagingAreaFolderHistory", RemoteFileChooser.SELECT_DIR,
+                createFlowVariableModel(m_settings.getStagingAreaFolderModel().getKey(), FlowVariable.Type.STRING), null);
+            return m_stagingAreaRemoteFile.getPanel();
+        } else {
+            m_stagingAreaFileSelection = new FileSelectionDialog( //
+                STAGING_AREA_DIR_HISTORY_ID, //
+                25, // history length
+                () -> null, //
+                DialogType.SAVE_DIALOG, //
+                FileSelectionMode.DIRECTORIES_ONLY, //
+                new String[0], //
+                e -> {
+            });
+            return m_stagingAreaFileSelection.getPanel();
+        }
     }
 
     private JPanel createGeneralTab() {
@@ -320,7 +350,11 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     @Override
     public void stateChanged(final ChangeEvent e) {
         m_settings.updateEnabledness();
-        m_stagingAreaFolder.setEnabled(m_settings.isStagingAreaFolderSet());
+        if (m_deprecatedFileChooser) {
+            m_stagingAreaRemoteFile.setEnabled(m_settings.isStagingAreaFolderSet());
+        } else {
+            m_stagingAreaFileSelection.setEnabled(m_settings.isStagingAreaFolderSet());
+        }
         updateExecutorAllocationOptions();
         updateExecutorResourceSummary();
     }
@@ -330,7 +364,12 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-        m_settings.getStagingAreaFolderModel().setStringValue(m_stagingAreaFolder.getSelection());
+        if (m_deprecatedFileChooser) {
+            m_settings.getStagingAreaFolderModel().setStringValue(m_stagingAreaRemoteFile.getSelection());
+        } else {
+            m_settings.getStagingAreaFolderModel().setStringValue(m_stagingAreaFileSelection.getSelected());
+            m_stagingAreaFileSelection.addCurrentSelectionToHistory();
+        }
         m_settings.validateDeeper();
         m_settings.saveSettingsTo(settings);
 
@@ -356,17 +395,58 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
             m_authentication.loadSettingsFrom(settings, specs, getCredentialsProvider());
             updateExecutorAllocationOptions();
             updateExecutorResourceSummary();
-            m_stagingAreaFolder.setSelection(m_settings.getStagingAreaFolder());
-            m_stagingAreaFolder.setEnabled(m_settings.isStagingAreaFolderSet());
+
+            if (m_deprecatedFileChooser) {
+                loadRemoteFileSettingsFrom(specs);
+            } else {
+                loadFileSelectionSettingsFrom(specs);
+            }
         } catch (final InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());
         }
+    }
+
+    private void loadRemoteFileSettingsFrom(final PortObjectSpec[] specs) {
+        m_stagingAreaRemoteFile.setSelection(m_settings.getStagingAreaFolder());
+        m_stagingAreaRemoteFile.setEnabled(m_settings.isStagingAreaFolderSet());
 
         if (specs.length > 0 && specs[0] != null) {
-            final ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
-            m_stagingAreaFolder.setConnectionInformation(connInfo);
+            final ConnectionInformation connInfo =
+                ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
+            m_stagingAreaRemoteFile.setConnectionInformation(connInfo);
         } else {
-            m_stagingAreaFolder.setConnectionInformation(null);
+            m_stagingAreaRemoteFile.setConnectionInformation(null);
         }
     }
+
+    private void loadFileSelectionSettingsFrom(final PortObjectSpec[] specs) {
+        m_stagingAreaFileSelection.setSelected(m_settings.getStagingAreaFolder());
+        m_stagingAreaFileSelection.setEnabled(m_settings.isStagingAreaFolderSet());
+
+        final Optional<String> fileSystemId = getFileSytemId(specs);
+        if(fileSystemId.isPresent() && FSConnectionRegistry.getInstance().contains(fileSystemId.get())) {
+            m_stagingAreaFileSelection.setEnableBrowsing(true);
+            m_stagingAreaFileSelection.setFSConnectionSupplier(
+                () -> FSConnectionRegistry.getInstance().retrieve(fileSystemId.get()).orElse(null));
+        } else {
+            m_stagingAreaFileSelection.setEnableBrowsing(false);
+            m_stagingAreaFileSelection.setFSConnectionSupplier(() -> null);
+        }
+    }
+
+    private static Optional<String> getFileSytemId(final PortObjectSpec[] specs) {
+        if (specs.length > 0 && specs[0] != null) {
+            return Optional.of(((FileSystemPortObjectSpec)specs[0]).getFileSystemId());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void onClose() {
+        if (!m_deprecatedFileChooser) {
+            m_stagingAreaFileSelection.onClose();
+        }
+    }
+
 }

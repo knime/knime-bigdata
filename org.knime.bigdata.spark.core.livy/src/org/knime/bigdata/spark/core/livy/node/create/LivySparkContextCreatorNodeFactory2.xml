@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+    <name>Create Spark Context (Livy - Labs)</name>
+    
+    <shortDescription>Creates a new Spark context via Apache Livy.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a new Spark context via <a href="http://livy.apache.org/">Apache Livy</a>. 
+            
+            <p>
+            This node requires access to a remote file system such as HDFS/webHDFs/httpFS or S3/Blob Store/Cloud Store
+            in order to exchange temporary files between KNIME and the Spark context (running on the cluster).
+            </p>
+            
+            <p>
+            <i>Note</i>: Executing this node always creates a new Spark context. Resetting the node
+            or closing the KNIME workflow will destroy the Spark context. Spark contexts created by this
+            node cannot be shared between KNIME workflows.
+            </p>
+        </intro>
+        <tab name="General">
+            <option name="Spark version">
+                The Spark version used by Livy. If this is set incorrectly, creating the Spark context will fail.
+            </option>
+            <option name="Livy URL">
+                The URL of Livy including protocol and port e.g. http://localhost:8998.
+            </option>
+            <option name="Authentication">
+                Select
+                <ul>
+		            <li><i>None</i>, if Livy does not require any credentials.</li>
+		            <li><i>Credentials</i>, if Livy requires HTTP "Basic" authentication and a credentials variable
+		           should be used to determine username and password.</li>
+		            <li><i>Username</i>, if Livy does not require authentication, but the Spark context should run as a particular user.</li>
+		            <li><i>Username &amp; password</i>, if Livy requires HTTP "Basic" authentication.</li>
+		            <li><i>Kerberos</i>, if Livy requires Kerberos authentication.</li>
+		        </ul>
+            </option>
+            <option name="Spark executor resources">
+                Select the <i>"Override default Spark executor resources"</i> option to manually set the resources
+                for the Spark executors. If enabled you can specify the amount of memory and the number of cores
+                for each executor.
+                <br/> 
+                In addition you can specify the Spark executor allocation strategy:
+                <ul>
+                    <li><i>Default allocation</i> uses the cluster default allocation strategy.</li>
+                    <li><i>Fixed allocation</i> allows you to specify a fixed number of Spark executors.</li>
+                    <li><i>Dynamic allocation</i> allows you to specify the minimum and maximum number of executors
+                    that Spark can use. Executors are allocated up to the maximum number and destroyed if no longer 
+                    needed until the minimum number of executors is reached.</li>
+                </ul>
+            </option>
+            <option name="Estimated resources">
+                An estimation of the resources that are allocated in your cluster by the Spark context. 
+                The calculation uses default settings for memory overheads etc. and is thus only an estimate. 
+                The exact resources might be different depending on your specific cluster settings.
+            </option>
+        </tab>
+        <tab name="Advanced">
+            <option name="Override default Spark driver resources">
+                If enabled you can specify the amount of memory and number of cores the Spark driver process will 
+                allocate.
+            </option>
+            <option name="Set staging area for Spark jobs">
+                If enabled you can specify a directory in the connected remote file system,
+                that will be used to transfer temporary files between KNIME and the Spark context. If no directory
+                is set, then a default directory will be chosen, e.g. the HDFS user home directory. However, if the remote file
+                system is Amazon S3, Azure Blob Store or Google Cloud Storage, then a staging directory <i>must</i> be provided.
+            </option>
+            
+            <option name="Set custom Spark settings">
+                If enabled you can specify additional Spark setting. 
+                A tooltip is provided for the keys if available. For further information about the Spark settings
+                refer to the <a href="https://spark.apache.org/docs/latest/configuration.html#available-properties">
+                Spark documentation</a>.
+                Invalid keys or values are highlighted with a red background.
+                Custom keys are highlighted with a yellow background and should be prefixed with <i>spark</i> or
+                <i>spark.hadoop</i>.
+            </option>
+        </tab>
+        <tab name="Time">
+            <description>
+                This tab allows to set a time zone that is applied in two cases:
+                <ul>
+                <li>To set the Spark SQL session time zone, which is relevant in Spark SQL, when parsing <i>Strings</i> such as '2020-03-27 08:00:00' into <i>Timestamps</i> (<i>to_timestamp</i>) and vice versa, as well as datetime manipulations.</li>
+                <li>In KNIME, when mapping between Spark <i>Timestamps</i> and the KNIME (legacy) Date and Time type column type. Here, the specified time zone will be used to make the Date and Time value in KNIME equal to what would be displayed when displaying a <i>Timestamp</i> in Spark.</li>
+                </ul>
+            </description>
+
+            <option name="Do not set">
+                Leaves the Spark SQL session time zone unchanged and does <b>not</b> align the display of KNIME (legacy) Date and Time columns.
+            </option>
+            
+            <option name="Use default time zone from Spark cluster">
+                Leaves the Spark SQL session time zone unchanged but aligns the display of KNIME (legacy) Date and Time columns, based on the Spark SQL session timezone. This is the default.
+            </option>
+            
+            <option name="Use fixed time zone">
+                Allows to specify a time zone that will be set as the Spark SQL session time zone. The same time zone and which will be used to align the display of KNIME (legacy) Date and Time columns.
+            </option>
+            
+            <option name="Fail on different cluster default time zone">
+                Allows to specify whether this node should fail, when the cluster-side default time zone is different from the fixed time zone that was specified.
+            </option>
+
+        </tab>
+    </fullDescription>
+    
+    <ports>
+	<inPort index="0" name="Remote file system connection">A connection to a remote file system to
+		exchange temporary files between KNIME and the Spark context (running on the cluster). Supported file systems are:
+		<ul>
+		<li>HDFS, webHDFS and httpFS. Note that here KNIME must access the remote file system with the same user as Spark,
+		otherwise Spark context creation fails. When authenticating with <i>Kerberos</i> against both HDFS/webHDFs/httpFS and Livy,
+		then usually the same user will be used. Otherwise, this must be ensured manually.</li>
+		<li>Amazon S3, Azure Blob Store and Google Cloud Storage (recommended when using Spark on Amazon EMR/Azure HDInsight/Google Cloud Dataproc).
+		Note that for these file systems a <i>staging area</i> must be specified (see above).</li>
+		</ul>
+	</inPort>
+	<outPort index="0" name="Spark Context">Spark context.</outPort>
+    </ports>
+    <views>
+      <view index="0" name="Spark log">
+        Displays the log messages returned by the spark-submit process on the
+        Livy server machine. This view does not provide the YARN container logs.
+      </view>
+    </views>
+</knimeNode>
