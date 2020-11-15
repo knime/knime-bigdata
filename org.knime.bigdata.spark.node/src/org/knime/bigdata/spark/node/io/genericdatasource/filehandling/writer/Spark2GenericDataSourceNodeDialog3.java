@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package org.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,11 +35,13 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
@@ -64,7 +66,7 @@ import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelF
  * @author Sascha Wolke, KNIME.com
  * @param <T> Settings type used by this node
  */
-public class NioSpark2GenericDataSourceNodeDialog<T extends NioSpark2GenericDataSourceSettings> extends NodeDialogPane implements ActionListener {
+public class Spark2GenericDataSourceNodeDialog3<T extends Spark2GenericDataSourceSettings3> extends NodeDialogPane implements ActionListener {
 
     private static final String FILE_HISTORY_ID = "spark_generic_reader_writer";
 
@@ -86,7 +88,7 @@ public class NioSpark2GenericDataSourceNodeDialog<T extends NioSpark2GenericData
      * @param initialSettings - Initial settings object
      * @see #addSettingsPanels(JPanel, GridBagConstraints) for customization
      */
-    public NioSpark2GenericDataSourceNodeDialog(final T initialSettings) {
+    public Spark2GenericDataSourceNodeDialog3(final T initialSettings) {
         m_settings = initialSettings;
         addTab("Settings", createSettingsTab());
         addTab("Partitions", createPartitionsTab());
@@ -102,20 +104,25 @@ public class NioSpark2GenericDataSourceNodeDialog<T extends NioSpark2GenericData
 
         final JPanel outputPathPanel = new JPanel();
         outputPathPanel.setLayout(new BoxLayout(outputPathPanel, BoxLayout.LINE_AXIS));
-        outputPathPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Output location"));
+        outputPathPanel.setBorder(createTitledBorder("Output location"));
         FlowVariableModel fvm = createFlowVariableModel(m_settings.getFileChooserModel().getKeysForFSLocation(),
             FSLocationVariableType.INSTANCE);
         m_outputPathChooser = new DialogComponentWriterFileChooser(m_settings.getFileChooserModel(), FILE_HISTORY_ID,
             fvm, FilterMode.FOLDER);
+        outputPathPanel.add(Box.createHorizontalStrut(5));
         outputPathPanel.add(m_outputPathChooser.getComponentPanel());
+        outputPathPanel.add(Box.createHorizontalStrut(5));
         panel.add(outputPathPanel, settingsGbc);
         settingsGbc.gridy++;
 
         if (m_settings.hasDriver()) {
             final JPanel driverPanel = new JPanel();
-            driverPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Driver"));
+            driverPanel.setLayout(new BoxLayout(driverPanel, BoxLayout.LINE_AXIS));
+            driverPanel.setBorder(createTitledBorder("Driver"));
             m_uploadDriver = new JCheckBox("Upload data source driver");
+            driverPanel.add(Box.createHorizontalStrut(5));
             driverPanel.add(m_uploadDriver);
+            driverPanel.add(Box.createHorizontalGlue());
             panel.add(driverPanel, settingsGbc);
             settingsGbc.gridy++;
         }
@@ -163,6 +170,14 @@ public class NioSpark2GenericDataSourceNodeDialog<T extends NioSpark2GenericData
     }
 
     /**
+     * @param title title of the border
+     * @return border with title
+     */
+    protected Border createTitledBorder(final String title) {
+        return BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title);
+    }
+
+    /**
      * Add additional panels to the settings panel.
      *
      * @param settingsPanel panel to add additional panels
@@ -170,6 +185,37 @@ public class NioSpark2GenericDataSourceNodeDialog<T extends NioSpark2GenericData
      */
     protected void addSettingsPanels(final JPanel settingsPanel, final GridBagConstraints gbc) {
         // overwrite this if required
+    }
+
+    /**
+     * Add components with description to a given panel.
+     *
+     * @param panel panel to add components to
+     * @param gbc grid bag constraint of the given panel
+     * @param description text on the left
+     * @param component component on the right
+     */
+    protected void addToPanel(final JPanel panel, final GridBagConstraints gbc, final String description, final JComponent component) {
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 0;
+        panel.add(new JLabel(description + ": "), gbc);
+        gbc.gridx++;
+        gbc.weightx = 1;
+        panel.add(component, gbc);
+    }
+
+    /**
+     * Add second component to a panel (after first component with description added).
+     *
+     * @param panel panel to add components to
+     * @param gbc grid bag constraint of the given panel
+     * @param component - Component on the right
+     */
+    protected void addToPanel(final JPanel panel, final GridBagConstraints gbc, final JComponent component) {
+        gbc.gridy++;
+        gbc.weightx = 1;
+        panel.add(component, gbc);
     }
 
     private static final void addVerticalSpace(final JPanel panel, final GridBagConstraints gbc) {

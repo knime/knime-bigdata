@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Spark to Avro (Labs)</name>
+	<shortDescription>Writes Spark data to a Avro</shortDescription>
+	<fullDescription>
+		<intro>
+			Writes a Spark data to Avro.
+			
+			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
+		</intro>
+
+		<tab name="Settings">
+	        <option name="Write to">
+	            Shows the connected file system.
+			</option>
+	
+			<option name="Folder">
+				Enter the output path. The required syntax of a path depends on the connected file system. The node
+	            description of the respective connector node describes the required path format.
+				You can also choose a previously selected file from the drop-down list, or select a location
+				from the &quot;Browse...&quot; dialog. Note that browsing is disabled in some cases:
+				<ul>
+					<li>
+					Browsing is disabled if the connector node hasn't been executed since the workflow has been opened.
+					(Re)execute the connector node to enable browsing.</li>
+				</ul>
+			</option>
+			<option name="Create missing folders">
+				Select if the folders of the selected output location should be created if they do not already exist. 
+				If this option is unchecked, the node will fail if a folder does not exist.
+			</option>
+			<option name="If exists">
+				Specify the behavior of the node in case the output file already exists.
+				<ul>
+					<li><i>Overwrite:</i> Will replace any existing file.</li>
+					<li><i>Append:</i> Append to existing files or create new one if output path does not exists.</li>
+					<li><i>Ignore:</i> Does nothing and keeps the output path unchanged.</li>
+					<li><i>Fail:</i> Will issue an error during the node's execution (to prevent unintentional overwrite).</li>
+				</ul>
+			</option>
+	        <option name="Driver">Upload data source driver or depend on cluster side provided driver.</option>	
+		</tab>
+		<tab name="Partitions">
+	        <option name="Columns">
+	        	Select the columns to partition on.
+	        </option>
+	        <option name="Overwrite partitions count">
+	        	This can be useful to reduce output file count to e.g. one file.
+	        	<br />
+	        	<b>Warning:</b> This might result in serious performance issues on huge data sets. Use with caution!
+	        	<br />
+	        	See <a href="http://spark.apache.org/docs/1.5.0/api/java/org/apache/spark/sql/DataFrame.html#coalesce(int)">Spark documentation</a> for more informations.	
+	       	</option>
+	       	
+		</tab>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="File system connection">Spark compatible connection (HDFS, WebHDFS, HttpFS, S3, Blob Storage, ...)</inPort>
+		<inPort index="1" name="Spark data">Spark DataFrame/RDD</inPort>
+	</ports>
+</knimeNode>

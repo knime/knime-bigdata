@@ -13,7 +13,7 @@
 			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
 		</intro>
 		
-		<tab name="Settings: Input location">
+		<tab name="Settings">
 			<option name="Mode">
 	            Select if you like to read a file or folder.
 			</option>
@@ -29,9 +29,6 @@
 					(Re)execute the connector node to enable browsing.</li>
 				</ul>
 			</option>
-		</tab>
-
-		<tab name="Settings: Options">
 			<option name="Sampling ratio">
 				Infer the type of a collection of JSON records in three stages:
 				<ol>
@@ -54,8 +51,8 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Remote file connection">Spark compatible connection (HDFS, WebHDFS, HttpFS, S3, Blob Storage, ...)</inPort>
-		<inPort index="1" name="Spark context">Required Spark context.</inPort>
+		<inPort index="0" name="File system connection">Spark compatible connection (HDFS, WebHDFS, HttpFS, S3, Blob Storage, ...)</inPort>
+		<inPort index="1" name="Spark context">Spark context</inPort>
 		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

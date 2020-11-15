@@ -43,6 +43,7 @@ import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobOutput;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -73,8 +74,7 @@ public class GenericDataSource2SparkNodeModel3<T extends GenericDataSource2Spark
     private static final NodeLogger LOGGER = NodeLogger.getLogger(GenericDataSource2SparkNodeModel3.class);
 
     /** The unique Spark job id. */
-    public static final String JOB_ID =
-        org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeModel.JOB_ID;
+    public static final String JOB_ID = GenericDataSource2SparkNodeModel.JOB_ID;
 
     /** Internal settings object. */
     private final T m_settings;

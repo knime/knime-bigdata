@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package org.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.core.port.FixedPortsConfiguration;
@@ -34,7 +34,7 @@ import org.knime.filehandling.core.port.FileSystemPortObject;
  * @param <M> Model of this node factory
  * @param <S> Settings of this node factory
  */
-public abstract class NioSpark2GenericDataSourceNodeFactory<M extends NioSpark2GenericDataSourceNodeModel<S>, S extends NioSpark2GenericDataSourceSettings>
+public abstract class Spark2GenericDataSourceNodeFactory3<M extends Spark2GenericDataSourceNodeModel3<S>, S extends Spark2GenericDataSourceSettings3>
     extends DefaultSparkNodeFactory<M> {
 
     /**
@@ -58,7 +58,7 @@ public abstract class NioSpark2GenericDataSourceNodeFactory<M extends NioSpark2G
     /**
      * Default constructor.
      */
-    public NioSpark2GenericDataSourceNodeFactory() {
+    public Spark2GenericDataSourceNodeFactory3() {
         super("io/write");
     }
 

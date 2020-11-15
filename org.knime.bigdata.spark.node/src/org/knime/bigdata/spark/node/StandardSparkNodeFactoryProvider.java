@@ -30,7 +30,18 @@ import org.knime.bigdata.spark.node.io.database.impala.reader.DBImpala2SparkNode
 import org.knime.bigdata.spark.node.io.database.impala.writer.DBSpark2ImpalaNodeFactory;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.avro.Avro2SparkNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.csv.CSV2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.json.Json2SparkNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.orc.Orc2SparkNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.parquet.Parquet2SparkNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.text.Text2SparkNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.avro.Spark2AvroNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.csv.Spark2CSVNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.json.Spark2JsonNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.orc.Spark2OrcNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.parquet.Spark2ParquetNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.text.Spark2TextNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.csv.CSV2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.json.Json2SparkNodeFactory2;
@@ -39,7 +50,6 @@ import org.knime.bigdata.spark.node.io.genericdatasource.reader.parquet.Parquet2
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.text.Text2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.avro.Spark2AvroNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.csv.Spark2CSVNodeFactory;
-import org.knime.bigdata.spark.node.io.genericdatasource.writer.json.NioSpark2JsonNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.json.Spark2JsonNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.orc.Spark2OrcNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.parquet.Spark2ParquetNodeFactory;
@@ -145,10 +155,22 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
      */
     public StandardSparkNodeFactoryProvider() {
         super(AllVersionCompatibilityChecker.INSTANCE,
-            new Avro2SparkNodeFactory2(),
-            new Spark2AvroNodeFactory(),
-            new CSV2SparkNodeFactory2(),
-            new Spark2CSVNodeFactory(),
+            // generic writer nodes
+            new Avro2SparkNodeFactory3(),
+            new CSV2SparkNodeFactory3(),
+            new Json2SparkNodeFactory3(),
+            new Orc2SparkNodeFactory3(),
+            new Parquet2SparkNodeFactory3(),
+            new Text2SparkNodeFactory3(),
+
+            // generic writer nodes
+            new Spark2AvroNodeFactory3(),
+            new Spark2CSVNodeFactory3(),
+            new Spark2JsonNodeFactory3(),
+            new Spark2OrcNodeFactory3(),
+            new Spark2ParquetNodeFactory3(),
+            new Spark2TextNodeFactory3(),
+
             new Database2SparkNodeFactory2(),
             new DB2SparkNodeFactory(),
             new Spark2DatabaseNodeFactory(),
@@ -159,18 +181,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Spark2HiveNodeFactory(),
             new DBSpark2HiveNodeFactory(),
             new DBSpark2ImpalaNodeFactory(),
-            new Json2SparkNodeFactory3(),
-            new Json2SparkNodeFactory2(),
-            new Spark2JsonNodeFactory(),
-            new NioSpark2JsonNodeFactory(),
             new Table2SparkNodeFactory2(),
             new Spark2TableNodeFactory(),
-            new Text2SparkNodeFactory2(),
-            new Spark2TextNodeFactory(),
-            new Orc2SparkNodeFactory2(),
-            new Spark2OrcNodeFactory(),
-            new Parquet2SparkNodeFactory2(),
-            new Spark2ParquetNodeFactory(),
             new MLlibClusterAssignerNodeFactory(),
             new MLlibKMeansNodeFactory(),
             new MLlibCollaborativeFilteringNodeFactory(),
@@ -232,19 +244,38 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new PySparkInner21NodeFactory(),
             new PySparkInner12NodeFactory(),
             new PySparkSourceNodeFactory(),
-            // deprecated
+
+            // deprecated generic spark writer nodes (connection information port)
+            new Spark2AvroNodeFactory(),
+            new Spark2CSVNodeFactory(),
+            new Spark2JsonNodeFactory(),
+            new Spark2OrcNodeFactory(),
+            new Spark2ParquetNodeFactory(),
+            new Spark2TextNodeFactory(),
+
+            // deprecated generic spark reader nodes (connection information port)
+            new Avro2SparkNodeFactory2(),
+            new CSV2SparkNodeFactory2(),
+            new Json2SparkNodeFactory2(),
+            new Orc2SparkNodeFactory2(),
+            new Parquet2SparkNodeFactory2(),
+            new Text2SparkNodeFactory2(),
+
+            // deprecated generic spark reader nodes (optional spark context port)
             new Avro2SparkNodeFactory(),
             new CSV2SparkNodeFactory(),
+            new Json2SparkNodeFactory(),
+            new Orc2SparkNodeFactory(),
+            new Parquet2SparkNodeFactory(),
+
+            // other deprecated nodes
             new Database2SparkNodeFactory(),
             new Hive2SparkNodeFactory(),
-            new Json2SparkNodeFactory(),
             new MLlibDecisionTreeNodeFactory(),
             new MLlibGradientBoostedTreeNodeFactory(),
             new MLlibRandomForestNodeFactory(),
             new Table2SparkNodeFactory(),
             new Text2SparkNodeFactory(),
-            new Orc2SparkNodeFactory(),
-            new Parquet2SparkNodeFactory(),
             new Impala2SparkNodeFactory(),
             new SparkJavaSnippetSourceNodeFactory(),
             new MLlibPCANodeFactory(),

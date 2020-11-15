@@ -18,12 +18,13 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package org.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer;
 
 import java.util.EnumSet;
 
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.SparkSaveMode;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -39,7 +40,7 @@ import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelF
  *
  * @author Sascha Wolke, KNIME.com
  */
-public class NioSpark2GenericDataSourceSettings {
+public class Spark2GenericDataSourceSettings3 {
 
     /** Short or long format name in spark. */
     private final String m_format;
@@ -85,7 +86,7 @@ public class NioSpark2GenericDataSourceSettings {
      * @param hasDriver - True if this data source has a driver jar.
      * @param portsConfig - Current ports configuration.
      */
-    public NioSpark2GenericDataSourceSettings(final String format, final SparkVersion minSparkVersion,
+    public Spark2GenericDataSourceSettings3(final String format, final SparkVersion minSparkVersion,
         final boolean supportsPartitioning, final boolean hasDriver, final PortsConfiguration portsConfig) {
 
         m_format = format;
@@ -93,15 +94,21 @@ public class NioSpark2GenericDataSourceSettings {
         m_supportsPartitioning = supportsPartitioning;
         m_hasDriver = hasDriver;
         m_outputPathChooser = new SettingsModelWriterFileChooser(
-            CFG_OUTPUT_PATH, portsConfig, NioSpark2GenericDataSourceNodeFactory.FS_INPUT_PORT_GRP_NAME,
+            CFG_OUTPUT_PATH, portsConfig, Spark2GenericDataSourceNodeFactory3.FS_INPUT_PORT_GRP_NAME,
             FilterMode.FOLDER, FileOverwritePolicy.FAIL,
             EnumSet.of(FileOverwritePolicy.FAIL, FileOverwritePolicy.OVERWRITE, FileOverwritePolicy.APPEND, FileOverwritePolicy.IGNORE));
     }
 
     /**
      * Constructor used in validation.
+     *
+     * @param format - Short or long format name in spark.
+     * @param minSparkVersion - Minimum spark version.
+     * @param supportsPartitioning - True if this format has partition by column support.
+     * @param hasDriver - True if this data source has a driver jar.
+     * @param outputPathChooser - The output file chooser.
      */
-    private NioSpark2GenericDataSourceSettings(final String format, final SparkVersion minSparkVersion,
+    protected Spark2GenericDataSourceSettings3(final String format, final SparkVersion minSparkVersion,
         final boolean supportsPartitioning, final boolean hasDriver, final SettingsModelWriterFileChooser outputPathChooser) {
 
         m_format = format;
@@ -112,8 +119,8 @@ public class NioSpark2GenericDataSourceSettings {
     }
 
     /** @return New instance of this settings (overwrite this in custom settings) */
-    protected NioSpark2GenericDataSourceSettings newValidateInstance() {
-        return new NioSpark2GenericDataSourceSettings(m_format, m_minSparkVersion, m_supportsPartitioning, m_hasDriver, m_outputPathChooser);
+    protected Spark2GenericDataSourceSettings3 newValidateInstance() {
+        return new Spark2GenericDataSourceSettings3(m_format, m_minSparkVersion, m_supportsPartitioning, m_hasDriver, m_outputPathChooser);
     }
 
     /** @return Spark format name */
@@ -164,17 +171,22 @@ public class NioSpark2GenericDataSourceSettings {
     /** @return Partition column filter configuration */
     public DataColumnSpecFilterConfiguration getPartitionBy() { return m_partitionBy; }
 
-    /** @return Number of partition (see {@link NioSpark2GenericDataSourceSettings#overwriteNumPartitions}) */
+    /** @return Number of partition (see {@link Spark2GenericDataSourceSettings3#overwriteNumPartitions}) */
     public int getNumPartitions() { return m_numPartitions; }
     /** @param numPartitions - Number of output partitions */
     public void setNumPartitions(final int numPartitions) { m_numPartitions = numPartitions; }
 
-    /** @return True if output number of partition should be overwritten (see {@link NioSpark2GenericDataSourceSettings#setNumPartitions}) */
+    /** @return True if output number of partition should be overwritten (see {@link Spark2GenericDataSourceSettings3#setNumPartitions}) */
     public boolean overwriteNumPartitions() { return m_overwriteNumPartitions; }
     /** @param overwriteNumPartitions - True if number of output partition should be overwritten */
     public void setOverwriteNumPartitions(final boolean overwriteNumPartitions) { m_overwriteNumPartitions = overwriteNumPartitions; }
 
-    private void saveSettingsTo(final NodeSettingsWO settings) {
+    /**
+     * Internal method to save settings.
+     *
+     * @param settings node settings to write to
+     */
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
         settings.addBoolean(CFG_UPLOAD_DRIVER, m_uploadDriver);
 
         if (m_supportsPartitioning && m_partitionBy != null) {
@@ -201,7 +213,7 @@ public class NioSpark2GenericDataSourceSettings {
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_outputPathChooser.validateSettings(settings);
 
-        NioSpark2GenericDataSourceSettings tmp = newValidateInstance();
+        Spark2GenericDataSourceSettings3 tmp = newValidateInstance();
         tmp.loadSettings(settings);
         tmp.validateSettings();
     }
@@ -237,7 +249,7 @@ public class NioSpark2GenericDataSourceSettings {
      * Loads the settings from the given settings object using default values for invalid or missing settings.
      * @param settings - Settings to load
      */
-    private void loadSettings(final NodeSettingsRO settings) {
+    protected void loadSettings(final NodeSettingsRO settings) {
         m_uploadDriver = settings.getBoolean(CFG_UPLOAD_DRIVER, DEFAULT_UPLOAD_DRIVER);
         m_overwriteNumPartitions = settings.getBoolean(CFG_OVERWRITE_NUM_PARTITIONS, DEFAULT_OVERWRITE_NUM_PARTITIONS);
         m_numPartitions = settings.getInt(CFG_NUM_PARTITIONS, DEFAULT_NUM_PARTITIONS);

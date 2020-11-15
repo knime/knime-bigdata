@@ -18,37 +18,38 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package org.knime.bigdata.spark.node.io.genericdatasource.writer.json;
+package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.json;
 
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeDialog;
-import org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeFactory;
-import org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeModel;
-import org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceSettings;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.Spark2GenericDataSourceNodeDialog3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.Spark2GenericDataSourceNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.Spark2GenericDataSourceNodeModel3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.Spark2GenericDataSourceSettings3;
 import org.knime.core.node.NodeDialogPane;
 
 /**
  * @author Sascha Wolke, KNIME.com
  */
-public class NioSpark2JsonNodeFactory extends
-    NioSpark2GenericDataSourceNodeFactory<NioSpark2GenericDataSourceNodeModel<NioSpark2GenericDataSourceSettings>, NioSpark2GenericDataSourceSettings> {
+public class Spark2JsonNodeFactory3 extends
+    Spark2GenericDataSourceNodeFactory3<Spark2GenericDataSourceNodeModel3<Spark2GenericDataSourceSettings3>, Spark2GenericDataSourceSettings3> {
 
     private static final String FORMAT = "json";
     private static final boolean HAS_PARTITIONING = true;
     private static final boolean HAS_DRIVER = false;
 
     @Override
-    public NioSpark2GenericDataSourceSettings getSettings() {
-        return new NioSpark2GenericDataSourceSettings(FORMAT, SparkVersion.V_1_5, HAS_PARTITIONING, HAS_DRIVER, PORTS_CONFIGURATION);
+    public Spark2GenericDataSourceSettings3 getSettings() {
+        return new Spark2GenericDataSourceSettings3(FORMAT, SparkVersion.V_1_5, HAS_PARTITIONING, HAS_DRIVER,
+            PORTS_CONFIGURATION);
     }
 
     @Override
-    public NioSpark2GenericDataSourceNodeModel<NioSpark2GenericDataSourceSettings> createNodeModel() {
-        return new NioSpark2GenericDataSourceNodeModel<>(PORTS_CONFIGURATION, getSettings());
+    public Spark2GenericDataSourceNodeModel3<Spark2GenericDataSourceSettings3> createNodeModel() {
+        return new Spark2GenericDataSourceNodeModel3<>(PORTS_CONFIGURATION, getSettings());
     }
 
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new NioSpark2GenericDataSourceNodeDialog<>(getSettings());
+        return new Spark2GenericDataSourceNodeDialog3<>(getSettings());
     }
 }

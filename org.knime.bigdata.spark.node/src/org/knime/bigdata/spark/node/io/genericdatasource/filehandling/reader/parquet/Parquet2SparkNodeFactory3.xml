@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>JSON to Parquet (Labs)</name>
+	<shortDescription>Creates a Spark DataFrame/RDD from given Parquet file.</shortDescription>
+	<fullDescription>
+		<intro>
+			Creates a Spark DataFrame/RDD from given Parquet file.
+			
+			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
+		</intro>
+		
+		<tab name="Settings">
+			<option name="Mode">
+	            Select if you like to read a file or folder.
+			</option>
+	
+			<option name="File/Folder">
+				Enter the input path. The required syntax of a path depends on the connected file system. The node
+	            description of the respective connector node describes the required path format.
+				You can also choose a previously selected file from the drop-down list, or select a location
+				from the &quot;Browse...&quot; dialog. Note that browsing is disabled in some cases:
+				<ul>
+					<li>
+					Browsing is disabled if the connector node hasn't been executed since the workflow has been opened.
+					(Re)execute the connector node to enable browsing.</li>
+				</ul>
+			</option>
+		</tab>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="File system connection">Spark compatible connection (HDFS, WebHDFS, HttpFS, S3, Blob Storage, ...)</inPort>
+		<inPort index="1" name="Spark context">Spark context</inPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
+	</ports>
+</knimeNode>

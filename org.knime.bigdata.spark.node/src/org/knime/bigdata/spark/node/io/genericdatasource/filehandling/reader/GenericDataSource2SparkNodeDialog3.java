@@ -108,9 +108,12 @@ public class GenericDataSource2SparkNodeDialog3<T extends GenericDataSource2Spar
 
         if (m_settings.hasDriver()) {
             final JPanel driverPanel = new JPanel();
-            driverPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Driver"));
+            driverPanel.setLayout(new BoxLayout(driverPanel, BoxLayout.LINE_AXIS));
+            driverPanel.setBorder(createTitledBorder("Driver"));
             m_uploadDriver = new JCheckBox("Upload data source driver");
+            driverPanel.add(Box.createHorizontalStrut(5));
             driverPanel.add(m_uploadDriver);
+            driverPanel.add(Box.createHorizontalGlue());
             settingsPanel.add(driverPanel, settingsGbc);
             settingsGbc.gridy++;
         } else {

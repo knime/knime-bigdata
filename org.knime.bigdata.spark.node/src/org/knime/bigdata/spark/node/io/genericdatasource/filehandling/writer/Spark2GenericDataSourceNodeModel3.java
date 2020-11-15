@@ -18,10 +18,10 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package org.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer;
 
-import static org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeFactory.FS_INPUT_PORT_GRP_NAME;
-import static org.knime.bigdata.spark.node.io.genericdatasource.writer.NioSpark2GenericDataSourceNodeFactory.SPARK_INPUT_PORT_GRP_NAME;
+import static org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.Spark2GenericDataSourceNodeFactory3.FS_INPUT_PORT_GRP_NAME;
+import static org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.Spark2GenericDataSourceNodeFactory3.SPARK_INPUT_PORT_GRP_NAME;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +44,8 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -68,16 +70,16 @@ import org.knime.filehandling.core.port.FileSystemPortObject;
  * @author Sascha Wolke, KNIME.com
  * @param <T> Settings type of this node
  */
-public class NioSpark2GenericDataSourceNodeModel<T extends NioSpark2GenericDataSourceSettings> extends SparkNodeModel {
+public class Spark2GenericDataSourceNodeModel3<T extends Spark2GenericDataSourceSettings3> extends SparkNodeModel {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(NioSpark2GenericDataSourceNodeModel.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark2GenericDataSourceNodeModel3.class);
 
     private final int m_fsInputPortIndex;
 
     private final int m_sparkInputPortIndex;
 
     /** The unique Spark job id. */
-    public static final String JOB_ID = Spark2GenericDataSourceNodeModel.class.getCanonicalName();
+    public static final String JOB_ID = Spark2GenericDataSourceNodeModel.JOB_ID;
 
     /** Internal settings object. */
     private final T m_settings;
@@ -90,7 +92,7 @@ public class NioSpark2GenericDataSourceNodeModel<T extends NioSpark2GenericDataS
      * @param portsConfig current port configuration
      * @param settings - Initial settings
      */
-    public NioSpark2GenericDataSourceNodeModel(final PortsConfiguration portsConfig, final T settings) {
+    public Spark2GenericDataSourceNodeModel3(final PortsConfiguration portsConfig, final T settings) {
         super(portsConfig.getInputPorts(), portsConfig.getOutputPorts());
         m_settings = settings;
         m_fsInputPortIndex = portsConfig.getInputPortLocation().get(FS_INPUT_PORT_GRP_NAME)[0];
