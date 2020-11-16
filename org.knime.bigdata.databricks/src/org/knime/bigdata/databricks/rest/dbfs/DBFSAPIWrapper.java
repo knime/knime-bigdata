@@ -142,4 +142,10 @@ public class DBFSAPIWrapper implements DBFSAPI {
         });
     }
 
+    /**
+     * @return the underlying {@link DBFSAPI} object.
+     */
+    public DBFSAPI getWrappedDBFSAPI() {
+        return m_api;
+    }
 }

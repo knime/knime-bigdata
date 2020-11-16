@@ -224,7 +224,11 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      *
      * @param proxy Client proxy implementation
      */
-    public static <T> void close(final T proxy) {
-        WebClient.client(proxy).close();
+    public static void close(final DBFSAPI proxy) {
+        DBFSAPI toClose = proxy;
+        if (proxy instanceof DBFSAPIWrapper) {
+            toClose = ((DBFSAPIWrapper)proxy).getWrappedDBFSAPI();
+        }
+        WebClient.client(toClose).close();
     }
 }
