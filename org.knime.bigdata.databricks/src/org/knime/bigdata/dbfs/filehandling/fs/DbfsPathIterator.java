@@ -44,45 +44,54 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-10-14 (Alexander Bondaletov): created
+ *   2020-10-31 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandling.node;
+package org.knime.bigdata.dbfs.filehandling.fs;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import java.io.IOException;
+import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Iterator;
+
+import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
+import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
+import org.knime.filehandling.core.connections.base.BasePathIterator;
 
 /**
- * Factory class for the {@link DatabricksConnectorNodeModel} node.
+ * Class to iterate through the files and folders in the path
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksConnectorNodeFactory extends NodeFactory<DatabricksConnectorNodeModel> {
+public class DbfsPathIterator extends BasePathIterator<DbfsPath> {
 
-    @Override
-    public DatabricksConnectorNodeModel createNodeModel() {
-        return new DatabricksConnectorNodeModel();
+    /**
+     * Creates iterator instance.
+     *
+     * @param path path to iterate.
+     * @param filter {@link Filter} instance.
+     * @throws IOException
+     */
+    public DbfsPathIterator(final DbfsPath path, final Filter<? super Path> filter) throws IOException {
+        super(path, filter);
+
+        @SuppressWarnings("resource")
+        FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
+        FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
+
+        Iterator<DbfsPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
+
+        setFirstPage(iterator);//NOSONAR
     }
 
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
+    @SuppressWarnings("resource")
+    private DbfsPath toPath(final FileInfo file) {
+        DbfsFileSystem fs = m_path.getFileSystem();
+        DbfsPath path = new DbfsPath(fs, file.path);
 
-    @Override
-    public NodeView<DatabricksConnectorNodeModel> createNodeView(final int viewIndex,
-            final DatabricksConnectorNodeModel nodeModel) {
-        return null;
-    }
+        fs.addToAttributeCache(path, DbfsFileSystemProvider.createBaseFileAttrs(file, path));
 
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new DatabricksConnectorNodeDialog();
+        return path;
     }
 
 }

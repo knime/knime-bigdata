@@ -51,7 +51,7 @@ package org.knime.bigdata.dbfs.filehandling.node;
 import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
@@ -60,11 +60,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
- * Settings for the {@link DatabricksConnectorNodeModel} node.
+ * Settings for the {@link DbfsConnectorNodeModel} node.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksConnectorSettings {
+public class DbfsConnectorNodeSettings {
 
     /**
      * Settings key for the authentication sub-settings. Must be public for dialog.
@@ -92,10 +92,10 @@ public class DatabricksConnectorSettings {
     /**
      * Creates new instance.
      */
-    public DatabricksConnectorSettings() {
+    public DbfsConnectorNodeSettings() {
         m_host = new SettingsModelString(KEY_HOST, "");
         m_port = new SettingsModelIntegerBounded(KEY_PORT, 443, 0, 65535);
-        m_workingDirectory = new SettingsModelString(KEY_WORKING_DIRECTORY, DatabricksFileSystem.PATH_SEPARATOR);
+        m_workingDirectory = new SettingsModelString(KEY_WORKING_DIRECTORY, DbfsFileSystem.PATH_SEPARATOR);
         m_connectionTimeout =
             new SettingsModelIntegerBounded(KEY_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
         m_readTimeout = new SettingsModelIntegerBounded(KEY_READ_TIMEOUT, DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
@@ -223,7 +223,7 @@ public class DatabricksConnectorSettings {
 
         m_authSettings.validateSettings(settings.getNodeSettings(KEY_AUTH));
 
-        DatabricksConnectorSettings temp = new DatabricksConnectorSettings();
+        DbfsConnectorNodeSettings temp = new DbfsConnectorNodeSettings();
         temp.loadSettingsForModel(settings);
         temp.validate();
     }
@@ -244,7 +244,7 @@ public class DatabricksConnectorSettings {
                 "Please provide a valid port to connect to the REST interface of your Databricks deployment.");
         }
 
-        if (!m_workingDirectory.getStringValue().startsWith(DatabricksFileSystem.PATH_SEPARATOR)) {
+        if (!m_workingDirectory.getStringValue().startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
             throw new InvalidSettingsException("Working directory must be an absolute path.");
         }
 
@@ -291,11 +291,11 @@ public class DatabricksConnectorSettings {
     /**
      * @return a (deep) clone of this node settings object.
      */
-    public DatabricksConnectorSettings createClone() {
+    public DbfsConnectorNodeSettings createClone() {
         final NodeSettings tempSettings = new NodeSettings("ignored");
         saveSettingsForModel(tempSettings);
 
-        final DatabricksConnectorSettings toReturn = new DatabricksConnectorSettings();
+        final DbfsConnectorNodeSettings toReturn = new DbfsConnectorNodeSettings();
         try {
             toReturn.loadSettingsForModel(tempSettings);
         } catch (InvalidSettingsException ex) { // NOSONAR can never happen

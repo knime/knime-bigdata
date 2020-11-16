@@ -46,33 +46,43 @@
  * History
  *   2020-10-14 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandling.fs;
+package org.knime.bigdata.dbfs.filehandling.node;
 
-import java.nio.file.Path;
-
-import org.knime.filehandling.core.connections.base.BaseFileSystem;
-import org.knime.filehandling.core.connections.base.UnixStylePath;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeView;
 
 /**
- * {@link Path} implementation for the {@link DatabricksFileSystem}.
+ * Factory class for the {@link DbfsConnectorNodeModel} node.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksPath extends UnixStylePath {
+public class DbfsConnectorNodeFactory extends NodeFactory<DbfsConnectorNodeModel> {
 
-    /**
-     * Creates path from the given path string.
-     *
-     * @param fileSystem the file system.
-     * @param first The first name component.
-     * @param more More name components. the string representation of the path.
-     */
-    protected DatabricksPath(final BaseFileSystem<?> fileSystem, final String first, final String... more) {
-        super(fileSystem, first, more);
+    @Override
+    public DbfsConnectorNodeModel createNodeModel() {
+        return new DbfsConnectorNodeModel();
     }
 
     @Override
-    public DatabricksFileSystem getFileSystem() {
-        return (DatabricksFileSystem)super.getFileSystem();
+    protected int getNrNodeViews() {
+        return 0;
     }
+
+    @Override
+    public NodeView<DbfsConnectorNodeModel> createNodeView(final int viewIndex,
+            final DbfsConnectorNodeModel nodeModel) {
+        return null;
+    }
+
+    @Override
+    protected boolean hasDialog() {
+        return true;
+    }
+
+    @Override
+    protected NodeDialogPane createNodeDialogPane() {
+        return new DbfsConnectorNodeDialog();
+    }
+
 }

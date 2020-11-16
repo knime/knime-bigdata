@@ -49,53 +49,59 @@
 package org.knime.bigdata.dbfs.filehandling.testing;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Base64;
 
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystemProvider;
-import org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorSettings;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
-import org.knime.filehandling.core.connections.FSLocationSpec;
-import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
+import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
+import org.knime.bigdata.databricks.rest.dbfs.Close;
+import org.knime.bigdata.databricks.rest.dbfs.Create;
+import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.bigdata.databricks.rest.dbfs.Delete;
+import org.knime.bigdata.databricks.rest.dbfs.FileHandle;
+import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsPath;
+import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
 
 /**
- * Test initializer provider for Databricks DBFS
+ * Databricks DBFS test initializer.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFSTestInitializerProvider extends DefaultFSTestInitializerProvider {
-    private static final String KEY_HOST = "host";
+public class DbfsFSTestInitializer extends DefaultFSTestInitializer<DbfsPath, DbfsFileSystem> {
 
-    private static final String KEY_TOKEN = "token";
+    private final DBFSAPI m_client;
 
-    private static final String KEY_WORKDIR_PREFIX = "workingDirPrefix";
-
-    @SuppressWarnings("resource")
-    @Override
-    public DatabricksFSTestInitializer setup(final Map<String, String> configuration) throws IOException {
-        System.setProperty("dbfs.token", getParameter(configuration, KEY_TOKEN));
-        String workDir =
-            generateRandomizedWorkingDir(getParameter(configuration, KEY_WORKDIR_PREFIX), DatabricksFileSystem.PATH_SEPARATOR);
-
-        DatabricksConnectorSettings settings = new DatabricksConnectorSettings();
-        settings.getHostModel().setStringValue(getParameter(configuration, KEY_HOST));
-        settings.getAuthenticationSettings().setAuthType(AuthType.TOKEN);
-        settings.getAuthenticationSettings().getTokenModel().setStringValue(getParameter(configuration, KEY_TOKEN));
-        settings.getWorkingDirectoryModel().setStringValue(workDir);
-
-        DatabricksFSConnection fsConnection = new DatabricksFSConnection(settings, null);
-        return new DatabricksFSTestInitializer(fsConnection);
+    /**
+     * Creates test initializer.
+     *
+     * @param fsConnection FS connection.
+     */
+    protected DbfsFSTestInitializer(final DbfsFSConnection fsConnection) {
+        super(fsConnection);
+        m_client = getFileSystem().getClient();
     }
 
     @Override
-    public String getFSType() {
-        return DatabricksFileSystemProvider.FS_TYPE;
+    public DbfsPath createFileWithContent(final String content, final String... pathComponents) throws IOException {
+        DbfsPath path = makePath(pathComponents);
+
+        FileHandle handle = m_client.create(Create.create(path.toString(), true));
+        m_client.addBlock(AddBlock.create(handle.handle, Base64.getEncoder().encodeToString(content.getBytes())));//NOSONAR
+        m_client.close(Close.create(handle.handle));
+        return path;
     }
 
     @Override
-    public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
-        return DatabricksFileSystem.createFSLocationSpec(getParameter(configuration, KEY_HOST));
+    protected void beforeTestCaseInternal() throws IOException {
+        DbfsPath scratchDir = getTestCaseScratchDir();
+        m_client.mkdirs(Mkdir.create(scratchDir.toString()));
+    }
+
+    @Override
+    protected void afterTestCaseInternal() throws IOException {
+        DbfsPath scratchDir = getTestCaseScratchDir();
+        m_client.delete(Delete.create(scratchDir.toString(), true));
     }
 
 }

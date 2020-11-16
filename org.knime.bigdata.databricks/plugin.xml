@@ -33,7 +33,7 @@
     </node>
     <node
           category-path="/labs/file-handling-prototype"
-          factory-class="org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorNodeFactory">
+          factory-class="org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeFactory">
     </node>
   </extension>
   
@@ -186,7 +186,7 @@
    <extension
          point="org.knime.filehandling.FSTestInitializerProvider">
          <FSTestInitializerProvider
-               ProviderClass="org.knime.bigdata.dbfs.filehandling.testing.DatabricksFSTestInitializerProvider">
+               ProviderClass="org.knime.bigdata.dbfs.filehandling.testing.DbfsFSTestInitializerProvider">
          </FSTestInitializerProvider>         
    </extension>
 </plugin>

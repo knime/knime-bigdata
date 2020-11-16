@@ -330,11 +330,17 @@ public class DbfsAuthenticationDialog extends JPanel {
             throws NotConfigurableException {
         m_userPassCredentialsFlowVarChooser.loadSettingsFrom(settings, specs);
         m_tokenCredentialsFlowVarChooser.loadSettingsFrom(settings, specs);
+
         try {
             m_settings.loadSettingsForDialog(settings);
         } catch (InvalidSettingsException ex) { // NOSONAR can be ignored
             // ignore
         }
+
+        // for some reason we need to do this, otherwise DialogComponentBoolean does not properly
+        // display the enabledness of the underlying SettingsModelBoolean
+        m_userPassUseCredentials.loadSettingsFrom(settings, specs);
+        m_tokenUseCredentials.loadSettingsFrom(settings, specs);
     }
 
     /**

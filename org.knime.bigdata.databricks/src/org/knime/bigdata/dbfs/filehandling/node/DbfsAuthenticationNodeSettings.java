@@ -64,7 +64,7 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
- * Authentication settings for {@link DatabricksConnectorNodeModel}.
+ * Authentication settings for {@link DbfsConnectorNodeModel}.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */

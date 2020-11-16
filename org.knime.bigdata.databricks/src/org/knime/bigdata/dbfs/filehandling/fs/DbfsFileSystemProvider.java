@@ -81,25 +81,25 @@ import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 
 /**
- * File system provider for the {@link DatabricksFileSystem}.
+ * File system provider for the {@link DbfsFileSystem}.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFileSystemProvider extends BaseFileSystemProvider<DatabricksPath, DatabricksFileSystem> {
+public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSystem> {
     /**
      * Databricks DBFS URI scheme.
      */
     public static final String FS_TYPE = "dbfs";
 
     @Override
-    protected SeekableByteChannel newByteChannelInternal(final DatabricksPath path, final Set<? extends OpenOption> options,
+    protected SeekableByteChannel newByteChannelInternal(final DbfsPath path, final Set<? extends OpenOption> options,
             final FileAttribute<?>... attrs) throws IOException {
-        return new DatabricksSeekableByteChannel(path, options);
+        return new DbfsSeekableByteChannel(path, options);
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected void moveInternal(final DatabricksPath source, final DatabricksPath target, final CopyOption... options)
+    protected void moveInternal(final DbfsPath source, final DbfsPath target, final CopyOption... options)
             throws IOException {
         if (existsCached(target)) {
             delete(target);
@@ -110,7 +110,7 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
     }
 
     @Override
-    protected void copyInternal(final DatabricksPath source, final DatabricksPath target, final CopyOption... options)
+    protected void copyInternal(final DbfsPath source, final DbfsPath target, final CopyOption... options)
             throws IOException {
         if (Files.isDirectory(source)) {
             if (!existsCached(target)) {
@@ -126,13 +126,13 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
 
     @SuppressWarnings("resource")
     @Override
-    protected InputStream newInputStreamInternal(final DatabricksPath path, final OpenOption... options) throws IOException {
+    protected InputStream newInputStreamInternal(final DbfsPath path, final OpenOption... options) throws IOException {
         return new DBFSInputStream(path.toString(), path.getFileSystem().getClient());
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected OutputStream newOutputStreamInternal(final DatabricksPath path, final OpenOption... options) throws IOException {
+    protected OutputStream newOutputStreamInternal(final DbfsPath path, final OpenOption... options) throws IOException {
         final Set<OpenOption> opts = new HashSet<>(Arrays.asList(options));
 
         if (opts.contains(StandardOpenOption.APPEND)) {
@@ -144,20 +144,20 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
     }
 
     @Override
-    protected Iterator<DatabricksPath> createPathIterator(final DatabricksPath dir, final Filter<? super Path> filter)
+    protected Iterator<DbfsPath> createPathIterator(final DbfsPath dir, final Filter<? super Path> filter)
             throws IOException {
-        return new DatabricksPathIterator(dir, filter);
+        return new DbfsPathIterator(dir, filter);
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected void createDirectoryInternal(final DatabricksPath dir, final FileAttribute<?>... attrs) throws IOException {
+    protected void createDirectoryInternal(final DbfsPath dir, final FileAttribute<?>... attrs) throws IOException {
         dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected BaseFileAttributes fetchAttributesInternal(final DatabricksPath path, final Class<?> type) throws IOException {
+    protected BaseFileAttributes fetchAttributesInternal(final DbfsPath path, final Class<?> type) throws IOException {
         try {
             FileInfo info = path.getFileSystem().getClient().getStatus(path.toString());
             return createBaseFileAttrs(info, path);
@@ -179,19 +179,19 @@ public class DatabricksFileSystemProvider extends BaseFileSystemProvider<Databri
      * @param path The path.
      * @return The attributes.
      */
-    public static BaseFileAttributes createBaseFileAttrs(final FileInfo info, final DatabricksPath path) {
+    public static BaseFileAttributes createBaseFileAttrs(final FileInfo info, final DbfsPath path) {
         FileTime time = FileTime.fromMillis(0);
         return new BaseFileAttributes(!info.is_dir, path, time, time, time, info.file_size, false, false, null);
     }
 
     @Override
-    protected void checkAccessInternal(final DatabricksPath path, final AccessMode... modes) throws IOException {
+    protected void checkAccessInternal(final DbfsPath path, final AccessMode... modes) throws IOException {
         // nothing to do here
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected void deleteInternal(final DatabricksPath path) throws IOException {
+    protected void deleteInternal(final DbfsPath path) throws IOException {
         DBFSAPI client = path.getFileSystem().getClient();
         client.delete(Delete.create(path.toString(), false));
     }

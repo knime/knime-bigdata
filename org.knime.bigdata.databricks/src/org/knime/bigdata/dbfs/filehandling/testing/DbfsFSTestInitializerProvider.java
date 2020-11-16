@@ -44,66 +44,58 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-10-14 (Alexander Bondaletov): created
+ *   2020-11-01 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandling.fs;
+package org.knime.bigdata.dbfs.filehandling.testing;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Map;
 
-import org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorSettings;
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
-import org.knime.filehandling.core.connections.uriexport.URIExporter;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
+import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
- * Databricks DBFS implementation of the {@link FSConnection} interface.
+ * Test initializer provider for Databricks DBFS
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFSConnection implements FSConnection {
-    private static final long CACHE_TTL = 6000;
+public class DbfsFSTestInitializerProvider extends DefaultFSTestInitializerProvider {
+    private static final String KEY_HOST = "host";
 
-    private final DatabricksFileSystem m_filesystem;
+    private static final String KEY_TOKEN = "token";
 
-    /**
-     * Creates new instance.
-     *
-     * @param settings The node settins.
-     * @param credentialsProvider The credential provider.
-     *
-     * @throws IOException
-     *
-     */
-    public DatabricksFSConnection(final DatabricksConnectorSettings settings,
-        final CredentialsProvider credentialsProvider) throws IOException {
-        URI uri = null;
-        try {
-            uri = new URI(DatabricksFileSystemProvider.FS_TYPE, settings.getHost(), null, null);
-        } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid hostname: " + settings.getHost());
-        }
+    private static final String KEY_WORKDIR_PREFIX = "workingDirPrefix";
 
-        m_filesystem = new DatabricksFileSystem(uri, CACHE_TTL, settings, credentialsProvider);
+    @SuppressWarnings("resource")
+    @Override
+    public DbfsFSTestInitializer setup(final Map<String, String> configuration) throws IOException {
+        System.setProperty("dbfs.token", getParameter(configuration, KEY_TOKEN));
+        String workDir =
+            generateRandomizedWorkingDir(getParameter(configuration, KEY_WORKDIR_PREFIX), DbfsFileSystem.PATH_SEPARATOR);
+
+        DbfsConnectorNodeSettings settings = new DbfsConnectorNodeSettings();
+        settings.getHostModel().setStringValue(getParameter(configuration, KEY_HOST));
+        settings.getAuthenticationSettings().setAuthType(AuthType.TOKEN);
+        settings.getAuthenticationSettings().getTokenModel().setStringValue(getParameter(configuration, KEY_TOKEN));
+        settings.getWorkingDirectoryModel().setStringValue(workDir);
+
+        DbfsFSConnection fsConnection = new DbfsFSConnection(settings, null);
+        return new DbfsFSTestInitializer(fsConnection);
     }
 
     @Override
-    public FSFileSystem<?> getFileSystem() {
-        return m_filesystem;
+    public String getFSType() {
+        return DbfsFileSystemProvider.FS_TYPE;
     }
 
     @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
+        return DbfsFileSystem.createFSLocationSpec(getParameter(configuration, KEY_HOST));
     }
 
-    @Override
-    public URIExporter getDefaultURIExporter() {
-        return PathURIExporter.getInstance();
-    }
 }

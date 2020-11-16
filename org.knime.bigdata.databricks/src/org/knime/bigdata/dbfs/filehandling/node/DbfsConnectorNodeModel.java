@@ -51,8 +51,8 @@ package org.knime.bigdata.dbfs.filehandling.node;
 import java.io.File;
 import java.io.IOException;
 
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -72,28 +72,28 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksConnectorNodeModel extends NodeModel {
+public class DbfsConnectorNodeModel extends NodeModel {
 
     private static final String FILE_SYSTEM_NAME = "Databricks DBFS";
 
-    private final DatabricksConnectorSettings m_settings = new DatabricksConnectorSettings();
+    private final DbfsConnectorNodeSettings m_settings = new DbfsConnectorNodeSettings();
 
     private String m_fsId;
-    private DatabricksFSConnection m_fsConnection;
+    private DbfsFSConnection m_fsConnection;
 
     /**
      * Creates new instance.
      */
-    protected DatabricksConnectorNodeModel() {
+    protected DbfsConnectorNodeModel() {
         super(new PortType[] {}, new PortType[] { FileSystemPortObject.TYPE });
     }
 
     @SuppressWarnings("resource")
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_fsConnection = new DatabricksFSConnection(m_settings, getCredentialsProvider());
+        m_fsConnection = new DbfsFSConnection(m_settings, getCredentialsProvider());
 
-        ((DatabricksFileSystem)m_fsConnection.getFileSystem()).getClient().list(DatabricksFileSystem.PATH_SEPARATOR);
+        ((DbfsFileSystem)m_fsConnection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
 
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
 
@@ -108,14 +108,14 @@ public class DatabricksConnectorNodeModel extends NodeModel {
 
     private FileSystemPortObjectSpec createSpec() {
         return new FileSystemPortObjectSpec(FILE_SYSTEM_NAME, m_fsId,
-            DatabricksFileSystem.createFSLocationSpec(m_settings.getHost()));
+            DbfsFileSystem.createFSLocationSpec(m_settings.getHost()));
     }
 
 
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)
             throws IOException, CanceledExecutionException {
-        setWarningMessage("Databricks DBFS connection no longer available. Please re-execute the node.");
+        setWarningMessage("Connection no longer available. Please re-execute the node.");
     }
 
     @Override

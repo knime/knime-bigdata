@@ -44,64 +44,66 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-11-01 (Alexander Bondaletov): created
+ *   2020-10-14 (Alexander Bondaletov): created
  */
-package org.knime.bigdata.dbfs.filehandling.testing;
+package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
-import java.util.Base64;
+import java.net.URI;
+import java.net.URISyntaxException;
 
-import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
-import org.knime.bigdata.databricks.rest.dbfs.Close;
-import org.knime.bigdata.databricks.rest.dbfs.Create;
-import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.databricks.rest.dbfs.Delete;
-import org.knime.bigdata.databricks.rest.dbfs.FileHandle;
-import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFileSystem;
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksPath;
-import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
+import org.knime.core.node.util.FileSystemBrowser;
+import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.FSFileSystem;
+import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
- * Databricks DBFS test initializer.
+ * Databricks DBFS implementation of the {@link FSConnection} interface.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFSTestInitializer extends DefaultFSTestInitializer<DatabricksPath, DatabricksFileSystem> {
+public class DbfsFSConnection implements FSConnection {
+    private static final long CACHE_TTL = 6000;
 
-    private final DBFSAPI m_client;
+    private final DbfsFileSystem m_filesystem;
 
     /**
-     * Creates test initializer.
+     * Creates new instance.
      *
-     * @param fsConnection FS connection.
+     * @param settings The node settins.
+     * @param credentialsProvider The credential provider.
+     *
+     * @throws IOException
+     *
      */
-    protected DatabricksFSTestInitializer(final DatabricksFSConnection fsConnection) {
-        super(fsConnection);
-        m_client = getFileSystem().getClient();
+    public DbfsFSConnection(final DbfsConnectorNodeSettings settings,
+        final CredentialsProvider credentialsProvider) throws IOException {
+        URI uri = null;
+        try {
+            uri = new URI(DbfsFileSystemProvider.FS_TYPE, settings.getHost(), null, null);
+        } catch (URISyntaxException ex) {// NOSONAR
+            throw new IOException("Invalid hostname: " + settings.getHost());
+        }
+
+        m_filesystem = new DbfsFileSystem(uri, CACHE_TTL, settings, credentialsProvider);
     }
 
     @Override
-    public DatabricksPath createFileWithContent(final String content, final String... pathComponents) throws IOException {
-        DatabricksPath path = makePath(pathComponents);
-
-        FileHandle handle = m_client.create(Create.create(path.toString(), true));
-        m_client.addBlock(AddBlock.create(handle.handle, Base64.getEncoder().encodeToString(content.getBytes())));//NOSONAR
-        m_client.close(Close.create(handle.handle));
-        return path;
+    public FSFileSystem<?> getFileSystem() {
+        return m_filesystem;
     }
 
     @Override
-    protected void beforeTestCaseInternal() throws IOException {
-        DatabricksPath scratchDir = getTestCaseScratchDir();
-        m_client.mkdirs(Mkdir.create(scratchDir.toString()));
+    public FileSystemBrowser getFileSystemBrowser() {
+        return new NioFileSystemBrowser(this);
     }
 
     @Override
-    protected void afterTestCaseInternal() throws IOException {
-        DatabricksPath scratchDir = getTestCaseScratchDir();
-        m_client.delete(Delete.create(scratchDir.toString(), true));
+    public URIExporter getDefaultURIExporter() {
+        return PathURIExporter.getInstance();
     }
-
 }

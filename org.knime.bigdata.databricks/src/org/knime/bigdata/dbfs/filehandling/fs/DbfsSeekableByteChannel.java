@@ -44,54 +44,47 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-10-31 (Alexander Bondaletov): created
+ *   2020-11-02 (Alexander Bondaletov): created
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.nio.file.StandardCopyOption;
+import java.util.Set;
 
-import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
-import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
-import org.knime.filehandling.core.connections.base.BasePathIterator;
+import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
 
 /**
- * Class to iterate through the files and folders in the path
+ * Databricks DBFS implementation of the {@link TempFileSeekableByteChannel}.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksPathIterator extends BasePathIterator<DatabricksPath> {
+public class DbfsSeekableByteChannel extends TempFileSeekableByteChannel<DbfsPath> {
 
     /**
-     * Creates iterator instance.
+     * Creates new instance.
      *
-     * @param path path to iterate.
-     * @param filter {@link Filter} instance.
+     * @param file The file for the channel.
+     * @param options Open options.
      * @throws IOException
      */
-    public DatabricksPathIterator(final DatabricksPath path, final Filter<? super Path> filter) throws IOException {
-        super(path, filter);
-
-        @SuppressWarnings("resource")
-        FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
-        FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
-
-        Iterator<DatabricksPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
-
-        setFirstPage(iterator);//NOSONAR
+    protected DbfsSeekableByteChannel(final DbfsPath file, final Set<? extends OpenOption> options)
+        throws IOException {
+        super(file, options);
     }
 
-    @SuppressWarnings("resource")
-    private DatabricksPath toPath(final FileInfo file) {
-        DatabricksFileSystem fs = m_path.getFileSystem();
-        DatabricksPath path = new DatabricksPath(fs, file.path);
+    @Override
+    public void copyFromRemote(final DbfsPath remoteFile, final Path tempFile) throws IOException {
+        Files.copy(remoteFile, tempFile);
+    }
 
-        fs.addToAttributeCache(path, DatabricksFileSystemProvider.createBaseFileAttrs(file, path));
+    @Override
+    public void copyToRemote(final DbfsPath remoteFile, final Path tempFile) throws IOException {
+        Files.copy(tempFile, remoteFile, StandardCopyOption.REPLACE_EXISTING);
 
-        return path;
     }
 
 }

@@ -44,47 +44,35 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2020-11-02 (Alexander Bondaletov): created
+ *   2020-10-14 (Alexander Bondaletov): created
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.Set;
 
-import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
+import org.knime.filehandling.core.connections.base.BaseFileSystem;
+import org.knime.filehandling.core.connections.base.UnixStylePath;
 
 /**
- * Databricks DBFS implementation of the {@link TempFileSeekableByteChannel}.
+ * {@link Path} implementation for the {@link DbfsFileSystem}.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksSeekableByteChannel extends TempFileSeekableByteChannel<DatabricksPath> {
+public class DbfsPath extends UnixStylePath {
 
     /**
-     * Creates new instance.
+     * Creates path from the given path string.
      *
-     * @param file The file for the channel.
-     * @param options Open options.
-     * @throws IOException
+     * @param fileSystem the file system.
+     * @param first The first name component.
+     * @param more More name components. the string representation of the path.
      */
-    protected DatabricksSeekableByteChannel(final DatabricksPath file, final Set<? extends OpenOption> options)
-        throws IOException {
-        super(file, options);
+    protected DbfsPath(final BaseFileSystem<?> fileSystem, final String first, final String... more) {
+        super(fileSystem, first, more);
     }
 
     @Override
-    public void copyFromRemote(final DatabricksPath remoteFile, final Path tempFile) throws IOException {
-        Files.copy(remoteFile, tempFile);
+    public DbfsFileSystem getFileSystem() {
+        return (DbfsFileSystem)super.getFileSystem();
     }
-
-    @Override
-    public void copyToRemote(final DatabricksPath remoteFile, final Path tempFile) throws IOException {
-        Files.copy(tempFile, remoteFile, StandardCopyOption.REPLACE_EXISTING);
-
-    }
-
 }

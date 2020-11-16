@@ -60,7 +60,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.knime.bigdata.dbfs.filehandling.fs.DatabricksFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -73,21 +73,21 @@ import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 
 /**
- * Node dialog for the {@link DatabricksConnectorNodeModel} node.
+ * Node dialog for the {@link DbfsConnectorNodeModel} node.
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksConnectorNodeDialog extends NodeDialogPane {
+public class DbfsConnectorNodeDialog extends NodeDialogPane {
 
-    private final DatabricksConnectorSettings m_settings;
+    private final DbfsConnectorNodeSettings m_settings;
     private final WorkingDirectoryChooser m_workingDirChooser;
     private DbfsAuthenticationDialog m_authPanel;
 
     /**
      * Creates new instance
      */
-    public DatabricksConnectorNodeDialog() {
-        m_settings = new DatabricksConnectorSettings();
+    public DbfsConnectorNodeDialog() {
+        m_settings = new DbfsConnectorNodeSettings();
 
         m_authPanel = new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this);
         m_workingDirChooser = new WorkingDirectoryChooser("dbfs.workingDir", this::createFSConnection);
@@ -167,14 +167,14 @@ public class DatabricksConnectorNodeDialog extends NodeDialogPane {
     }
 
     private FSConnection createFSConnection() throws IOException {
-        return new DatabricksFSConnection(m_settings, getCredentialsProvider());
+        return new DbfsFSConnection(m_settings, getCredentialsProvider());
     }
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         preSettingsSave();
         validateBeforeSaving();
-        m_authPanel.saveSettingsTo(settings.addNodeSettings(DatabricksConnectorSettings.KEY_AUTH));
+        m_authPanel.saveSettingsTo(settings.addNodeSettings(DbfsConnectorNodeSettings.KEY_AUTH));
         m_settings.saveSettingsForDialog(settings);
     }
 
@@ -191,7 +191,7 @@ public class DatabricksConnectorNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
         try {
-            m_authPanel.loadSettingsFrom(settings.getNodeSettings(DatabricksConnectorSettings.KEY_AUTH), specs);
+            m_authPanel.loadSettingsFrom(settings.getNodeSettings(DbfsConnectorNodeSettings.KEY_AUTH), specs);
             m_settings.loadSettingsForDialog(settings);
         } catch (InvalidSettingsException ex) { // NOSONAR can be ignored
         }

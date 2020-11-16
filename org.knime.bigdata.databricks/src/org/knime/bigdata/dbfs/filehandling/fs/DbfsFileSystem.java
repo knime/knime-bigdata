@@ -57,7 +57,7 @@ import java.util.Collections;
 
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.dbfs.filehandling.node.DatabricksConnectorSettings;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
 import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings;
 import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.core.node.workflow.CredentialsProvider;
@@ -73,7 +73,7 @@ import org.knime.filehandling.core.connections.base.BaseFileSystem;
  *
  * @author Alexander Bondaletov
  */
-public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
+public class DbfsFileSystem extends BaseFileSystem<DbfsPath> {
 
     /**
      * Character to use as path separator
@@ -89,10 +89,10 @@ public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
      * @param credentialsProvider The {@link CredentialsProvider}.
      * @throws IOException
      */
-    protected DatabricksFileSystem(final URI uri, final long cacheTTL, final DatabricksConnectorSettings settings,
+    protected DbfsFileSystem(final URI uri, final long cacheTTL, final DbfsConnectorNodeSettings settings,
         final CredentialsProvider credentialsProvider)
             throws IOException {
-        super(new DatabricksFileSystemProvider(), uri, cacheTTL, settings.getWorkingDirectory(),
+        super(new DbfsFileSystemProvider(), uri, cacheTTL, settings.getWorkingDirectory(),
             createFSLocationSpec(uri.getHost()));
 
         m_client = createClient(settings, credentialsProvider);
@@ -104,10 +104,10 @@ public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
      */
     public static DefaultFSLocationSpec createFSLocationSpec(final String deployment) {
         return new DefaultFSLocationSpec(FSCategory.CONNECTED,
-            String.format("%s:%s", DatabricksFileSystemProvider.FS_TYPE, deployment));
+            String.format("%s:%s", DbfsFileSystemProvider.FS_TYPE, deployment));
     }
 
-    private static DBFSAPI createClient(final DatabricksConnectorSettings settings,
+    private static DBFSAPI createClient(final DbfsConnectorNodeSettings settings,
         final CredentialsProvider credentialsProvider) throws UnsupportedEncodingException {
 
         final DbfsAuthenticationNodeSettings authSettings = settings.getAuthenticationSettings();
@@ -163,8 +163,8 @@ public class DatabricksFileSystem extends BaseFileSystem<DatabricksPath> {
     }
 
     @Override
-    public DatabricksPath getPath(final String first, final String... more) {
-        return new DatabricksPath(this, first, more);
+    public DbfsPath getPath(final String first, final String... more) {
+        return new DbfsPath(this, first, more);
     }
 
     @Override
