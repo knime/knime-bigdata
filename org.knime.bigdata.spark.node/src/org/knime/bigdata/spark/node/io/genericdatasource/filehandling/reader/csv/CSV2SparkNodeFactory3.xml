@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
 	type="Other" icon="icon.png">	
-	<name>JSON to CSV (Labs)</name>
+	<name>CSV to Spark (Labs)</name>
 	<shortDescription>Creates a Spark DataFrame/RDD from given CSV file.</shortDescription>
 	<fullDescription>
 		<intro>
