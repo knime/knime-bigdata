@@ -141,7 +141,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * @return Client implementation for given proxy interface
      */
     private static <T> T create(final String deploymentUrl, final Class<T> proxy,
-        final Duration receiveTimeout, final Duration connectionTimeout) {
+        final Duration receiveTimeout, final Duration connectionTimeout, final boolean doRequestLogging) {
 
         final String baseUrl = deploymentUrl + "/api/";
 
@@ -162,7 +162,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         if (proxyAuthPolicy != null) {
             config.getHttpConduit().setProxyAuthorization(proxyAuthPolicy);
         }
-        if (LOG.isDebugEnabled()) {
+
+        if (doRequestLogging) {
             config.getInInterceptors().add(new LoggingInInterceptor());
             config.getOutInterceptors().add(new LoggingOutInterceptor());
         }
@@ -183,7 +184,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String token,
         final Duration receiveTimeout, final Duration connectionTimeout) {
 
-        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout);
+        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, false);
         WebClient.client(proxyImpl).header("Authorization", "Bearer " + token);
         return wrap(proxyImpl);
     }
@@ -204,7 +205,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String user, final String password,
         final Duration receiveTimeout, final Duration connectionTimeout) throws UnsupportedEncodingException {
 
-        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout);
+        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, false);
         WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
         return wrap(proxyImpl);
     }
