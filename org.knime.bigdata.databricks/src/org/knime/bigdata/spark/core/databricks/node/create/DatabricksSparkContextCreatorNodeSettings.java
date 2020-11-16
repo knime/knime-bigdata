@@ -85,6 +85,11 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
         super();
     }
 
+    @Override
+    protected AbstractDatabricksSparkContextCreatorNodeSettings createTestingInstance() {
+        return new DatabricksSparkContextCreatorNodeSettings();
+    }
+
     /**
      * @return the settings model for the authentication
      */

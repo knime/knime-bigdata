@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+    <name>Create Databricks Environment (Labs)</name>
+    
+    <shortDescription>Creates a Databricks Environment connected to an existing Databricks cluster.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a Databricks Environment connected to an existsing <a href="https://www.databricks.com/">Databricks</a> cluster.
+            See <a href="https://docs.databricks.com/getting-started/index.html">AWS</a> or <a href="https://docs.azuredatabricks.net/getting-started/index.html">Azure</a> Databricks documentation for more information.
+            
+            <p>
+            <i>Note:</i>
+            To avoid an accidental cluster startup, this node creates a dummy DB and Spark port
+            if loaded in executed state from a stored workflow.
+            Reset and execute the node to start the cluster and create a Spark execution context.
+            </p>
+
+            <p>
+            <i>Cluster access control</i>: KNIME uploads additional libraries to the cluster. This requires
+            <a href="https://docs.databricks.com/security/access-control/cluster-acl.html#cluster-level-permissions">manage cluster-level permissions</a>
+            if your cluster is secured with access control.
+            See the <a href="https://docs.databricks.com/security/access-control/cluster-acl.html#configure-cluster-level-permissions">Databricks documentation</a>
+            on how to set up the permission.
+            </p>
+        </intro>
+        <tab name="Settings">
+            <option name="Spark version">
+                The Spark version used by Databricks. If this is set incorrectly, creating the Spark context will fail.
+            </option>
+            <option name="Databricks URL">
+                Full URL of the Databricks deployment, e.g.
+            	<i>https://&lt;account&gt;.cloud.databricks.com</i> on AWS or
+            	<i>https://&lt;region&gt;.azuredatabricks.net</i> on Azure.
+            </option>
+            <option name="Cluster ID">
+            	Unique identifier of a cluster in the databricks workspace. See
+            	<a href="https://docs.databricks.com/workspace/workspace-details.html#cluster-url">AWS</a>
+            	or
+            	<a href="https://docs.azuredatabricks.net/workspace/workspace-details.html#cluster-url">Azure</a>
+            	Databricks documentation for more informations.
+            </option>
+            <option name="Workspace ID">
+            	Workspace ID for Databricks on Azure, leave blank on AWS. See
+            	<a href="https://docs.azuredatabricks.net/workspace/workspace-details.html#workspace-instance-and-id">Azure</a>
+            	Databricks documentation for more informations.
+            </option>
+            <option name="Authentication">
+                Workflow Token, username and password or credentials can be used for authentication. Databricks strongly recommends tokens.
+	            See authentication in Databricks
+	            <a href="https://docs.databricks.com/api/latest/authentication.html">AWS</a> or
+	            <a href="https://docs.azuredatabricks.net/api/latest/authentication.html">Azure</a>
+	            documentation for more informations about personal access token.
+	            <ul>
+	            	<li>
+	            		<b>Username/password:</b> Authenticate with the provided <i>Username</i> and <i>Password</i>. If entered here,
+	            		the password is persistently stored (in encrypted form) in the settings of this node. Alternatively, if <i>Use credentials</i>
+	            		is selected, the username and password of the selected credentials flow variable will be used for authentication.
+	            	</li>
+	            	<li>
+	            		<b>Token:</b> Authenticate with the provided personal access <i>token</i>. If entered here,
+	            		the token is persistently stored (in encrypted form) in the settings of this node. Alternatively, if <i>Use credentials</i>
+	            		is selected, the password of the selected credentials flow variable will be used as the token for authentication
+	            		(username of the flow variable will be ignored).
+					</li>
+	           	</ul>
+            </option>
+            <option name="Working directory">
+	            Specify the <i>working directory</i> of the resulting file system connection. The working
+		        directory must be specified as an absolute path. A working directory allows downstream nodes to access files/folders using <i>relative</i>
+		        paths, i.e. paths that do not have a leading slash. The default working directory is the root "/", under which all the
+		        document libraries are located.
+	        </option>            
+        </tab>
+        <tab name="Advanced">
+            <option name="Create Spark context and enable Spark context port">
+            	If enabled, an execution context will be started on Databricks to run KNIME Spark jobs.
+            	If disabled, the Spark context port will be disabled.
+            	This might be useful to save resources in the driver process or required if the cluster runs with 
+            	<a href="https://docs.databricks.com/administration-guide/access-control/table-acls/index.html">Table Access Control</a>.
+            </option>
+        
+            <option name="Set staging area for Spark jobs">
+                If enabled you can specify a directory in the connected Databricks file system,
+                that will be used to transfer temporary files between KNIME and the Spark context. If no directory
+                is set, then a default directory will be chosen in <i>/tmp</i>.
+            </option>
+            
+            <option name="Terminate cluster on context destroy">
+            	If selected, the cluster will be destroyed when the node will be reseted,
+            	the <i>Destroy Spark Context</i> node executed on the context, the workflow or
+        		KNIME is closed. This way, resources are released, but all data cached inside the cluster
+        		are lost, unless they have been saved to persistent storage such as DBFS.
+            </option>
+            
+            <option name="Databricks connection and receive timeout">
+            	Timeouts for the REST client in seconds. 
+            </option>
+            
+            <option name="Job status polling interval">
+            	The frequency with which KNIME polls the status of a job in seconds.
+            </option>
+        </tab>
+        <tab name="DB Port: Connection settings">
+            <option name="Database Dialect">
+                Choose the registered database dialect here.
+            </option>
+            <option name="Driver Name">
+                Choose the registered database driver here.
+            	The node includes the Apache Hive driver. Proprietary drivers are also supported,
+            	but need to be <a href="https://databricks.com/spark/odbc-driver-download">downloaded</a>
+            	and registered in the KNIME preferences under "KNIME -> Databases" with Database type Databricks.
+            	<br/>
+            	The node uses the proprietary driver as default if registered and the Apache Hive driver otherwise.
+            </option>
+        </tab>
+        <tab name="DB Port: JDBC Parameters">
+             <description>
+                This tab allows you to define JDBC driver connection parameter. The value of a parameter can be a 
+                constant, variable, credential user, credential password or KNIME URL.
+             </description>
+             <option name=""></option>
+        </tab>
+        <tab name="DB Port: Advanced">
+            <description>
+                This tab allows you to define KNIME framework properties such as connection handling,
+                advanced SQL dialect settings or logging options. The available properties depend on the selected
+                database type and driver.
+            </description>
+            <option name=""></option>
+        </tab>
+        <tab name="DB Port: Input Type Mapping">
+            <description>
+                This tab allows you to define rules to map from database types to KNIME types.
+            </description>
+            <option name="Mapping by Name">
+                Columns that match the given name (or regular expression) and database type will be mapped
+                to the specified KNIME type.
+            </option>
+            <option name="Mapping by Type">
+                Columns that match the given database type will be mapped to the specified KNIME type.
+            </option>
+        </tab>
+        <tab name="DB Port: Output Type Mapping">
+            <description>
+                This tab allows you to define rules to map from KNIME types to database types.
+            </description>
+            <option name="Mapping by Name">
+                Columns that match the given name (or regular expression) and KNIME type will be mapped
+                to the specified database type.
+            </option>
+            <option name="Mapping by Type">
+                Columns that match the given KNIME type will be mapped to the specified database type.
+            </option>
+        </tab>
+    </fullDescription>
+    <ports>
+    	<outPort index="0" name="DB Connection">
+    		JDBC connection, that can be connected to the KNIME database nodes.
+   		</outPort>
+		<outPort index="1" name="DBFS Connection">
+			DBFS connection, that can be connected to the Spark nodes to read/write files.
+		</outPort>
+        <outPort index="2" name="Spark Context">
+        	Spark context, that can be connected to all Spark nodes.
+       	</outPort>
+    </ports>
+</knimeNode>

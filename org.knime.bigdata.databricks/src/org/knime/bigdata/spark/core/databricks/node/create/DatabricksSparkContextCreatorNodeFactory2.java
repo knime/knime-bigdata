@@ -43,26 +43,43 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.spark.core.databricks;
+package org.knime.bigdata.spark.core.databricks.node.create;
 
-import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeFactory;
-import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeFactory2;
-import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
-import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.core.node.NodeDialogPane;
 
 /**
- * Node factory provider for Databricks Spark context.
+ * Databricks connector node factory.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksNodeFactoryProvider extends DefaultSparkNodeFactoryProvider {
+public class DatabricksSparkContextCreatorNodeFactory2
+    extends DefaultSparkNodeFactory<DatabricksSparkContextCreatorNodeModel2> {
 
     /**
-     * Default constructor.
+     * Constructor.
      */
-    public DatabricksNodeFactoryProvider() {
-        super(AllVersionCompatibilityChecker.INSTANCE, new DatabricksSparkContextCreatorNodeFactory(),
-            new DatabricksSparkContextCreatorNodeFactory2());
+    public DatabricksSparkContextCreatorNodeFactory2() {
+        super("");
     }
 
+    @Override
+    public DatabricksSparkContextCreatorNodeModel2 createNodeModel() {
+        return new DatabricksSparkContextCreatorNodeModel2();
+    }
+
+    @Override
+    protected boolean hasDialog() {
+        return true;
+    }
+
+    @Override
+    protected NodeDialogPane createNodeDialogPane() {
+        return new DatabricksSparkContextCreatorNodeDialog2();
+    }
+
+    @Override
+    protected int getNrNodeViews() {
+        return 0;
+    }
 }

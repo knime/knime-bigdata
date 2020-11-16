@@ -109,7 +109,8 @@ import org.knime.datatype.mapping.DataTypeMappingDirection;
  */
 public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends DBSessionSettings {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(DatabricksSparkContextCreatorNodeSettings.class);
+    private static final NodeLogger LOGGER =
+        NodeLogger.getLogger(AbstractDatabricksSparkContextCreatorNodeSettings.class);
 
     private static final DBType DB_TYPE = Databricks.DB_TYPE;
 
@@ -468,10 +469,15 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
         m_externalToKnimeMappingConfig.validateSettings(settings);
         m_knimeToExternalMappingConfig.validateSettings(settings);
 
-        final DatabricksSparkContextCreatorNodeSettings tmpSettings = new DatabricksSparkContextCreatorNodeSettings();
+        final AbstractDatabricksSparkContextCreatorNodeSettings tmpSettings = createTestingInstance();
         tmpSettings.loadSettingsFrom(settings);
         tmpSettings.validateDeeper();
     }
+
+    /**
+     * @return a instance that can be used to load and validate settings
+     */
+    protected abstract AbstractDatabricksSparkContextCreatorNodeSettings createTestingInstance();
 
     /**
      * Validate current settings values.
