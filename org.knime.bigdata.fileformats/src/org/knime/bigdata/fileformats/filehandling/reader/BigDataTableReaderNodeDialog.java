@@ -52,6 +52,7 @@ import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
@@ -69,6 +70,8 @@ import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.Settin
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.config.DefaultMultiTableReadConfig;
+import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.config.MultiTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.config.ReaderSpecificConfig;
 import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
@@ -85,9 +88,11 @@ import org.knime.filehandling.core.util.SettingsUtils;
 public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C>>
     extends AbstractTableReaderNodeDialog<C, KnimeType> {
 
-    private final StorableMultiTableReadConfig<C> m_config;
+    private final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> m_config;
 
     private final DialogComponentReaderFileChooser m_fileChooser;
+
+    private final JCheckBox m_failOnDifferingSpecs = new JCheckBox("Fail on differing specs");
 
     /**
      * Constructor.
@@ -98,7 +103,7 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
      * @param productionPathProvider {@link ProductionPathProvider} providing {@link ProductionPath ProductionPaths}
      */
     public BigDataTableReaderNodeDialog(final SettingsModelReaderFileChooser pathSettings,
-        final StorableMultiTableReadConfig<C> config, final MultiTableReadFactory<C, KnimeType> readFactory,
+        final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> config, final MultiTableReadFactory<C, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> productionPathProvider) {
         super(readFactory, productionPathProvider, true);
         m_config = config;
@@ -116,6 +121,7 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         final JPanel panel = new JPanel(new GridBagLayout());
         GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
         panel.add(m_fileChooser.getComponentPanel(), gbc.build());
+        panel.add(m_failOnDifferingSpecs, gbc.incY().build());
         panel.add(createTransformationTab(), gbc.fillBoth().setWeightY(1.0).incY().build());
         return panel;
     }
@@ -133,16 +139,18 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         super.saveSettingsTo(settings);
-        m_config.setTableSpecConfig(getTableSpecConfig());
-        m_config.saveInDialog(settings);
         m_fileChooser.saveSettingsTo(SettingsUtils.getOrAdd(settings, SettingsUtils.CFG_SETTINGS_TAB));
+        m_config.setTableSpecConfig(getTableSpecConfig());
+        m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
+        m_config.saveInDialog(settings);
     }
 
     @Override
     protected void loadSettings(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
-        m_config.loadInDialog(settings, specs);
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
+        m_config.loadInDialog(settings, specs);
+        m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
     }
 
 }

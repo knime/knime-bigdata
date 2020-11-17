@@ -81,6 +81,10 @@
 					(Re)execute the connector node to enable browsing.</li>
 				</ul>
 			</option>
+			
+			<option name="Fail on differing specs">
+				If checked, the node will fail if not all files contain the same columns i.e. column names.
+			</option>
      	   
      	   
      	   <option name="Transformations">

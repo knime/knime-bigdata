@@ -85,8 +85,9 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     @Override
     protected final SettingsModelReaderFileChooser
         createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
-        return new SettingsModelReaderFileChooser("file_selection", nodeCreationConfig.getPortConfig().get(),
-            FS_CONNECT_GRP_ID, FilterMode.FILE, m_fileExtensions);
+        return new SettingsModelReaderFileChooser("file_selection",
+            nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
+            FilterMode.FILE, m_fileExtensions);
     }
 
     @Override
