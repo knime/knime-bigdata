@@ -50,7 +50,9 @@ package org.knime.bigdata.fileformats.filehandling.reader.type;
 
 import static org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeTester.createTypeTester;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -71,20 +73,25 @@ import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeTester;
  */
 public final class KnimeTypeHierarchies {
 
+    private static final EnumSet<PrimitiveKnimeType> STRING_HIERARCHY_TYPES =
+        EnumSet.complementOf(EnumSet.of(PrimitiveKnimeType.BINARY));
+
     private static TreeTypeHierarchy<KnimeType, KnimeType>
         fromPrimitiveHierarchy(final TreeTypeHierarchy<KnimeType, KnimeType> hierarchy) {
         final TreeNode<KnimeType, KnimeType> root = hierarchy.getRootNode();
         // the root must accept all values
         final KnimeType rootType = root.getType();
         final TreeTypeHierarchyBuilder<KnimeType, KnimeType> builder =
-            TreeTypeHierarchy.builder(createTypeTester(rootType, t -> true));
-        final KnimeTypeBuilderFiller primitiveBuilderFiller =
-            new KnimeTypeBuilderFiller(builder, UnaryOperator.identity(), KnimeTypeHierarchies::createPrimitivePredicate);
+            TreeTypeHierarchy.builder(createTypeTester(rootType,
+                t -> t.isList() ? hierarchy.supports(t.asListType().getElementType()) : hierarchy.supports(t)));
+        final KnimeTypeBuilderFiller primitiveBuilderFiller = new KnimeTypeBuilderFiller(builder,
+            UnaryOperator.identity(), KnimeTypeHierarchies::createPrimitivePredicate);
         primitiveBuilderFiller.addTypes(root, rootType);
 
         // the list subhierarchy is a mirror of the primitive hierarchy just for lists
         final ListKnimeType rootListType = new ListKnimeType(root.getType());
-        builder.addType(rootType, createTypeTester(rootListType, KnimeType::isList));
+        builder.addType(rootType,
+            createTypeTester(rootListType, t -> t.isList() && hierarchy.supports(t.asListType().getElementType())));
         final KnimeTypeBuilderFiller listBuilderFiller =
             new KnimeTypeBuilderFiller(builder, ListKnimeType::new, KnimeTypeHierarchies::createListPredicate);
         listBuilderFiller.addTypes(root, rootListType);
@@ -95,8 +102,8 @@ public final class KnimeTypeHierarchies {
         return node::test;
     }
 
-    private static Predicate<KnimeType> createListPredicate(final TypeTester<KnimeType, KnimeType> node) {
-        return t -> t.isList() && node.test(t.asListType().getElementType());
+    private static Predicate<KnimeType> createListPredicate(final TypeTester<KnimeType, KnimeType> primitiveTester) {
+        return t -> t.isList() && primitiveTester.test(t.asListType().getElementType());
     }
 
     /**
@@ -105,6 +112,7 @@ public final class KnimeTypeHierarchies {
      * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
      */
     private static final class KnimeTypeBuilderFiller {
+
         private final TreeTypeHierarchyBuilder<KnimeType, KnimeType> m_builder;
 
         private final Function<KnimeType, KnimeType> m_typeFactory;
@@ -132,13 +140,50 @@ public final class KnimeTypeHierarchies {
     /**
      * The {@link TypeHierarchy} of primitive types.
      */
-    public static final TreeTypeHierarchy<KnimeType, KnimeType> PRIMITIVE_TYPE_HIERARCHY = createTypeHierarchy();
+    private static final TreeTypeHierarchy<KnimeType, KnimeType> PRIMITIVE_TYPE_HIERARCHY =
+        createPrimitiveTypeHierarchy();
 
     /**
-     * The {@link TypeHierarchy} that includes flat list types in addition to the types contained in {@link #PRIMITIVE_TYPE_HIERARCHY}.
+     * The {@link TypeHierarchy} that includes flat list types in addition to the types contained in
+     * {@link #PRIMITIVE_TYPE_HIERARCHY}.
      */
-    public static final TreeTypeHierarchy<KnimeType, KnimeType> TYPE_HIERARCHY =
+    private static final TreeTypeHierarchy<KnimeType, KnimeType> COMMON_TYPE_HIERARCHY =
         fromPrimitiveHierarchy(PRIMITIVE_TYPE_HIERARCHY);
+
+    private static final TreeTypeHierarchy<KnimeType, KnimeType> BINARY_STUMP =
+        TreeTypeHierarchy.builder(createKnimeTypeTester(PrimitiveKnimeType.BINARY)).build();
+
+    private static final TreeTypeHierarchy<KnimeType, KnimeType> BINARY_LIST_STUMP = createBinaryListStump();
+
+    /**
+     * The hierarchy of {@link KnimeType KnimeTypes}. It actually consists of three disjunct sub-hierarchies. The first
+     * covers most types and looks like this:
+     *
+     * <pre>
+     *      String
+     *   ______|___________________________________
+     *   |       |         |         |            |
+     * Double  Boolean    Time  Date & Time   List(String)
+     *   |                           |      ______|_____________________________________
+     * Long                        Date     |            |             |               |
+     *   |                             List(Double) List(Boolean)  List(Time)  List(Date & Time)
+     * Integer                              |                                          |
+     *                                  List(Long)                                List(Date)
+     *                                      |
+     *                                List(Integer)
+     * </pre>
+     *
+     * The other two sub-hierarchies are much simpler and consist only of the {@link PrimitiveKnimeType#BINARY} and its
+     * corresponding {@link ListKnimeType}, respectively.
+     */
+    public static final ForestTypeHierarchy<KnimeType, KnimeType> TYPE_HIERARCHY =
+        new ForestTypeHierarchy<>(Arrays.asList(COMMON_TYPE_HIERARCHY, BINARY_STUMP, BINARY_LIST_STUMP));
+
+    private static TreeTypeHierarchy<KnimeType, KnimeType> createBinaryListStump() {
+        final KnimeType binaryList = new ListKnimeType(PrimitiveKnimeType.BINARY);
+        return TreeTypeHierarchy.builder(createTypeTester(binaryList, createListPredicate(BINARY_STUMP.getRootNode())))
+            .build();
+    }
 
     /**
      * The default type map for the types in {@link #TYPE_HIERARCHY}.
@@ -150,12 +195,12 @@ public final class KnimeTypeHierarchies {
         // static utility class
     }
 
-
-
     private static Map<KnimeType, DataType>
-        createDefaultTypeMap(final TreeTypeHierarchy<KnimeType, KnimeType> typeHierarchy) {
+        createDefaultTypeMap(final ForestTypeHierarchy<KnimeType, KnimeType> typeHierarchy) {
         final Map<KnimeType, DataType> tm = new HashMap<>();
-        fillDefaultTypeMap(tm, typeHierarchy.getRootNode());
+        for (TreeTypeHierarchy<KnimeType, KnimeType> tree : typeHierarchy) {
+            fillDefaultTypeMap(tm, tree.getRootNode());
+        }
         return tm;
     }
 
@@ -168,16 +213,19 @@ public final class KnimeTypeHierarchies {
         }
     }
 
-    private static TreeTypeHierarchy<KnimeType, KnimeType> createTypeHierarchy() {
+    private static TreeTypeHierarchy<KnimeType, KnimeType> createPrimitiveTypeHierarchy() {
         final TreeTypeHierarchyBuilder<KnimeType, KnimeType> builder =
-            TreeTypeHierarchy.builder(createTypeTester(PrimitiveKnimeType.STRING, t -> true));
+            TreeTypeHierarchy.builder(createTypeTester(PrimitiveKnimeType.STRING, STRING_HIERARCHY_TYPES::contains));
         return builder.addType(PrimitiveKnimeType.STRING, createKnimeTypeTester(PrimitiveKnimeType.BOOLEAN))//
+            .addType(PrimitiveKnimeType.STRING, createKnimeTypeTester(PrimitiveKnimeType.TIME))//
+            .addType(PrimitiveKnimeType.STRING,
+                createKnimeTypeTester(PrimitiveKnimeType.DATE_TIME, PrimitiveKnimeType.DATE))//
+            .addType(PrimitiveKnimeType.DATE_TIME, createKnimeTypeTester(PrimitiveKnimeType.DATE))//
             .addType(PrimitiveKnimeType.STRING,
                 createKnimeTypeTester(PrimitiveKnimeType.DOUBLE, PrimitiveKnimeType.INTEGER, PrimitiveKnimeType.LONG))//
-            .addType(PrimitiveKnimeType.DOUBLE,
+            .addType(PrimitiveKnimeType.DOUBLE, //
                 createKnimeTypeTester(PrimitiveKnimeType.LONG, PrimitiveKnimeType.INTEGER))//
             .addType(PrimitiveKnimeType.LONG, createKnimeTypeTester(PrimitiveKnimeType.INTEGER)).build();
-
     }
 
     private static TypeTester<KnimeType, KnimeType> createKnimeTypeTester(final PrimitiveKnimeType type,
@@ -188,14 +236,7 @@ public final class KnimeTypeHierarchies {
 
     private static Predicate<PrimitiveKnimeType> isOneOf(final PrimitiveKnimeType type,
         final PrimitiveKnimeType... alternativeTypes) {
-        Predicate<PrimitiveKnimeType> typePredicate = is(type);
-        for (PrimitiveKnimeType alternativeType : alternativeTypes) {
-            typePredicate = typePredicate.or(is(alternativeType));
-        }
-        return typePredicate;
-    }
-
-    private static Predicate<PrimitiveKnimeType> is(final PrimitiveKnimeType type) {
-        return t -> t == type;
+        final EnumSet<PrimitiveKnimeType> compatibleTypes = EnumSet.of(type, alternativeTypes);
+        return compatibleTypes::contains;
     }
 }

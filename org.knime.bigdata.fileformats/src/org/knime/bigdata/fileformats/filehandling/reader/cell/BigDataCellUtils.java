@@ -46,7 +46,7 @@
  * History
  *   Nov 9, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.fileformats.filehandling.reader;
+package org.knime.bigdata.fileformats.filehandling.reader.cell;
 
 /**
  * Contains utility methods for {@link BigDataCell}.

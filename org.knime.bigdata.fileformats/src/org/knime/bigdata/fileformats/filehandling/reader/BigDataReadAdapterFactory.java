@@ -50,6 +50,7 @@ package org.knime.bigdata.fileformats.filehandling.reader;
 
 import java.util.Map;
 
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
 import org.knime.core.data.DataType;

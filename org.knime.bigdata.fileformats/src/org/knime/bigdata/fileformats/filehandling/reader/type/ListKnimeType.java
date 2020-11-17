@@ -48,7 +48,11 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.type;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.knime.core.data.DataType;
@@ -66,7 +70,7 @@ public final class ListKnimeType implements KnimeType {
 
     private final DataType m_defaultDataType;
 
-    private final Class<?> m_javaClass;
+    private final Set<Class<?>> m_supportedJavaClasses;
 
     /**
      * Constructor.
@@ -76,7 +80,13 @@ public final class ListKnimeType implements KnimeType {
     public ListKnimeType(final KnimeType elementType) {
         m_elementType = elementType;
         m_defaultDataType = ListCell.getCollectionType(elementType.getDefaultDataType());
-        m_javaClass = Array.newInstance(elementType.getJavaClass(), 0).getClass();
+        m_supportedJavaClasses =
+            Collections.unmodifiableSet(elementType.getSupportedJavaClasses().stream().map(ListKnimeType::getArrayClass)//
+                .collect(toSet()));
+    }
+
+    private static Class<? extends Object> getArrayClass(final Class<?> elementType) {
+        return Array.newInstance(elementType, 0).getClass();
     }
 
     @Override
@@ -90,8 +100,8 @@ public final class ListKnimeType implements KnimeType {
     }
 
     @Override
-    public Class<?> getJavaClass() {
-        return m_javaClass;
+    public Set<Class<?>> getSupportedJavaClasses() {
+        return m_supportedJavaClasses;
     }
 
     @Override
@@ -127,17 +137,17 @@ public final class ListKnimeType implements KnimeType {
 
     private boolean equals(final ListKnimeType other) {
         return m_elementType.equals(other.m_elementType)//
-            && m_javaClass == other.m_javaClass//
+            && m_supportedJavaClasses.equals(other.m_supportedJavaClasses)//
             && m_defaultDataType.equals(other.m_defaultDataType);
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()//
-                .append(m_elementType)//
-                .append(m_javaClass)//
-                .append(m_defaultDataType)//
-                .toHashCode();
+            .append(m_elementType)//
+            .append(m_supportedJavaClasses)//
+            .append(m_defaultDataType)//
+            .toHashCode();
     }
 
 }

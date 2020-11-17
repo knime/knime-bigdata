@@ -50,6 +50,8 @@ package org.knime.bigdata.fileformats.filehandling.reader;
 
 import java.util.function.Supplier;
 
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.type.ForestTypeHierarchy;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType;
 import org.knime.core.data.convert.map.BooleanCellValueProducer;
@@ -62,7 +64,6 @@ import org.knime.core.data.convert.map.MappingException;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.data.convert.map.PrimitiveCellValueProducer;
 import org.knime.core.data.convert.map.ProducerRegistry;
-import org.knime.core.data.convert.map.TypedCellValueProducerFactory;
 import org.knime.filehandling.core.node.table.reader.ReadAdapter.ReadAdapterParams;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TreeTypeHierarchy;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TreeTypeHierarchy.TreeNode;
@@ -80,78 +81,102 @@ final class BigDataCellValueProducerFactories {
     }
 
     static ProducerRegistry<KnimeType, BigDataReadAdapter>
-        createRegistry(final TreeTypeHierarchy<KnimeType, KnimeType> typeHierarchy) {
+        createRegistry(final ForestTypeHierarchy<KnimeType, KnimeType> typeHierarchy) {
         final ProducerRegistry<KnimeType, BigDataReadAdapter> registry =
             MappingFramework.forSourceType(BigDataReadAdapter.class);
-        fillRegistryRecursively(registry, typeHierarchy.getRootNode());
+        for (TreeTypeHierarchy<KnimeType, KnimeType> tree : typeHierarchy) {
+            fillRegistryRecursively(registry, tree.getRootNode());
+        }
         return registry;
     }
 
     private static void fillRegistryRecursively(final ProducerRegistry<KnimeType, BigDataReadAdapter> registry,
         final TreeNode<KnimeType, KnimeType> node) {
-        registry.register(createCellValueProducerFactory(node.getType()));
+        addProducerFactories(registry, node.getType());
         for (TreeNode<KnimeType, KnimeType> child : node.getChildren()) {
             fillRegistryRecursively(registry, child);
         }
     }
 
-    private static CellValueProducerFactory<BigDataReadAdapter, KnimeType, ?, ?>
-        createCellValueProducerFactory(final KnimeType knimeType) {
+    private static void addProducerFactories(final ProducerRegistry<KnimeType, BigDataReadAdapter> registry,
+        final KnimeType knimeType) {
         if (knimeType.isList()) {
-            return createListCellValueProducerFactory(knimeType);
+            createListCellValueProducerFactory(registry, knimeType);
         } else {
-            return createPrimitiveCellValueProducerFactory(knimeType.asPrimitiveType());
+            addPrimitiveProducerFactories(registry, knimeType.asPrimitiveType());
         }
     }
 
-    private static CellValueProducerFactory<BigDataReadAdapter, KnimeType, ?, ?>
-        createListCellValueProducerFactory(final KnimeType knimeType) {
-        return new ArrayBigDataCellValueProducerFactory<>(knimeType.getJavaClass(), knimeType);
+    private static void createListCellValueProducerFactory(
+        final ProducerRegistry<KnimeType, BigDataReadAdapter> registry, final KnimeType knimeType) {
+        for (Class<?> supportedJavaClass : knimeType.getSupportedJavaClasses()) {
+            registry.register(new ArrayBigDataCellValueProducerFactory<>(supportedJavaClass, knimeType));
+        }
     }
 
-    private static CellValueProducerFactory<BigDataReadAdapter, KnimeType, ?, ?>
-        createPrimitiveCellValueProducerFactory(final PrimitiveKnimeType primitiveKnimeType) {
+    private static void addPrimitiveProducerFactories(final ProducerRegistry<KnimeType, BigDataReadAdapter> registry, //NOSONAR
+        final PrimitiveKnimeType primitiveKnimeType) {
         switch (primitiveKnimeType) {
             case BOOLEAN:
-                return new BigDataProducerFactory<>(primitiveKnimeType, BooleanBigDataCellValueProducer.class,
-                    BooleanBigDataCellValueProducer::new);
+                registry.register(new BigDataProducerFactory<>(primitiveKnimeType, Boolean.class,
+                    BooleanBigDataCellValueProducer::new));
+                break;
             case DOUBLE:
-                return new BigDataProducerFactory<>(primitiveKnimeType, DoubleBigDataCellValueProducer.class,
-                    DoubleBigDataCellValueProducer::new);
+                registry.register(new BigDataProducerFactory<>(primitiveKnimeType, Double.class,
+                    DoubleBigDataCellValueProducer::new));
+                break;
             case INTEGER:
-                return new BigDataProducerFactory<>(primitiveKnimeType, IntBigDataCellValueProducer.class,
-                    IntBigDataCellValueProducer::new);
+                registry.register(
+                    new BigDataProducerFactory<>(primitiveKnimeType, Integer.class, IntBigDataCellValueProducer::new));
+                break;
             case LONG:
-                return new BigDataProducerFactory<>(primitiveKnimeType, LongBigDataCellValueProducer.class,
-                    LongBigDataCellValueProducer::new);
+                registry.register(
+                    new BigDataProducerFactory<>(primitiveKnimeType, Long.class, LongBigDataCellValueProducer::new));
+                break;
             case STRING:
-                return new BigDataProducerFactory<>(primitiveKnimeType, StringBigDataCellValueProducer.class,
-                    StringBigDataCellValueProducer::new);
+                registry.register(new BigDataProducerFactory<>(primitiveKnimeType, String.class,
+                    StringBigDataCellValueProducer::new));
+                break;
+            case BINARY:
+            case DATE:
+            case TIME:
+            case DATE_TIME:
+                for (final Class<?> supportedClass : primitiveKnimeType.getSupportedJavaClasses()) {
+                    registry.register(createObjProducerFactory(primitiveKnimeType, supportedClass));
+                }
+                break;
+
             default:
                 throw new IllegalArgumentException("Unsupported primitive type encountered: " + primitiveKnimeType);
         }
     }
 
+    private static <J> BigDataProducerFactory<J, BigDataObjCellValueProducer<J>>
+        createObjProducerFactory(final PrimitiveKnimeType primitiveKnimeType, final Class<J> objClass) {
+        return new BigDataProducerFactory<>(primitiveKnimeType, objClass,
+            () -> new BigDataObjCellValueProducer<>(objClass));
+    }
+
     private static class BigDataProducerFactory<J, P extends CellValueProducer<BigDataReadAdapter, J, ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig>>>
         implements
-        TypedCellValueProducerFactory<BigDataReadAdapter, KnimeType, J, ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig>, P> {
+        CellValueProducerFactory<BigDataReadAdapter, KnimeType, J, ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig>> {
 
         private final KnimeType m_sourceType;
 
-        private final Class<P> m_producerType;
+        private final Class<?> m_destinationType;
 
         private final Supplier<P> m_producerSupplier;
 
-        BigDataProducerFactory(final KnimeType sourceType, final Class<P> producerType,
+        BigDataProducerFactory(final KnimeType sourceType, final Class<?> destinationType,
             final Supplier<P> producerSupplier) {
             m_sourceType = sourceType;
-            m_producerType = producerType;
             m_producerSupplier = producerSupplier;
+            m_destinationType = destinationType;
         }
 
         @Override
         public Class<?> getDestinationType() {
-            return m_sourceType.getJavaClass();
+            return m_destinationType;
         }
 
         @Override
@@ -161,12 +186,7 @@ final class BigDataCellValueProducerFactories {
 
         @Override
         public String getIdentifier() {
-            return m_sourceType + "->" + m_sourceType.getJavaClass().getName();
-        }
-
-        @Override
-        public Class<P> getProducerType() {
-            return m_producerType;
+            return m_sourceType + "->" + m_destinationType;
         }
 
         @Override
@@ -249,6 +269,24 @@ final class BigDataCellValueProducerFactories {
 
     }
 
+    private static class BigDataObjCellValueProducer<T> implements
+        CellValueProducer<BigDataReadAdapter, T, ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig>> {
+
+        private final Class<T> m_objClass;
+
+        BigDataObjCellValueProducer(final Class<T> objClass) {
+            m_objClass = objClass;
+        }
+
+        @Override
+        public T produceCellValue(final BigDataReadAdapter source,
+            final ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig> params) throws MappingException {
+            final BigDataCell cell = source.get(params);
+            return (cell == null || cell.isNull()) ? null : cell.getObj(m_objClass);
+        }
+
+    }
+
     private static final class ArrayBigDataCellValueProducerFactory<A> implements
         CellValueProducerFactory<BigDataReadAdapter, KnimeType, A, ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig>> {
 
@@ -273,7 +311,7 @@ final class BigDataCellValueProducerFactories {
 
         @Override
         public String getIdentifier() {
-            return m_knimeType + "->" + m_knimeType.getJavaClass().getSimpleName();
+            return m_knimeType + "->" + m_arrayClass.getSimpleName();
         }
 
         @Override
@@ -283,7 +321,7 @@ final class BigDataCellValueProducerFactories {
         }
 
         private A produceCellValue(final BigDataReadAdapter source,
-            final ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig> params) throws MappingException {
+            final ReadAdapterParams<BigDataReadAdapter, BigDataReaderConfig> params) {
             final BigDataCell cell = source.get(params);
             return (cell == null || cell.isNull()) ? null : cell.getObj(m_arrayClass);
         }

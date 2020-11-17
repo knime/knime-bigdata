@@ -48,6 +48,8 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.type;
 
+import java.util.Set;
+
 import org.knime.core.data.DataType;
 
 /**
@@ -72,8 +74,8 @@ public interface KnimeType {
     ListKnimeType asListType();
 
     /**
-     * Convenience method for accessing this instance as a {@link PrimitiveKnimeType} provided it is one.
-     * Should only be called if {@link #isList()} returned {@code false}.
+     * Convenience method for accessing this instance as a {@link PrimitiveKnimeType} provided it is one. Should only be
+     * called if {@link #isList()} returned {@code false}.
      *
      * @return this instance as a {@link PrimitiveKnimeType} provided it is one
      */
@@ -87,11 +89,10 @@ public interface KnimeType {
     DataType getDefaultDataType();
 
     /**
-     * Returns the {@link Class} this type corresponds to.</br>
-     * In the case of primitives, this will return the wrapper class i.e. for int it returns the Integer class.
+     * Provides the {@link Set} of {@link Class classes} this KnimeType can be converted to.
      *
-     * @return the {@link Class} corresponding to this type
+     * @return the java classes this type can be converted to
      */
-    Class<?> getJavaClass();
+    Set<Class<?>> getSupportedJavaClasses();
 
 }

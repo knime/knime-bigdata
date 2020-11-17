@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader;
 
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
 import org.knime.core.node.context.NodeCreationConfiguration;
@@ -82,13 +83,14 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     }
 
     @Override
-    protected SettingsModelReaderFileChooser createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
-        return new SettingsModelReaderFileChooser("path", nodeCreationConfig.getPortConfig().get(), FS_CONNECT_GRP_ID,
-            FilterMode.FILE, m_fileExtensions);
+    protected final SettingsModelReaderFileChooser
+        createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
+        return new SettingsModelReaderFileChooser("file_selection", nodeCreationConfig.getPortConfig().get(),
+            FS_CONNECT_GRP_ID, FilterMode.FILE, m_fileExtensions);
     }
 
     @Override
-    protected AbstractTableReaderNodeDialog<BigDataReaderConfig, KnimeType> createNodeDialogPane(
+    protected final AbstractTableReaderNodeDialog<BigDataReaderConfig, KnimeType> createNodeDialogPane(
         final NodeCreationConfiguration creationConfig,
         final MultiTableReadFactory<BigDataReaderConfig, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> defaultProductionPathFn) {
@@ -97,24 +99,24 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     }
 
     @Override
-    protected DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>>
+    protected final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>>
         createConfig() {
         final DefaultTableReadConfig<BigDataReaderConfig> tc = new DefaultTableReadConfig<>(new BigDataReaderConfig());
         return new DefaultMultiTableReadConfig<>(tc, BigDataTableReadConfigSerializer.INSTANCE);
     }
 
     @Override
-    protected ReadAdapterFactory<KnimeType, BigDataCell> getReadAdapterFactory() {
+    protected final ReadAdapterFactory<KnimeType, BigDataCell> getReadAdapterFactory() {
         return BigDataReadAdapterFactory.INSTANCE;
     }
 
     @Override
-    protected String extractRowKey(final BigDataCell value) {
+    protected final String extractRowKey(final BigDataCell value) {
         return value.getString();
     }
 
     @Override
-    protected TypeHierarchy<KnimeType, KnimeType> getTypeHierarchy() {
+    protected final TypeHierarchy<KnimeType, KnimeType> getTypeHierarchy() {
         return KnimeTypeHierarchies.TYPE_HIERARCHY;
     }
 

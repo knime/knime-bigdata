@@ -48,12 +48,26 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.type;
 
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.knime.core.data.DataType;
+import org.knime.core.data.blob.BinaryObjectDataCell;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.time.localdate.LocalDateCellFactory;
+import org.knime.core.data.time.localtime.LocalTimeCellFactory;
+import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
 
 /**
  * Enum of primitive types supported in KNIME.
@@ -64,34 +78,56 @@ public enum PrimitiveKnimeType implements KnimeType {
         /**
          * String type.
          */
-        STRING(String.class, StringCell.TYPE, "String"),
+        STRING("String", StringCell.TYPE, asSet(String.class)),
         /**
          * Boolean type.
          */
-        BOOLEAN(Boolean.class, BooleanCell.TYPE, "Boolean"),
+        BOOLEAN("Boolean", BooleanCell.TYPE, asSet(Boolean.class)),
         /**
          * Integer type.
          */
-        INTEGER(Integer.class, IntCell.TYPE, "Integer"),
+        INTEGER("Integer", IntCell.TYPE, asSet(Integer.class)),
         /**
          * Long type.
          */
-        LONG(Long.class, LongCell.TYPE, "Long"),
+        LONG("Long", LongCell.TYPE, asSet(Long.class)),
         /**
          * Double type.
          */
-        DOUBLE(Double.class, DoubleCell.TYPE, "Double");
+        DOUBLE("Double", DoubleCell.TYPE, asSet(Double.class)),
+        /**
+         * Binary type.
+         */
+        BINARY("Binary", BinaryObjectDataCell.TYPE, asSet(InputStream.class)),
+        /**
+         * Local date type.
+         */
+        DATE("Date", LocalDateCellFactory.TYPE, asSet(LocalDate.class)),
+        /**
+         * Local time type.
+         */
+        TIME("Time", LocalTimeCellFactory.TYPE, asSet(LocalTime.class)),
+        /**
+         * Local date&time type
+         */
+        DATE_TIME("Date & Time", ZonedDateTimeCellFactory.TYPE,
+            asSet(ZonedDateTime.class, LocalDateTime.class, LocalDate.class));
 
     private final DataType m_defaultDataType;
 
-    private final Class<?> m_javaClass;
+    private final Set<Class<?>> m_supportedJavaClasses;
 
     private final String m_toString;
 
-    private PrimitiveKnimeType(final Class<?> javaClass, final DataType defaultDataType, final String toString) {
+    private PrimitiveKnimeType(final String toString, final DataType defaultDataType,
+        final Set<Class<?>> supportedJavaClasses) {
         m_defaultDataType = defaultDataType;
-        m_javaClass = javaClass;
         m_toString = toString;
+        m_supportedJavaClasses = supportedJavaClasses;
+    }
+
+    private static Set<Class<?>> asSet(final Class<?>... classes) {
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(classes)));
     }
 
     @Override
@@ -102,11 +138,6 @@ public enum PrimitiveKnimeType implements KnimeType {
     @Override
     public ListKnimeType asListType() {
         throw new IllegalStateException("Tried to access a primitive type as list type.");
-    }
-
-    @Override
-    public Class<?> getJavaClass() {
-        return m_javaClass;
     }
 
     @Override
@@ -122,6 +153,11 @@ public enum PrimitiveKnimeType implements KnimeType {
     @Override
     public PrimitiveKnimeType asPrimitiveType() {
         return this;
+    }
+
+    @Override
+    public Set<Class<?>> getSupportedJavaClasses() {
+        return m_supportedJavaClasses;
     }
 
 }

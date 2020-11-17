@@ -46,9 +46,13 @@
  * History
  *   Nov 9, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.fileformats.filehandling.reader;
+package org.knime.bigdata.fileformats.filehandling.reader.cell;
 
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
+import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType;
 import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 
 /**
  * Represents a cell in a {@link RandomAccessible} which reads from a big data file format.</br>
@@ -62,20 +66,27 @@ public interface BigDataCell {
     /**
      * Indicates whether the underlying value is {@code null}.</br>
      * If this method returns {@code true}, none of the getters must be called.
-     * 
+     *
      * @return {@code true} if the underlying value is {@code null}
      */
     boolean isNull();
 
     /**
      * Returns a String representing the underlying value. All cell implementations must implement this getter.
-     * 
+     *
      * @return the underlying value as String
      */
     String getString();
 
     /**
-     * Returns the underlying value as instance of {@link Class expectedClass}.
+     * Returns the underlying value as instance of {@link Class expectedClass}.</br>
+     * Which types have to be supported depends on which {@link KnimeType KnimeTypes} this BigDataCell is compatible
+     * with.</br>
+     * Example: Let's assume that this cell is compatible to {@link PrimitiveKnimeType#INTEGER}, then it needs to
+     * support all {@link KnimeType#getSupportedJavaClasses()} as well as all supported Java classes of all super types
+     * according to the used {@link TypeHierarchy}. In case we use {@link KnimeTypeHierarchies#TYPE_HIERARCHY} the super
+     * types would be {@link PrimitiveKnimeType#LONG}, {@link PrimitiveKnimeType#DOUBLE} and
+     * {@link PrimitiveKnimeType#STRING}.
      *
      * @param <T> the expected type of the return value
      * @param expectedClass the expected class of the underlying value

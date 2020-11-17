@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader;
 
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.filehandling.core.node.table.reader.ReadAdapter;
 
