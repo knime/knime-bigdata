@@ -126,7 +126,7 @@ public class KnoxHDFSConnectionNodeModel extends NodeModel {
         try {
             final KnoxHDFSConnectionInformation connectionInformation =
                 m_settings.createConnectionInformation(getCredentialsProvider());
-            final URI resolve = connectionInformation.toURI();
+            final URI resolve = connectionInformation.toURI().resolve("/");
             final RemoteFile<KnoxHDFSConnection> remoteFile =
                 RemoteFileFactory.createRemoteFile(resolve, connectionInformation, connectionMonitor);
             // validate:
@@ -134,7 +134,7 @@ public class KnoxHDFSConnectionNodeModel extends NodeModel {
         } catch (InvalidSettingsException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new InvalidSettingsException(ex.getMessage());
+            throw new InvalidSettingsException(ex.getMessage(), ex);
         } finally {
             connectionMonitor.closeAll();
         }
