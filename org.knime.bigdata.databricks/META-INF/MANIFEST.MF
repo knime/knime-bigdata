@@ -6,6 +6,7 @@ Bundle-Version: 4.3.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.databricks.DatabricksPlugin
 Export-Package: org.knime.bigdata.database.databricks.testing,
+  org.knime.bigdata.dbfs.filehandling.testing,
   org.knime.bigdata.dbfs.testing,
   org.knime.bigdata.spark.core.databricks.jobapi
 Require-Bundle: org.knime.base;bundle-version="[4.0.0,5.0.0)",

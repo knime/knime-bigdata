@@ -47,9 +47,11 @@ package org.knime.bigdata.spark.core.databricks.node.create;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
+import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
@@ -65,6 +67,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.workflow.FlowVariable;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
@@ -250,4 +253,56 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
         return new DbfsFSConnection(settings, credentialsProvider);
     }
 
+    /**
+     * Create settings model from testing flow variables.
+     *
+     * @param flowVariables variables to use
+     * @return settings model
+     * @throws InvalidSettingsException
+     */
+    public static DatabricksSparkContextCreatorNodeSettings2
+        fromFlowVariables(final Map<String, FlowVariable> flowVariables) throws InvalidSettingsException {
+
+        final DatabricksSparkContextCreatorNodeSettings2 settings = new DatabricksSparkContextCreatorNodeSettings2();
+        settings.m_sparkVersion
+            .setStringValue(TestflowVariable.getString(TestflowVariable.SPARK_VERSION, flowVariables));
+        settings.m_url.setStringValue(TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_URL, flowVariables));
+        settings.m_clusterId
+            .setStringValue(TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_CLUSTER_ID, flowVariables));
+        settings.m_workspaceId
+            .setStringValue(TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_WORKSPACE_ID, flowVariables));
+
+        if (flowVariables.containsKey(TestflowVariable.SPARK_DATABRICKS_TOKEN.getName())) {
+            final String token = TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_TOKEN, flowVariables);
+            settings.m_authSettings.setAuthType(AuthType.TOKEN);
+            settings.m_authSettings.getTokenModel().setStringValue(token);
+        } else {
+            final String user = TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_USERNAME, flowVariables);
+            final String pass = TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_PASSWORD, flowVariables);
+            settings.m_authSettings.setAuthType(AuthType.USER_PWD);
+            settings.m_authSettings.getUserModel().setStringValue(user);
+            settings.m_authSettings.getPasswordModel().setStringValue(pass);
+        }
+
+        settings.m_workingDirectory.setStringValue("/");
+
+        settings.m_setStagingAreaFolder.setBooleanValue(
+            TestflowVariable.isTrue(TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, flowVariables));
+        if (settings.isStagingAreaFolderSet()) {
+            settings.m_stagingAreaFolder.setStringValue(
+                TestflowVariable.getString(TestflowVariable.SPARK_DATABRICKS_STAGINGAREAFOLDER, flowVariables));
+        }
+
+        settings.m_terminateClusterOnDestroy.setBooleanValue(false); // keep context cluster running
+
+        settings.m_connectionTimeout
+            .setIntValue(TestflowVariable.getInt(TestflowVariable.SPARK_DATABRICKS_CONNECTIONTIMEOUT, flowVariables));
+        settings.m_receiveTimeout
+            .setIntValue(TestflowVariable.getInt(TestflowVariable.SPARK_DATABRICKS_RECEIVETIMEOUT, flowVariables));
+        settings.m_jobCheckFrequency.setIntValue(1); // one second
+
+        settings.validateDeeper();
+
+        return settings;
+    }
 }
