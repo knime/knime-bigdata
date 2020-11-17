@@ -133,12 +133,16 @@ public class RemoteFSControllerNIO implements RemoteFSController {
             "Unable to setup staging area, please specify an existing directory in the Advanced tab.");
     }
 
+    @SuppressWarnings("resource")
     @Override
     public void createStagingArea() throws KNIMESparkException {
         try {
             final String stagingDirPrefix = "knime-spark-staging-";
             m_stagingArea = FSFiles.createTempDirectory(m_stagingAreaParent, stagingDirPrefix, "");
-            Files.setPosixFilePermissions(m_stagingArea, STAGING_AREA_PERMISSIONS);
+            
+            if (m_fsConnection.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+                Files.setPosixFilePermissions(m_stagingArea, STAGING_AREA_PERMISSIONS);
+            }
             final URI uri = m_fsConnection.getDefaultURIExporter().toUri(m_stagingArea);
             m_stagingAreaString = URIUtil.toUnencodedString(uri);
             m_stagingAreaIsPath = uri.getScheme() == null;

@@ -57,14 +57,8 @@ public class LivySparkContextCreatorNodeModel2 extends AbstractLivySparkContextC
         }
 
         final FileSystemPortObjectSpec spec = (FileSystemPortObjectSpec)inSpecs[0];
-
-        if (!m_settings.isStagingAreaFolderSet()) {
-            throw new InvalidSettingsException(
-                String.format("When connecting to %s a staging directory must be specified (see Advanced tab).",
-                    spec.getFileSystemType()));
-        }
-
         m_settings.validateDeeper();
+
         configureSparkContext(m_sparkContextId, spec.getFileSystemId(), m_settings, getCredentialsProvider());
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_sparkContextId)};
     }
