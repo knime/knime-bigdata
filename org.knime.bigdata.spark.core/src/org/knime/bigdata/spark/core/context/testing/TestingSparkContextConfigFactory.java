@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.context.SparkContextProviderRegistry;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -36,7 +37,10 @@ import org.knime.core.node.workflow.FlowVariable;
  * @author Bjoern Lohrmann, KNIME GmbH
  * @noreference This is testing code and its API is subject to change without notice.
  */
-public class TestingSparkContextConfigFactory {
+public final class TestingSparkContextConfigFactory {
+
+    private TestingSparkContextConfigFactory() {
+    }
 
     /**
      * Creates a {@link SparkContextConfig} from the given map of flow variables.
@@ -45,21 +49,35 @@ public class TestingSparkContextConfigFactory {
      * @return a {@link SparkContextConfig}.
      * @throws InvalidSettingsException
      */
-    public synchronized static SparkContextConfig create(final Map<String, FlowVariable> flowVars)
+    public static SparkContextIDScheme createContextIDScheme(final Map<String, FlowVariable> flowVars)
         throws InvalidSettingsException {
 
         if (!flowVars.containsKey(TestflowVariable.SPARK_CONTEXTIDSCHEME.getName())) {
-            throw new IllegalArgumentException("No Spark context provider settings found in flow variables");
+            throw new InvalidSettingsException("No Spark context provider settings found in flow variables");
         }
 
         final String idSchemeString = flowVars.get(TestflowVariable.SPARK_CONTEXTIDSCHEME.getName()).getStringValue();
-        final SparkContextIDScheme idScheme = SparkContextIDScheme.fromString(idSchemeString);
+        return SparkContextIDScheme.fromString(idSchemeString);
+    }
 
-        final SparkContextProvider<?> provider = SparkContextProviderRegistry.getSparkContextProvider(idScheme);
+    /**
+     * Creates a {@link SparkContextConfig} from the given map of flow variables.
+     *
+     * @param sparkScheme spark context scheme
+     * @param flowVars A map of flow variables that provide the Spark context settings.
+     * @param fsPortObjectSpec spec of the file system port
+     * @return a {@link SparkContextConfig}.
+     * @throws InvalidSettingsException
+     */
+    public static synchronized SparkContextConfig create(final SparkContextIDScheme sparkScheme,
+        final Map<String, FlowVariable> flowVars, final PortObjectSpec fsPortObjectSpec)
+        throws InvalidSettingsException {
+
+        final SparkContextProvider<?> provider = SparkContextProviderRegistry.getSparkContextProvider(sparkScheme);
         if (provider == null) {
-            throw new IllegalArgumentException("No Spark context provider found for the scheme " + idSchemeString);
+            throw new IllegalArgumentException("No Spark context provider found for the scheme " + sparkScheme);
         }
 
-        return provider.createTestingSparkContextConfig(flowVars);
+        return provider.createTestingSparkContextConfig(flowVars, fsPortObjectSpec);
     }
 }

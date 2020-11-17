@@ -22,6 +22,7 @@ import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
 import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -105,7 +106,8 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
      * {@inheritDoc}
      */
     @Override
-    public LocalSparkContextConfig createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables) {
+    public LocalSparkContextConfig createTestingSparkContextConfig(final Map<String, FlowVariable> flowVariables,
+        final PortObjectSpec fsPortObjectSpec) {
 
         final String contextName = TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
         final SparkContextID contextID = LocalSparkContextSettings.createSparkContextID(contextName);

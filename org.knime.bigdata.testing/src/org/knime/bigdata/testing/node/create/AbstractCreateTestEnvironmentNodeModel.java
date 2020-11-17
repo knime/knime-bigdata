@@ -88,10 +88,10 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
             throw new InvalidSettingsException("Failed to read flowvariables.csv: " + e.getMessage(), e);
         }
 
-        final SparkContextConfig sparkConfig = TestingSparkContextConfigFactory.create(flowVars);
-        final SparkContextIDScheme sparkScheme = sparkConfig.getSparkContextID().getScheme();
+        final SparkContextIDScheme sparkScheme = TestingSparkContextConfigFactory.createContextIDScheme(flowVars);
         final PortObjectSpec dbPortSpec = getDatabasePortUtil().configure(sparkScheme, flowVars);
         final PortObjectSpec fsPortSpec = getFileSystemPortUtil().configure(sparkScheme, flowVars);
+        final SparkContextConfig sparkConfig = TestingSparkContextConfigFactory.create(sparkScheme, flowVars, fsPortSpec);
         configureSparkContext(sparkConfig);
         final SparkContextPortObjectSpec sparkPortSpec = new SparkContextPortObjectSpec(sparkConfig.getSparkContextID());
 

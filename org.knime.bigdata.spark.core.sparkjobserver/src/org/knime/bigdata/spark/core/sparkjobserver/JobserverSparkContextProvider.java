@@ -20,6 +20,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.context.JobserverSparkContext
 import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -111,7 +112,8 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
      * {@inheritDoc}
      */
     @Override
-    public JobServerSparkContextConfig createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables) {
+    public JobServerSparkContextConfig createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables,
+        final PortObjectSpec fsPortObjectSpec) {
 
         final String jobServerUrl = TestflowVariable.getString(TestflowVariable.SPARK_SJS_URL, flowVariables);
         final boolean authentication =

@@ -51,6 +51,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -58,12 +59,16 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContext;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
+import org.knime.bigdata.spark.core.databricks.node.create.AbstractDatabricksSparkContextCreatorNodeSettings;
 import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings;
+import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
 /**
  * Spark context provider that provides Databricks connectivity.
@@ -158,14 +163,26 @@ public class DatabricksSparkContextProvider implements SparkContextProvider<Data
     }
 
     @Override
-    public DatabricksSparkContextConfig createTestingSparkContextConfig(final Map<String, FlowVariable> flowVariables)
+    public DatabricksSparkContextConfig createTestingSparkContextConfig(final Map<String, FlowVariable> flowVariables,
+        final PortObjectSpec fsPortObjectSpec)
         throws InvalidSettingsException {
 
         final CredentialsProvider cp = null;
-        final DatabricksSparkContextCreatorNodeSettings settings =
-            DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables);
-        final SparkContextID contextId = DatabricksSparkContextCreatorNodeSettings.createSparkContextID("testflowContext");
-        final ConnectionInformation remoteFS = settings.createDBFSConnectionInformation(cp);
-        return settings.createContextConfig(contextId, remoteFS, cp);
+        final SparkContextID contextId = AbstractDatabricksSparkContextCreatorNodeSettings.createSparkContextID("testflowContext");
+
+        if (fsPortObjectSpec instanceof ConnectionInformationPortObjectSpec) {
+            final ConnectionInformation remoteFS =
+                ((ConnectionInformationPortObjectSpec)fsPortObjectSpec).getConnectionInformation();
+            final DatabricksSparkContextCreatorNodeSettings settings =
+                DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables);
+            return settings.createContextConfig(contextId, remoteFS, cp);
+        } else if (fsPortObjectSpec instanceof FileSystemPortObjectSpec) {
+            final String fsId = ((FileSystemPortObjectSpec)fsPortObjectSpec).getFileSystemId();
+            final DatabricksSparkContextCreatorNodeSettings2 settings =
+                DatabricksSparkContextCreatorNodeSettings2.fromFlowVariables(flowVariables);
+            return settings.createContextConfig(contextId, fsId, cp);
+        } else {
+            throw new InvalidSettingsException("Unknown file system port spec.");
+        }
     }
 }

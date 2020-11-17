@@ -29,6 +29,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -93,5 +94,6 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      * @see TestflowVariable
      * @throws InvalidSettingsException on invalid settings in flow variables
      */
-    public T createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables) throws InvalidSettingsException;
+    public T createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables,
+        final PortObjectSpec fsPortObjectSpec) throws InvalidSettingsException;
 }
