@@ -47,8 +47,8 @@ package org.knime.bigdata.spark.core.databricks.context;
 
 import java.util.Map;
 
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 
@@ -58,7 +58,7 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksSparkContextConfig implements SparkContextConfig {
+public abstract class DatabricksSparkContextConfig implements SparkContextConfig {
 
     private final SparkVersion m_sparkVersion;
 
@@ -86,8 +86,6 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
 
     private final SparkContextID m_sparkContextId;
 
-    private final ConnectionInformation m_remoteFsConnectionInfo;
-
     /**
      * Constructor for token based authentication.
      *
@@ -101,12 +99,11 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
      * @param receiveTimeoutSeconds Receive timeout
      * @param jobCheckFrequencySeconds
      * @param sparkContextId
-     * @param remoteFsConnectionInfo
      */
     public DatabricksSparkContextConfig(final SparkVersion sparkVersion, final String databricksUrl,
         final String clusterId, final String authToken, final String stagingAreaFolder,
         final boolean terminateClusterOnDestroy, final int connectionTimeoutSeconds,
-        final int receiveTimeoutSeconds, final int jobCheckFrequencySeconds, final SparkContextID sparkContextId, final ConnectionInformation remoteFsConnectionInfo) {
+        final int receiveTimeoutSeconds, final int jobCheckFrequencySeconds, final SparkContextID sparkContextId) {
 
         m_sparkVersion = sparkVersion;
         m_databricksUrl = databricksUrl;
@@ -121,7 +118,6 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
         m_receiveTimeoutSeconds = receiveTimeoutSeconds;
         m_jobCheckFrequencySeconds = jobCheckFrequencySeconds;
         m_sparkContextId = sparkContextId;
-        m_remoteFsConnectionInfo = remoteFsConnectionInfo;
     }
 
     /**
@@ -138,13 +134,11 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
      * @param receiveTimeoutSeconds Receive timeout
      * @param jobCheckFrequencySeconds
      * @param sparkContextId
-     * @param remoteFsConnectionInfo
      */
     public DatabricksSparkContextConfig(final SparkVersion sparkVersion, final String databricksUrl,
         final String clusterId, final String user, final String password, final String stagingAreaFolder,
         final boolean terminateClusterOnDestroy, final int connectionTimeoutSeconds,
-        final int receiveTimeoutSeconds, final int jobCheckFrequencySeconds, final SparkContextID sparkContextId,
-        final ConnectionInformation remoteFsConnectionInfo) {
+        final int receiveTimeoutSeconds, final int jobCheckFrequencySeconds, final SparkContextID sparkContextId) {
 
         m_sparkVersion = sparkVersion;
         m_databricksUrl = databricksUrl;
@@ -159,7 +153,6 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
         m_receiveTimeoutSeconds = receiveTimeoutSeconds;
         m_jobCheckFrequencySeconds = jobCheckFrequencySeconds;
         m_sparkContextId = sparkContextId;
-        m_remoteFsConnectionInfo = remoteFsConnectionInfo;
     }
     /**
      * {@inheritDoc}
@@ -202,12 +195,10 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
     }
 
     /**
-     *
-     * @return a {@link ConnectionInformation} object to use for the staging area
+     * @return {@link RemoteFSController} instance
+     * @throws KNIMESparkException
      */
-    public ConnectionInformation getRemoteFsConnectionInfo() {
-        return m_remoteFsConnectionInfo;
-    }
+    public abstract RemoteFSController createRemoteFSController() throws KNIMESparkException;
 
     /**
      * @return the http(s) URL for Databricks
@@ -302,7 +293,6 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
         result = prime * result + m_jobCheckFrequencySeconds;
         result = prime * result + ((m_password == null) ? 0 : m_password.hashCode());
         result = prime * result + m_receiveTimeoutSeconds;
-        result = prime * result + ((m_remoteFsConnectionInfo == null) ? 0 : m_remoteFsConnectionInfo.hashCode());
         result = prime * result + ((m_sparkContextId == null) ? 0 : m_sparkContextId.hashCode());
         result = prime * result + ((m_sparkVersion == null) ? 0 : m_sparkVersion.hashCode());
         result = prime * result + ((m_stagingAreaFolder == null) ? 0 : m_stagingAreaFolder.hashCode());
@@ -362,13 +352,6 @@ public class DatabricksSparkContextConfig implements SparkContextConfig {
             return false;
         }
         if (m_receiveTimeoutSeconds != other.m_receiveTimeoutSeconds) {
-            return false;
-        }
-        if (m_remoteFsConnectionInfo == null) {
-            if (other.m_remoteFsConnectionInfo != null) {
-                return false;
-            }
-        } else if (!m_remoteFsConnectionInfo.equals(other.m_remoteFsConnectionInfo)) {
             return false;
         }
         if (m_sparkContextId == null) {

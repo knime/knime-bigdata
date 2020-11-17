@@ -143,8 +143,7 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
     }
 
     private void ensureRemoteFSConnection() throws KNIMESparkException {
-        final RemoteFSController tmpController = new RemoteFSController(getConfiguration().getRemoteFsConnectionInfo(),
-            getConfiguration().getStagingAreaFolder(), getConfiguration().getClusterId());
+        final RemoteFSController tmpController = getConfiguration().createRemoteFSController();
         tmpController.createStagingArea();
         m_remoteFSController = tmpController;
     }
