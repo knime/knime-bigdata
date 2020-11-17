@@ -58,7 +58,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.knime.bigdata.database.databricks.Databricks;
-import org.knime.bigdata.database.databricks.DatabricksDBConnectionController;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksClusterStatusProvider;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -68,8 +67,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
@@ -238,14 +235,15 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
             connectionController, m_settings.getAttributeValues());
     }
 
-    private DBConnectionController createConnectionController(final DatabricksClusterStatusProvider clusterStatus)
-        throws InvalidSettingsException {
-
-        final String username = m_settings.getUsername(getCredentialsProvider());
-        final String password = m_settings.getPassword(getCredentialsProvider());
-        return new DatabricksDBConnectionController(m_settings.getDBUrl(), clusterStatus, m_settings.getClusterId(),
-            m_settings.getWorkspaceId(), username, password);
-    }
+    /**
+     * Create the DB connection controller instance.
+     *
+     * @param clusterStatus cluster status provider
+     * @return {@link DBConnectionController} instance
+     * @throws InvalidSettingsException
+     */
+    protected abstract DBConnectionController
+        createConnectionController(final DatabricksClusterStatusProvider clusterStatus) throws InvalidSettingsException;
 
     @Override
     protected void onDisposeInternal() {
@@ -294,18 +292,4 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
             m_sparkContextId.toString().getBytes(Charset.forName("UTF-8")));
     }
 
-    @Override
-    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
-    }
-
-    @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
-    }
-
-    @Override
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
-    }
 }

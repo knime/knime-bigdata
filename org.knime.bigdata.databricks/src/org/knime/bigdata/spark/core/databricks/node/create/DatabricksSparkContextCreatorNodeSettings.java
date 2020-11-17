@@ -56,6 +56,9 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConnInfoConfig;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
@@ -72,11 +75,73 @@ import org.knime.core.node.workflow.FlowVariable;
  */
 public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabricksSparkContextCreatorNodeSettings {
 
+    final SettingsModelAuthentication m_authentication =
+        new SettingsModelAuthentication("authentication", AuthenticationType.PWD);
+
     /**
      * Constructor.
      */
     DatabricksSparkContextCreatorNodeSettings() {
         super();
+    }
+
+    /**
+     * @return the settings model for the authentication
+     */
+    protected SettingsModelAuthentication getAuthenticationModel() {
+        return m_authentication;
+    }
+
+    /**
+     * @param credentialsProvider to use
+     * @return username for connection
+     * @throws InvalidSettingsException on unknown authentication type
+     */
+    public String getUsername(final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
+        if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
+            return m_authentication.getUsername();
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.PWD) {
+            return "token";
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
+            return m_authentication.getUserName(credentialsProvider);
+        } else {
+            throw new InvalidSettingsException("Unknown authentication method.");
+        }
+    }
+
+    /**
+     * @param credentialsProvider to use
+     * @return password for connection
+     * @throws InvalidSettingsException on unknown authentication type
+     */
+    public String getPassword(final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
+        if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
+            return m_authentication.getPassword();
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.PWD) {
+            return m_authentication.getPassword();
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
+            return m_authentication.getPassword(credentialsProvider);
+        } else {
+            throw new InvalidSettingsException("Unknown authentication method.");
+        }
+    }
+
+    @Override
+    public void saveSettingsTo(final NodeSettingsWO settings) {
+        super.saveSettingsTo(settings);
+        m_authentication.saveSettingsTo(settings);
+    }
+
+    @Override
+    public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        super.validateSettings(settings);
+        m_authentication.validateSettings(settings);
+    }
+
+    @Override
+    public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        super.loadSettingsFrom(settings);
+        m_authentication.loadSettingsFrom(settings);
     }
 
     /**

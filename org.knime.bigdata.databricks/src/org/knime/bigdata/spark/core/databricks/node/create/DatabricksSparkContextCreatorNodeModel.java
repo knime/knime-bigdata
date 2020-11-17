@@ -48,21 +48,26 @@ package org.knime.bigdata.spark.core.databricks.node.create;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.bigdata.database.databricks.DatabricksDBConnectionController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.databricks.context.DatabricksClusterStatusProvider;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContext;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.inactive.InactiveBranchPortObject;
 import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.database.connection.DBConnectionController;
 import org.knime.database.port.DBSessionPortObject;
 
 /**
@@ -171,4 +176,28 @@ public class DatabricksSparkContextCreatorNodeModel extends AbstractDatabricksSp
             getCredentialsProvider());
     }
 
+    @Override
+    protected DBConnectionController createConnectionController(final DatabricksClusterStatusProvider clusterStatus)
+        throws InvalidSettingsException {
+
+        final String username = m_settings.getUsername(getCredentialsProvider());
+        final String password = m_settings.getPassword(getCredentialsProvider());
+        return new DatabricksDBConnectionController(m_settings.getDBUrl(), clusterStatus, m_settings.getClusterId(),
+            m_settings.getWorkspaceId(), username, password);
+    }
+
+    @Override
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
+        m_settings.saveSettingsTo(settings);
+    }
+
+    @Override
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.validateSettings(settings);
+    }
+
+    @Override
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.loadSettingsFrom(settings);
+    }
 }

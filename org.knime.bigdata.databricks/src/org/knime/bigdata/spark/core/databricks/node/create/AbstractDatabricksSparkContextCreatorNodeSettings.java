@@ -77,13 +77,10 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication;
-import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.database.DBType;
 import org.knime.database.dialect.DBSQLDialectFactory;
 import org.knime.database.dialect.DBSQLDialectRegistry;
@@ -135,9 +132,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
     final SettingsModelString m_clusterId = new SettingsModelString("clusterId", "");
 
     final SettingsModelString m_workspaceId = new SettingsModelString("workspaceId", "");
-
-    final SettingsModelAuthentication m_authentication =
-        new SettingsModelAuthentication("authentication", AuthenticationType.PWD);
 
     final SettingsModelBoolean m_createSparkContext = new SettingsModelBoolean("createSparkContext", true);
 
@@ -249,13 +243,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
      */
     public String getWorkspaceId() {
         return m_workspaceId.getStringValue();
-    }
-
-    /**
-     * @return the settings model for the authentication
-     */
-    protected SettingsModelAuthentication getAuthenticationModel() {
-        return m_authentication;
     }
 
     /**
@@ -434,7 +421,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
         m_url.saveSettingsTo(settings);
         m_clusterId.saveSettingsTo(settings);
         m_workspaceId.saveSettingsTo(settings);
-        m_authentication.saveSettingsTo(settings);
 
         m_createSparkContext.saveSettingsTo(settings);
         m_setStagingAreaFolder.saveSettingsTo(settings);
@@ -466,7 +452,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
         m_url.validateSettings(settings);
         m_clusterId.validateSettings(settings);
         m_workspaceId.validateSettings(settings);
-        m_authentication.validateSettings(settings);
 
         m_createSparkContext.loadSettingsFrom(settings);
         m_setStagingAreaFolder.validateSettings(settings);
@@ -554,7 +539,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
         m_url.loadSettingsFrom(settings);
         m_clusterId.loadSettingsFrom(settings);
         m_workspaceId.loadSettingsFrom(settings);
-        m_authentication.loadSettingsFrom(settings);
 
         m_createSparkContext.loadSettingsFrom(settings);
         m_setStagingAreaFolder.loadSettingsFrom(settings);
@@ -581,40 +565,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
      */
     public static SparkContextID createSparkContextID(final String uniqueId) {
         return new SparkContextID(String.format("%s://%s", SparkContextIDScheme.SPARK_DATABRICKS, uniqueId));
-    }
-
-    /**
-     * @param credentialsProvider to use
-     * @return username for connection
-     * @throws InvalidSettingsException on unknown authentication type
-     */
-    public String getUsername(final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
-        if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
-            return m_authentication.getUsername();
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.PWD) {
-            return "token";
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
-            return m_authentication.getUserName(credentialsProvider);
-        } else {
-            throw new InvalidSettingsException("Unknown authentication method.");
-        }
-    }
-
-    /**
-     * @param credentialsProvider to use
-     * @return password for connection
-     * @throws InvalidSettingsException on unknown authentication type
-     */
-    public String getPassword(final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
-        if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
-            return m_authentication.getPassword();
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.PWD) {
-            return  m_authentication.getPassword();
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
-            return m_authentication.getPassword(credentialsProvider);
-        } else {
-            throw new InvalidSettingsException("Unknown authentication method.");
-        }
     }
 
 }
