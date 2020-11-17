@@ -60,6 +60,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.knime.bigdata.databricks.node.DbfsAuthenticationDialog;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -105,13 +106,11 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
     }
 
     private JComponent createDeploymentPanel() {
-        DialogComponentString host = new DialogComponentString(m_settings.getHostModel(), "Host", true, 40);
-        DialogComponentNumber port = new DialogComponentNumber(m_settings.getPortModel(), "Port", 1);
+        DialogComponentString url = new DialogComponentString(m_settings.getUrlModel(), "Databricks URL:", true, 40);
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(host.getComponentPanel());
-        panel.add(port.getComponentPanel());
-        panel.setBorder(BorderFactory.createTitledBorder("Deployment URL"));
+        panel.add(url.getComponentPanel());
+        panel.setBorder(BorderFactory.createTitledBorder("Connection settings"));
         return panel;
     }
 
@@ -174,7 +173,7 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         preSettingsSave();
         validateBeforeSaving();
-        m_authPanel.saveSettingsTo(settings.addNodeSettings(DbfsConnectorNodeSettings.KEY_AUTH));
+        m_authPanel.saveSettingsTo(settings);
         m_settings.saveSettingsForDialog(settings);
     }
 
@@ -191,7 +190,7 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
         try {
-            m_authPanel.loadSettingsFrom(settings.getNodeSettings(DbfsConnectorNodeSettings.KEY_AUTH), specs);
+            m_authPanel.loadSettingsFrom(settings, specs);
             m_settings.loadSettingsForDialog(settings);
         } catch (InvalidSettingsException ex) { // NOSONAR can be ignored
         }

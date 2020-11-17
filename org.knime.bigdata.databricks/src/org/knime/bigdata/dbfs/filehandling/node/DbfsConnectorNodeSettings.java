@@ -48,9 +48,15 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
+import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
@@ -66,13 +72,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class DbfsConnectorNodeSettings {
 
-    /**
-     * Settings key for the authentication sub-settings. Must be public for dialog.
-     */
-    public static final String KEY_AUTH = "auth";
+    private static final String KEY_AUTH = "auth";
 
-    private static final String KEY_HOST = "host";
-    private static final String KEY_PORT = "port";
+    private static final String KEY_URL = "url";
 
     private static final String KEY_WORKING_DIRECTORY = "workingDirectory";
     private static final String KEY_CONNECTION_TIMEOUT = "connectionTimeout";
@@ -80,8 +82,7 @@ public class DbfsConnectorNodeSettings {
 
     private static final int DEFAULT_TIMEOUT = 30;
 
-    private final SettingsModelString m_host;
-    private final SettingsModelIntegerBounded m_port;
+    private final SettingsModelString m_url;
 
     private final SettingsModelString m_workingDirectory;
     private final SettingsModelIntegerBounded m_connectionTimeout;
@@ -93,13 +94,12 @@ public class DbfsConnectorNodeSettings {
      * Creates new instance.
      */
     public DbfsConnectorNodeSettings() {
-        m_host = new SettingsModelString(KEY_HOST, "");
-        m_port = new SettingsModelIntegerBounded(KEY_PORT, 443, 0, 65535);
+        m_url = new SettingsModelString(KEY_URL, "https://");
         m_workingDirectory = new SettingsModelString(KEY_WORKING_DIRECTORY, DbfsFileSystem.PATH_SEPARATOR);
         m_connectionTimeout =
             new SettingsModelIntegerBounded(KEY_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
         m_readTimeout = new SettingsModelIntegerBounded(KEY_READ_TIMEOUT, DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
-        m_authSettings = new DbfsAuthenticationNodeSettings();
+        m_authSettings = new DbfsAuthenticationNodeSettings(KEY_AUTH, AuthType.TOKEN);
     }
 
     /**
@@ -110,31 +110,28 @@ public class DbfsConnectorNodeSettings {
     }
 
     /**
-     * @return the host model
+     * @return the URL model
      */
-    public SettingsModelString getHostModel() {
-        return m_host;
+    public SettingsModelString getUrlModel() {
+        return m_url;
     }
 
     /**
-     * @return the host
+     * @return the host part of the deployment URL
      */
     public String getHost() {
-        return m_host.getStringValue();
-    }
-
-    /**
-     * @return the port model
-     */
-    public SettingsModelIntegerBounded getPortModel() {
-        return m_port;
+        try {
+            return new URI(getDeploymentUrl()).getHost();
+        } catch (final URISyntaxException e) {
+            return null;
+        }
     }
 
     /**
      * @return The deployment URL consists of host and port from the settings.
      */
     public String getDeploymentUrl() {
-        return String.format("https://%s:%d", m_host.getStringValue(), m_port.getIntValue());
+        return m_url.getStringValue();
     }
 
     /**
@@ -180,8 +177,7 @@ public class DbfsConnectorNodeSettings {
     }
 
     private void save(final NodeSettingsWO settings) {
-        m_host.saveSettingsTo(settings);
-        m_port.saveSettingsTo(settings);
+        m_url.saveSettingsTo(settings);
         m_workingDirectory.saveSettingsTo(settings);
         m_connectionTimeout.saveSettingsTo(settings);
         m_readTimeout.saveSettingsTo(settings);
@@ -204,7 +200,7 @@ public class DbfsConnectorNodeSettings {
      */
     public void saveSettingsForModel(final NodeSettingsWO settings) {
         save(settings);
-        m_authSettings.saveSettingsForModel(settings.addNodeSettings(KEY_AUTH));
+        m_authSettings.saveSettingsForModel(settings);
     }
 
     /**
@@ -215,13 +211,12 @@ public class DbfsConnectorNodeSettings {
      * @throws InvalidSettingsException
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_host.validateSettings(settings);
-        m_port.validateSettings(settings);
+        m_url.validateSettings(settings);
         m_workingDirectory.validateSettings(settings);
         m_connectionTimeout.validateSettings(settings);
         m_readTimeout.validateSettings(settings);
 
-        m_authSettings.validateSettings(settings.getNodeSettings(KEY_AUTH));
+        m_authSettings.validateSettings(settings);
 
         DbfsConnectorNodeSettings temp = new DbfsConnectorNodeSettings();
         temp.loadSettingsForModel(settings);
@@ -234,14 +229,23 @@ public class DbfsConnectorNodeSettings {
      * @throws InvalidSettingsException
      */
     public void validate() throws InvalidSettingsException {
-        if (StringUtils.isBlank(m_host.getStringValue())) {
-            throw new InvalidSettingsException("Please provide the hostname of your Databricks deployment.");
-        }
+        if (StringUtils.isBlank(getDeploymentUrl())) {
+            throw new InvalidSettingsException("The Databricks deployment URL must not be empty.");
+        } else {
+            try {
+                final URL uri = new URL(getDeploymentUrl());
 
-        int port = m_port.getIntValue();
-        if (port <= 0 || port > 65535) {
-            throw new InvalidSettingsException(
-                "Please provide a valid port to connect to the REST interface of your Databricks deployment.");
+                if (StringUtils.isBlank(uri.getProtocol()) || !uri.getProtocol().equalsIgnoreCase("https")) {
+                    throw new InvalidSettingsException(
+                        "HTTPS Protocol in Databricks deployment URL required (only https supported)");
+                } else if (StringUtils.isBlank(uri.getHost())) {
+                    throw new InvalidSettingsException("Hostname in Databricks deployment URL required.");
+                }
+
+            } catch (MalformedURLException e) {
+                throw new InvalidSettingsException(
+                    String.format("Invalid Databricks deployment URL: %s", e.getMessage()));
+            }
         }
 
         if (!m_workingDirectory.getStringValue().startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
@@ -259,8 +263,7 @@ public class DbfsConnectorNodeSettings {
      * @throws InvalidSettingsException
      */
     public void load(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_host.loadSettingsFrom(settings);
-        m_port.loadSettingsFrom(settings);
+        m_url.loadSettingsFrom(settings);
         m_workingDirectory.loadSettingsFrom(settings);
         m_connectionTimeout.loadSettingsFrom(settings);
         m_readTimeout.loadSettingsFrom(settings);
@@ -285,7 +288,7 @@ public class DbfsConnectorNodeSettings {
      */
     public void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
         load(settings);
-        m_authSettings.loadSettingsForModel(settings.getNodeSettings(KEY_AUTH));
+        m_authSettings.loadSettingsForModel(settings);
     }
 
     /**

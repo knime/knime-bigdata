@@ -47,7 +47,7 @@
  *   2020-10-15 (Vyacheslav Soldatov): created
  */
 
-package org.knime.bigdata.dbfs.filehandling.node;
+package org.knime.bigdata.databricks.node;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -64,7 +64,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
+import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;

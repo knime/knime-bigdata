@@ -55,11 +55,11 @@ import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.Collections;
 
+import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
+import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.ICredentials;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;

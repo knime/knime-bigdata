@@ -46,11 +46,12 @@
  * History
  *   2020-10-15 (Vyacheslav Soldatov): created
  */
-package org.knime.bigdata.dbfs.filehandling.node;
+package org.knime.bigdata.databricks.node;
 
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
@@ -61,6 +62,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelPassword;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ButtonGroupEnumInterface;
+import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
@@ -85,6 +87,8 @@ public class DbfsAuthenticationNodeSettings {
     private static final String KEY_TOKEN = "token";
 
     private static final String SECRET_KEY = "ekerjvjhmzle,ptktysq";
+
+    private final String m_configName;
 
     private AuthType m_authType;
 
@@ -185,10 +189,14 @@ public class DbfsAuthenticationNodeSettings {
 
     /**
      * Default constructor.
+     *
+     * @param configName the identifier the value is stored with in the {@link org.knime.core.node.NodeSettings} object
+     * @param defaultValue the initial value
      */
-    public DbfsAuthenticationNodeSettings() {
-        //authentication
-        m_authType = AuthType.USER_PWD;
+    public DbfsAuthenticationNodeSettings(final String configName, final AuthType defaultValue) {
+        m_configName = configName;
+
+        m_authType = defaultValue;
 
         m_userPassUseCredentials = new SettingsModelBoolean(KEY_USE_CREDENTIALS, false);
         m_userPassCredentialsName = new SettingsModelString(KEY_CREDENTIALS, "");
@@ -210,6 +218,13 @@ public class DbfsAuthenticationNodeSettings {
      */
     public AuthType getAuthType() {
         return m_authType;
+    }
+
+    /**
+     * @return {@code true} if token authentication should be used
+     */
+    public boolean useTokenAuth() {
+        return m_authType == AuthType.TOKEN;
     }
 
     /**
@@ -278,6 +293,34 @@ public class DbfsAuthenticationNodeSettings {
     }
 
     /**
+     * @param cp credentials provider if credentials should be used
+     * @return user to use
+     */
+    public String getUser(final CredentialsProvider cp) {
+        if (useUserPassCredentials() && cp == null) {
+            throw new IllegalStateException("Credential provider is not available");
+        } else if (useUserPassCredentials()) {
+            return cp.get(getUserPassCredentialsName()).getLogin();
+        } else {
+            return m_user.getStringValue();
+        }
+    }
+
+    /**
+     * @param cp credentials provider if credentials should be used
+     * @return password to use
+     */
+    public String getPassword(final CredentialsProvider cp) {
+        if (useUserPassCredentials() && cp == null) {
+            throw new IllegalStateException("Credential provider is not available");
+        } else if (useUserPassCredentials()) {
+            return cp.get(getUserPassCredentialsName()).getPassword();
+        } else {
+            return m_password.getStringValue();
+        }
+    }
+
+    /**
      * @return settings model for whether or not to use a credentials flow variable for token authentication.
      */
     public SettingsModelBoolean getTokenUseCredentialsModel() {
@@ -307,6 +350,20 @@ public class DbfsAuthenticationNodeSettings {
     }
 
     /**
+     * @param cp credentials provider if credentials should be used
+     * @return token to use
+     */
+    public String getToken(final CredentialsProvider cp) {
+        if (useTokenCredentials() && cp == null) {
+            throw new IllegalStateException("Credential provider is not available");
+        } else if (useTokenCredentials()) {
+            return cp.get(getTokenCredentialsName()).getPassword();
+        } else {
+            return m_token.getStringValue();
+        }
+    }
+
+    /**
      * @return token model.
      */
     public SettingsModelPassword getTokenModel() {
@@ -320,7 +377,7 @@ public class DbfsAuthenticationNodeSettings {
         final NodeSettings tempSettings = new NodeSettings("ignored");
         saveSettingsForModel(tempSettings);
 
-        final DbfsAuthenticationNodeSettings toReturn = new DbfsAuthenticationNodeSettings();
+        final DbfsAuthenticationNodeSettings toReturn = new DbfsAuthenticationNodeSettings(m_configName, m_authType);
         try {
             toReturn.loadSettingsForModel(tempSettings);
         } catch (InvalidSettingsException ex) { // NOSONAR can never happen
@@ -350,7 +407,9 @@ public class DbfsAuthenticationNodeSettings {
         load(settings);
     }
 
-    private void load(final NodeSettingsRO settings) throws InvalidSettingsException {
+    private void load(final NodeSettingsRO nodeSettings) throws InvalidSettingsException {
+        final NodeSettingsRO settings = nodeSettings.getNodeSettings(m_configName);
+
         try {
             m_authType = AuthType.fromSettingsValue(settings.getString(KEY_AUTH_TYPE));
         } catch (IllegalArgumentException e) {
@@ -375,10 +434,12 @@ public class DbfsAuthenticationNodeSettings {
     /**
      * Validates the settings in the given {@link NodeSettingsRO}.
      *
-     * @param settings
+     * @param nodeSettings
      * @throws InvalidSettingsException
      */
-    public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    public void validateSettings(final NodeSettingsRO nodeSettings) throws InvalidSettingsException {
+        final NodeSettingsRO settings = nodeSettings.getNodeSettings(m_configName);
+
         final NodeSettingsRO userPassSettings = settings.getNodeSettings(KEY_USER_PASSWORD);
         m_userPassUseCredentials.validateSettings(userPassSettings);
         m_userPassCredentialsName.validateSettings(userPassSettings);
@@ -390,8 +451,8 @@ public class DbfsAuthenticationNodeSettings {
         m_tokenCredentialsName.validateSettings(tokenSettings);
         m_token.validateSettings(tokenSettings);
 
-        DbfsAuthenticationNodeSettings temp = new DbfsAuthenticationNodeSettings();
-        temp.loadSettingsForModel(settings);
+        DbfsAuthenticationNodeSettings temp = new DbfsAuthenticationNodeSettings(m_configName, m_authType);
+        temp.loadSettingsForModel(nodeSettings);
         temp.validate();
     }
 
@@ -458,7 +519,9 @@ public class DbfsAuthenticationNodeSettings {
      *
      * @param settings
      */
-    private void save(final NodeSettingsWO settings) {
+    private void save(final NodeSettingsWO nodeSettings) {
+        final NodeSettingsWO settings = nodeSettings.addNodeSettings(m_configName);
+
         settings.addString(KEY_AUTH_TYPE, m_authType.getSettingsValue());
 
         final NodeSettingsWO userPassSettings = settings.addNodeSettings(KEY_USER_PASSWORD);

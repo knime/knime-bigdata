@@ -82,14 +82,13 @@ public class DbfsFSConnection implements FSConnection {
      */
     public DbfsFSConnection(final DbfsConnectorNodeSettings settings,
         final CredentialsProvider credentialsProvider) throws IOException {
-        URI uri = null;
-        try {
-            uri = new URI(DbfsFileSystemProvider.FS_TYPE, settings.getHost(), null, null);
-        } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid hostname: " + settings.getHost());
-        }
 
-        m_filesystem = new DbfsFileSystem(uri, CACHE_TTL, settings, credentialsProvider);
+        try {
+            final URI uri = new URI(settings.getDeploymentUrl());
+            m_filesystem = new DbfsFileSystem(uri, CACHE_TTL, settings, credentialsProvider);
+        } catch (URISyntaxException ex) {// NOSONAR
+            throw new IOException("Invalid URL: " + settings.getDeploymentUrl());
+        }
     }
 
     @Override
