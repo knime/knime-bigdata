@@ -57,7 +57,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.AbstractMap;
@@ -84,12 +83,12 @@ public class RemoteFSControllerNIO implements RemoteFSController {
 
     private static final NodeLogger LOG = NodeLogger.getLogger(RemoteFSControllerNIO.class);
 
-    private static final FileAttribute<Set<PosixFilePermission>> STAGING_AREA_PERMISSIONS =
-        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------"));
+    private static final Set<PosixFilePermission> STAGING_AREA_PERMISSIONS =
+        PosixFilePermissions.fromString("rwx------");
 
     private final FSConnection m_fsConnection;
 
-    private final String m_stagingAreaParent;
+    private final FSPath m_stagingAreaParent;
 
     private FSPath m_stagingArea;
 
@@ -107,21 +106,39 @@ public class RemoteFSControllerNIO implements RemoteFSController {
     public RemoteFSControllerNIO(final FSConnection fsConnection, final String stagingAreaParent) throws KNIMESparkException {
         m_fsConnection = fsConnection;
 
-        if (StringUtils.isBlank(stagingAreaParent)) {
-            throw new KNIMESparkException(
-                "Unable to detect the staging area path, please specify one in the Advanced tab.");
-        } else {
-            m_stagingAreaParent = stagingAreaParent;
+        m_stagingAreaParent = detectStagingAreaParentPath(fsConnection, stagingAreaParent);
+    }
+
+    @SuppressWarnings("resource")
+    private static FSPath detectStagingAreaParentPath(final FSConnection fsConnection, final String stagingAreaParent)
+        throws KNIMESparkException {
+
+        // check the configured staging area if set
+        if (!StringUtils.isBlank(stagingAreaParent)) {
+            final FSPath candidate = fsConnection.getFileSystem().getPath(stagingAreaParent);
+            if (Files.isDirectory(candidate)) {
+                return candidate;
+            } else {
+                throw new KNIMESparkException("Configured staging area directory does not exist or is not a directory (see Advanced tab).");
+            }
         }
+
+        // check tmp directory
+        final FSPath candidate = fsConnection.getFileSystem().getPath("/tmp");
+        if (Files.isDirectory(candidate)) {
+            return candidate;
+        }
+
+        throw new KNIMESparkException(
+            "Unable to setup staging area, please specify an existing directory in the Advanced tab.");
     }
 
     @Override
-    @SuppressWarnings("resource")
     public void createStagingArea() throws KNIMESparkException {
         try {
-            final String stagingDir = "knime-spark-staging-" + UUID.randomUUID().toString();
-            m_stagingArea = (FSPath)m_fsConnection.getFileSystem().getPath(m_stagingAreaParent).resolve(stagingDir);
-            FSFiles.createDirectories(m_stagingArea, STAGING_AREA_PERMISSIONS);
+            final String stagingDirPrefix = "knime-spark-staging-";
+            m_stagingArea = FSFiles.createTempDirectory(m_stagingAreaParent, stagingDirPrefix, "");
+            Files.setPosixFilePermissions(m_stagingArea, STAGING_AREA_PERMISSIONS);
             final URI uri = m_fsConnection.getDefaultURIExporter().toUri(m_stagingArea);
             m_stagingAreaString = URIUtil.toUnencodedString(uri);
             m_stagingAreaIsPath = uri.getScheme() == null;
@@ -177,7 +194,7 @@ public class RemoteFSControllerNIO implements RemoteFSController {
 
     @Override
     public void ensureClosed() {
-        m_fsConnection.closeInBackground();
+        // nothing to do here, file system connection gets closed in the connector node model
     }
 
 }
