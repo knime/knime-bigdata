@@ -27,12 +27,10 @@
             </p>
         </intro>
         <tab name="Settings">
-            <option name="Host">
-                Full hostname (domain name) of the Databricks deployment. For example
-                <tt>&lt;id&gt;.cloud.databricks.com</tt> on AWS or <tt>&lt;region&gt;.azuredatabricks.net</tt> on Azure. 
-            </option>
-            <option name="Port">
-                Port to use. Should be 443 on most deployments.
+            <option name="Databricks URL">
+                Full URL of the Databricks deployment, e.g.
+            	<i>https://&lt;account&gt;.cloud.databricks.com</i> on AWS or
+            	<i>https://&lt;region&gt;.azuredatabricks.net</i> on Azure.
             </option>
 	        <option name="Authentication">
 	            Method of authentication to use.

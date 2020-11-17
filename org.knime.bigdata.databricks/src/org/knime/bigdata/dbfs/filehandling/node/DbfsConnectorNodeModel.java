@@ -48,6 +48,8 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
+import static org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider.FS_NAME;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -73,8 +75,6 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  * @author Alexander Bondaletov
  */
 public class DbfsConnectorNodeModel extends NodeModel {
-
-    private static final String FILE_SYSTEM_NAME = "Databricks DBFS";
 
     private final DbfsConnectorNodeSettings m_settings = new DbfsConnectorNodeSettings();
 
@@ -107,7 +107,7 @@ public class DbfsConnectorNodeModel extends NodeModel {
     }
 
     private FileSystemPortObjectSpec createSpec() {
-        return new FileSystemPortObjectSpec(FILE_SYSTEM_NAME, m_fsId,
+        return new FileSystemPortObjectSpec(FS_NAME, m_fsId,
             DbfsFileSystem.createFSLocationSpec(m_settings.getHost()));
     }
 
