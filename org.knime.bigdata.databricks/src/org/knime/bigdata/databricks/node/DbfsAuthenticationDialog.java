@@ -301,6 +301,17 @@ public class DbfsAuthenticationDialog extends JPanel {
         m_passwordLabel.setEnabled(authType == AuthType.USER_PWD && !m_settings.useUserPassCredentials());
 
         m_tokenLabel.setEnabled(authType == AuthType.TOKEN && !m_settings.useTokenCredentials());
+
+        if (m_flowVariablesSupplier.get().isEmpty()) {
+            m_settings.getUserPassUseCredentialsModel().setBooleanValue(false);
+            m_userPassUseCredentials.setEnabled(false);
+
+            m_settings.getTokenUseCredentialsModel().setBooleanValue(false);
+            m_tokenUseCredentials.setEnabled(false);
+        } else {
+            m_userPassUseCredentials.setEnabled(authType == AuthType.USER_PWD);
+            m_tokenUseCredentials.setEnabled(authType == AuthType.TOKEN);
+        }
     }
 
     /**
