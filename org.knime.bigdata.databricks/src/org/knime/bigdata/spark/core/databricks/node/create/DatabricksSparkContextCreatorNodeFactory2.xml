@@ -93,11 +93,15 @@
         		KNIME is closed. This way, resources are released, but all data cached inside the cluster
         		are lost, unless they have been saved to persistent storage such as DBFS.
             </option>
-            
-            <option name="Databricks connection and receive timeout">
-            	Timeouts for the REST client in seconds. 
+
+            <option name="Connection timeout">
+              Timeout in seconds to establish a connection, or 0 for an infinite timeout.
             </option>
-            
+
+            <option name="Read timeout">
+              Timeout in seconds to read data from an established connection, or 0 for an infinite timeout.
+            </option>
+
             <option name="Job status polling interval">
             	The frequency with which KNIME polls the status of a job in seconds.
             </option>

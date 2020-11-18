@@ -98,11 +98,22 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
     }
 
     private JComponent createSettingsTab() {
-        Box box = new Box(BoxLayout.Y_AXIS);
-        box.add(createDeploymentPanel());
-        box.add(createAuthPanel());
-        box.add(createFilesystemPanel());
-        return box;
+        final JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        panel.add(createDeploymentPanel(), gbc);
+        gbc.gridy++;
+        panel.add(createAuthPanel(), gbc);
+        gbc.gridy++;
+        panel.add(createFilesystemPanel(), gbc);
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1;
+        panel.add(new JLabel(), gbc);
+        return panel;
     }
 
     private JComponent createDeploymentPanel() {
@@ -117,20 +128,25 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
     private JComponent createAuthPanel() {
         final JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createTitledBorder("Authentication"));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
         panel.add(m_authPanel);
         return panel;
     }
 
     private JComponent createFilesystemPanel() {
-        m_workingDirChooser.setBorder(BorderFactory.createTitledBorder("File system settings"));
-        return m_workingDirChooser;
+        final JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+        panel.add(Box.createHorizontalStrut(5));
+        panel.setBorder(BorderFactory.createTitledBorder("File System settings"));
+        panel.add(m_workingDirChooser);
+        return panel;
     }
 
-    private JComponent createAdvancedTab() {
+    private JComponent createTimeoutPanel() {
         DialogComponentNumber connectionTimeout =
-            new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), "", 1);
+            new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), null, 1, 6);
         DialogComponentNumber readTimeout =
-            new DialogComponentNumber(m_settings.getReadTimeoutModel(), "", 1);
+            new DialogComponentNumber(m_settings.getReadTimeoutModel(), null, 1, 6);
 
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints c = new GridBagConstraints();
@@ -161,8 +177,23 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
         c.weighty = 1;
         panel.add(Box.createVerticalGlue(), c);
 
-        panel.setBorder(BorderFactory.createTitledBorder("Connection settings"));
+        panel.setBorder(BorderFactory.createTitledBorder("Connection timeouts"));
         return panel;
+    }
+
+    private JComponent createAdvancedTab() {
+        final JPanel advancedTabPanel = new JPanel();
+        advancedTabPanel.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        advancedTabPanel.add(createTimeoutPanel(), gbc);
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1;
+        advancedTabPanel.add(new JLabel(), gbc);
+        return advancedTabPanel;
     }
 
     private FSConnection createFSConnection() throws IOException {

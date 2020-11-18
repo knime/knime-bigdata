@@ -211,13 +211,13 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
     private FileSelectionDialog m_stagingAreaFileSelection;
 
     private final DialogComponentNumber m_connectionTimeout =
-        new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), null, 10, 3);
+        new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), null, 10, 6);
 
     private final DialogComponentNumber m_receiveTimeout =
-        new DialogComponentNumber(m_settings.getReceiveTimeoutModel(), null, 10, 3);
+        new DialogComponentNumber(m_settings.getReceiveTimeoutModel(), null, 10, 6);
 
     private final DialogComponentNumber m_jobCheckFrequency = new DialogComponentNumber(
-        m_settings.getJobCheckFrequencyModel(), null, 1, 3);
+        m_settings.getJobCheckFrequencyModel(), null, 1, 6);
 
     private final DialogComponentBoolean m_terminateClusterOnDestroy =
             new DialogComponentBoolean(m_settings.getTerminateClusterOnDestroyModel(), "Terminate cluster on context destroy");
@@ -305,10 +305,18 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
 
     private JPanel createAdvancedTab() {
         final JPanel panel = new JPanel();
-        final BoxLayout parentLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-        panel.setLayout(parentLayout);
-        panel.add(createSparkContextPanel());
-        panel.add(createTimeoutPanel());
+        panel.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        panel.add(createSparkContextPanel(), gbc);
+        gbc.gridy++;
+        panel.add(createTimeoutPanel(), gbc);
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1;
+        panel.add(new JLabel(), gbc);
         return panel;
     }
 
@@ -323,7 +331,7 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(5, 0, 5, 5);
+        gbc.insets = new Insets(5, 0, 0, 5);
         addDialogComponentToPanel(m_createSparkContext, panel, gbc);
         m_createSparkContext.getModel().addChangeListener(this);
 
@@ -334,7 +342,7 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
 
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(5, 25, 5, 20);
+        gbc.insets = new Insets(0, 25, 0, 20);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         m_stagingAreaFileSelection = new FileSelectionDialog( //
             STAGING_AREA_DIR_HISTORY_ID, //
@@ -350,7 +358,7 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
 
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(5, 0, 5, 5);
+        gbc.insets = new Insets(5, 0, 0, 5);
         addDialogComponentToPanel(m_terminateClusterOnDestroy, panel, gbc);
 
         return panel;
@@ -358,22 +366,32 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
 
     private JPanel createTimeoutPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(createTitledBorder("Timeouts and update frequency"));
+        panel.setBorder(createTitledBorder("Connection timeouts and update frequency"));
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = gbc.gridy = 0;
-        addDialogComponentToPanel("Databricks connection timeout (seconds):", m_connectionTimeout, false, panel, gbc);
-        addDialogComponentToPanel("Databricks receive timeout (seconds):", m_receiveTimeout, false, panel, gbc);
+        gbc.anchor = GridBagConstraints.WEST;
+        addDialogComponentToPanel("Connection timeout (seconds):", m_connectionTimeout, false, panel, gbc);
+        addDialogComponentToPanel("Read timeout (seconds):", m_receiveTimeout, false, panel, gbc);
         addDialogComponentToPanel("Job status polling interval (seconds):", m_jobCheckFrequency, false, panel, gbc);
         return panel;
     }
 
     private JPanel createSettingsTab() {
         final JPanel panel = new JPanel();
-        final BoxLayout parentLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-        panel.setLayout(parentLayout);
-        panel.add(createConnectionPanel());
-        panel.add(createAuthPanel());
-        panel.add(createFileSystemSettingsPanel());
+        panel.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        panel.add(createConnectionPanel(), gbc);
+        gbc.gridy++;
+        panel.add(createAuthPanel(), gbc);
+        gbc.gridy++;
+        panel.add(createFileSystemSettingsPanel(), gbc);
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1;
+        panel.add(new JLabel(), gbc);
         return panel;
     }
 
@@ -397,14 +415,14 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
     private JComponent createAuthPanel() {
         final JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createTitledBorder("Authentication"));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
         panel.add(m_authPanel);
         return panel;
     }
 
     private Component createFileSystemSettingsPanel() {
         final JPanel panel = new JPanel();
-        final BoxLayout parentLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-        panel.setLayout(parentLayout);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
         panel.add(Box.createHorizontalStrut(5));
         panel.setBorder(createTitledBorder("File System settings"));
         panel.add(m_workingDirChooser);
@@ -428,7 +446,7 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 0;
         gbc.insets = new Insets(0, 5, 0, 0);
         panel.add(new JLabel(label), gbc);
