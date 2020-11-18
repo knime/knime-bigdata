@@ -336,13 +336,13 @@ public class BigDataLoaderNode2
         final List<SettingsModel> settingsModels, final ConnectableCsvLoaderNodeSettings2 customSettings)
         throws InvalidSettingsException {
 
-        final DBPortObject sessionPortObjectSpec = (DBPortObject)inSpecs[1];
+        final DBPortObject sessionPortObjectSpec = getDBSpec(inSpecs);
         final DBSession session = sessionPortObjectSpec.getDBSession();
 
         if (session.getAttributeValues().get(DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED)) {
 
             final ExecutionMonitor exec = createModelConfigurationExecutionMonitor(session);
-            final DataTableSpec tableSpecification = (DataTableSpec)inSpecs[0];
+            final DataTableSpec tableSpecification = getDataSpec(inSpecs);
             final DBTable dbTable = customSettings.getTableNameModel().toDBTable();
 
             try {
