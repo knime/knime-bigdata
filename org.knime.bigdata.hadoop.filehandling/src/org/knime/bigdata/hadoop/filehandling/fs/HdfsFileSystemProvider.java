@@ -82,11 +82,6 @@ import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
  */
 public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSystem> {
 
-    @Override
-    public String getScheme() {
-        return HdfsFileSystem.FS_TYPE;
-    }
-
     @SuppressWarnings("resource")
     private FileSystem getHadoopFS() {
         return getFileSystemInternal().getHadoopFileSystem();

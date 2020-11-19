@@ -202,11 +202,6 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
     }
 
     @Override
-    public String getScheme() {
-        return FS_TYPE;
-    }
-
-    @Override
     protected boolean isHiddenInternal(final DbfsPath path) throws IOException {
         final String name = path.getFileName().toString();
         return name.startsWith(".") || name.startsWith("_");

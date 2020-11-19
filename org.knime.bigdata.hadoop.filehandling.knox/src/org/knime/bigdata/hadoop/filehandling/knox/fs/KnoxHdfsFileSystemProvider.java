@@ -88,11 +88,6 @@ import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
  */
 public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, KnoxHdfsFileSystem> {
 
-    @Override
-    public String getScheme() {
-        return KnoxHdfsFileSystem.FS_TYPE;
-    }
-
     @SuppressWarnings("resource")
     private WebHDFSAPI getClient() {
         return getFileSystemInternal().getClient();
