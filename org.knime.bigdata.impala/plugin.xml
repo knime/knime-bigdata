@@ -8,6 +8,7 @@
             category-path="/db/database_legacy/database-connector"/>
       <node
             category-path="/db/database_legacy/database-io"
+            deprecated="true"
             factory-class="org.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory">
       </node>
     </extension>
