@@ -15,12 +15,6 @@
    <feature id="org.knime.features.bigdata.fileformats" >
           <category name="knime-bigdata" />
    </feature>
-   <feature id="org.knime.features.bigdata.hadoop.filehandling" >
-          <category name="knime-bigdata" />
-   </feature>
-   <feature id="org.knime.features.bigdata.hadoop.filehandling.knox" >
-          <category name="knime-bigdata" />
-   </feature>
    <feature id="org.knime.features.bigdata.spark" >
           <category name="knime-bigdata" />
    </feature>
@@ -40,12 +34,6 @@
           <category name="knime-bigdata" />
    </feature>
    <feature id="org.knime.features.bigdata.fileformats.source" >
-          <category name="knime-bigdata" />
-   </feature>
-   <feature id="org.knime.features.bigdata.hadoop.filehandling.source" >
-          <category name="knime-bigdata" />
-   </feature>
-   <feature id="org.knime.features.bigdata.hadoop.filehandling.knox.source" >
           <category name="knime-bigdata" />
    </feature>
    <feature id="org.knime.features.bigdata.spark.source" >

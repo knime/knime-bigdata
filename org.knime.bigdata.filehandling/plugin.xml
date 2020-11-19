@@ -11,30 +11,32 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/io/filehandling/remote/connections"
+            deprecated="true"
             factory-class="org.knime.bigdata.hdfs.node.connector.HDFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote"
+            deprecated="true"
             factory-class="org.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
-            deprecated="false"
+            deprecated="true"
             factory-class="org.knime.bigdata.hdfs.node.connector.HttpFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
-            deprecated="false"
+            deprecated="true"
             factory-class="org.knime.bigdata.hdfs.node.connector.HttpsFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
-            deprecated="false"
+            deprecated="true"
             factory-class="org.knime.bigdata.hdfs.node.connector.WebHDFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
-            deprecated="false"
+            deprecated="true"
             factory-class="org.knime.bigdata.hdfs.node.connector.SWebHDFSConnectionInformationNodeFactory">
       </node>
    </extension>

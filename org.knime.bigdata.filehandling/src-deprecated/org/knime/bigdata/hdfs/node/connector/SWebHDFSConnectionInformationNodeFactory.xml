@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
-    icon="./httpfsconnection16x16.png" type="Source">
-    <name>Secured HttpFS Connection</name>
+    icon="./webhdfsconnection16x16.png" type="Source" deprecated="true">
+    <name>Secured WebHDFS Connection</name>
 
     <shortDescription>
-        Configures the connection information used to connect SSL encrypted to 
-        a Hadoop Distributed File System (HDFS) via HttpFS.
+        Configures the connection information used to connect to 
+        a Hadoop Distributed File System (HDFS) via SSL encrypted WebHDFS.
     </shortDescription>
 
     <fullDescription>
@@ -49,8 +49,8 @@
     </fullDescription>
 
     <ports>
-        <outPort name="HttpsFS Connection information port" index="0">
-            Port object containing the HttpsFS connection information.
+        <outPort name="SWebHDFS Connection information port" index="0">
+            Port object containing the SWebHDFS connection information.
         </outPort>
     </ports>
 </knimeNode>

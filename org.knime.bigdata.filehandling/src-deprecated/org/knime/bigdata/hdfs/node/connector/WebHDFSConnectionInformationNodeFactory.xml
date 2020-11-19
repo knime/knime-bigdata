@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
-    icon="./webhdfsconnection16x16.png" type="Source">
+    icon="./webhdfsconnection16x16.png" type="Source" deprecated="true">
     <name>WebHDFS Connection</name>
 
     <shortDescription>

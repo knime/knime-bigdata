@@ -60,8 +60,6 @@
 		<module>org.knime.features.bigdata.commons.windows</module>
 		<module>org.knime.features.bigdata.databricks</module>
 		<module>org.knime.features.bigdata.fileformats</module>
-		<module>org.knime.features.bigdata.hadoop.filehandling</module>
-		<module>org.knime.features.bigdata.hadoop.filehandling.knox</module>
 		<module>org.knime.features.bigdata.spark</module>
 		<module>org.knime.features.bigdata.spark.local</module>
 		<module>org.knime.features.bigdata.testing</module>
