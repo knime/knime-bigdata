@@ -47,17 +47,13 @@ package org.knime.bigdata.testing.node.create.utils;
 
 import static org.knime.bigdata.testing.node.create.utils.CreateTestSparkContextPortUtil.isLocalSparkWithThriftserver;
 
-import java.sql.SQLException;
 import java.util.Map;
-import java.util.Objects;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.knime.bigdata.database.databricks.testing.DatabricksTestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.hive.testing.TestingDatabaseConnectionSettingsFactory;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.local.testing.LocalHiveTestingConnectionSettingsFactory;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -115,11 +111,8 @@ public class CreateTestDatabaseConnectionPortUtil implements CreateTestPortUtil 
         switch (sparkScheme) {
             case SPARK_LOCAL:
                 if (isLocalSparkWithThriftserver(flowVars)) {
-                    final DatabaseConnectionPortObject dbPortObject =
-                        new DatabaseConnectionPortObject(new DatabaseConnectionPortObjectSpec(
-                            LocalHiveTestingConnectionSettingsFactory.createConnectionSettings(flowVars)));
-                    openHiveConnection(dbPortObject.getSpec(), credentialsProvider, exec.createSubProgress(0.1));
-                    return dbPortObject;
+                    return new DatabaseConnectionPortObject(new DatabaseConnectionPortObjectSpec(
+                        LocalHiveTestingConnectionSettingsFactory.createConnectionSettings(flowVars)));
                 } else {
                     return InactiveBranchPortObject.INSTANCE;
                 }
@@ -132,20 +125,4 @@ public class CreateTestDatabaseConnectionPortUtil implements CreateTestPortUtil 
         }
     }
 
-    private static void openHiveConnection(final DatabaseConnectionPortObjectSpec spec, final CredentialsProvider cp,
-        final ExecutionMonitor exec) throws InvalidSettingsException, SQLException {
-
-        exec.setProgress(0, "Opening Hive connection");
-        try {
-            spec.getConnectionSettings(cp).execute(cp, Objects::nonNull);
-            exec.setProgress(1);
-        } catch (SQLException ex) {
-            Throwable cause = ExceptionUtils.getRootCause(ex);
-            if (cause == null || cause.getMessage() == null) {
-                cause = ex;
-            }
-
-            throw new SQLException("Could not create connection to database: " + cause.getMessage(), ex);
-        }
-    }
 }
