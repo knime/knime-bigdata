@@ -6,3 +6,4 @@ documentation/secured_cluster_connection_guide_server/index.html
 **/.flattened-pom.xml
 **/.polyglot.build.properties
 */*.jar
+**/CHANGELOG.md
