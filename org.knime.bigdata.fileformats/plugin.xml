@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?><plugin>
    
    <extension point="org.knime.workbench.repository.nodes">
-   <node 
+   <node
          category-path="/io/read"
          deprecated="true"
          factory-class="org.knime.bigdata.fileformats.orc.reader.OrcReaderNodeFactory"/>
@@ -10,9 +10,9 @@
          category-path="/io/write"
          deprecated="true"
          factory-class="org.knime.bigdata.fileformats.orc.writer.OrcWriterNodeFactory"/>
-   <node 
+   <node
          category-path="/io/read"
-         deprecated="true" 
+         deprecated="true"
          factory-class="org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory"/>
    <node
          category-path="/io/write"
@@ -28,12 +28,6 @@
          category-path="/io/write"
          deprecated="false"
          factory-class="org.knime.bigdata.fileformats.parquet.writer2.ParquetWriter2NodeFactory"
-         hidden="false">
-   </node>
-   <node
-         category-path="/io/write"
-         deprecated="false"
-         factory-class="org.knime.bigdata.fileformats.orc.writer2.ORCWriter2NodeFactory"
          hidden="false">
    </node>
    <node
