@@ -52,11 +52,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accessors.BooleanColumnAccess;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accessors.DoubleColumnAccess;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accessors.IntColumnAccess;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accessors.LongColumnAccess;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accessors.ObjColumnAccess;
+import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accesses.BooleanColumnAccess;
+import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accesses.DoubleColumnAccess;
+import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accesses.IntColumnAccess;
+import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accesses.LongColumnAccess;
+import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.Accesses.ObjColumnAccess;
 
 /**
  * An {@link OrcCell} that operates on a particular type of {@link ColumnVector} and is composed of a number of accesses
@@ -102,7 +102,11 @@ final class ComposedOrcCell<C extends ColumnVector> implements OrcCell {
 
     @Override
     public void setIndexInColumn(final int idxInColumn) {
-        m_idx = idxInColumn;
+        if (m_colVector.isRepeating) {
+            m_idx = 0;
+        } else {
+            m_idx = idxInColumn;
+        }
     }
 
     @Override

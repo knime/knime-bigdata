@@ -49,7 +49,7 @@
 package org.knime.bigdata.fileformats.filehandling.reader.orc.cell;
 
 import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 
 /**
  * A {@link BigDataCell} for reading from ORC.

@@ -49,8 +49,8 @@
 package org.knime.bigdata.fileformats.filehandling.reader.orc;
 
 import org.knime.bigdata.fileformats.filehandling.reader.AbstractBigDataTableReaderNodeFactory;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.filehandling.core.node.table.reader.TableReader;
 

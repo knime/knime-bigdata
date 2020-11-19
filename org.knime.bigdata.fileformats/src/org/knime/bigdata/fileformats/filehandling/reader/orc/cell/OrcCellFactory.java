@@ -48,10 +48,16 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.orc.cell;
 
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
 import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.DecimalColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.DoubleColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
+import org.apache.hadoop.hive.ql.exec.vector.TimestampColumnVector;
 import org.apache.orc.TypeDescription;
 import org.apache.orc.TypeDescription.Category;
 
@@ -95,16 +101,37 @@ public final class OrcCellFactory {
                 return createForBytesColumnVector();
             case LIST:
                 return createForListColumnVector(column);
+            case BINARY:
+                return createForBinaryColumn();
+            case DATE:
+                return createLocalDateCell();
+            case TIMESTAMP:
+                return createForTimeStampColumn();
             // unsupported types
             case MAP:
             case STRUCT:
-            case TIMESTAMP:
             case UNION:
-            case DATE:
-            case BINARY:
             default:
                 throw new IllegalArgumentException(String.format("The type %s is not supported.", category));
         }
+    }
+
+    private static ComposedOrcCell<LongColumnVector> createLocalDateCell() {
+        return ComposedOrcCell.builder(Accesses::getLocalDateString)//
+            .withObjAccess(LocalDate.class, Accesses::getLocalDate)//
+            .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTime).build();
+    }
+
+    private static ComposedOrcCell<TimestampColumnVector> createForTimeStampColumn() {
+        return ComposedOrcCell.builder(Accesses::getZonedDateTimeString)//
+            .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTime)//
+            .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTime).build();
+    }
+
+    private static ComposedOrcCell<BytesColumnVector> createForBinaryColumn() {
+        return ComposedOrcCell.builder(Accesses::getBinaryString)//
+            .withObjAccess(InputStream.class, Accesses::getInputStream)//
+            .build();
     }
 
     private static OrcCell createForListColumnVector(final TypeDescription listColumn) {
@@ -114,34 +141,35 @@ public final class OrcCellFactory {
     }
 
     private static OrcCell createForBytesColumnVector() {
-        final ComposedOrcCell.Builder<BytesColumnVector> builder = ComposedOrcCell.builder(Accessors::getString);
+        final ComposedOrcCell.Builder<BytesColumnVector> builder = ComposedOrcCell.builder(Accesses::getString);
         return builder.build();
     }
 
     private static OrcCell createForDecimalColumnVector() {
-        final ComposedOrcCell.Builder<DecimalColumnVector> builder = ComposedOrcCell.builder(Accessors::getString);
-        return builder.withDoubleAccess(Accessors::getDouble).build();
+        final ComposedOrcCell.Builder<DecimalColumnVector> builder = ComposedOrcCell.builder(Accesses::getString);
+        return builder.withDoubleAccess(Accesses::getDouble).build();
     }
 
     private static OrcCell createForDoubleColumnVector() {
-        final ComposedOrcCell.Builder<DoubleColumnVector> builder = ComposedOrcCell.builder(Accessors::getString);
-        return builder.withDoubleAccess(Accessors::getDouble).build();
+        final ComposedOrcCell.Builder<DoubleColumnVector> builder = ComposedOrcCell.builder(Accesses::getString);
+        return builder.withDoubleAccess(Accesses::getDouble).build();
     }
 
     private static OrcCell createBooleanCell() {
-        final ComposedOrcCell.Builder<LongColumnVector> builder = ComposedOrcCell.builder(Accessors::getStringBoolean);
-        return builder.withBooleanAccess(Accessors::getBoolean).build();
+        final ComposedOrcCell.Builder<LongColumnVector> builder = ComposedOrcCell.builder(Accesses::getStringBoolean);
+        return builder.withBooleanAccess(Accesses::getBoolean).build();
     }
 
     private static OrcCell createForLongColumnVector(final Category category) {
-        final ComposedOrcCell.Builder<LongColumnVector> builder = ComposedOrcCell.builder(Accessors::getString);
+        final ComposedOrcCell.Builder<LongColumnVector> builder = ComposedOrcCell.builder(Accesses::getString);
         switch (category) {
             case BYTE:
             case SHORT:
             case INT:// NOSONAR falling through to long is intended
-                builder.withIntAccess(Accessors::getInt);
+                builder.withIntAccess(Accesses::getInt);
             case LONG:
-                builder.withLongAccess(Accessors::getLong).withDoubleAccess(Accessors::getDouble);
+                builder.withLongAccess(Accesses::getLong)//
+                    .withDoubleAccess(Accesses::getDouble).withObjAccess(LocalDate.class, Accesses::getLocalDate);
                 break;
             default:
                 throw new IllegalStateException("Coding-error: Non-integer type encountered: " + category);

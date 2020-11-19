@@ -53,11 +53,10 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.Reader;
 import org.apache.orc.RecordReader;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCell;
 import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCellFactory;
 import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
@@ -68,7 +67,7 @@ import org.knime.filehandling.core.node.table.reader.read.Read;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class OrcRead implements Read<BigDataCell> {
+final class OrcRead implements Read<BigDataCell>, RandomAccessible<BigDataCell> {
 
     private final long m_rowCount;
 
@@ -78,11 +77,9 @@ final class OrcRead implements Read<BigDataCell> {
 
     private final VectorizedRowBatch m_batch;
 
-    private final OrcRandomAccessible m_randomAccessible;
-
     private final OrcCell[] m_cells;
 
-    private int m_batchIndex = -1;
+    private int m_batchIndex = 0;
 
     private long m_rowCounter = 0;
 
@@ -91,7 +88,6 @@ final class OrcRead implements Read<BigDataCell> {
         m_rows = reader.rows();
         m_batch = reader.getSchema().createRowBatch();
         m_path = path;
-        m_randomAccessible = new OrcRandomAccessible();
         m_cells = reader.getSchema().getChildren().stream().map(OrcCellFactory::create).toArray(OrcCell[]::new);
     }
 
@@ -114,28 +110,18 @@ final class OrcRead implements Read<BigDataCell> {
         }
         m_batchIndex++;
 
-        return m_randomAccessible;
+        return this;
     }
 
-    /**
-     * {@link RandomAccessible} of {@link OrcCell OrcCells}.
-     * It always returns the same cells which internally read from a {@link ColumnVector}.
-     *
-     * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
-     */
-    private class OrcRandomAccessible implements RandomAccessible<BigDataCell> {
+    @Override
+    public int size() {
+        return m_cells.length;
+    }
 
-        @Override
-        public int size() {
-            return m_cells.length;
-        }
-
-        @Override
-        public OrcCell get(final int idx) {
-            final OrcCell cell = m_cells[idx];
-            return cell.isNull() ? null : cell;
-        }
-
+    @Override
+    public OrcCell get(final int idx) {
+        final OrcCell cell = m_cells[idx];
+        return cell.isNull() ? null : cell;
     }
 
     @Override

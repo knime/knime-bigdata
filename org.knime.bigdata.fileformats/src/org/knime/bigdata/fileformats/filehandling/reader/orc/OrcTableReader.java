@@ -57,8 +57,8 @@ import org.apache.orc.OrcFile;
 import org.apache.orc.Reader;
 import org.apache.orc.TypeDescription;
 import org.apache.orc.TypeDescription.Category;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.ListKnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType;
@@ -79,14 +79,15 @@ import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.T
 final class OrcTableReader implements TableReader<BigDataReaderConfig, KnimeType, BigDataCell> {
 
     @Override
-    public Read<BigDataCell> read(final Path path, final TableReadConfig<BigDataReaderConfig> config) throws IOException {
+    public Read<BigDataCell> read(final Path path, final TableReadConfig<BigDataReaderConfig> config)
+        throws IOException {
         Reader reader = createReader(path);
         return new OrcRead(reader, path);
     }
 
     private static Reader createReader(final Path path) throws IOException {
         Configuration hadoopConfig = NioFileSystemUtil.getConfiguration();
-        org.apache.hadoop.fs.Path hadoopPath = NioFileSystemUtil.getHadoopPath((FSPath) path, hadoopConfig);
+        org.apache.hadoop.fs.Path hadoopPath = NioFileSystemUtil.getHadoopPath((FSPath)path, hadoopConfig);
         return OrcFile.createReader(hadoopPath, OrcFile.readerOptions(hadoopConfig));
     }
 
@@ -130,11 +131,14 @@ final class OrcTableReader implements TableReader<BigDataReaderConfig, KnimeType
                 return PrimitiveKnimeType.STRING;
             case LIST:
                 return new ListKnimeType(toKnimeType(type.getChildren().get(0)));
-            // unsupported types (they are listed intentionally so that we can see what is supported with one glance)
-            case BINARY:
             case DATE:
-            case MAP:
+                return PrimitiveKnimeType.DATE;
             case TIMESTAMP:
+                return PrimitiveKnimeType.DATE_TIME;
+            case BINARY:
+                return PrimitiveKnimeType.BINARY;
+            // unsupported types (they are listed intentionally so that we can see what is supported with one glance)
+            case MAP:
             case STRUCT:
             case UNION:
             default:

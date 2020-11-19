@@ -48,21 +48,34 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.orc.cell;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+
 import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.DecimalColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.DoubleColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
+import org.apache.hadoop.hive.ql.exec.vector.TimestampColumnVector;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 
 /**
  * Provides various value access interfaces and corresponding implementations.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class Accessors {
+final class Accesses {
 
-    private Accessors() {
+    private Accesses() {
         // static utility class
     }
+
+    private static final ZoneId UTC = ZoneId.of("Etc/UTC");
 
     @FunctionalInterface
     interface ObjColumnAccess<C, T> {
@@ -109,20 +122,40 @@ final class Accessors {
         }
     }
 
-    static double getDouble(final LongColumnVector vector, final int idx) {
-        return vector.vector[idx];
+    // DecimalColumnVector accesses
+
+    static double getDouble(final DecimalColumnVector vector, final int idx) {
+        return vector.vector[idx].doubleValue();
+    }
+
+    static String getString(final DecimalColumnVector vector, final int idx) {
+        return Double.toString(getDouble(vector, idx));
+    }
+
+    // DoubleColumnVector accesses
+
+    static String getString(final DoubleColumnVector vector, final int idx) {
+        return Double.toString(getDouble(vector, idx));
     }
 
     static double getDouble(final DoubleColumnVector vector, final int idx) {
         return vector.vector[idx];
     }
 
-    static double getDouble(final DecimalColumnVector vector, final int idx) {
-        return vector.vector[idx].doubleValue();
+    // LongColumnVector accesses
+
+    static double getDouble(final LongColumnVector vector, final int idx) {
+        return vector.vector[idx];
     }
 
     static int getInt(final LongColumnVector vector, final int idx) {
-        return (int)getLong(vector, idx);
+        final long valueL = getLong(vector, idx);
+        final int valueI = (int)valueL;
+        if (valueI != valueL) {
+            throw new BigDataFileFormatException(
+                String.format("Written as int but read as a long (overflow): (long)%d != (int)%d", valueL, valueI));
+        }
+        return valueI;
     }
 
     static long getLong(final LongColumnVector vector, final int idx) {
@@ -133,24 +166,51 @@ final class Accessors {
         return Long.toString(getLong(vector, idx));
     }
 
-    static String getString(final DoubleColumnVector vector, final int idx) {
-        return Double.toString(getDouble(vector, idx));
-    }
-
-    static String getString(final DecimalColumnVector vector, final int idx) {
-        return Double.toString(getDouble(vector, idx));
-    }
-
     static boolean getBoolean(final LongColumnVector vector, final int idx) {
-        return vector.vector[idx] != 0L;
+        return vector.vector[idx] == 1L;
     }
 
     static String getStringBoolean(final LongColumnVector vector, final int idx) {
         return Boolean.toString(getBoolean(vector, idx));
     }
 
-    static String getString(final BytesColumnVector vector, final int idx) {
-        return vector.toString(idx);
+    static String getLocalDateString(final LongColumnVector vector, final int idx) {
+        return getLocalDate(vector, idx).toString();
     }
 
+    static LocalDate getLocalDate(final LongColumnVector vector, final int idx) {
+        return LocalDate.ofEpochDay(vector.vector[idx]);
+    }
+
+    static LocalDateTime getLocalDateTime(final LongColumnVector vector, final int idx) {
+        return getLocalDate(vector, idx).atStartOfDay();
+    }
+
+    // TimestampColumnVector accesses
+
+    static LocalDateTime getLocalDateTime(final TimestampColumnVector vector, final int idx) {
+        return vector.asScratchTimestamp(idx).toLocalDateTime();
+    }
+
+    static ZonedDateTime getZonedDateTime(final TimestampColumnVector vector, final int idx) {
+        return ZonedDateTime.ofInstant(vector.asScratchTimestamp(idx).toInstant(), UTC);
+    }
+
+    static String getZonedDateTimeString(final TimestampColumnVector vector, final int idx) {
+        return getZonedDateTime(vector, idx).toString();
+    }
+
+    // BytesColumnVector accesses
+
+    static String getString(final BytesColumnVector vector, final int idx) {
+        return new String(vector.vector[idx], vector.start[idx], vector.length[idx], StandardCharsets.UTF_8);
+    }
+
+    static String getBinaryString(final BytesColumnVector vector, final int idx) {
+        return Arrays.toString(vector.vector[idx]);
+    }
+
+    static InputStream getInputStream(final BytesColumnVector vector, final int idx) {
+        return new ByteArrayInputStream(vector.vector[idx], vector.start[idx], vector.length[idx]);
+    }
 }
