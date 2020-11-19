@@ -44,13 +44,14 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Oct 1, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 14, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet.cell;
 
+import static java.util.stream.Collectors.joining;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.parquet.io.api.Converter;
 import org.apache.parquet.io.api.GroupConverter;
@@ -64,13 +65,12 @@ final class ListParquetCell extends GroupConverter implements ParquetCell {
 
     private final ParquetCell m_elementConverter;
 
-    private boolean m_isNull = true;
-
     private final List<ParquetCell> m_values = new ArrayList<>();
 
+    private boolean m_isNull = true;
 
-    ListParquetCell(final ParquetCell elementConverter) {
-        m_elementConverter = elementConverter;
+    ListParquetCell(final ParquetCell elementCell) {
+        m_elementConverter = elementCell;
     }
 
     private ListParquetCell(final ListParquetCell toCopy) {
@@ -80,30 +80,34 @@ final class ListParquetCell extends GroupConverter implements ParquetCell {
     }
 
     @Override
-    public Converter asConverter() {
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T getArray(final Class<T> valueClass) {
-        final Class<?> elementClass = valueClass.getComponentType();
-        final Object[] array = m_values.stream().map(c -> c.getObj(elementClass)).toArray();
-        return (T) array;
-    }
-
-    @Override
-    public String getString() {
-        return m_values.stream().map(ParquetCell::getString).collect(Collectors.joining(", ", "[", "]"));
-    }
-
-    @Override
     public boolean isNull() {
         return m_isNull;
     }
 
     @Override
-    public void reset() {
-        m_isNull = true;
+    public String getString() {
+        return m_values.stream()//
+            .map(ParquetCell::getString)//
+            .collect(joining(", ", "[", "]"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getArray(final Class<T> valueClass) {
+        final Class<?> elementClass = valueClass.getComponentType();
+        final Object[] array = m_values.stream()//
+            .map(c -> c.isNull() ? null : c.getObj(elementClass))//
+            .toArray();
+        return (T)array;
+    }
+
+    @Override
+    public <T> T getObj(final Class<T> expectedClass) {
+        assert !isNull() : "Getter should only be called if isNull() returns false.";
+        if (expectedClass == String.class) {
+            return expectedClass.cast(getString());
+        } else {
+            return getArray(expectedClass);
+        }
     }
 
     @Override
@@ -112,7 +116,7 @@ final class ListParquetCell extends GroupConverter implements ParquetCell {
 
             @Override
             public Converter getConverter(final int innerFieldIndex) {
-                return m_elementConverter.asConverter();
+                return m_elementConverter.getConverter();
             }
 
             @Override
@@ -140,13 +144,25 @@ final class ListParquetCell extends GroupConverter implements ParquetCell {
     }
 
     @Override
-    public <T> T getObj(final Class<T> expectedValueClass) {
-        return getArray(expectedValueClass);
+    public ParquetCell copy() {
+        return new ListParquetCell(this);
     }
 
     @Override
-    public ListParquetCell copy() {
-        return new ListParquetCell(this);
+    public Converter getConverter() {
+        return this;
+    }
+
+    @Override
+    public void reset() {
+        m_isNull = true;
+    }
+
+    @Override
+    public String toString() {
+        return m_isNull ? "null" : m_values.stream()//
+            .map(Object::toString)//
+            .collect(joining(", ", "[", "]"));
     }
 
 }

@@ -119,7 +119,7 @@ final class ParquetRandomAccessibleReadSupport extends ReadSupport<ParquetRandom
 
         @Override
         public Converter getConverter(final int fieldIndex) {
-            return m_row.get(fieldIndex).asConverter();
+            return m_row.get(fieldIndex).getConverter();
         }
 
         ParquetRandomAccessible getRow() {

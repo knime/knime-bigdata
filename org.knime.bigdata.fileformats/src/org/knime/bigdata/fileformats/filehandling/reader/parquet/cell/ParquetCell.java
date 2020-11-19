@@ -44,38 +44,32 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 14, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet.cell;
 
 import org.apache.parquet.io.api.Converter;
-import org.apache.parquet.io.api.GroupConverter;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.core.node.context.DeepCopy;
 
 /**
- * {@link BigDataCell} implementation for Parquet. Extends DeepCopy because of the contract of
- * {@link GroupConverter#getConverter(int)} which requires to return the same converter each time. For more informations
- * see {@link ListParquetCell}.
+ * A {@link BigDataCell} for reading from Parquet.</br>
+ * Implements {@link DeepCopy} to satisfy the Parquet API for lists.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-@SuppressWarnings("javadoc")
 public interface ParquetCell extends BigDataCell, DeepCopy<ParquetCell> {
 
     /**
-     * Returns this instance as a {@link Converter}.
+     * Returns the converter that is filled by Parquet.
      *
-     * @return this instance typed as {@link Converter}
+     * @return the {@link Converter} for Parquet
      */
-    Converter asConverter();
+    Converter getConverter();
 
     /**
-     * Resets this instance i.e. {@link #isNull()} will return true after calling this method.
+     * Resets the value in this cell.
      */
     void reset();
-
-    @Override
-    ParquetCell copy();
 
 }

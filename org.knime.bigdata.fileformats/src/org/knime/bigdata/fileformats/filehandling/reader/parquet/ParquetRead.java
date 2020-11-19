@@ -54,11 +54,12 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.parquet.hadoop.ParquetReader;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
 import org.knime.filehandling.core.node.table.reader.read.Read;
 
 /**
+ * A {@link Read} of a single Parquet file.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */

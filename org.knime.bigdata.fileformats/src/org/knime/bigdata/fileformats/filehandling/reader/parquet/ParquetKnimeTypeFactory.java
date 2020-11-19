@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
+import org.apache.parquet.schema.DecimalMetadata;
 import org.apache.parquet.schema.GroupType;
 import org.apache.parquet.schema.OriginalType;
 import org.apache.parquet.schema.PrimitiveType;
@@ -66,6 +67,10 @@ import org.knime.core.node.util.CheckUtils;
  */
 final class ParquetKnimeTypeFactory {
 
+    private ParquetKnimeTypeFactory() {
+        // static factory class
+    }
+
     public static KnimeType fromType(final Type type) {
         if (type.isPrimitive()) {
             return fromPrimitiveType(type.asPrimitiveType());
@@ -82,7 +87,6 @@ final class ParquetKnimeTypeFactory {
             final KnimeType primitiveElementType = fromPrimitiveType(subtype.asPrimitiveType());
             return new ListKnimeType(primitiveElementType);
         } else {
-            // TODO We could identify lists based on the repetitions of the fields
             throw new BigDataFileFormatException(String.format(
                 "Found unsupported group type in column '%s', only supported group type is LIST.", type.getName()));
         }
@@ -90,13 +94,13 @@ final class ParquetKnimeTypeFactory {
 
     private static PrimitiveKnimeType fromPrimitiveType(final PrimitiveType field) {
         if (field.getOriginalType() != null) {
-            return fromOriginalType(field.getOriginalType());
+            return fromOriginalType(field);
         } else {
-            return fromPrimitiveType(field.getPrimitiveTypeName());
+            return fromPhysicalType(field.getPrimitiveTypeName());
         }
     }
 
-    private static PrimitiveKnimeType fromPrimitiveType(final PrimitiveTypeName primitiveType) {
+    private static PrimitiveKnimeType fromPhysicalType(final PrimitiveTypeName primitiveType) {//NOSONAR
         switch (primitiveType) {
             case BOOLEAN:
                 return PrimitiveKnimeType.BOOLEAN;
@@ -107,19 +111,21 @@ final class ParquetKnimeTypeFactory {
                 return PrimitiveKnimeType.INTEGER;
             case INT64:
                 return PrimitiveKnimeType.LONG;
-            case INT96: // we can't represent a 96 bit integer in KNIME
-                return PrimitiveKnimeType.STRING;
+            case INT96: // INT96 is used to store Date & Time in Impala
+                return PrimitiveKnimeType.DATE_TIME;
             case FIXED_LEN_BYTE_ARRAY:
             case BINARY:
+                return PrimitiveKnimeType.BINARY;
             default:
                 throw new IllegalArgumentException("Unsupported primitive type: " + primitiveType);
         }
     }
 
-    private static PrimitiveKnimeType fromOriginalType(final OriginalType originalType) {//NOSONAR, the rule is nonsense for switches
+    private static PrimitiveKnimeType fromOriginalType(final PrimitiveType type) {//NOSONAR, the rule is nonsense for switches
+        OriginalType originalType = type.getOriginalType();
         switch (originalType) {
             case DECIMAL:
-                return PrimitiveKnimeType.DOUBLE;
+                return fromDecimal(type);
             case UINT_8:
             case INT_8:
             case INT_16:
@@ -129,14 +135,17 @@ final class ParquetKnimeTypeFactory {
             case INT_64:
             case UINT_32:
                 return PrimitiveKnimeType.LONG;
-            case BSON:
             case DATE:
-            case TIMESTAMP_MICROS:
-            case TIMESTAMP_MILLIS:
+                return PrimitiveKnimeType.DATE;
             case TIME_MICROS:
             case TIME_MILLIS:
+                return PrimitiveKnimeType.TIME;
+            case TIMESTAMP_MICROS:
+            case TIMESTAMP_MILLIS:
+                return PrimitiveKnimeType.DATE_TIME;
+            case BSON:
             case JSON:
-            case UINT_64:
+            case UINT_64: // the largest integer in knime is long i.e. 64 bit signed
             case ENUM:
             case UTF8:
                 return PrimitiveKnimeType.STRING;
@@ -146,6 +155,15 @@ final class ParquetKnimeTypeFactory {
             case MAP_KEY_VALUE:
             default:
                 throw new IllegalArgumentException("Unsupported original type: " + originalType);
+        }
+    }
+
+    private static PrimitiveKnimeType fromDecimal(final PrimitiveType type) {
+        final DecimalMetadata decimalMetaData = type.getDecimalMetadata();
+        if (decimalMetaData.getScale() == 0 && decimalMetaData.getPrecision() <= 18) {
+            return PrimitiveKnimeType.LONG;
+        } else {
+            return PrimitiveKnimeType.DOUBLE;
         }
     }
 

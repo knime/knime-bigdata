@@ -51,7 +51,7 @@ package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 import java.util.Arrays;
 
 import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCellFactory;
 import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
@@ -66,7 +66,7 @@ final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
 
     ParquetRandomAccessible(final Type[] types) {
         m_cells = Arrays.stream(types)//
-            .map(ParquetCellFactory::createFor)//
+            .map(ParquetCellFactory::create)//
             .toArray(ParquetCell[]::new);
     }
 

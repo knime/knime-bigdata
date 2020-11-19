@@ -60,8 +60,8 @@ import org.apache.parquet.hadoop.metadata.FileMetaData;
 import org.apache.parquet.hadoop.metadata.ParquetMetadata;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.core.node.ExecutionMonitor;
@@ -80,7 +80,8 @@ final class ParquetTableReader implements TableReader<BigDataReaderConfig, Knime
 
     @SuppressWarnings("resource") // It's the responsibility of the caller to close the read
     @Override
-    public Read<BigDataCell> read(final Path path, final TableReadConfig<BigDataReaderConfig> config) throws IOException {
+    public Read<BigDataCell> read(final Path path, final TableReadConfig<BigDataReaderConfig> config)
+        throws IOException {
 
         final Configuration configuration = NioFileSystemUtil.getConfiguration();
         final org.apache.hadoop.fs.Path hadoopPath = getHadoopPath(path, configuration);
@@ -89,16 +90,15 @@ final class ParquetTableReader implements TableReader<BigDataReaderConfig, Knime
             ParquetFileReader.readFooter(configuration, hadoopPath, ParquetMetadataConverter.NO_FILTER);
         final long rowCount = meta.getBlocks().stream().mapToLong(BlockMetaData::getRowCount).sum();
 
-        final ParquetRandomAccessibleReadSupport readSupport =
-            new ParquetRandomAccessibleReadSupport();
+        final ParquetRandomAccessibleReadSupport readSupport = new ParquetRandomAccessibleReadSupport();
         final ParquetReader<ParquetRandomAccessible> parquetReader =
             ParquetReader.builder(readSupport, hadoopPath).withConf(configuration).build();
         return new ParquetRead(path, parquetReader, rowCount);
     }
 
     @Override
-    public TypedReaderTableSpec<KnimeType> readSpec(final Path path,
-        final TableReadConfig<BigDataReaderConfig> config, final ExecutionMonitor exec) throws IOException {
+    public TypedReaderTableSpec<KnimeType> readSpec(final Path path, final TableReadConfig<BigDataReaderConfig> config,
+        final ExecutionMonitor exec) throws IOException {
         final MessageType schema = extractSchema(path);
         return convertToSpec(schema);
     }
@@ -121,7 +121,7 @@ final class ParquetTableReader implements TableReader<BigDataReaderConfig, Knime
         final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
         for (Type field : schema.getFields()) {
             final KnimeType type = ParquetKnimeTypeFactory.fromType(field);
-                specBuilder.addColumn(field.getName(), type, true);
+            specBuilder.addColumn(field.getName(), type, true);
         }
         return specBuilder.build();
     }
