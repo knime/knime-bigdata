@@ -2,12 +2,18 @@
 <?eclipse version="3.0"?><plugin>
    
    <extension point="org.knime.workbench.repository.nodes">
-   <node category-path="/io/read" factory-class="org.knime.bigdata.fileformats.orc.reader.OrcReaderNodeFactory"/>
+   <node 
+         category-path="/io/read"
+         deprecated="true"
+         factory-class="org.knime.bigdata.fileformats.orc.reader.OrcReaderNodeFactory"/>
    <node
          category-path="/io/write"
          deprecated="true"
          factory-class="org.knime.bigdata.fileformats.orc.writer.OrcWriterNodeFactory"/>
-   <node category-path="/io/read" factory-class="org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory"/>
+   <node 
+         category-path="/io/read"
+         deprecated="true" 
+         factory-class="org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory"/>
    <node
          category-path="/io/write"
          deprecated="true"
@@ -31,13 +37,13 @@
          hidden="false">
    </node>
    <node
-         category-path="/labs/file-handling-prototype/file-handling-IO/file-handling-Read"
+         category-path="/io/read"
          deprecated="false"
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory"
          hidden="false">
    </node>
    <node
-         category-path="/labs/file-handling-prototype/file-handling-IO/file-handling-Read"
+         category-path="/io/read"
          deprecated="false"
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.orc.OrcTableReaderNodeFactory"
          hidden="false">
