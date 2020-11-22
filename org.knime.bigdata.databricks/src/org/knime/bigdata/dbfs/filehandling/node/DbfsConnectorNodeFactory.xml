@@ -4,7 +4,7 @@
 		xmlns="http://knime.org/node/v4.1"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd">
-    <name>Databricks File System Connector (Labs)</name>
+    <name>Databricks File System Connector</name>
     
     <shortDescription>
         Connects to Databricks File System (DBFS) in order to read/write files in downstream nodes.

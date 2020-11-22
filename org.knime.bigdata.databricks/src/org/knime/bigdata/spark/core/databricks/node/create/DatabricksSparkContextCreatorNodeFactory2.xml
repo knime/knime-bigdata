@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
-    <name>Create Databricks Environment (Labs)</name>
+    <name>Create Databricks Environment</name>
     
     <shortDescription>Creates a Databricks Environment connected to an existing Databricks cluster.</shortDescription>
     
