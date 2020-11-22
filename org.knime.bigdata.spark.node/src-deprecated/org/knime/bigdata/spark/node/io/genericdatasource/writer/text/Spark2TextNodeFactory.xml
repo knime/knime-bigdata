@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
-	type="Other" icon="icon.png">
+	deprecated="true" type="Other" icon="icon.png">
 	<name>Spark to Text</name>
 	<shortDescription>Writes a Spark DataFrame/RDD into a text file</shortDescription>
 	<fullDescription>

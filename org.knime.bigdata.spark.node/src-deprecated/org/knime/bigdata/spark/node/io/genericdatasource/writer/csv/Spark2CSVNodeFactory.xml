@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
-	type="Other" icon="icon.png">
+	deprecated="true" type="Other" icon="icon.png">
 	<name>Spark to CSV</name>
 	<shortDescription>Writes a Spark DataFrame/RDD into a CSV file</shortDescription>
 	<fullDescription>
