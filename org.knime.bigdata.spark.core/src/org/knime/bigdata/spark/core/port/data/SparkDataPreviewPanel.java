@@ -80,7 +80,7 @@ public abstract class SparkDataPreviewPanel extends JPanel implements ActionList
         m_controlPanel.add(m_loadButton);
         m_controlPanel.add(m_cacheRows);
 
-        m_startupInfoLabel = new JLabel("CLick on the button above to load/refresh the preview.",
+        m_startupInfoLabel = new JLabel("Click on the button above to load/refresh the preview.",
             SharedIcons.INFO_BALLOON.get(), SwingConstants.CENTER);
 
         m_fetchingLabel = new JLabel();
