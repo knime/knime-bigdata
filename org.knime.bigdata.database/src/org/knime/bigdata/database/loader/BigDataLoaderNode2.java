@@ -49,12 +49,9 @@
 package org.knime.bigdata.database.loader;
 
 import static java.util.Arrays.asList;
-import static org.knime.base.filehandling.NodeUtils.resetGBC;
 import static org.knime.database.agent.metadata.DBMetaDataHelper.createDBTableSpec;
 import static org.knime.datatype.mapping.DataTypeMappingDirection.KNIME_TO_EXTERNAL;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -65,9 +62,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.parquet.hadoop.ParquetFileWriter.Mode;
@@ -139,24 +133,6 @@ public class BigDataLoaderNode2
     private static final long FILE_SIZE = TO_BYTE * 1024l;
 
     private static final int ROW_GROUP_SIZE = ParquetWriter.DEFAULT_BLOCK_SIZE * TO_BYTE;
-
-    private static Box createBox(final boolean horizontal) {
-        final Box box;
-        if (horizontal) {
-            box = new Box(BoxLayout.X_AXIS);
-            box.add(Box.createVerticalGlue());
-        } else {
-            box = new Box(BoxLayout.Y_AXIS);
-            box.add(Box.createHorizontalGlue());
-        }
-        return box;
-    }
-
-    private static JPanel createPanel() {
-        final JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        return panel;
-    }
 
     private static final class DBLoaderFileWriterImplementation
         implements DBFileLoader<ConnectableCsvLoaderNodeSettings2, BigDataLoaderParameters2> {
@@ -312,22 +288,7 @@ public class BigDataLoaderNode2
     @Override
     public void buildDialog(final DialogBuilder builder, final List<DialogComponent> dialogComponents,
         final ConnectedCsvLoaderNodeComponents2 customComponents) {
-        final JPanel optionsPanel = createPanel();
-        final Box optionsBox = createBox(false);
-        optionsPanel.add(optionsBox);
-        // Table name
-        optionsBox.add(customComponents.getTableNameComponent().getComponentPanel());
-        // Target folder
-        final JPanel fileChooserPanel = new JPanel(new GridBagLayout());
-        final GridBagConstraints constraints = new GridBagConstraints();
-        resetGBC(constraints);
-        constraints.anchor = GridBagConstraints.WEST;
-        fileChooserPanel.add(new JLabel("Target folder: "), constraints);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridx = 1;
-        constraints.weightx = 1;
-        fileChooserPanel.add(customComponents.getTargetFolderComponent().getComponentPanel(), constraints);
-        optionsBox.add(fileChooserPanel);
+        final JPanel optionsPanel = createTargetTableFolderPanel(customComponents);
         builder.addTab(Integer.MAX_VALUE, "Options", optionsPanel, true);
     }
 
