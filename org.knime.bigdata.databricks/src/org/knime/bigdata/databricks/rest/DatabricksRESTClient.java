@@ -48,16 +48,22 @@
  */
 package org.knime.bigdata.databricks.rest;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.RedirectionException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.common.util.Base64Utility;
@@ -90,41 +96,54 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     /**
      * Map response HTTP status codes to {@link IOException}s with error message from JSON response if possible.
      */
-    static class DatabricksResponseExceptionMapper implements ResponseExceptionMapper<IOException> {
+    static class DatabricksResponseExceptionMapper implements ResponseExceptionMapper<WebApplicationException> {
         @Override
-        public IOException fromResponse(final Response response) {
-            String message = "";
+        public WebApplicationException fromResponse(final Response response) {
+            Optional<String> message = Optional.empty();
 
             // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
             if (response.getMediaType().getSubtype().toLowerCase().contains("json")) {
                 try {
                     final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
                     if (!StringUtils.isBlank(resp.message)) {
-                        message = resp.message;
+                        message = Optional.of(resp.message);
                     } else if (!StringUtils.isBlank(resp.error)) {
-                        message = resp.error;
+                        message = Optional.of(resp.error);
                     } else {
-                        message = response.getStatusInfo().getReasonPhrase();
+                        message = Optional.ofNullable(response.getStatusInfo().getReasonPhrase());
                     }
                 } catch (Exception e) {
-                    message = e.getMessage();
+                    message = Optional.ofNullable(e.getMessage());
                 }
             }
 
-            if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
-                return new AccessDeniedException(message);
-            } else if (response.getStatus() == 403) {
-                return new AccessDeniedException("Invalid or missing authentication data");
-            } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
-                return new FileNotFoundException(message);
-            } else if (response.getStatus() == 404) {
-                return new FileNotFoundException("Resource not found");
-            } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
-                return new FileNotFoundException("Context not found");
-            } else if (!StringUtils.isBlank(message)) {
-                return new IOException("Server error: " + message);
+            message = message.filter(s -> !s.isEmpty());
+            Status status = Status.fromStatusCode(response.getStatus());
+
+            if (status == Status.FORBIDDEN) {
+                return new ForbiddenException(message.orElse("Invalid or missing authentication data"), response);
+            } else if (status == Status.NOT_FOUND) {
+                return new NotFoundException(message.orElse("Resource not found"), response);
+            } else if (status == Status.INTERNAL_SERVER_ERROR
+                && message.filter(m -> m.startsWith("ContextNotFound: ")).isPresent()) {
+                return new NotFoundException("Context not found", response);
             } else {
-                return new IOException("Server error: " + response.getStatus());
+                String serverError = "Server error: " + message.orElse(String.valueOf(response.getStatus()));
+                return toGenericException(status, serverError, response);
+            }
+        }
+
+        private static WebApplicationException toGenericException(final Status status, final String message,
+            final Response response) {
+            switch (status.getFamily()) {
+                case CLIENT_ERROR:
+                    return new ClientErrorException(message, response);
+                case REDIRECTION:
+                    return new RedirectionException(message, response);
+                case SERVER_ERROR:
+                    return new ServerErrorException(message, response);
+                default:
+                    return new WebApplicationException(message, response);
             }
         }
     }

@@ -48,8 +48,6 @@
  */
 package org.knime.bigdata.database.databricks;
 
-import java.io.IOException;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
@@ -65,7 +63,7 @@ public class TableAccessControllException extends KNIMESparkException {
      *
      * @param e original exception from databricks
      */
-    public TableAccessControllException(final IOException e) {
+    public TableAccessControllException(final Exception e) {
         super("Table Access Control detected, see the advanced tab in the configuration dialog to disable the spark context.\n" + e.getMessage(), e);
     }
 }

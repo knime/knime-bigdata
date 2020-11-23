@@ -51,6 +51,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
 import org.knime.bigdata.databricks.rest.dbfs.Close;
 import org.knime.bigdata.databricks.rest.dbfs.Create;
@@ -95,8 +97,8 @@ public class DBFSOutputStream extends OutputStream {
 
         try {
             m_handle = m_api.create(Create.create(path, overwrite)).handle;
-        } catch (Exception e) {
-            throw new IOException("Failed to open handle for " + m_path, e);
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, path);
         }
     }
 
@@ -114,8 +116,8 @@ public class DBFSOutputStream extends OutputStream {
                 m_api.addBlock(AddBlock.create(m_handle, base64Data));
                 m_bufferOffset = 0;
             }
-        } catch (Exception e) {
-            throw new IOException("Failed to submit buffer while writing " + m_path, e);
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, m_path);
         }
     }
 
@@ -162,8 +164,8 @@ public class DBFSOutputStream extends OutputStream {
                 flush();
                 m_api.close(Close.create(m_handle));
 
-            } catch (Exception e) {
-                throw new IOException("Failed to close handle while writing " + m_path, e);
+            } catch (WebApplicationException e) {
+                throw DBFSUtil.toIOE(e, m_path);
 
             } finally {
                 m_isOpen = false;

@@ -54,8 +54,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
 import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
+import org.knime.bigdata.dbfs.filehandler.DBFSUtil;
 import org.knime.filehandling.core.connections.base.BasePathIterator;
 
 /**
@@ -74,14 +77,17 @@ public class DbfsPathIterator extends BasePathIterator<DbfsPath> {
      */
     public DbfsPathIterator(final DbfsPath path, final Filter<? super Path> filter) throws IOException {
         super(path, filter);
+        try {
+            @SuppressWarnings("resource")
+            FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
+            FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
 
-        @SuppressWarnings("resource")
-        FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
-        FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
+            Iterator<DbfsPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
 
-        Iterator<DbfsPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
-
-        setFirstPage(iterator);//NOSONAR
+            setFirstPage(iterator);//NOSONAR
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, path.toString());
+        }
     }
 
     @SuppressWarnings("resource")

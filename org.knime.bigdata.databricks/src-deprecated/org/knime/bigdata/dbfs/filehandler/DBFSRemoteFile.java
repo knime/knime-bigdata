@@ -50,7 +50,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.file.AccessDeniedException;
+
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
@@ -112,12 +114,15 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
             try {
                 m_fileInfo = getOpenedConnection().getFileInfo(getURI().getPath());
                 m_fileInfoLoaded = true;
-            } catch (AccessDeniedException e) {
+            } catch (ForbiddenException e) {
                 throw new RemoteFile.AccessControlException(e);
-            } catch (FileNotFoundException e) {
+            } catch (NotFoundException e) {
                 m_fileInfoLoaded = true;
                 m_fileInfo = null;
-                throw e;
+
+                FileNotFoundException fnfe = new FileNotFoundException(e.getMessage());
+                fnfe.initCause(e);
+                throw fnfe;
             }
         } else if (m_fileInfo == null) {
             throw new FileNotFoundException(getURI().getPath());
@@ -208,7 +213,7 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
                 files[i] = new DBFSRemoteFile(fileInfos[i], uri, getConnectionInformation(), getConnectionMonitor());
             }
             return files;
-        } catch (AccessDeniedException e) {
+        } catch (ForbiddenException e) {
             throw new RemoteFile.AccessControlException(e);
         }
     }

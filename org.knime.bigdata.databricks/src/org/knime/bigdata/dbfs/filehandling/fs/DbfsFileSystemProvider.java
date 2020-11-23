@@ -48,7 +48,6 @@
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,7 +57,6 @@ import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -70,6 +68,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.Delete;
 import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
@@ -77,6 +77,7 @@ import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
 import org.knime.bigdata.databricks.rest.dbfs.Move;
 import org.knime.bigdata.dbfs.filehandler.DBFSInputStream;
 import org.knime.bigdata.dbfs.filehandler.DBFSOutputStream;
+import org.knime.bigdata.dbfs.filehandler.DBFSUtil;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 
@@ -111,7 +112,11 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
         }
 
         DBFSAPI client = source.getFileSystem().getClient();
-        client.move(Move.create(source.toString(), target.toString()));
+        try {
+            client.move(Move.create(source.toString(), target.toString()));
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, source.toString(), target.toString());
+        }
     }
 
     @Override
@@ -157,7 +162,11 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
     @SuppressWarnings("resource")
     @Override
     protected void createDirectoryInternal(final DbfsPath dir, final FileAttribute<?>... attrs) throws IOException {
-        dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
+        try {
+            dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, dir.toString());
+        }
     }
 
     @SuppressWarnings("resource")
@@ -166,15 +175,9 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
         try {
             FileInfo info = path.getFileSystem().getClient().getStatus(path.toString());
             return createBaseFileAttrs(info, path);
-        } catch (FileNotFoundException e) {
-            throw toNSFException(e, path.toString());
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, path.toString());
         }
-    }
-
-    private static NoSuchFileException toNSFException(final FileNotFoundException cause, final String path) {
-        NoSuchFileException nsfe = new NoSuchFileException(path);
-        nsfe.initCause(cause);
-        return nsfe;
     }
 
     /**
@@ -198,7 +201,11 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
     @Override
     protected void deleteInternal(final DbfsPath path) throws IOException {
         DBFSAPI client = path.getFileSystem().getClient();
-        client.delete(Delete.create(path.toString(), false));
+        try {
+            client.delete(Delete.create(path.toString(), false));
+        } catch (WebApplicationException e) {
+            throw DBFSUtil.toIOE(e, path.toString());
+        }
     }
 
     @Override

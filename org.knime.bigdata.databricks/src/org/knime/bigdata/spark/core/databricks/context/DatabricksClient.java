@@ -49,11 +49,13 @@
 package org.knime.bigdata.spark.core.databricks.context;
 
 import java.io.Closeable;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.util.Arrays;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.knime.bigdata.database.databricks.TableAccessControllException;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
@@ -172,9 +174,9 @@ public class DatabricksClient {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution canceled after thread interruption.");
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             throw new SparkClusterNotFoundException(clusterId);
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to uninstall old job jar: " + e.getMessage(), e);
         }
     }
@@ -241,9 +243,9 @@ public class DatabricksClient {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution cancled after thread interruption.");
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             throw new SparkClusterNotFoundException(clusterId);
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to install job jar in Databricks cluster: " + e.getMessage(), e);
         }
     }
@@ -294,7 +296,7 @@ public class DatabricksClient {
             }
             return null;
 
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             throw new SparkClusterNotFoundException(clusterId);
         }
     }
@@ -361,9 +363,9 @@ public class DatabricksClient {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution cancled after thread interruption.");
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             throw new SparkClusterNotFoundException(clusterId);
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to start cluster: " + e.getMessage(), e);
         }
     }
@@ -388,9 +390,9 @@ public class DatabricksClient {
                         || (e.getKey().equalsIgnoreCase("spark.databricks.acl.sqlOnly")
                             && e.getValue().equalsIgnoreCase("true")));
             }
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             throw new SparkClusterNotFoundException(clusterId);
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             LOG.warn("Unable to fetch cluster configuration: " + e.getMessage(), e);
         }
 
@@ -406,7 +408,7 @@ public class DatabricksClient {
     boolean isClusterRunning() throws KNIMESparkException {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_clusterAPI.getCluster(m_config.getClusterId()).state == ClusterState.RUNNING;
-        } catch (IOException e) {
+        } catch (IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to fetch cluster state: " + e.getMessage(), e);
         }
     }
@@ -423,9 +425,9 @@ public class DatabricksClient {
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             LOG.info("Terminating cluster " + clusterId + " on Databricks");
             m_clusterAPI.delete(Cluster.create(clusterId));
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             throw new SparkClusterNotFoundException(clusterId);
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to stop cluster: " + e.getMessage(), e);
         }
     }
@@ -483,7 +485,7 @@ public class DatabricksClient {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution cancled after thread interruption.");
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to run job on cluster: " + e.getMessage(), e);
         }
     }
@@ -502,9 +504,9 @@ public class DatabricksClient {
                 LOG.info("Spark execution context " + context.id + " on Databricks cluster " + m_config.getClusterId()
                     + " destroyed.");
             }
-        } catch (final FileNotFoundException e) {
+        } catch (final NotFoundException e) {
             // context already destroyed
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             throw new KNIMESparkException("Unable to destroy context on cluster: " + e.getMessage(), e);
         }
     }
@@ -546,9 +548,9 @@ public class DatabricksClient {
             cancelCommand(contextId, command);
             Thread.currentThread().interrupt();
             throw new CanceledExecutionException("Execution cancled after thread interruption.");
-        } catch (final FileNotFoundException e) { // cluster or driver restart
+        } catch (final NotFoundException e) { // cluster or driver restart
             throw new SparkContextNotFoundException();
-        } catch (final IOException e) {
+        } catch (final IOException | WebApplicationException e) {
             if (e.getMessage() != null && e.getMessage().startsWith("Server error: UnauthorizedCommandException")) {
                 throw new TableAccessControllException(e);
             } else {
@@ -570,7 +572,7 @@ public class DatabricksClient {
                         + m_config.getClusterId() + ".");
                 m_commandsAPI.cancel(CommandCancel.create(m_config.getClusterId(), contextId, command.id));
 
-            } catch (IOException e) {
+            } catch (IOException | WebApplicationException e) {
                 LOG.warn("Unable to cancel command: " + command.id);
             }
         }

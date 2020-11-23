@@ -42,100 +42,65 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2020-11-22 (Alexander Bondaletov): created
  */
 package org.knime.bigdata.dbfs.filehandler;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Base64;
-import java.util.Base64.Decoder;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.NoSuchFileException;
 
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
-import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.databricks.rest.dbfs.FileBlock;
+import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 
 /**
- * {@link InputStream} to read files in 1MB blocks from DBFS.
+ * Utility class for DBFS.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * For the moment it is only contains methods working with {@link WebApplicationException}, which is pretty generic and
+ * not specific to DBFS. It would probably make sense to move these to the {@link ExceptionUtil} class as a part of it's
+ * future refactoring.
+ *
+ * @author Alexander Bondaletov
  */
-public class DBFSInputStream extends InputStream {
-    private static final int BLOCK_SIZE = 1024 * 1024;
-
-    private final String m_path;
-
-    private final DBFSAPI m_api;
-
-    private long m_nextOffset;
-
-    private final Decoder m_decoder;
-
-    private final byte[] m_buffer;
-
-    private int m_bufferOffset;
-
-    private int m_bufferLength;
-
-    private boolean m_lastBlock;
+public final class DBFSUtil {
+    private DBFSUtil() {
+    }
 
     /**
-     * @param path The file path.
-     * @param api The {@link DBFSAPI} instance.
-     * @throws IOException
+     * Converts provided {@link WebApplicationException} into {@link IOException}.
+     *
+     * @param e The {@link WebApplicationException} instance.
+     * @param file A string identifying the file or {@code null} if not known.
+     * @param other A string identifying the other file or {@code null} if not known.
+     * @return The {@link IOException}.
      */
-    public DBFSInputStream(final String path, final DBFSAPI api) throws IOException {
-        m_path = path;
-        m_api = api;
-        m_nextOffset = 0;
-        m_decoder = Base64.getDecoder();
-        m_buffer = new byte[BLOCK_SIZE];
-        m_bufferOffset = 0;
-        m_bufferLength = 0;
-        readNextBlockIfNecessary();
+    public static IOException toIOE(final WebApplicationException e, final String file, final String other) {
+        if (e instanceof NotFoundException) {
+            NoSuchFileException nsfe = new NoSuchFileException(file, other, e.getMessage());
+            nsfe.initCause(e);
+            return nsfe;
+        }
+        if (e instanceof ForbiddenException) {
+            AccessDeniedException ade = new AccessDeniedException(file, other, e.getMessage());
+            ade.initCause(e);
+            return ade;
+        }
+        return new IOException(e.getMessage(), e);
     }
 
-    private void readNextBlockIfNecessary() throws IOException {
-        if (!m_lastBlock && m_bufferOffset == m_bufferLength) {
-            try {
-                final FileBlock fileBlock = m_api.read(m_path, m_nextOffset, BLOCK_SIZE);
-                m_lastBlock = fileBlock.bytes_read < BLOCK_SIZE;
-                m_bufferOffset = m_bufferLength = 0;
-
-                if (fileBlock.bytes_read > 0) {
-                    m_nextOffset += fileBlock.bytes_read;
-                    m_bufferLength = m_decoder.decode(fileBlock.data.getBytes(), m_buffer);
-                }
-            } catch (WebApplicationException e) {
-                throw DBFSUtil.toIOE(e, m_path);
-            }
-        }
-    }
-
-    @Override
-    public synchronized int read() throws IOException {
-        readNextBlockIfNecessary();
-
-        if (m_lastBlock && m_bufferOffset == m_bufferLength) {
-            return -1;
-        } else {
-            // return byte as int between 0 and 255
-            return m_buffer[m_bufferOffset++] & 0xff;
-        }
-    }
-
-    @Override
-    public int read(final byte[] dest, final int off, final int len) throws IOException {
-
-        readNextBlockIfNecessary();
-
-        if (m_lastBlock && m_bufferOffset == m_bufferLength) {
-            return -1;
-        } else {
-            final int bytesToRead = Math.min(len, m_bufferLength - m_bufferOffset);
-            System.arraycopy(m_buffer, m_bufferOffset, dest, off, bytesToRead);
-            m_bufferOffset += bytesToRead;
-            return bytesToRead;
-        }
+    /**
+     * Converts provided {@link WebApplicationException} into {@link IOException}.
+     *
+     * @param e The {@link WebApplicationException} instance.
+     * @param file A string identifying the file or {@code null} if not known.
+     * @return The {@link IOException}.
+     */
+    public static IOException toIOE(final WebApplicationException e, final String file) {
+        return toIOE(e, file, null);
     }
 }
