@@ -237,4 +237,9 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
 
         return fileSettingsPanel;
     }
+
+    @Override
+    public void onClose() {
+        m_filePanel.onClose();  
+    }
 }

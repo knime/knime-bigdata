@@ -187,4 +187,9 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         updateMultiFileEnabledStatus();
     }
 
+    @Override
+    public void onClose() {
+        m_fileChooser.onClose();
+    }
+
 }

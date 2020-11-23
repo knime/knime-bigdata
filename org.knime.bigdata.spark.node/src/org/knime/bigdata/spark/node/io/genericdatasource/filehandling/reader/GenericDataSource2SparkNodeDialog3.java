@@ -255,6 +255,7 @@ public class GenericDataSource2SparkNodeDialog3<T extends GenericDataSource2Spar
     @Override
     public void onClose() {
         super.onClose();
+        m_inputPathChooser.onClose();
         m_settings.getFileChooserModel().removeChangeListener(m_inputPathChangeListener);
     }
 }

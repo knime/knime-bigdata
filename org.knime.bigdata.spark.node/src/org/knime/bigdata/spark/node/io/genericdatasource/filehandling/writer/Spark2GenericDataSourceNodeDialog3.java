@@ -347,4 +347,9 @@ public class Spark2GenericDataSourceNodeDialog3<T extends Spark2GenericDataSourc
 
         return KNIMEConfigContainer.getSparkVersion();
     }
+
+    @Override
+    public void onClose() {
+        m_outputPathChooser.onClose();
+    }
 }
