@@ -60,55 +60,57 @@ import org.knime.core.data.convert.map.MappingException;
 
 /**
  * Factory for List cell to ORC List
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
- * @param <T>
- *            the list type
- * @param <E>
- *            the element type
+ * @param <T> the list type
+ * @param <E> the element type
  * @param <CV> the type of the column vector
  */
 public class ORCListCellValueConsumerFactory<T, E, CV extends ColumnVector>
-extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORCParameter> {
+    extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORCParameter> {
 
-    private class ListConsumer<CCV extends ColumnVector> 
-    implements CellValueConsumer<ORCDestination, E[], ORCParameter> {
+    private class ListConsumer<CCV extends ColumnVector>
+        implements CellValueConsumer<ORCDestination, E[], ORCParameter> {
 
         ORCCellValueConsumer<E, CCV> m_elementconsumer;
 
-        public ListConsumer(ORCCellValueConsumer<E, CCV> orcConsumer) {
+        public ListConsumer(final ORCCellValueConsumer<E, CCV> orcConsumer) {
             m_elementconsumer = orcConsumer;
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public void consumeCellValue(ORCDestination destination, E[] value, ORCParameter consumerParams)
-                throws MappingException {
+        public void consumeCellValue(final ORCDestination destination, final E[] value, final ORCParameter consumerParams)
+            throws MappingException {
 
             final int colIdx = consumerParams.getColumnIndex();
-            final ListColumnVector columnVector = (ListColumnVector) destination.getColumnVector(colIdx);
+            final ListColumnVector columnVector = (ListColumnVector)destination.getColumnVector(colIdx);
             final int rowIndex = destination.getRowIndex();
 
+            long offset = 0;
+            if (rowIndex != 0) {
+                offset = columnVector.offsets[rowIndex - 1] + columnVector.lengths[rowIndex - 1] + 1;
+            }
+            // the offset must be set whether the value is missing or not
+            // otherwise the calculation above will result in the offset starting at 0
+            // after a missing value is encountered
+            columnVector.offsets[rowIndex] = offset;
             if (value == null) {
                 columnVector.noNulls = false;
                 columnVector.isNull[rowIndex] = true;
+                columnVector.lengths[rowIndex] = 0;
             } else {
-                long offset = 0;
-                if (rowIndex != 0) {
-                    offset = columnVector.offsets[rowIndex - 1] + columnVector.lengths[rowIndex - 1] + 1;
-                }
-                columnVector.offsets[rowIndex] = offset;
                 final int listsize = value.length;
-                columnVector.child.ensureSize((int) (offset + listsize), true);
+                columnVector.child.ensureSize((int)(offset + listsize), true);
 
                 for (final E val : value) {
                     if (val == null) {
                         columnVector.child.noNulls = false;
-                        columnVector.child.isNull[(int) offset] = true;
+                        columnVector.child.isNull[(int)offset] = true;
                     } else {
                         try {
-                            m_elementconsumer.writeNonNullValue((CCV) columnVector.child, (int) offset, val);
+                            m_elementconsumer.writeNonNullValue((CCV)columnVector.child, (int)offset, val);
                         } catch (Exception e) {
                             throw new MappingException(e);
                         }
@@ -128,25 +130,24 @@ extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORC
 
     /**
      * Constructs a element List consumer
-     * 
-     * @param elementConsumerFactory
-     *            the factory for the element consumer
+     *
+     * @param elementConsumerFactory the factory for the element consumer
      */
-    public ORCListCellValueConsumerFactory(ORCCellValueConsumerFactory<E, CV> elementConsumerFactory) {
+    public ORCListCellValueConsumerFactory(final ORCCellValueConsumerFactory<E, CV> elementConsumerFactory) {
         super();
         m_elementConsumerFactory = elementConsumerFactory;
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public CellValueConsumer<ORCDestination, T, ORCParameter> create() {
 
-        return (CellValueConsumer<ORCDestination, T, ORCParameter>) new ListConsumer<>(
-                m_elementConsumerFactory.getORCConsumer());
+        return (CellValueConsumer<ORCDestination, T, ORCParameter>)new ListConsumer<>(
+            m_elementConsumerFactory.getORCConsumer());
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
 
         if (this == obj) {
             return true;
@@ -158,10 +159,10 @@ extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORC
             return false;
         }
 
-        final ORCListCellValueConsumerFactory<?, ?, ?> other = (ORCListCellValueConsumerFactory<?, ?, ?>) obj;
-        if(!other.m_elementConsumerFactory.equals(m_elementConsumerFactory)) {
+        final ORCListCellValueConsumerFactory<?, ?, ?> other = (ORCListCellValueConsumerFactory<?, ?, ?>)obj;
+        if (!other.m_elementConsumerFactory.equals(m_elementConsumerFactory)) {
             return false;
-        }else {
+        } else {
             return super.equals(obj);
         }
 
