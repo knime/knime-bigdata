@@ -202,18 +202,12 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-        preSettingsSave();
-        validateBeforeSaving();
         m_authPanel.saveSettingsTo(settings);
-        m_settings.saveSettingsForDialog(settings);
-    }
-
-    private void preSettingsSave() {
         m_settings.getWorkingDirectoryModel().setStringValue(m_workingDirChooser.getSelectedWorkingDirectory());
-    }
 
-    private void validateBeforeSaving() throws InvalidSettingsException {
         m_settings.validate();
+
+        m_settings.saveSettingsForDialog(settings);
         m_workingDirChooser.addCurrentSelectionToHistory();
     }
 
@@ -223,13 +217,13 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
         try {
             m_authPanel.loadSettingsFrom(settings, specs);
             m_settings.loadSettingsForDialog(settings);
+            m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
         } catch (InvalidSettingsException ex) { // NOSONAR can be ignored
         }
     }
 
     @Override
     public void onOpen() {
-        m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
         m_authPanel.onOpen();
     }
 
