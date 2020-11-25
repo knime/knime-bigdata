@@ -73,7 +73,7 @@ public final class NioFileSystemUtil {
         try {
             final String key = getFileSystemUUID();
             NioFileSystem.NEXT_FILE_SYSTEM.set(fsPath.getFileSystem());
-            final Path hadoopPath = new Path(new URI(SCHEME, key, fsPath.toUri().getPath(), null));
+            final Path hadoopPath = new Path(new URI(SCHEME, key, fsPath.getURICompatiblePath(), null));
             hadoopPath.getFileSystem(config); // open the file system
             return hadoopPath;
         } catch (final URISyntaxException e) {

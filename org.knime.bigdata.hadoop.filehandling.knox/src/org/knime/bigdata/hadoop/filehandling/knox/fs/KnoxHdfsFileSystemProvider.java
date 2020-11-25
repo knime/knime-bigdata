@@ -142,9 +142,9 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
 
     @SuppressWarnings("resource")
     private void copyFile(final KnoxHdfsPath source, final KnoxHdfsPath target) throws IOException {
-        final String sourcePath = source.toUri().getPath();
+        final String sourcePath = source.getURICompatiblePath();
         final KnoxHdfsFileSystem fs = target.getFileSystem();
-        final String targetPath = target.toUri().getPath();
+        final String targetPath = target.getURICompatiblePath();
 
         try (final InputStream in = KnoxHDFSClient.openFile(getClient(), sourcePath);
                 final OutputStream out = fs.createFile(targetPath, false)) {

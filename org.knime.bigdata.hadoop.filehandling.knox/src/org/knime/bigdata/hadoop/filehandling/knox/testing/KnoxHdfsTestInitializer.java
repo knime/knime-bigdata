@@ -88,7 +88,7 @@ public class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPa
     public KnoxHdfsPath createFileWithContent(final String content, final String... pathComponents) throws IOException {
         final KnoxHdfsPath path = makePath(pathComponents);
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            m_client.mkdirs(path.getParent().toUri().getPath(), PutOpParam.Op.MKDIRS);
+            m_client.mkdirs(((KnoxHdfsPath)path.getParent()).getURICompatiblePath(), PutOpParam.Op.MKDIRS);
             try (final OutputStream stream = KnoxHDFSClient.createFile(m_client, m_uploadExecutor, path.toUri().getPath(), false)) {
                 stream.write(content.getBytes(StandardCharsets.UTF_8));
             }
@@ -100,7 +100,7 @@ public class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPa
     protected void beforeTestCaseInternal() throws IOException {
         final KnoxHdfsPath scratchDir = getTestCaseScratchDir();
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            m_client.mkdirs(scratchDir.toUri().getPath(), PutOpParam.Op.MKDIRS);
+            m_client.mkdirs(scratchDir.getURICompatiblePath(), PutOpParam.Op.MKDIRS);
         }
     }
 
@@ -109,7 +109,7 @@ public class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPa
         final KnoxHdfsPath scratchDir = getTestCaseScratchDir();
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final boolean recursive = true;
-            m_client.delete(scratchDir.toUri().getPath(), DeleteOpParam.Op.DELETE, recursive);
+            m_client.delete(scratchDir.getURICompatiblePath(), DeleteOpParam.Op.DELETE, recursive);
         }
     }
 }

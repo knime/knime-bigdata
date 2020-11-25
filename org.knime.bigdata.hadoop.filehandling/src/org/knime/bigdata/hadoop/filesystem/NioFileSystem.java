@@ -116,7 +116,7 @@ public class NioFileSystem extends FileSystem {
         try {
             // the underling file system might use an other separator,
             // convert the path to a compatible URI syntax instead of p.toString here.
-            return new Path(new URI(SCHEME, m_uri.getHost(), p.toUri().getPath(), null));
+            return new Path(new URI(SCHEME, m_uri.getHost(), p.getURICompatiblePath(), null));
         } catch (URISyntaxException e) {
             throw new IOException(e);
         }

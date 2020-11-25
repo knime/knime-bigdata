@@ -81,10 +81,9 @@ public class KnoxHdfsPathIterator extends BasePathIterator<KnoxHdfsPath> {
 
         final KnoxHdfsFileSystem fileSystem = path.getFileSystem();
         final ArrayList<KnoxHdfsPath> result = new ArrayList<>(stats.length);
-        final String pathPrefix = path.toUri().getPath();
 
         for (final FileStatus stat : stats) {
-            final KnoxHdfsPath current = fileSystem.getPath(pathPrefix, stat.pathSuffix);
+            final KnoxHdfsPath current = (KnoxHdfsPath)path.resolve(stat.pathSuffix);
             final BaseFileAttributes attributes = toBaseFileAttributes(current, stat);
 
             // the newOutputStream... methods do not play well with symbolic links,
