@@ -105,11 +105,11 @@
 					<li>Intersection: Only columns that appear in all files are considered for the output table.</li>
 				</ul>
 				<b>NOTE:</b> This setting has special implications if you are controlling the input location with a flow variable. 
-				If Intersection is selected any column that moves into the intersection during execution will be considered to be new, even if it was previously part of the union of columns.
+				If Intersection is selected any column that moves into the intersection during execution will be considered to be an unknown new column, even if it was previously part of the union of columns.
 				It is also important to note that the transformation matching during execution is based on name.
 				That means if there was a column [A, Integer] during configuration in the dialog and this column becomes [A, String] during execution, then the stored transformation is applied
 				to it. For filtering, ordering and renaming, this is straight forward. For type mapping the following is done: If there is an alternative converter to the specified KNIME type, then this converter is used,
-				otherwise we default to the default KNIME type for the new type. In our example we might have specified that [A, Integer] should be mapped to Long.
+				otherwise we default to the default KNIME type for the new column. In our example we might have specified that [A, Integer] should be mapped to Long.
 				For the changed column [A, String] there is no converter to Long, so we default back to String and A becomes a String column in the output table.
 			</option>
         </tab>

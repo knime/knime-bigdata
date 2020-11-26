@@ -52,6 +52,7 @@ import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
@@ -113,21 +114,49 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         final FlowVariableModel locationFvm = createFlowVariableModel(keyChain, FSLocationVariableType.INSTANCE);
         m_fileChooser = new DialogComponentReaderFileChooser(pathSettings, "parquet", locationFvm, FilterMode.FILE,
             FilterMode.FILES_IN_FOLDERS);
-        pathSettings.addChangeListener(e -> configChanged());
+        pathSettings.addChangeListener(e -> handlePathSettingsChange());
+        m_failOnDifferingSpecs.addActionListener(e -> configChanged());
         addTab("Settings", createSettingsPanel());
+    }
+
+    private void handlePathSettingsChange() {
+        updateMultiFileEnabledStatus();
+        configChanged();
+    }
+
+    private void updateMultiFileEnabledStatus() {
+        final boolean isMultiFile = isMultiFile();
+        m_failOnDifferingSpecs.setEnabled(isMultiFile);
+        getTransformationPanel().setColumnFilterModeEnabled(isMultiFile);
+    }
+
+    private boolean isMultiFile() {
+        return m_fileChooser.getSettingsModel().getFilterMode() != FilterMode.FILE;
     }
 
     private JPanel createSettingsPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
         GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
-        panel.add(m_fileChooser.getComponentPanel(), gbc.build());
-        panel.add(m_failOnDifferingSpecs, gbc.incY().build());
+        JPanel fileChooserPanel = m_fileChooser.getComponentPanel();
+        fileChooserPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input location"));
+        panel.add(fileChooserPanel, gbc.build());
+        panel.add(createMultiFilePanel(), gbc.incY().build());
         panel.add(createTransformationTab(), gbc.fillBoth().setWeightY(1.0).incY().build());
+        return panel;
+    }
+
+    private JPanel createMultiFilePanel() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options for multiple files"));
+        GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
+        panel.add(m_failOnDifferingSpecs, gbc.build());
+        panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
         return panel;
     }
 
     @Override
     protected MultiTableReadConfig<C> getConfig() throws InvalidSettingsException {
+        saveToConfig();
         return m_config;
     }
 
@@ -140,9 +169,13 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         super.saveSettingsTo(settings);
         m_fileChooser.saveSettingsTo(SettingsUtils.getOrAdd(settings, SettingsUtils.CFG_SETTINGS_TAB));
+        saveToConfig();
+        m_config.saveInDialog(settings);
+    }
+
+    private void saveToConfig() {
         m_config.setTableSpecConfig(getTableSpecConfig());
         m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
-        m_config.saveInDialog(settings);
     }
 
     @Override
@@ -151,6 +184,7 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
         m_config.loadInDialog(settings, specs);
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
+        updateMultiFileEnabledStatus();
     }
 
 }
