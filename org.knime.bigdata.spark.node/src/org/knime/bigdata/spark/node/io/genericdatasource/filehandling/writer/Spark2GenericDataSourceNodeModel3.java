@@ -58,6 +58,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.WritePathAccessor;
 import org.knime.filehandling.core.defaultnodesettings.status.NodeModelStatusConsumer;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage.MessageType;
@@ -163,7 +164,7 @@ public class Spark2GenericDataSourceNodeModel3<T extends Spark2GenericDataSource
             final FSPath outputFSPath = accessor.getOutputPath(m_statusConsumer);
             checkOutputPath(outputFSPath);
             final FSConnection fsConnection = fsPort.getFileSystemConnection().get(); // NOSONAR present check done in getOutputPath
-            final URI clusterOutputURI = fsConnection.getDefaultURIExporter().toUri(outputFSPath);
+            final URI clusterOutputURI = fsConnection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP).toUri(outputFSPath);
             final String clusterOutputPath = URIUtil.toUnencodedString(clusterOutputURI);
             jobInput = new Spark2GenericDataSourceJobInput(sparkData.getData().getID(), format, uploadDriver,
                 clusterOutputPath, schema, saveMode);

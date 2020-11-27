@@ -57,6 +57,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.ReadPathAccessor;
 import org.knime.filehandling.core.defaultnodesettings.status.NodeModelStatusConsumer;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
@@ -144,7 +145,7 @@ public class GenericDataSource2SparkNodeModel3<T extends GenericDataSource2Spark
         try (final ReadPathAccessor accessor = settings.getFileChooserModel().createReadPathAccessor()) {
             final FSPath inputFSPath = accessor.getRootPath(statusConsumer);
             final FSConnection fsConnection = settings.getFileChooserModel().getConnection();
-            final URI clusterInputURI = fsConnection.getDefaultURIExporter().toUri(inputFSPath);
+            final URI clusterInputURI = fsConnection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP).toUri(inputFSPath);
             return URIUtil.toUnencodedString(clusterInputURI);
         }
     }

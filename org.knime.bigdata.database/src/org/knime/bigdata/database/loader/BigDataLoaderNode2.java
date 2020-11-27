@@ -113,6 +113,7 @@ import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.node.datatype.mapping.DataTypeMappingConfigurationData;
 
@@ -180,7 +181,7 @@ public class BigDataLoaderNode2
                 rowInput.close();
             }
             try (FSConnection connection = targetFolderModel.getConnection()) {
-                final URIExporter uriExporter = connection.getDefaultURIExporter();
+                final URIExporter uriExporter = connection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP);
                 final String targetFileString = URIUtil.toUnencodedString(uriExporter.toUri(targetFile));
                 exec.setProgress("Loading data file into DB table...");
                 exec.checkCanceled();

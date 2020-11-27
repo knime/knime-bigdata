@@ -71,6 +71,7 @@ import org.knime.core.util.FileUtil;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
 
 /**
  * KNIME-side implementation of {@link StagingAreaAccess} that accesses the staging area using a {@code FSConnection}.
@@ -139,7 +140,7 @@ public class RemoteFSControllerNIO implements RemoteFSController {
             final String stagingDir = ".knime-spark-staging-" + m_clusterID;
             m_stagingArea = (FSPath)m_stagingAreaParent.resolve(stagingDir);
             FSFiles.createDirectories(m_stagingArea);
-            final URI uri = m_fsConnection.getDefaultURIExporter().toUri(m_stagingArea);
+            final URI uri = m_fsConnection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP).toUri(m_stagingArea);
             m_stagingAreaString = URIUtil.toUnencodedString(uri);
             m_stagingAreaIsPath = uri.getScheme() == null;
         } catch (final IOException|URISyntaxException e) {
@@ -179,7 +180,7 @@ public class RemoteFSControllerNIO implements RemoteFSController {
                 Files.copy(fileToUpload.toPath(), out);
             }
             final FSPath fsPath = (FSPath)m_stagingArea.resolve(stagingFilename);
-            final URI uri = m_fsConnection.getDefaultURIExporter().toUri(fsPath);
+            final URI uri = m_fsConnection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP).toUri(fsPath);
             return URIUtil.toUnencodedString(uri);
         } catch (final URISyntaxException e) {
             throw new IOException("Unable to encode staging file URI", e);

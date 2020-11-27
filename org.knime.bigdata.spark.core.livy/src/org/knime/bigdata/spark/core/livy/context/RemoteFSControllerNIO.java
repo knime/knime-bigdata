@@ -73,6 +73,7 @@ import org.knime.core.util.FileUtil;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
 
 /**
  * KNIME-side implementation of {@link StagingAreaAccess} that accesses the staging area using a {@code FSConnection}.
@@ -143,7 +144,7 @@ public class RemoteFSControllerNIO implements RemoteFSController {
             if (m_fsConnection.getFileSystem().supportedFileAttributeViews().contains("posix")) {
                 Files.setPosixFilePermissions(m_stagingArea, STAGING_AREA_PERMISSIONS);
             }
-            final URI uri = m_fsConnection.getDefaultURIExporter().toUri(m_stagingArea);
+            final URI uri = m_fsConnection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP).toUri(m_stagingArea);
             m_stagingAreaString = URIUtil.toUnencodedString(uri);
             m_stagingAreaIsPath = uri.getScheme() == null;
         } catch (final IOException|URISyntaxException e) {
