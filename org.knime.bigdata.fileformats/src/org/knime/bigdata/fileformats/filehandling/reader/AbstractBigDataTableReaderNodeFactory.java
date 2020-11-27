@@ -95,13 +95,13 @@ public abstract class AbstractBigDataTableReaderNodeFactory
         final NodeCreationConfiguration creationConfig,
         final MultiTableReadFactory<BigDataReaderConfig, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> defaultProductionPathFn) {
-        return new BigDataTableReaderNodeDialog<>(createPathSettings(creationConfig), createConfig(), readFactory,
-            defaultProductionPathFn);
+        return new BigDataTableReaderNodeDialog<>(createPathSettings(creationConfig), createConfig(creationConfig),
+            readFactory, defaultProductionPathFn);
     }
 
     @Override
     protected final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>>
-        createConfig() {
+        createConfig(final NodeCreationConfiguration nodeCreationConfig) {
         final DefaultTableReadConfig<BigDataReaderConfig> tc = new DefaultTableReadConfig<>(new BigDataReaderConfig());
         return new DefaultMultiTableReadConfig<>(tc, BigDataTableReadConfigSerializer.INSTANCE);
     }
