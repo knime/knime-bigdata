@@ -51,7 +51,7 @@ package org.knime.bigdata.hadoop.filesystem.testing;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
@@ -80,7 +80,7 @@ class LocalHdfsFSConnection implements FSConnection {
         m_hadoopFileSystem = (NioFileSystem)NioFileSystemUtil //
                 .getHadoopPath(m_localFileSystem.getWorkingDirectory(), hadoopFileSystemConfig) //
                 .getFileSystem(hadoopFileSystemConfig);
-        m_hdfsFileSystem = new HdfsConnection(m_hadoopFileSystem).getFileSystem();
+        m_hdfsFileSystem = new HdfsFSConnection(m_hadoopFileSystem).getFileSystem();
     }
 
     @Override

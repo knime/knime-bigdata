@@ -51,7 +51,7 @@ import java.net.ConnectException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -76,7 +76,7 @@ public class HdfsConnectorNodeModel extends NodeModel {
 
     private String m_fsId;
 
-    private HdfsConnection m_connection;
+    private HdfsFSConnection m_connection;
 
     private HdfsConnectorNodeSettings m_settings = new HdfsConnectorNodeSettings();
 
@@ -95,14 +95,14 @@ public class HdfsConnectorNodeModel extends NodeModel {
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_connection = new HdfsConnection(m_settings);
+        m_connection = new HdfsFSConnection(m_settings);
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
         testConnection(m_connection);
         return new PortObject[]{new FileSystemPortObject(createSpec())};
     }
 
     @SuppressWarnings("resource")
-    private static void testConnection(final HdfsConnection connection) throws IOException {
+    private static void testConnection(final HdfsFSConnection connection) throws IOException {
         try {
             Files.getLastModifiedTime(connection.getFileSystem().getPath("/"));
         } catch (AccessDeniedException e) {

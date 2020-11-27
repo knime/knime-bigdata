@@ -53,7 +53,7 @@ import java.net.URI;
 import java.util.Map;
 
 import org.knime.bigdata.commons.testing.TestflowVariable;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsAuthenticationSettings.AuthType;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
@@ -62,7 +62,7 @@ import org.knime.core.node.workflow.FlowVariable;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
 /**
- * Provides factory methods to create {@link HdfsConnection} objects for testing purposes.
+ * Provides factory methods to create {@link HdfsFSConnection} objects for testing purposes.
  *
  * @author Sascha Wolke, KNIME GmbH
  * @noreference This is testing code and its API is subject to change without notice.
@@ -94,7 +94,7 @@ public class TestingHdfsConnectionFactory {
      * @return a {@link FileSystemPortObjectSpec} instance
      * @throws IOException
      */
-    public static HdfsConnection createConnection(final Map<String, FlowVariable> flowVariables) throws IOException {
+    public static HdfsFSConnection createConnection(final Map<String, FlowVariable> flowVariables) throws IOException {
         final URI uri = URI.create(TestflowVariable.getString(TestflowVariable.HDFS_URL, flowVariables));
         final HdfsProtocol protocol = HdfsProtocol.valueOf(uri.getScheme().toUpperCase());
         final String authMethod = TestflowVariable.getString(TestflowVariable.HDFS_AUTH_METHOD, flowVariables);
@@ -114,6 +114,6 @@ public class TestingHdfsConnectionFactory {
             throw new IllegalArgumentException("Unsupported HDFS authentication method: " + authMethod);
         }
 
-        return new HdfsConnection(settings);
+        return new HdfsFSConnection(settings);
     }
 }

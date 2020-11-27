@@ -68,7 +68,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -311,7 +311,7 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
 
     private FSConnection createFSConnection() throws IOException {
         HdfsConnectorNodeSettings clonedSettings = new HdfsConnectorNodeSettings(m_settings);
-        return new HdfsConnection(clonedSettings);
+        return new HdfsFSConnection(clonedSettings);
     }
 
     @Override

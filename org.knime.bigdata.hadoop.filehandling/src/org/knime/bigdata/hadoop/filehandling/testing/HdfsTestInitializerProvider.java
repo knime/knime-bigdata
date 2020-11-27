@@ -50,7 +50,7 @@ import java.net.URI;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsAuthenticationSettings.AuthType;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
@@ -85,7 +85,7 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
             configuration.get("user"), //
             workingDir);
 
-        return new HdfsTestInitializer(new HdfsConnection(settings));
+        return new HdfsTestInitializer(new HdfsFSConnection(settings));
     }
 
     private static void validateConfiguration(final Map<String, String> configuration) {

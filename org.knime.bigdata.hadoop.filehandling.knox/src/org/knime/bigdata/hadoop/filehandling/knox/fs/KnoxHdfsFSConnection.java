@@ -46,6 +46,7 @@
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSettings;
@@ -54,6 +55,9 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
 import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporterID;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.URIExporterMapBuilder;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -62,6 +66,11 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  * @author Sascha Wolke, KNIME GmbH
  */
 public class KnoxHdfsFSConnection implements FSConnection {
+
+    private static final Map<URIExporterID, URIExporter> URI_EXPORTERS = new URIExporterMapBuilder() //
+            .add(URIExporterIDs.DEFAULT, PathURIExporter.getInstance()) //
+            .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporter.getInstance()) //
+            .build();
 
     private static final long CACHE_TTL_MILLIS = 6000;
 
@@ -96,7 +105,7 @@ public class KnoxHdfsFSConnection implements FSConnection {
     }
 
     @Override
-    public URIExporter getDefaultURIExporter() {
-        return PathURIExporter.getInstance();
+    public Map<URIExporterID, URIExporter> getURIExporters() {
+        return URI_EXPORTERS;
     }
 }

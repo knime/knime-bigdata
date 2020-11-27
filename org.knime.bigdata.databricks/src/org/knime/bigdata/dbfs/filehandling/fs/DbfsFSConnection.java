@@ -51,6 +51,7 @@ package org.knime.bigdata.dbfs.filehandling.fs;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
 import org.knime.core.node.util.FileSystemBrowser;
@@ -59,6 +60,9 @@ import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
 import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
 import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporterID;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.URIExporterMapBuilder;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -67,6 +71,12 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  * @author Alexander Bondaletov
  */
 public class DbfsFSConnection implements FSConnection {
+
+    private static final Map<URIExporterID, URIExporter> URI_EXPORTERS = new URIExporterMapBuilder() //
+        .add(URIExporterIDs.DEFAULT, PathURIExporter.getInstance()) //
+        .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporter.getInstance()) //
+        .build();
+
     private static final long CACHE_TTL = 6000;
 
     private final DbfsFileSystem m_filesystem;
@@ -102,7 +112,7 @@ public class DbfsFSConnection implements FSConnection {
     }
 
     @Override
-    public URIExporter getDefaultURIExporter() {
-        return PathURIExporter.getInstance();
+    public Map<URIExporterID, URIExporter> getURIExporters() {
+        return URI_EXPORTERS;
     }
 }

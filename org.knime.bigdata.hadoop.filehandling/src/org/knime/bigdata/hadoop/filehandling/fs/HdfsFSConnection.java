@@ -47,6 +47,7 @@ package org.knime.bigdata.hadoop.filehandling.fs;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
@@ -54,6 +55,9 @@ import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
 import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporterID;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.URIExporterMapBuilder;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -61,9 +65,14 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnection implements FSConnection {
+public class HdfsFSConnection implements FSConnection {
 
     private static final long CACHE_TTL_MILLIS = 60000;
+
+    private static final Map<URIExporterID, URIExporter> URI_EXPORTERS = new URIExporterMapBuilder() //
+            .add(URIExporterIDs.DEFAULT, PathURIExporter.getInstance()) //
+            .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporter.getInstance()) //
+            .build();
 
     private final HdfsFileSystem m_filesystem;
 
@@ -73,17 +82,16 @@ public class HdfsConnection implements FSConnection {
      * @param settings Connection settings.
      * @throws IOException
      */
-    public HdfsConnection(final HdfsConnectorNodeSettings settings) throws IOException {
+    public HdfsFSConnection(final HdfsConnectorNodeSettings settings) throws IOException {
         m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, settings);
     }
 
     /**
      * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
      *
-     * @param workingDirectory working directory to use
      * @param hadoopFileSystem already initialized and open Hadoop file system to use
      */
-    public HdfsConnection(final FileSystem hadoopFileSystem) {
+    public HdfsFSConnection(final FileSystem hadoopFileSystem) {
         final String host = "localhost";
         final URI uri = URI.create(HdfsFileSystem.FS_TYPE + "://" + host);
         final String workingDirectory = hadoopFileSystem.getWorkingDirectory().toUri().getPath();
@@ -101,8 +109,7 @@ public class HdfsConnection implements FSConnection {
     }
 
     @Override
-    public URIExporter getDefaultURIExporter() {
-        return PathURIExporter.getInstance();
+    public Map<URIExporterID, URIExporter> getURIExporters() {
+        return URI_EXPORTERS;
     }
-
 }

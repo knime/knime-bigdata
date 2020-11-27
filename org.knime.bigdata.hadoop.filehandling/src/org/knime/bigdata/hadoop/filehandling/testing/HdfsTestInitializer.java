@@ -51,7 +51,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsPath;
 import org.knime.filehandling.core.connections.FSConnection;
@@ -72,7 +72,7 @@ public class HdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath, Hdfs
      * @param fsConnection {@link FSConnection} to use
      */
     @SuppressWarnings("resource")
-    public HdfsTestInitializer(final HdfsConnection fsConnection) {
+    public HdfsTestInitializer(final HdfsFSConnection fsConnection) {
         super(fsConnection);
         m_hadoopFileSystem = fsConnection.getFileSystem().getHadoopFileSystem();
     }
