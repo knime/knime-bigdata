@@ -21,10 +21,10 @@
 package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import org.knime.bigdata.spark.core.port.FixedPortsConfiguration;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.core.node.NodeView;
 import org.knime.core.node.context.ports.PortsConfiguration;
+import org.knime.filehandling.core.defaultnodesettings.filesystemchooser.FixedPortsConfiguration.FixedPortsConfigurationBuilder;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 
 /**
@@ -55,11 +55,11 @@ public abstract class GenericDataSource2SparkNodeFactory3<M extends GenericDataS
     /**
      * Fixed ports configuration.
      */
-    protected static final PortsConfiguration PORTS_CONFIGURATION = new FixedPortsConfiguration.Builder() //
-            .addFixedInputPortGroup(FS_INPUT_PORT_GRP_NAME, FileSystemPortObject.TYPE) //
-            .addFixedInputPortGroup(SPARK_INPUT_PORT_GRP_NAME, SparkDataPortObject.TYPE) //
-            .addFixedOutputPortGroup(SPARK_OUTPUT_PORT_GRP_NAME, SparkDataPortObject.TYPE) //
-            .build();
+    protected static final PortsConfiguration PORTS_CONFIGURATION = new FixedPortsConfigurationBuilder() //
+        .addFixedInputPortGroup(FS_INPUT_PORT_GRP_NAME, FileSystemPortObject.TYPE) //
+        .addFixedInputPortGroup(SPARK_INPUT_PORT_GRP_NAME, SparkDataPortObject.TYPE) //
+        .addFixedOutputPortGroup(SPARK_OUTPUT_PORT_GRP_NAME, SparkDataPortObject.TYPE) //
+        .build();
 
     /**
      * Default Constructor.
