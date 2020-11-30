@@ -184,6 +184,9 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
         m_config.loadInDialog(settings, specs);
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
+        if (m_config.hasTableSpecConfig()) {
+            loadFromTableSpecConfig(m_config.getTableSpecConfig());
+        }
         updateMultiFileEnabledStatus();
     }
 
