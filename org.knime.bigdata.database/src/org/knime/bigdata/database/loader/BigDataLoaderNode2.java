@@ -283,9 +283,6 @@ public class BigDataLoaderNode2
         return new BigDataLoaderNode2();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void buildDialog(final DialogBuilder builder, final List<DialogComponent> dialogComponents,
         final ConnectedCsvLoaderNodeComponents2 customComponents) {
@@ -402,25 +399,22 @@ public class BigDataLoaderNode2
         return new ConnectableCsvLoaderNodeSettings2(modelDelegate);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<DialogComponent> createDialogComponents(final ConnectedCsvLoaderNodeComponents2 customComponents) {
         return asList(customComponents.getTargetFolderComponent(), customComponents.getTableNameComponent());
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public void onCloseInDialog(final ConnectedCsvLoaderNodeComponents2 customComponents) {
+        super.onCloseInDialog(customComponents);
+        customComponents.getTargetFolderComponent().onClose();
+    }
+
     @Override
     public List<SettingsModel> createSettingsModels(final ConnectableCsvLoaderNodeSettings2 customSettings) {
         return asList(customSettings.getTargetFolderModel(), customSettings.getTableNameModel());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DBTable load(final ExecutionParameters<ConnectableCsvLoaderNodeSettings2> parameters)
         throws Exception {
