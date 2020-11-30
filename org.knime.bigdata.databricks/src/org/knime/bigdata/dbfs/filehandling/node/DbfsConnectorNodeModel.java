@@ -52,6 +52,11 @@ import static org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider.FS_N
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
+import javax.ws.rs.ProcessingException;
 
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
@@ -88,16 +93,37 @@ public class DbfsConnectorNodeModel extends NodeModel {
         super(new PortType[] {}, new PortType[] { FileSystemPortObject.TYPE });
     }
 
-    @SuppressWarnings("resource")
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         m_fsConnection = new DbfsFSConnection(m_settings, getCredentialsProvider());
 
-        ((DbfsFileSystem)m_fsConnection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
+        testFileSystemConnection();
 
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
 
-        return new PortObject[] { new FileSystemPortObject(createSpec()) };
+        return new PortObject[]{new FileSystemPortObject(createSpec())};
+    }
+
+    @SuppressWarnings("resource")
+    private void testFileSystemConnection() throws IOException {
+        try {
+            ((DbfsFileSystem)m_fsConnection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
+        } catch (ProcessingException e) {
+            String errorMsg;
+            Throwable cause = e.getCause();
+
+            if (cause instanceof ConnectException) {
+                errorMsg = "Unable to connect: Probably the host and/or port are incorrect.";
+            } else if (cause instanceof UnknownHostException) {
+                errorMsg = "Unable to connect: The host is unkown.";
+            } else if (cause instanceof SocketTimeoutException) {
+                errorMsg = "Unable to connect: Connection timed out.";
+            } else {
+                errorMsg = cause != null ? cause.getMessage() : e.getMessage();
+            }
+
+            throw new IOException(errorMsg, e);
+        }
     }
 
     @Override
