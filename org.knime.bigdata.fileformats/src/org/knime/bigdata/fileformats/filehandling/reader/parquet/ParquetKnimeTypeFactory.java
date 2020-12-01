@@ -112,7 +112,7 @@ final class ParquetKnimeTypeFactory {
             case INT64:
                 return PrimitiveKnimeType.LONG;
             case INT96: // INT96 is used to store Date & Time in Impala
-                return PrimitiveKnimeType.DATE_TIME;
+                return PrimitiveKnimeType.INSTANT_DATE_TIME;
             case FIXED_LEN_BYTE_ARRAY:
             case BINARY:
                 return PrimitiveKnimeType.BINARY;
@@ -142,7 +142,7 @@ final class ParquetKnimeTypeFactory {
                 return PrimitiveKnimeType.TIME;
             case TIMESTAMP_MICROS:
             case TIMESTAMP_MILLIS:
-                return PrimitiveKnimeType.DATE_TIME;
+                return PrimitiveKnimeType.INSTANT_DATE_TIME;
             case BSON:
             case JSON:
             case UINT_64: // the largest integer in knime is long i.e. 64 bit signed

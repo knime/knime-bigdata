@@ -134,7 +134,7 @@ final class OrcTableReader implements TableReader<BigDataReaderConfig, KnimeType
             case DATE:
                 return PrimitiveKnimeType.DATE;
             case TIMESTAMP:
-                return PrimitiveKnimeType.DATE_TIME;
+                return PrimitiveKnimeType.LOCAL_DATE_TIME;
             case BINARY:
                 return PrimitiveKnimeType.BINARY;
             // unsupported types (they are listed intentionally so that we can see what is supported with one glance)

@@ -119,13 +119,16 @@ public final class OrcCellFactory {
     private static ComposedOrcCell<LongColumnVector> createLocalDateCell() {
         return ComposedOrcCell.builder(Accesses::getLocalDateString)//
             .withObjAccess(LocalDate.class, Accesses::getLocalDate)//
-            .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTime).build();
+            .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTime)//
+            .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTime)//
+            .build();
     }
 
     private static ComposedOrcCell<TimestampColumnVector> createForTimeStampColumn() {
-        return ComposedOrcCell.builder(Accesses::getZonedDateTimeString)//
+        return ComposedOrcCell.builder(Accesses::getLocalDateTimeString)//
             .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTime)//
-            .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTime).build();
+            .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTime)//
+            .build();
     }
 
     private static ComposedOrcCell<BytesColumnVector> createForBinaryColumn() {

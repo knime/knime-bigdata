@@ -66,6 +66,7 @@ import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.data.time.localdate.LocalDateCellFactory;
+import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
 import org.knime.core.data.time.localtime.LocalTimeCellFactory;
 import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
 
@@ -108,10 +109,15 @@ public enum PrimitiveKnimeType implements KnimeType {
          */
         TIME("Time", LocalTimeCellFactory.TYPE, asSet(LocalTime.class)),
         /**
-         * Local date&time type
+         * Instant date&time type
          */
-        DATE_TIME("Date & Time", ZonedDateTimeCellFactory.TYPE,
-            asSet(ZonedDateTime.class, LocalDateTime.class, LocalDate.class));
+        INSTANT_DATE_TIME("Instant Date & Time", ZonedDateTimeCellFactory.TYPE,
+            asSet(ZonedDateTime.class, LocalDateTime.class, LocalDate.class)),
+        /**
+         * Local date&time type i.e. no instant semantics
+         */
+        LOCAL_DATE_TIME("Local Date & Time", LocalDateTimeCellFactory.TYPE,
+            asSet(LocalDateTime.class, ZonedDateTime.class, LocalDate.class));
 
     private final DataType m_defaultDataType;
 

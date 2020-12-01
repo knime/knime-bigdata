@@ -140,12 +140,12 @@ final class BigDataCellValueProducerFactories {
             case BINARY:
             case DATE:
             case TIME:
-            case DATE_TIME:
+            case INSTANT_DATE_TIME:
+            case LOCAL_DATE_TIME:
                 for (final Class<?> supportedClass : primitiveKnimeType.getSupportedJavaClasses()) {
                     registry.register(createObjProducerFactory(primitiveKnimeType, supportedClass));
                 }
                 break;
-
             default:
                 throw new IllegalArgumentException("Unsupported primitive type encountered: " + primitiveKnimeType);
         }

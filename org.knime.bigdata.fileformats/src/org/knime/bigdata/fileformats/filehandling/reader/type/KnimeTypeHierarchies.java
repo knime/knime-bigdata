@@ -161,16 +161,16 @@ public final class KnimeTypeHierarchies {
      *
      * <pre>
      *      String
-     *   ______|___________________________________
-     *   |       |         |         |            |
-     * Double  Boolean    Time  Date & Time   List(String)
-     *   |                           |      ______|_____________________________________
-     * Long                        Date     |            |             |               |
-     *   |                             List(Double) List(Boolean)  List(Time)  List(Date & Time)
-     * Integer                              |                                          |
-     *                                  List(Long)                                List(Date)
-     *                                      |
-     *                                List(Integer)
+     *   ______|___________________________________________________
+     *   |       |         |            |                         |
+     * Double  Boolean    Time  Instant Date & Time          List(String)
+     *   |                              |                _________|_______________________________________
+     * Long                      Local Date & Time       |                |             |                |
+     *   |                              |            List(Double) List(Boolean)  List(Time)  List(Instant Date & Time)
+     * Integer                        Date                |                                              |
+     *                                               List(Long)                                List(Local Date & Time)
+     *                                                    |                                              |
+     *                                              List(Integer)                                      Date
      * </pre>
      *
      * The other two sub-hierarchies are much simpler and consist only of the {@link PrimitiveKnimeType#BINARY} and its
@@ -219,8 +219,11 @@ public final class KnimeTypeHierarchies {
         return builder.addType(PrimitiveKnimeType.STRING, createKnimeTypeTester(PrimitiveKnimeType.BOOLEAN))//
             .addType(PrimitiveKnimeType.STRING, createKnimeTypeTester(PrimitiveKnimeType.TIME))//
             .addType(PrimitiveKnimeType.STRING,
-                createKnimeTypeTester(PrimitiveKnimeType.DATE_TIME, PrimitiveKnimeType.DATE))//
-            .addType(PrimitiveKnimeType.DATE_TIME, createKnimeTypeTester(PrimitiveKnimeType.DATE))//
+                createKnimeTypeTester(PrimitiveKnimeType.INSTANT_DATE_TIME, PrimitiveKnimeType.LOCAL_DATE_TIME,
+                    PrimitiveKnimeType.DATE))//
+            .addType(PrimitiveKnimeType.INSTANT_DATE_TIME,
+                createKnimeTypeTester(PrimitiveKnimeType.LOCAL_DATE_TIME, PrimitiveKnimeType.DATE))//
+            .addType(PrimitiveKnimeType.LOCAL_DATE_TIME, createKnimeTypeTester(PrimitiveKnimeType.DATE))//
             .addType(PrimitiveKnimeType.STRING,
                 createKnimeTypeTester(PrimitiveKnimeType.DOUBLE, PrimitiveKnimeType.INTEGER, PrimitiveKnimeType.LONG))//
             .addType(PrimitiveKnimeType.DOUBLE, //

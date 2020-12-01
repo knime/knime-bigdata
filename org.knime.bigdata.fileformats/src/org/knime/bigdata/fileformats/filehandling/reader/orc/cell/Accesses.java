@@ -186,6 +186,10 @@ final class Accesses {
         return getLocalDate(vector, idx).atStartOfDay();
     }
 
+    static ZonedDateTime getZonedDateTime(final LongColumnVector vector, final int idx) {
+        return getLocalDateTime(vector, idx).atZone(UTC);
+    }
+
     // TimestampColumnVector accesses
 
     static LocalDateTime getLocalDateTime(final TimestampColumnVector vector, final int idx) {
@@ -196,8 +200,8 @@ final class Accesses {
         return ZonedDateTime.ofInstant(vector.asScratchTimestamp(idx).toInstant(), UTC);
     }
 
-    static String getZonedDateTimeString(final TimestampColumnVector vector, final int idx) {
-        return getZonedDateTime(vector, idx).toString();
+    static String getLocalDateTimeString(final TimestampColumnVector vector, final int idx) {
+        return getLocalDateTime(vector, idx).toString();
     }
 
     // BytesColumnVector accesses
