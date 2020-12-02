@@ -72,11 +72,11 @@ import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
  */
 public class DbfsAuthenticationNodeSettings {
 
-    private static final String KEY_AUTH_TYPE = "authType";
+    private static final String KEY_AUTH_TYPE = "type";
 
-    private static final String KEY_USE_CREDENTIALS = "useCredentials";
+    private static final String KEY_USE_CREDENTIALS = "use_credentials";
 
-    private static final String KEY_CREDENTIALS = "credentialsName";
+    private static final String KEY_CREDENTIALS = "credentials";
 
     private static final String KEY_USER_PASSWORD = "user_pwd";
 
@@ -86,7 +86,11 @@ public class DbfsAuthenticationNodeSettings {
 
     private static final String KEY_TOKEN = "token";
 
-    private static final String SECRET_KEY = "ekerjvjhmzle,ptktysq";
+    private static final String KEY_SECRET = "secret";
+
+    private static final String USER_PASSWORD_ENCRYPTION_KEY = "laig9eeyeix:ae$Lo6lu";
+
+    private static final String TOKEN_ENCRYPTION_KEY = "xe:sh'o4uch1Ox2Shoh:";
 
     private final String m_configName;
 
@@ -115,11 +119,11 @@ public class DbfsAuthenticationNodeSettings {
             /**
              * User name and password authentication.
              */
-            USER_PWD("USER_PWD", "Username/password", "Authenticate with username and password"),
+            USER_PWD(KEY_USER_PASSWORD, "Username/password", "Authenticate with username and password"),
             /**
              * Token authentication.
              */
-            TOKEN("TOKEN", "Token", "Authenticate with a token");
+            TOKEN(KEY_TOKEN, "Token", "Authenticate with a token");
 
         private final String m_settingsValue;
 
@@ -201,11 +205,11 @@ public class DbfsAuthenticationNodeSettings {
         m_userPassUseCredentials = new SettingsModelBoolean(KEY_USE_CREDENTIALS, false);
         m_userPassCredentialsName = new SettingsModelString(KEY_CREDENTIALS, "");
         m_user = new SettingsModelString(KEY_USER, System.getProperty("user.name"));
-        m_password = new SettingsModelPassword(KEY_PASSWORD, SECRET_KEY, "");
+        m_password = new SettingsModelPassword(KEY_PASSWORD, USER_PASSWORD_ENCRYPTION_KEY, "");
 
         m_tokenUseCredentials = new SettingsModelBoolean(KEY_USE_CREDENTIALS, false);
         m_tokenCredentialsName = new SettingsModelString(KEY_CREDENTIALS, "");
-        m_token = new SettingsModelPassword(KEY_TOKEN, SECRET_KEY, "");
+        m_token = new SettingsModelPassword(KEY_SECRET, TOKEN_ENCRYPTION_KEY, "");
 
         m_userPassUseCredentials.addChangeListener(e -> updateEnabledness());
         m_tokenUseCredentials.addChangeListener(e -> updateEnabledness());
