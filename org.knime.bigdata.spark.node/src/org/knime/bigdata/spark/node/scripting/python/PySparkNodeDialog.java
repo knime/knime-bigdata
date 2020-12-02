@@ -49,6 +49,8 @@ package org.knime.bigdata.spark.node.scripting.python;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -57,7 +59,9 @@ import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.scripting.python.util.DefaultPySparkHelper;
 import org.knime.bigdata.spark.node.scripting.python.util.FlowVariableCleaner;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkDocument;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkHelper;
@@ -72,6 +76,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.core.node.workflow.NodeContext;
 
 /**
  * The dialog that is used in the PySpark scripting nodes.
@@ -125,9 +130,17 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
 
-        setSparkVersion(specs);
-        final PySparkHelper helper = getHelper();
-        setPySparkPath(helper);
+        final PySparkHelper helper;
+
+        if (isNodeInLocalWorkflow()) {
+            setSparkVersion(specs);
+            helper = getHelper();
+            setPySparkPath(helper);
+        } else {
+            // node is not part of a local workflow
+            // but (most likely) part a workflow opened in the remote workflow editor
+            helper = FallbackPySparkHelper.getInstance();
+        }
 
         final PySparkNodeConfig config = new PySparkNodeConfig(m_inCount, m_outCount, helper);
         config.loadFromInDialog(settings);
@@ -139,7 +152,10 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
         config.setDoc((PySparkDocument)m_sourceCodePanel.getEditor().getDocument());
         m_config = config;
         m_sourceCodePanel.updatePortObjects(null);
+    }
 
+    private static boolean isNodeInLocalWorkflow() {
+        return NodeContext.getContext() != null && NodeContext.getContext().getWorkflowManager() != null;
     }
 
     private void setSparkVersion(final PortObjectSpec[] specs) throws NotConfigurableException {
@@ -174,7 +190,11 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
     }
 
     private PySparkHelper getHelper() {
-        return PySparkHelperRegistry.getInstance().getHelper(m_sparkVersion);
+        if (isNodeInLocalWorkflow()) {
+            return PySparkHelperRegistry.getInstance().getHelper(m_sparkVersion);
+        } else {
+            return FallbackPySparkHelper.getInstance();
+        }
     }
 
     /**
@@ -219,6 +239,11 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
             fold.setCollapsed(true);
         }
         m_sourceCodePanel.open();
+        if (!isNodeInLocalWorkflow()) {
+            m_sourceCodePanel.errorToConsole("Node is opened in the remote workflow editor. "
+                + "Source code validation on the cluster is not possible "
+                + "because the dialog has no access to the PySpark execution environment.\n");
+        }
     }
 
     /**
@@ -227,6 +252,36 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
     @Override
     public void onClose() {
         m_sourceCodePanel.close();
+    }
+
+    private static class FallbackPySparkHelper extends DefaultPySparkHelper {
+
+        private static class LazySingleton {
+            public static final FallbackPySparkHelper INSTANCE = new FallbackPySparkHelper();
+        }
+
+        static FallbackPySparkHelper getInstance() {
+            return LazySingleton.INSTANCE;
+        }
+
+        private FallbackPySparkHelper() {
+            super(new FallbackCompatibilityChecker(), "NO_EXCHANGE_PACKAGE_FALLBACK");
+        }
+
+    }
+
+    private static class FallbackCompatibilityChecker implements CompatibilityChecker {
+
+        @Override
+        public boolean supportSpark(final SparkVersion sparkVersion) {
+            return false;
+        }
+
+        @Override
+        public Set<SparkVersion> getSupportedSparkVersions() {
+            return Collections.emptySet();
+        }
+
     }
 
 }
