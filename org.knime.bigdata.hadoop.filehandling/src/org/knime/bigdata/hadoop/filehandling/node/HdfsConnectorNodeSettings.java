@@ -51,7 +51,6 @@ import java.net.URISyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsAuthenticationSettings.AuthType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
@@ -60,6 +59,10 @@ import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.filehandling.core.connections.base.auth.AuthSettings;
+import org.knime.filehandling.core.connections.base.auth.AuthType;
+import org.knime.filehandling.core.connections.base.auth.EmptyAuthProviderSettings;
+import org.knime.filehandling.core.connections.base.auth.UserAuthProviderSettings;
 
 /**
  * Settings for {@link HdfsConnectorNodeModel}.
@@ -82,7 +85,7 @@ public class HdfsConnectorNodeSettings {
 
     private final SettingsModelIntegerBounded m_customPort = new SettingsModelIntegerBounded("customPort", DEFAULT_PROTOCOL.getDefaultPort(), 1, 65535);
 
-    private final HdfsAuthenticationSettings m_auth;
+    private final AuthSettings m_auth;
 
     private final SettingsModelString m_workingDirectory =
         new SettingsModelString("workingDirectory", DEFAULT_WORKING_DIR);
@@ -92,14 +95,19 @@ public class HdfsConnectorNodeSettings {
      */
     public HdfsConnectorNodeSettings() {
         m_customPort.setEnabled(m_useCustomPort.getBooleanValue());
-        m_auth = new HdfsAuthenticationSettings();
+
+        m_auth = new AuthSettings.Builder() //
+                .add(new UserAuthProviderSettings(HdfsAuth.SIMPLE)) //
+                .add(new EmptyAuthProviderSettings(HdfsAuth.KERBEROS)) //
+                .defaultType(HdfsAuth.SIMPLE) //
+                .build();
     }
 
     /**
      * Clone a given settings model
      */
     HdfsConnectorNodeSettings(final HdfsConnectorNodeSettings other) {
-        m_auth = new HdfsAuthenticationSettings();
+        this();
 
         try {
             final NodeSettings transferSettings = new NodeSettings("ignored");
@@ -124,12 +132,14 @@ public class HdfsConnectorNodeSettings {
     public HdfsConnectorNodeSettings(final HdfsProtocol protocol, final String host, final boolean useCustomPort,
         final int customPort, final AuthType authType, final String user, final String workingDir) {
 
+        this();
+
         m_protocol.setStringValue(protocol.toString());
         m_host.setStringValue(host);
         m_useCustomPort.setBooleanValue(useCustomPort);
         m_customPort.setIntValue(customPort);
         m_customPort.setEnabled(useCustomPort);
-        m_auth = new HdfsAuthenticationSettings(authType, user);
+        m_auth.setAuthType(authType);
         m_workingDirectory.setStringValue(workingDir);
     }
 
@@ -141,7 +151,7 @@ public class HdfsConnectorNodeSettings {
         m_host.saveSettingsTo(settings);
         m_useCustomPort.saveSettingsTo(settings);
         m_customPort.saveSettingsTo(settings);
-        m_auth.saveSettingsTo(settings);
+        m_auth.saveSettingsForModel(settings.addNodeSettings(AuthSettings.KEY_AUTH));
         m_workingDirectory.saveSettingsTo(settings);
     }
 
@@ -154,7 +164,7 @@ public class HdfsConnectorNodeSettings {
         m_useCustomPort.loadSettingsFrom(settings);
         m_customPort.loadSettingsFrom(settings);
         m_customPort.setEnabled(m_useCustomPort.getBooleanValue());
-        m_auth.loadSettingsFrom(settings);
+        m_auth.loadSettingsForModel(settings.getNodeSettings(AuthSettings.KEY_AUTH));
         m_workingDirectory.loadSettingsFrom(settings);
     }
 
@@ -166,12 +176,8 @@ public class HdfsConnectorNodeSettings {
         m_host.validateSettings(settings);
         m_useCustomPort.validateSettings(settings);
         m_customPort.validateSettings(settings);
-        m_auth.validateSettings(settings);
+        m_auth.validateSettings(settings.getNodeSettings(AuthSettings.KEY_AUTH));
         m_workingDirectory.validateSettings(settings);
-
-        final HdfsConnectorNodeSettings temp = new HdfsConnectorNodeSettings();
-        temp.loadSettingsFrom(settings);
-        temp.validateValues();
     }
 
     /**
@@ -188,7 +194,7 @@ public class HdfsConnectorNodeSettings {
             throw new InvalidSettingsException("Host required.");
         }
 
-        m_auth.validateValues();
+        m_auth.validate();
 
         if (StringUtils.isBlank(m_workingDirectory.getStringValue())) {
             throw new InvalidSettingsException("Working directory required.");
@@ -289,20 +295,13 @@ public class HdfsConnectorNodeSettings {
      * @return {@code true} if kerberos authentication should be used
      */
     public boolean useKerberos() {
-        return m_auth.useKerberosAuthentication();
-    }
-
-    /**
-     * @return user name, might be empty depending on the authentication method
-     */
-    public String getUser() {
-        return m_auth.getUser();
+        return m_auth.getAuthType() == HdfsAuth.KERBEROS;
     }
 
     /**
      * @return authentication settings model
      */
-    HdfsAuthenticationSettings getAuthSettingsModel() {
+    AuthSettings getAuthSettings() {
         return m_auth;
     }
 
@@ -318,5 +317,13 @@ public class HdfsConnectorNodeSettings {
      */
     SettingsModelString getWorkingDirectorySettingsModel() {
         return m_workingDirectory;
+    }
+
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return m_auth.<UserAuthProviderSettings>getSettingsForAuthType(HdfsAuth.SIMPLE) //
+                .getUser();
     }
 }

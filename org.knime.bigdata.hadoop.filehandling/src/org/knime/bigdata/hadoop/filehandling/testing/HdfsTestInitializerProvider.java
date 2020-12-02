@@ -52,10 +52,11 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsAuthenticationSettings.AuthType;
+import org.knime.bigdata.hadoop.filehandling.node.HdfsAuth;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsProtocol;
 import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.connections.base.auth.AuthType;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
@@ -76,12 +77,19 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
         final HdfsProtocol protocol = HdfsProtocol.valueOf(configuration.get("protocol").toUpperCase());
         int port = configuration.containsKey("port") ? Integer.parseInt(configuration.get("port")) : protocol.getDefaultPort();
 
+        final AuthType authType;
+        if (configuration.get("auth").equalsIgnoreCase(HdfsAuth.SIMPLE.getSettingsKey())) {
+            authType = HdfsAuth.SIMPLE;
+        } else {
+            authType = HdfsAuth.KERBEROS;
+        }
+
         final HdfsConnectorNodeSettings settings = new HdfsConnectorNodeSettings( //
             protocol, //
             configuration.get("host"), //
             true, // custom port
             port, //
-            AuthType.valueOf(configuration.get("auth").toUpperCase()), //
+            authType, //
             configuration.get("user"), //
             workingDir);
 
@@ -105,10 +113,10 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
         checkArgumentNotBlank(configuration.get("workingDirPrefix"), "Working directory prefix must be specified.");
 
         checkArgumentNotBlank(configuration.get("auth"), "Auth type must be specified.");
-        final AuthType authType = AuthType.valueOf(configuration.get("auth").toUpperCase());
-        if (authType == AuthType.SIMPLE) {
+
+        if (configuration.get("auth").equalsIgnoreCase(HdfsAuth.SIMPLE.getSettingsKey())) {
             checkArgumentNotBlank(configuration.get("user"), "User must be specified.");
-        } else if (authType != AuthType.KERBEROS) { // NOSONAR
+        } else if (!configuration.get("auth").equalsIgnoreCase(HdfsAuth.KERBEROS.getSettingsKey())) {
             throw new IllegalArgumentException("Unknown authentication type.");
         }
     }

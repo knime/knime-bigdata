@@ -52,6 +52,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -78,6 +79,10 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.base.auth.AuthPanel;
+import org.knime.filehandling.core.connections.base.auth.AuthSettings;
+import org.knime.filehandling.core.connections.base.auth.EmptyAuthProviderPanel;
+import org.knime.filehandling.core.connections.base.auth.UserAuthProviderPanel;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 
 /**
@@ -105,7 +110,7 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
     private final DialogComponentNumber m_customPort =
         new DialogComponentNumber(m_settings.getCustomPortSettingsModel(), null, 1);
 
-    private final HdfsAuthenticationDialog m_auth = new HdfsAuthenticationDialog(m_settings.getAuthSettingsModel());
+    private AuthPanel m_authPanel;
 
     private final ChangeListener m_workingDirListener;
 
@@ -125,6 +130,12 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
         portButtonGroup.add(m_useCustomPortButton);
         m_useDefaultPortButton.addActionListener(e -> updatePortSettings());
         m_useCustomPortButton.addActionListener(e -> updatePortSettings());
+
+        final AuthSettings authSettings = m_settings.getAuthSettings();
+        m_authPanel = new AuthPanel(authSettings, //
+                Arrays.asList( //
+                        new UserAuthProviderPanel(authSettings.getSettingsForAuthType(HdfsAuth.SIMPLE)), //
+                        new EmptyAuthProviderPanel(authSettings.getSettingsForAuthType(HdfsAuth.KERBEROS))));
 
         m_workingDirListener = e -> updateWorkingDirSetting();
 
@@ -192,11 +203,18 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
     }
 
     private Component createAuthenticationSettingsPanel() {
-        final JPanel panel = new JPanel();
-        final BoxLayout parentLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-        panel.setLayout(parentLayout);
+        final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(createTitledBorder("Authentication settings"));
-        panel.add(m_auth.getComponentPanel());
+
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(m_authPanel, gbc);
+
         return panel;
     }
 
@@ -290,7 +308,7 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
             m_settings.getWorkingDirectorySettingsModel().loadSettingsFrom(settings);
             m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
             m_workingDirChooser.addListener(m_workingDirListener);
-            m_auth.loadSettingsFrom(settings, specs);
+            m_authPanel.loadSettingsFrom(settings.getNodeSettings(AuthSettings.KEY_AUTH), specs);
         } catch (InvalidSettingsException e) { // NOSONAR ignore and use defaults
         }
     }
@@ -304,7 +322,7 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
         m_settings.getUseCustomPortSettingsModel().saveSettingsTo(settings);
         m_customPort.saveSettingsTo(settings);
         m_settings.getWorkingDirectorySettingsModel().saveSettingsTo(settings);
-        m_auth.saveSettingsTo(settings);
+        m_authPanel.saveSettingsTo(settings.addNodeSettings(AuthSettings.KEY_AUTH));
 
         m_workingDirChooser.addCurrentSelectionToHistory();
     }
@@ -317,13 +335,12 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
     @Override
     public void onOpen() {
         m_protocol.addActionListener(this);
-        m_auth.onOpen();
     }
 
     @Override
     public void onClose() {
         m_protocol.removeActionListener(this);
-        m_auth.onClose();
+        m_authPanel.onClose();
         m_workingDirChooser.removeListener(m_workingDirListener);
         m_workingDirChooser.onClose();
     }

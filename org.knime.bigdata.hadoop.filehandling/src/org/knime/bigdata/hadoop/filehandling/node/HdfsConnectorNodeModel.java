@@ -89,6 +89,7 @@ public class HdfsConnectorNodeModel extends NodeModel {
 
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        m_settings.validateValues();
         m_fsId = FSConnectionRegistry.getInstance().getKey();
         return new PortObjectSpec[]{createSpec()};
     }

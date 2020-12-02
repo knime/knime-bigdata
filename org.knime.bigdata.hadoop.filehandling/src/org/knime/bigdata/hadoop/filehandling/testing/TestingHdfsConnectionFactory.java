@@ -55,7 +55,7 @@ import java.util.Map;
 import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsAuthenticationSettings.AuthType;
+import org.knime.bigdata.hadoop.filehandling.node.HdfsAuth;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsProtocol;
 import org.knime.core.node.workflow.FlowVariable;
@@ -102,14 +102,14 @@ public class TestingHdfsConnectionFactory {
 
         if (authMethod.equalsIgnoreCase("kerberos")) {
             settings = new HdfsConnectorNodeSettings(protocol, uri.getHost(), true, uri.getPort(),
-                AuthType.KERBEROS, null, WORKING_DIR);
+                HdfsAuth.KERBEROS, null, WORKING_DIR);
         } else if (authMethod.equalsIgnoreCase("password")) {
             final String user = TestflowVariable.getString(TestflowVariable.HDFS_USERNAME, flowVariables);
             settings = new HdfsConnectorNodeSettings(protocol, uri.getHost(), true, uri.getPort(),
-                AuthType.SIMPLE, user, WORKING_DIR);
+                HdfsAuth.SIMPLE, user, WORKING_DIR);
         } else if (authMethod.equalsIgnoreCase("none")) {
             settings = new HdfsConnectorNodeSettings(protocol, uri.getHost(), true, uri.getPort(),
-                AuthType.SIMPLE, null, WORKING_DIR);
+                HdfsAuth.SIMPLE, null, WORKING_DIR);
         } else {
             throw new IllegalArgumentException("Unsupported HDFS authentication method: " + authMethod);
         }
