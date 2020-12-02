@@ -49,6 +49,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
@@ -69,6 +70,10 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.connections.FSConnection;
+import org.knime.filehandling.core.connections.base.auth.AuthPanel;
+import org.knime.filehandling.core.connections.base.auth.AuthSettings;
+import org.knime.filehandling.core.connections.base.auth.StandardAuthTypes;
+import org.knime.filehandling.core.connections.base.auth.UserPasswordAuthProviderPanel;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 
 /**
@@ -85,8 +90,7 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
     private final DialogComponentString m_url =
         new DialogComponentString(m_settings.getURLSettingsModel(), "", true, 60);
 
-    private final KnoxHdfsAuthenticationDialog m_auth =
-        new KnoxHdfsAuthenticationDialog(m_settings.getAuthSettingsModel(), this);
+    private AuthPanel m_authPanel;
 
     private final ChangeListener m_workingDirListener;
 
@@ -105,6 +109,11 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
     public KnoxHdfsConnectorNodeDialog() {
         m_workingDirListener = e -> updateWorkingDirSetting();
 
+        final AuthSettings authSettings = m_settings.getAuthSettings();
+        m_authPanel = new AuthPanel(authSettings, //
+                Arrays.asList( //
+                        new UserPasswordAuthProviderPanel(authSettings.getSettingsForAuthType(StandardAuthTypes.USER_PASSWORD), this)));
+
         addTab("Settings", createSettingsTab());
         addTab("Advanced", createAdvancedTab());
     }
@@ -115,7 +124,7 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
         panel.setLayout(parentLayout);
 
         panel.add(createConnectionSettingsPanel());
-        panel.add(createPanel("Authentication settings", m_auth.getComponentPanel()));
+        panel.add(createPanel("Authentication settings", m_authPanel));
         panel.add(createPanel("File System settings", m_workingDirChooser));
 
         return panel;
@@ -219,7 +228,7 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
             m_settings.getWorkingDirectorySettingsModel().loadSettingsFrom(settings);
             m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
             m_workingDirChooser.addListener(m_workingDirListener);
-            m_auth.loadSettingsFrom(settings, specs);
+            m_authPanel.loadSettingsFrom(settings.getNodeSettings(AuthSettings.KEY_AUTH), specs);
             m_connectionTimeout.loadSettingsFrom(settings, specs);
             m_receiveTimeout.loadSettingsFrom(settings, specs);
         } catch (InvalidSettingsException e) { // NOSONAR ignore and use defaults
@@ -233,7 +242,7 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
 
         m_url.saveSettingsTo(settings);
         m_settings.getWorkingDirectorySettingsModel().saveSettingsTo(settings);
-        m_auth.saveSettingsTo(settings);
+        m_authPanel.saveSettingsTo(settings.addNodeSettings(AuthSettings.KEY_AUTH));
         m_connectionTimeout.saveSettingsTo(settings);
         m_receiveTimeout.saveSettingsTo(settings);
 
@@ -246,13 +255,8 @@ public class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
     }
 
     @Override
-    public void onOpen() {
-        m_auth.onOpen();
-    }
-
-    @Override
     public void onClose() {
-        m_auth.onClose();
+        m_authPanel.onClose();
         m_workingDirChooser.removeListener(m_workingDirListener);
         m_workingDirChooser.onClose();
     }

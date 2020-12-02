@@ -90,6 +90,8 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
 
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        m_settings.validateValues();
+        m_settings.configureInModel(inSpecs, m -> {}, getCredentialsProvider());
         m_fsId = FSConnectionRegistry.getInstance().getKey();
         return new PortObjectSpec[]{createSpec()};
     }
@@ -130,7 +132,7 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO output) {
-        m_settings.saveSettingsTo(output);
+        m_settings.saveSettingsForModel(output);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
 
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO input) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(input);
+        m_settings.loadSettingsForModel(input);
     }
 
     @Override

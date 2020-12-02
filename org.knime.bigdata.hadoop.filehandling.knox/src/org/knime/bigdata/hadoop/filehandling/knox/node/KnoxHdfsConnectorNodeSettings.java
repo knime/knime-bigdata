@@ -48,6 +48,7 @@ package org.knime.bigdata.hadoop.filehandling.knox.node;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
@@ -58,7 +59,12 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.filehandling.core.connections.base.auth.AuthSettings;
+import org.knime.filehandling.core.connections.base.auth.StandardAuthTypes;
+import org.knime.filehandling.core.connections.base.auth.UserPasswordAuthProviderSettings;
+import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
  * Settings for {@link KnoxHdfsConnectorNodeModel}.
@@ -75,7 +81,7 @@ public class KnoxHdfsConnectorNodeSettings {
 
     private final SettingsModelString m_url = new SettingsModelString("url", DEFAULT_URL);
 
-    private final KnoxHdfsAuthenticationSettings m_auth;
+    private final AuthSettings m_authSettings;
 
     private final SettingsModelString m_workingDirectory =
         new SettingsModelString("workingDirectory", DEFAULT_WORKING_DIR);
@@ -92,19 +98,21 @@ public class KnoxHdfsConnectorNodeSettings {
      * Default constructor.
      */
     public KnoxHdfsConnectorNodeSettings() {
-        m_auth = new KnoxHdfsAuthenticationSettings();
+        m_authSettings = new AuthSettings.Builder() //
+                .add(new UserPasswordAuthProviderSettings(StandardAuthTypes.USER_PASSWORD, true)) //
+                .build();
     }
 
     /**
      * Clone a given settings model
      */
     KnoxHdfsConnectorNodeSettings(final KnoxHdfsConnectorNodeSettings other) {
-        m_auth = new KnoxHdfsAuthenticationSettings();
+        this();
 
         try {
             final NodeSettings transferSettings = new NodeSettings("ignored");
-            other.saveSettingsTo(transferSettings);
-            loadSettingsFrom(transferSettings); // NOSONAR
+            other.saveSettingsForModel(transferSettings);
+            loadSettingsForModel(transferSettings); // NOSONAR
         } catch (InvalidSettingsException ex) {
             throw new IllegalStateException(ex);
         }
@@ -123,33 +131,63 @@ public class KnoxHdfsConnectorNodeSettings {
     public KnoxHdfsConnectorNodeSettings(final String url, final String user, final String pass,
         final String workingDir, final int connectionTimeout, final int receiveTimeout) {
 
+        this();
+
         m_url.setStringValue(url);
-        m_auth = new KnoxHdfsAuthenticationSettings(user, pass);
+
+        final UserPasswordAuthProviderSettings userPwdSettings = m_authSettings.getSettingsForAuthType(StandardAuthTypes.USER_PASSWORD);
+        userPwdSettings.getUserModel().setStringValue(user);
+        userPwdSettings.getPasswordModel().setStringValue(pass);
+
         m_workingDirectory.setStringValue(workingDir);
         m_connectionTimeout.setIntValue(connectionTimeout);
         m_receiveTimeout.setIntValue(receiveTimeout);
     }
 
-    /**
-     * Save all the {@link SettingsModel}s to {@link NodeSettingsWO}.
-     */
-    void saveSettingsTo(final NodeSettingsWO settings) {
+    private void save(final NodeSettingsWO settings) {
         m_url.saveSettingsTo(settings);
         m_workingDirectory.saveSettingsTo(settings);
-        m_auth.saveSettingsTo(settings);
         m_connectionTimeout.saveSettingsTo(settings);
         m_receiveTimeout.saveSettingsTo(settings);
     }
 
     /**
-     * Load all the {@link SettingsModel}s from {@link NodeSettingsRO}.
+     * Save all the {@link SettingsModel}s to {@link NodeSettingsWO}.
      */
-    void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    void saveSettingsForModel(final NodeSettingsWO settings) {
+        save(settings);
+        m_authSettings.saveSettingsForModel(settings.addNodeSettings(AuthSettings.KEY_AUTH));
+    }
+
+    /**
+     * Save all the {@link SettingsModel}s to {@link NodeSettingsWO}.
+     */
+    void saveSettingsForDialog(final NodeSettingsWO settings) {
+        save(settings);
+        // auth settings are saved by dialog
+    }
+
+    private void load(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_url.loadSettingsFrom(settings);
         m_workingDirectory.loadSettingsFrom(settings);
-        m_auth.loadSettingsFrom(settings);
         m_connectionTimeout.loadSettingsFrom(settings);
         m_receiveTimeout.loadSettingsFrom(settings);
+    }
+
+    /**
+     * Load all the {@link SettingsModel}s from {@link NodeSettingsRO}.
+     */
+    void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+        load(settings);
+        m_authSettings.loadSettingsForModel(settings.getNodeSettings(AuthSettings.KEY_AUTH));
+    }
+
+    /**
+     * Load all the {@link SettingsModel}s from {@link NodeSettingsRO}.
+     */
+    void loadSettingsForDialog(final NodeSettingsRO settings) throws InvalidSettingsException {
+        load(settings);
+        // auth settings are loaded by dialog
     }
 
     /**
@@ -158,13 +196,9 @@ public class KnoxHdfsConnectorNodeSettings {
     void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_url.validateSettings(settings);
         m_workingDirectory.validateSettings(settings);
-        m_auth.validateSettings(settings);
+        m_authSettings.validateSettings(settings.getNodeSettings(AuthSettings.KEY_AUTH));
         m_connectionTimeout.validateSettings(settings);
         m_receiveTimeout.validateSettings(settings);
-
-        final KnoxHdfsAuthenticationSettings temp = new KnoxHdfsAuthenticationSettings();
-        temp.loadSettingsFrom(settings);
-        temp.validateValues();
     }
 
     /**
@@ -192,11 +226,16 @@ public class KnoxHdfsConnectorNodeSettings {
             throw new InvalidSettingsException("Failed to parse URL: " + e.getMessage(), e);
         }
 
-        m_auth.validateValues();
+        m_authSettings.validate();
 
         if (StringUtils.isBlank(m_workingDirectory.getStringValue())) {
             throw new InvalidSettingsException("Working directory required.");
         }
+    }
+
+    void configureInModel(final PortObjectSpec[] inSpecs, final Consumer<StatusMessage> statusConsumer,
+        final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
+        m_authSettings.configureInModel(inSpecs, statusConsumer, credentialsProvider);
     }
 
     /**
@@ -226,7 +265,8 @@ public class KnoxHdfsConnectorNodeSettings {
      * @return user name
      */
     public String getUser(final CredentialsProvider cp) {
-        return m_auth.getUser(cp);
+        return m_authSettings.<UserPasswordAuthProviderSettings>getSettingsForAuthType(StandardAuthTypes.USER_PASSWORD) //
+                .getUser(cp::get);
     }
 
     /**
@@ -234,14 +274,15 @@ public class KnoxHdfsConnectorNodeSettings {
      * @return password
      */
     public String getPassword(final CredentialsProvider cp) {
-        return m_auth.getPass(cp);
+        return m_authSettings.<UserPasswordAuthProviderSettings>getSettingsForAuthType(StandardAuthTypes.USER_PASSWORD) //
+                .getPassword(cp::get);
     }
 
     /**
      * @return authentication settings model
      */
-    KnoxHdfsAuthenticationSettings getAuthSettingsModel() {
-        return m_auth;
+    AuthSettings getAuthSettings() {
+        return m_authSettings;
     }
 
     /**
