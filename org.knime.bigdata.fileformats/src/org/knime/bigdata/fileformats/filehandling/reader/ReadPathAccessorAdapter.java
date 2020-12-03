@@ -44,104 +44,48 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Nov 6, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Dec 4, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.fileformats.filehandling.reader.orc;
+package org.knime.bigdata.fileformats.filehandling.reader;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.OptionalLong;
+import java.util.List;
+import java.util.function.Consumer;
 
-import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
-import org.apache.orc.Reader;
-import org.apache.orc.RecordReader;
-import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCell;
-import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCellFactory;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
-import org.knime.filehandling.core.node.table.reader.read.Read;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.ReadPathAccessor;
+import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
+import org.knime.filehandling.core.node.table.reader.preview.dialog.GenericItemAccessor;
 
 /**
- * A {@link Read} of an ORC file.
+ * An adapter for {@link ReadPathAccessor} that turns it into a {@code GenericItemAccessor<FSPath>}.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDataCell> {
+final class ReadPathAccessorAdapter implements GenericItemAccessor<FSPath> {
 
-    private final long m_rowCount;
+    private final ReadPathAccessor m_pathAccessor;
 
-    private final RecordReader m_rows;
-
-    private final FSPath m_path;
-
-    private final VectorizedRowBatch m_batch;
-
-    private final OrcCell[] m_cells;
-
-    private int m_batchIndex = 0;
-
-    private long m_rowCounter = 0;
-
-    OrcRead(final Reader reader, final FSPath path) throws IOException {
-        m_rowCount = reader.getNumberOfRows();
-        m_rows = reader.rows();
-        m_batch = reader.getSchema().createRowBatch();
-        m_path = path;
-        m_cells = reader.getSchema().getChildren().stream().map(OrcCellFactory::create).toArray(OrcCell[]::new);
-    }
-
-    @Override
-    public RandomAccessible<BigDataCell> next() throws IOException {
-        m_rowCounter++;
-
-        if (m_rowCounter == 1 || m_batchIndex >= m_batch.size) {
-            if (m_rows.nextBatch(m_batch)) {
-                m_batchIndex = 0;
-                for (int i = 0; i < m_cells.length; i++) {
-                    m_cells[i].setColVector(m_batch.cols[i]);
-                }
-            } else {
-                return null;
-            }
-        }
-        for (OrcCell cell : m_cells) {
-            cell.setIndexInColumn(m_batchIndex);
-        }
-        m_batchIndex++;
-
-        return this;
-    }
-
-    @Override
-    public int size() {
-        return m_cells.length;
-    }
-
-    @Override
-    public OrcCell get(final int idx) {
-        final OrcCell cell = m_cells[idx];
-        return cell.isNull() ? null : cell;
-    }
-
-    @Override
-    public OptionalLong getMaxProgress() {
-        return OptionalLong.of(m_rowCount);
-    }
-
-    @Override
-    public long getProgress() {
-        return m_rowCounter;
-    }
-
-    @Override
-    public Optional<FSPath> getItem() {
-        return Optional.of(m_path);
+    ReadPathAccessorAdapter(final ReadPathAccessor pathAccessor) {
+        m_pathAccessor = pathAccessor;
     }
 
     @Override
     public void close() throws IOException {
-        m_rows.close();
+        m_pathAccessor.close();
+    }
+
+    @Override
+    public List<FSPath> getItems(final Consumer<StatusMessage> statusMessageConsumer)
+        throws IOException, InvalidSettingsException {
+        return m_pathAccessor.getFSPaths(statusMessageConsumer);
+    }
+
+    @Override
+    public FSPath getRootItem(final Consumer<StatusMessage> statusMessageConsumer)
+        throws IOException, InvalidSettingsException {
+        return m_pathAccessor.getRootPath(statusMessageConsumer);
     }
 
 }

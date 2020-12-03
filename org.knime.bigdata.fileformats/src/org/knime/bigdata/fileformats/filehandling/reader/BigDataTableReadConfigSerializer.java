@@ -93,7 +93,8 @@ enum BigDataTableReadConfigSerializer implements
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS, true));
     }
 
-    private static TableSpecConfig loadTableSpecConfig(final NodeSettingsRO settings) throws InvalidSettingsException {
+    private static TableSpecConfig loadTableSpecConfig(final NodeSettingsRO settings)
+        throws InvalidSettingsException {
         return DefaultTableSpecConfig.load(settings, BigDataReadAdapterFactory.INSTANCE.getProducerRegistry(),
             PrimitiveKnimeType.STRING, null);
     }

@@ -52,7 +52,8 @@ import org.knime.bigdata.fileformats.filehandling.reader.AbstractBigDataTableRea
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.filehandling.core.node.table.reader.TableReader;
+import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 
 /**
  * Node factory for the Parquet Reader.
@@ -71,7 +72,7 @@ public final class ParquetTableReaderNodeFactory extends AbstractBigDataTableRea
     }
 
     @Override
-    protected TableReader<BigDataReaderConfig, KnimeType, BigDataCell> createReader() {
+    protected GenericTableReader<FSPath, BigDataReaderConfig, KnimeType, BigDataCell> createReader() {
         return new ParquetTableReader();
     }
 

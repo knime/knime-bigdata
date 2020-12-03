@@ -64,9 +64,9 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.DialogComponentReaderFileChooser;
-import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.ReadPathAccessor;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
@@ -77,6 +77,7 @@ import org.knime.filehandling.core.node.table.reader.config.MultiTableReadConfig
 import org.knime.filehandling.core.node.table.reader.config.ReaderSpecificConfig;
 import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.AbstractTableReaderNodeDialog;
+import org.knime.filehandling.core.node.table.reader.preview.dialog.GenericItemAccessor;
 import org.knime.filehandling.core.util.GBCBuilder;
 import org.knime.filehandling.core.util.SettingsUtils;
 
@@ -87,7 +88,7 @@ import org.knime.filehandling.core.util.SettingsUtils;
  * @param <C> the type of {@link ReaderSpecificConfig} used by this reader
  */
 public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C>>
-    extends AbstractTableReaderNodeDialog<C, KnimeType> {
+    extends AbstractTableReaderNodeDialog<FSPath, C, KnimeType> {
 
     private final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> m_config;
 
@@ -104,7 +105,8 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
      * @param productionPathProvider {@link ProductionPathProvider} providing {@link ProductionPath ProductionPaths}
      */
     public BigDataTableReaderNodeDialog(final SettingsModelReaderFileChooser pathSettings,
-        final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> config, final MultiTableReadFactory<C, KnimeType> readFactory,
+        final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> config,
+        final MultiTableReadFactory<FSPath, C, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> productionPathProvider) {
         super(readFactory, productionPathProvider, true);
         m_config = config;
@@ -138,7 +140,8 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         final JPanel panel = new JPanel(new GridBagLayout());
         GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
         JPanel fileChooserPanel = m_fileChooser.getComponentPanel();
-        fileChooserPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input location"));
+        fileChooserPanel
+            .setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input location"));
         panel.add(fileChooserPanel, gbc.build());
         panel.add(createMultiFilePanel(), gbc.incY().build());
         panel.add(createTransformationTab(), gbc.fillBoth().setWeightY(1.0).incY().build());
@@ -147,7 +150,8 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
 
     private JPanel createMultiFilePanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options for multiple files"));
+        panel.setBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options for multiple files"));
         GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
         panel.add(m_failOnDifferingSpecs, gbc.build());
         panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
@@ -160,9 +164,10 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         return m_config;
     }
 
+    @SuppressWarnings("resource") // the ReadPathAccessor is managed by the adapter
     @Override
-    protected ReadPathAccessor createReadPathAccessor() {
-        return m_fileChooser.getSettingsModel().createReadPathAccessor();
+    protected GenericItemAccessor<FSPath> createItemAccessor() {
+        return new ReadPathAccessorAdapter(m_fileChooser.getSettingsModel().createReadPathAccessor());
     }
 
     @Override

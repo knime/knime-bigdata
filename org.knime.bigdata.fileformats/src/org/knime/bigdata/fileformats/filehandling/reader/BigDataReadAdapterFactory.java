@@ -48,8 +48,6 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader;
 
-import java.util.Map;
-
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
@@ -81,8 +79,8 @@ enum BigDataReadAdapterFactory implements ReadAdapterFactory<KnimeType, BigDataC
     }
 
     @Override
-    public Map<KnimeType, DataType> getDefaultTypeMap() {
-        return KnimeTypeHierarchies.DEFAULT_TYPES;
+    public DataType getDefaultType(final KnimeType type) {
+        return KnimeTypeHierarchies.DEFAULT_TYPES.get(type);
     }
 
 }

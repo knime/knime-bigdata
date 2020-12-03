@@ -49,9 +49,9 @@
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.parquet.format.converter.ParquetMetadataConverter;
 import org.apache.parquet.hadoop.ParquetFileReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -66,9 +66,8 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.TableReader;
+import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.read.Read;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
@@ -76,12 +75,11 @@ import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.T
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class ParquetTableReader implements TableReader<BigDataReaderConfig, KnimeType, BigDataCell> {
+final class ParquetTableReader implements GenericTableReader<FSPath, BigDataReaderConfig, KnimeType, BigDataCell> {
 
     @SuppressWarnings("resource") // It's the responsibility of the caller to close the read
     @Override
-    public Read<BigDataCell> read(final Path path, final TableReadConfig<BigDataReaderConfig> config)
-        throws IOException {
+    public ParquetRead read(final FSPath path, final TableReadConfig<BigDataReaderConfig> config) throws IOException {
 
         final Configuration configuration = NioFileSystemUtil.getConfiguration();
         final org.apache.hadoop.fs.Path hadoopPath = getHadoopPath(path, configuration);
@@ -97,20 +95,20 @@ final class ParquetTableReader implements TableReader<BigDataReaderConfig, Knime
     }
 
     @Override
-    public TypedReaderTableSpec<KnimeType> readSpec(final Path path, final TableReadConfig<BigDataReaderConfig> config,
-        final ExecutionMonitor exec) throws IOException {
+    public TypedReaderTableSpec<KnimeType> readSpec(final FSPath path,
+        final TableReadConfig<BigDataReaderConfig> config, final ExecutionMonitor exec) throws IOException {
         final MessageType schema = extractSchema(path);
         return convertToSpec(schema);
     }
 
-    private static MessageType extractSchema(final Path path) throws IOException {
+    private static MessageType extractSchema(final FSPath path) throws IOException {
         Configuration configuration = NioFileSystemUtil.getConfiguration();
-        final org.apache.hadoop.fs.Path hadoopPath = getHadoopPath(path, configuration);
+        final Path hadoopPath = getHadoopPath(path, configuration);
         return extractSchema(configuration, hadoopPath);
     }
 
-    private static MessageType extractSchema(final Configuration configuration,
-        final org.apache.hadoop.fs.Path hadoopPath) throws IOException {
+    private static MessageType extractSchema(final Configuration configuration, final Path hadoopPath)
+        throws IOException {
         final ParquetMetadata meta =
             ParquetFileReader.readFooter(configuration, hadoopPath, ParquetMetadataConverter.NO_FILTER);
         final FileMetaData fileMetaData = meta.getFileMetaData();
@@ -126,9 +124,8 @@ final class ParquetTableReader implements TableReader<BigDataReaderConfig, Knime
         return specBuilder.build();
     }
 
-    private static org.apache.hadoop.fs.Path getHadoopPath(final Path path, final Configuration configuration)
-        throws IOException {
-        return NioFileSystemUtil.getHadoopPath((FSPath)path, configuration);
+    private static Path getHadoopPath(final FSPath path, final Configuration configuration) throws IOException {
+        return NioFileSystemUtil.getHadoopPath(path, configuration);
     }
 
 }

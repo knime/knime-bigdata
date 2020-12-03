@@ -49,12 +49,12 @@
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.parquet.hadoop.ParquetReader;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
+import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
 import org.knime.filehandling.core.node.table.reader.read.Read;
 
@@ -63,17 +63,17 @@ import org.knime.filehandling.core.node.table.reader.read.Read;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class ParquetRead implements Read<BigDataCell> {
+final class ParquetRead implements Read<FSPath, BigDataCell> {
 
     private final ParquetReader<ParquetRandomAccessible> m_reader;
 
-    private final Path m_sourcePath;
+    private final FSPath m_sourcePath;
 
     private final long m_rowCount;
 
     private long m_rowCounter = 0L;
 
-    ParquetRead(final Path path, final ParquetReader<ParquetRandomAccessible> reader, final long rowCount) {
+    ParquetRead(final FSPath path, final ParquetReader<ParquetRandomAccessible> reader, final long rowCount) {
         m_sourcePath = path;
         m_reader = reader;
         m_rowCount = rowCount;
@@ -96,7 +96,7 @@ final class ParquetRead implements Read<BigDataCell> {
     }
 
     @Override
-    public Optional<Path> getPath() {
+    public Optional<FSPath> getItem() {
         return Optional.of(m_sourcePath);
     }
 

@@ -48,19 +48,30 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader;
 
+import java.util.function.Consumer;
+
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
+import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 import org.knime.filehandling.core.node.table.reader.AbstractTableReaderNodeFactory;
+import org.knime.filehandling.core.node.table.reader.GenericAbstractTableReaderNodeFactory;
 import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
 import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
 import org.knime.filehandling.core.node.table.reader.config.DefaultMultiTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
+import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.AbstractTableReaderNodeDialog;
+import org.knime.filehandling.core.node.table.reader.preview.dialog.GenericItemAccessor;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 
 /**
@@ -69,7 +80,7 @@ import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarch
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 public abstract class AbstractBigDataTableReaderNodeFactory
-    extends AbstractTableReaderNodeFactory<BigDataReaderConfig, KnimeType, BigDataCell> {
+    extends GenericAbstractTableReaderNodeFactory<FSPath, BigDataReaderConfig, KnimeType, BigDataCell> {
 
     private final String[] m_fileExtensions;
 
@@ -83,24 +94,28 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     }
 
     @Override
-    protected final SettingsModelReaderFileChooser
-        createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
+    protected final FSPathSettings createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
+        return new FSPathSettings(createFCSettingsModel(nodeCreationConfig));
+    }
+
+    private SettingsModelReaderFileChooser createFCSettingsModel(final NodeCreationConfiguration nodeCreationConfig) {
         return new SettingsModelReaderFileChooser("file_selection",
             nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
             FilterMode.FILE, m_fileExtensions);
     }
 
     @Override
-    protected final AbstractTableReaderNodeDialog<BigDataReaderConfig, KnimeType> createNodeDialogPane(
+    protected final AbstractTableReaderNodeDialog<FSPath, BigDataReaderConfig, KnimeType> createNodeDialogPane(
         final NodeCreationConfiguration creationConfig,
-        final MultiTableReadFactory<BigDataReaderConfig, KnimeType> readFactory,
+        final MultiTableReadFactory<FSPath, BigDataReaderConfig, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> defaultProductionPathFn) {
-        return new BigDataTableReaderNodeDialog<>(createPathSettings(creationConfig), createConfig(creationConfig),
+        return new BigDataTableReaderNodeDialog<>(createFCSettingsModel(creationConfig), createConfig(creationConfig),
             readFactory, defaultProductionPathFn);
     }
 
     @Override
-    protected final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>>
+    protected final
+        DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>>
         createConfig(final NodeCreationConfiguration nodeCreationConfig) {
         final DefaultTableReadConfig<BigDataReaderConfig> tc = new DefaultTableReadConfig<>(new BigDataReaderConfig());
         return new DefaultMultiTableReadConfig<>(tc, BigDataTableReadConfigSerializer.INSTANCE);
@@ -119,6 +134,48 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     @Override
     protected final TypeHierarchy<KnimeType, KnimeType> getTypeHierarchy() {
         return KnimeTypeHierarchies.TYPE_HIERARCHY;
+    }
+
+    private class FSPathSettings implements SourceSettings<FSPath> {
+
+        private final SettingsModelReaderFileChooser m_settings;
+
+        FSPathSettings(final SettingsModelReaderFileChooser settings) {
+            m_settings = settings;
+        }
+
+        @Override
+        public String getSourceIdentifier() {
+            return m_settings.getPath();
+        }
+
+        @Override
+        public void configureInModel(final PortObjectSpec[] specs, final Consumer<StatusMessage> statusMessageConsumer)
+            throws InvalidSettingsException {
+            m_settings.configureInModel(specs, statusMessageConsumer);
+        }
+
+        @SuppressWarnings("resource") // the ReadPathAccessor is managed by the adapter
+        @Override
+        public GenericItemAccessor<FSPath> createItemAccessor() {
+            return new ReadPathAccessorAdapter(m_settings.createReadPathAccessor());
+        }
+
+        @Override
+        public void saveSettingsTo(final NodeSettingsWO settings) {
+            m_settings.saveSettingsTo(settings);
+        }
+
+        @Override
+        public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+            m_settings.loadSettingsFrom(settings);
+        }
+
+        @Override
+        public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+            m_settings.validateSettings(settings);
+        }
+
     }
 
 }
