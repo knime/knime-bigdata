@@ -37,16 +37,12 @@
 				The protocol should be <i>https</i> and port <i>8443</i> on most deployments.
 			</option>
 	        <option name="Authentication">
-	            Specify the authentication method to use:
+	            Authenticate with a username and password.
 	            <ul>
-	            	<li>
-	            		<b>Credentials:</b> Authenticate with the username and password of the selected credentials flow variable.
-	            	</li>
-	            	<li>
-	            		<b>Username &amp; password:</b> Authenticate with the provided <i>Username</i> and <i>Password</i>. The password is persistently stored
-	            		(in encrypted form) in the settings of this node and will be saved with the workflow.
-	            	</li>
-	           	</ul>
+	            <li>Either enter a <b>username</b> and <b>password</b>, in which case the password will be persistently
+	            stored (in encrypted form) with the workflow.</li>
+	            <li>Or check <b>Use credentials</b> and a select a credentials flow variable to supply the username and password.</li>
+	            </ul>
 	        </option>
 		    <option name="Working directory">
 		        Specify the <i>working directory</i> of the resulting file system connection, using the <b>Path syntax</b> explained above. The working

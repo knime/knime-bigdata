@@ -47,20 +47,21 @@
             	Databricks documentation for more informations.
             </option>
             <option name="Authentication">
-                Workflow Token, username and password or credentials can be used for authentication. Databricks strongly recommends tokens.
+	            Username and password or a personal access token can be used for authentication. Databricks strongly recommends tokens.
 	            See authentication in Databricks
 	            <a href="https://docs.databricks.com/api/latest/authentication.html">AWS</a> or
 	            <a href="https://docs.azuredatabricks.net/api/latest/authentication.html">Azure</a>
 	            documentation for more informations about personal access token.
 	            <ul>
 	            	<li>
-	            		<b>Username/password:</b> Authenticate with the provided <i>Username</i> and <i>Password</i>. If entered here,
-	            		the password is persistently stored (in encrypted form) in the settings of this node. Alternatively, if <i>Use credentials</i>
-	            		is selected, the username and password of the selected credentials flow variable will be used for authentication.
+	            		<b>Username &amp; password:</b> Authenticate with a username and password. Either enter a <i>username</i> and
+	            		<i>password</i>, in which case the password will be persistently stored (in encrypted form) with
+	            		the workflow. Or check <i>Use credentials</i> and a select a credentials flow variable to supply
+	            		the username and password.
 	            	</li>
 	            	<li>
 	            		<b>Token:</b> Authenticate with the provided personal access <i>token</i>. If entered here,
-	            		the token is persistently stored (in encrypted form) in the settings of this node. Alternatively, if <i>Use credentials</i>
+	            		the token will be persistently stored (in encrypted form) with the workflow. Alternatively, if <i>Use credentials</i>
 	            		is selected, the password of the selected credentials flow variable will be used as the token for authentication
 	            		(username of the flow variable will be ignored).
 					</li>
