@@ -115,7 +115,7 @@ public abstract class AbstractBigDataTableReaderNodeFactory
 
     @Override
     protected final
-        DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>>
+        DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType>
         createConfig(final NodeCreationConfiguration nodeCreationConfig) {
         final DefaultTableReadConfig<BigDataReaderConfig> tc = new DefaultTableReadConfig<>(new BigDataReaderConfig());
         return new DefaultMultiTableReadConfig<>(tc, BigDataTableReadConfigSerializer.INSTANCE);

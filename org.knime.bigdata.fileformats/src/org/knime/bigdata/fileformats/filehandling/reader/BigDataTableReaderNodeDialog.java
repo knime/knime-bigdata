@@ -90,7 +90,7 @@ import org.knime.filehandling.core.util.SettingsUtils;
 public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C>>
     extends AbstractTableReaderNodeDialog<FSPath, C, KnimeType> {
 
-    private final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> m_config;
+    private final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>, KnimeType> m_config;
 
     private final DialogComponentReaderFileChooser m_fileChooser;
 
@@ -105,7 +105,7 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
      * @param productionPathProvider {@link ProductionPathProvider} providing {@link ProductionPath ProductionPaths}
      */
     public BigDataTableReaderNodeDialog(final SettingsModelReaderFileChooser pathSettings,
-        final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> config,
+        final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>, KnimeType> config,
         final MultiTableReadFactory<FSPath, C, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> productionPathProvider) {
         super(readFactory, productionPathProvider, true);
@@ -159,7 +159,7 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
     }
 
     @Override
-    protected MultiTableReadConfig<C> getConfig() throws InvalidSettingsException {
+    protected MultiTableReadConfig<C, KnimeType> getConfig() throws InvalidSettingsException {
         saveToConfig();
         return m_config;
     }
