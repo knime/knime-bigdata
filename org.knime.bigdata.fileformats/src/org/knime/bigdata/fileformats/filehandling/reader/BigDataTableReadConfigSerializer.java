@@ -132,7 +132,9 @@ enum BigDataTableReadConfigSerializer implements
     }
 
     @Override
-    public void validate(final NodeSettingsRO settings) throws InvalidSettingsException {
+    public void validate(
+        final BigDataMultiTableReadConfig config,
+        final NodeSettingsRO settings) throws InvalidSettingsException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             DefaultTableSpecConfig.validate(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG),
                 BigDataReadAdapterFactory.INSTANCE.getProducerRegistry());
