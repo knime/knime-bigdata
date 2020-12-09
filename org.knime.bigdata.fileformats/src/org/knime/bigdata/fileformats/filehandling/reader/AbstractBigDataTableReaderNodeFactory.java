@@ -67,8 +67,6 @@ import org.knime.filehandling.core.node.table.reader.GenericAbstractTableReaderN
 import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
 import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
-import org.knime.filehandling.core.node.table.reader.config.DefaultMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.AbstractTableReaderNodeDialog;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.GenericItemAccessor;
@@ -109,16 +107,13 @@ public abstract class AbstractBigDataTableReaderNodeFactory
         final NodeCreationConfiguration creationConfig,
         final MultiTableReadFactory<FSPath, BigDataReaderConfig, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> defaultProductionPathFn) {
-        return new BigDataTableReaderNodeDialog<>(createFCSettingsModel(creationConfig), createConfig(creationConfig),
+        return new BigDataTableReaderNodeDialog(createFCSettingsModel(creationConfig), createConfig(creationConfig),
             readFactory, defaultProductionPathFn);
     }
 
     @Override
-    protected final
-        DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType>
-        createConfig(final NodeCreationConfiguration nodeCreationConfig) {
-        final DefaultTableReadConfig<BigDataReaderConfig> tc = new DefaultTableReadConfig<>(new BigDataReaderConfig());
-        return new DefaultMultiTableReadConfig<>(tc, BigDataTableReadConfigSerializer.INSTANCE);
+    protected final BigDataMultiTableReadConfig createConfig(final NodeCreationConfiguration nodeCreationConfig) {
+        return new BigDataMultiTableReadConfig();
     }
 
     @Override

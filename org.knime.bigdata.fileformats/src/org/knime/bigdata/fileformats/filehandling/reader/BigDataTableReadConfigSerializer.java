@@ -58,8 +58,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.node.table.reader.config.ConfigSerializer;
-import org.knime.filehandling.core.node.table.reader.config.DefaultMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfig;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfigSerializer;
 import org.knime.filehandling.core.node.table.reader.config.TableSpecConfig;
@@ -71,7 +69,7 @@ import org.knime.filehandling.core.util.SettingsUtils;
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 enum BigDataTableReadConfigSerializer implements
-    ConfigSerializer<DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType>> {
+    ConfigSerializer<BigDataMultiTableReadConfig> {
         INSTANCE;
 
     private static final String CFG_FAIL_ON_DIFFERING_SPECS = "fail_on_differing_specs";
@@ -86,7 +84,7 @@ enum BigDataTableReadConfigSerializer implements
 
     @Override
     public void loadInDialog(
-        final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType> config,
+        final BigDataMultiTableReadConfig config,
         final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             try {
@@ -106,7 +104,7 @@ enum BigDataTableReadConfigSerializer implements
 
     @Override
     public void loadInModel(
-        final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType> config,
+        final BigDataMultiTableReadConfig config,
         final NodeSettingsRO settings) throws InvalidSettingsException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             config.setTableSpecConfig(loadTableSpecConfig(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG)));
@@ -117,7 +115,7 @@ enum BigDataTableReadConfigSerializer implements
 
     @Override
     public void saveInModel(
-        final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType> config,
+        final BigDataMultiTableReadConfig config,
         final NodeSettingsWO settings) {
         if (config.hasTableSpecConfig()) {
             config.getTableSpecConfig().save(settings.addNodeSettings(CFG_TABLE_SPEC_CONFIG));
@@ -128,7 +126,7 @@ enum BigDataTableReadConfigSerializer implements
 
     @Override
     public void saveInDialog(
-        final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType> config,
+        final BigDataMultiTableReadConfig config,
         final NodeSettingsWO settings) throws InvalidSettingsException {
         saveInModel(config, settings);
     }

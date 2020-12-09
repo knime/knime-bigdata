@@ -71,10 +71,6 @@ import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.Settin
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
-import org.knime.filehandling.core.node.table.reader.config.DefaultMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.config.MultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.config.ReaderSpecificConfig;
 import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.AbstractTableReaderNodeDialog;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.GenericItemAccessor;
@@ -85,12 +81,11 @@ import org.knime.filehandling.core.util.SettingsUtils;
  * Dialog for the Parquet and ORC Reader nodes.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
- * @param <C> the type of {@link ReaderSpecificConfig} used by this reader
  */
-public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C>>
-    extends AbstractTableReaderNodeDialog<FSPath, C, KnimeType> {
+public final class BigDataTableReaderNodeDialog
+    extends AbstractTableReaderNodeDialog<FSPath, BigDataReaderConfig, KnimeType> {
 
-    private final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>, KnimeType> m_config;
+    private final BigDataMultiTableReadConfig m_config;
 
     private final DialogComponentReaderFileChooser m_fileChooser;
 
@@ -105,8 +100,8 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
      * @param productionPathProvider {@link ProductionPathProvider} providing {@link ProductionPath ProductionPaths}
      */
     public BigDataTableReaderNodeDialog(final SettingsModelReaderFileChooser pathSettings,
-        final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>, KnimeType> config,
-        final MultiTableReadFactory<FSPath, C, KnimeType> readFactory,
+        final BigDataMultiTableReadConfig config,
+        final MultiTableReadFactory<FSPath, BigDataReaderConfig, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> productionPathProvider) {
         super(readFactory, productionPathProvider, true);
         m_config = config;
@@ -159,7 +154,7 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
     }
 
     @Override
-    protected MultiTableReadConfig<C, KnimeType> getConfig() throws InvalidSettingsException {
+    protected BigDataMultiTableReadConfig getConfig() throws InvalidSettingsException {
         saveToConfig();
         return m_config;
     }
