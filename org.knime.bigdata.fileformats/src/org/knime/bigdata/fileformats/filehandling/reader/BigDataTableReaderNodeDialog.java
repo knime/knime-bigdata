@@ -179,15 +179,13 @@ public final class BigDataTableReaderNodeDialog
     }
 
     @Override
-    protected void loadSettings(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected BigDataMultiTableReadConfig loadSettings(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
         m_config.loadInDialog(settings, specs);
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
-        if (m_config.hasTableSpecConfig()) {
-            loadFromTableSpecConfig(m_config.getTableSpecConfig());
-        }
         updateMultiFileEnabledStatus();
+        return m_config;
     }
 
     @Override

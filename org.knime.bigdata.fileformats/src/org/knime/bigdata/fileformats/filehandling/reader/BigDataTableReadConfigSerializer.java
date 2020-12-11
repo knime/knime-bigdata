@@ -60,6 +60,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.node.table.reader.config.ConfigSerializer;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfig;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfigSerializer;
+import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfigSerializer.ExternalConfig;
 import org.knime.filehandling.core.node.table.reader.config.TableSpecConfig;
 import org.knime.filehandling.core.util.SettingsUtils;
 
@@ -99,7 +100,7 @@ enum BigDataTableReadConfigSerializer implements
 
     private static TableSpecConfig<KnimeType> loadTableSpecConfig(final NodeSettingsRO settings)
         throws InvalidSettingsException {
-        return TABLE_SPEC_CONFIG_SERIALIZER.load(settings, null);
+        return TABLE_SPEC_CONFIG_SERIALIZER.load(settings, new ExternalConfig(null, false));
     }
 
     @Override
