@@ -59,13 +59,14 @@ import org.knime.filehandling.core.node.table.reader.config.MultiTableReadConfig
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 public final class BigDataMultiTableReadConfig extends
-AbstractMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType, BigDataMultiTableReadConfig> {
+    AbstractMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>, KnimeType, BigDataMultiTableReadConfig> {
 
     /**
      * Constructor.
      */
     public BigDataMultiTableReadConfig() {
-        super(new DefaultTableReadConfig<>(new BigDataReaderConfig()), BigDataTableReadConfigSerializer.INSTANCE);
+        super(new DefaultTableReadConfig<>(new BigDataReaderConfig()), BigDataTableReadConfigSerializer.INSTANCE,
+            BigDataTableReadConfigSerializer.INSTANCE);
     }
 
     @Override

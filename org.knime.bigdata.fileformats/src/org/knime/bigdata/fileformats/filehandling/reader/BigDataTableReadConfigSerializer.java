@@ -52,15 +52,18 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.filehandling.core.node.table.reader.config.ConfigID;
+import org.knime.filehandling.core.node.table.reader.config.ConfigIDFactory;
 import org.knime.filehandling.core.node.table.reader.config.ConfigSerializer;
-import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfig;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfigSerializer;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableSpecConfigSerializer.ExternalConfig;
+import org.knime.filehandling.core.node.table.reader.config.NodeSettingsConfigID;
 import org.knime.filehandling.core.node.table.reader.config.TableSpecConfig;
 import org.knime.filehandling.core.util.SettingsUtils;
 
@@ -69,9 +72,11 @@ import org.knime.filehandling.core.util.SettingsUtils;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-enum BigDataTableReadConfigSerializer implements
-    ConfigSerializer<BigDataMultiTableReadConfig> {
+enum BigDataTableReadConfigSerializer
+    implements ConfigSerializer<BigDataMultiTableReadConfig>, ConfigIDFactory<BigDataMultiTableReadConfig> {
         INSTANCE;
+
+    private static final ExternalConfig EXTERNAL_CONFIG = new ExternalConfig(null, false);
 
     private static final String CFG_FAIL_ON_DIFFERING_SPECS = "fail_on_differing_specs";
 
@@ -79,14 +84,16 @@ enum BigDataTableReadConfigSerializer implements
 
     private static final String CFG_TABLE_SPEC_CONFIG = "table_spec_config" + SettingsModel.CFGKEY_INTERNAL;
 
-    private static final DefaultTableSpecConfigSerializer<KnimeType> TABLE_SPEC_CONFIG_SERIALIZER =
-        new DefaultTableSpecConfigSerializer<KnimeType>(BigDataReadAdapterFactory.INSTANCE.getProducerRegistry(),
-            PrimitiveKnimeType.STRING);
+    private final DefaultTableSpecConfigSerializer<KnimeType> m_tableSpecConfigSerializer;
+
+    private BigDataTableReadConfigSerializer() {
+        m_tableSpecConfigSerializer = new DefaultTableSpecConfigSerializer<>(
+            BigDataReadAdapterFactory.INSTANCE.getProducerRegistry(), PrimitiveKnimeType.STRING, this);
+    }
 
     @Override
-    public void loadInDialog(
-        final BigDataMultiTableReadConfig config,
-        final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    public void loadInDialog(final BigDataMultiTableReadConfig config, final NodeSettingsRO settings,
+        final PortObjectSpec[] specs) throws NotConfigurableException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             try {
                 config.setTableSpecConfig(loadTableSpecConfig(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG)));
@@ -98,15 +105,14 @@ enum BigDataTableReadConfigSerializer implements
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS, true));
     }
 
-    private static TableSpecConfig<KnimeType> loadTableSpecConfig(final NodeSettingsRO settings)
+    private TableSpecConfig<KnimeType> loadTableSpecConfig(final NodeSettingsRO settings)
         throws InvalidSettingsException {
-        return TABLE_SPEC_CONFIG_SERIALIZER.load(settings, new ExternalConfig(null, false));
+        return m_tableSpecConfigSerializer.load(settings, EXTERNAL_CONFIG);
     }
 
     @Override
-    public void loadInModel(
-        final BigDataMultiTableReadConfig config,
-        final NodeSettingsRO settings) throws InvalidSettingsException {
+    public void loadInModel(final BigDataMultiTableReadConfig config, final NodeSettingsRO settings)
+        throws InvalidSettingsException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             config.setTableSpecConfig(loadTableSpecConfig(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG)));
         }
@@ -115,9 +121,7 @@ enum BigDataTableReadConfigSerializer implements
     }
 
     @Override
-    public void saveInModel(
-        final BigDataMultiTableReadConfig config,
-        final NodeSettingsWO settings) {
+    public void saveInModel(final BigDataMultiTableReadConfig config, final NodeSettingsWO settings) {
         if (config.hasTableSpecConfig()) {
             config.getTableSpecConfig().save(settings.addNodeSettings(CFG_TABLE_SPEC_CONFIG));
         }
@@ -126,22 +130,29 @@ enum BigDataTableReadConfigSerializer implements
     }
 
     @Override
-    public void saveInDialog(
-        final BigDataMultiTableReadConfig config,
-        final NodeSettingsWO settings) throws InvalidSettingsException {
+    public void saveInDialog(final BigDataMultiTableReadConfig config, final NodeSettingsWO settings)
+        throws InvalidSettingsException {
         saveInModel(config, settings);
     }
 
     @Override
-    public void validate(
-        final BigDataMultiTableReadConfig config,
-        final NodeSettingsRO settings) throws InvalidSettingsException {
+    public void validate(final BigDataMultiTableReadConfig config, final NodeSettingsRO settings)
+        throws InvalidSettingsException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
-            DefaultTableSpecConfig.validate(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG),
-                BigDataReadAdapterFactory.INSTANCE.getProducerRegistry());
+            m_tableSpecConfigSerializer.validate(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG));
         }
         final NodeSettingsRO settingsTab = settings.getNodeSettings(SettingsUtils.CFG_SETTINGS_TAB);
         settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS);
+    }
+
+    @Override
+    public ConfigID createFromConfig(final BigDataMultiTableReadConfig config) {
+        return new NodeSettingsConfigID(new NodeSettings("big_data_reader"));
+    }
+
+    @Override
+    public ConfigID createFromSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        return new NodeSettingsConfigID(settings.getNodeSettings("big_data_reader"));
     }
 
 }
