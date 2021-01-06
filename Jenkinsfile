@@ -16,7 +16,7 @@ properties([
 ])
 
 try {
-    knimetools.defaultTychoBuild('org.knime.update.bigdata')
+    // knimetools.defaultTychoBuild('org.knime.update.bigdata')
     // TEST REGEX
     def local_bd_tests = "(KnimeOnSpark|SparkLocal|SparkExecutor|SparklingWater|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_all|ORC|Parquet)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db).+"
     def testPrefix = "BigDataTests/${BN}" 
@@ -58,6 +58,7 @@ try {
                     'knime-pmml',
                     'knime-python',
                     'knime-rest',
+                    'knime-reporting',
                     'knime-sparkling-water',
                     'knime-stats',
                     'knime-streaming',

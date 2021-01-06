@@ -8,4 +8,4 @@ spark.local.threads,2
 spark.local.sqlSupport,HIVEQL_WITH_JDBC
 spark.local.thriftserverPort,14999
 spark.local.useHiveDataFolder,true
-spark.local.hiveDataFolder,/tmp/bigdata-tests/hive
+spark.local.hiveDataFolder,/home/gabriel/knimestuff/workspace/tmp/bigdata-tests/hive/
