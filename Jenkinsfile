@@ -18,7 +18,7 @@ properties([
 try {
     knimetools.defaultTychoBuild('org.knime.update.bigdata')
     // TEST REGEX
-    def local_bd_tests = "(KnimeOnSpark|SparkLocal|SparkExecutor|SparklingWater|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_all|ORC|Parquet)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db).+"
+    def local_bd_tests = '(KnimeOnSpark|SparkLocal|SparkExecutor|SparklingWater|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_all|ORC|Parquet)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db)(?:(?!OS)|OS/__KNIME_OS__/).+'
     def testPrefix = "BigDataTests/${BN}" 
     def testRegex = "^/${testPrefix}/${local_bd_tests}"
 
@@ -32,7 +32,6 @@ try {
         workflowTests.runTests(
             testflowsDir: testPrefix,
             testflowsRegex: testRegex,
-            configurations: ['ubuntu20.04'],
             dependencies: [
                 repositories: [
                     'knime-bigdata-externals',
