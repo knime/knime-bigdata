@@ -32,6 +32,7 @@ try {
         workflowTests.runTests(
             testflowsDir: testPrefix,
             testflowsRegex: testRegex,
+            configurations: ['ubuntu20.04'],
             dependencies: [
                 repositories: [
                     'knime-bigdata-externals',
