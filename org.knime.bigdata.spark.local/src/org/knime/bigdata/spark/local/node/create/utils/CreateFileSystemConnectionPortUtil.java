@@ -50,16 +50,21 @@ package org.knime.bigdata.spark.local.node.create.utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings;
+import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.WorkingDirMode;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.workflow.WorkflowContext;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
+import org.knime.filehandling.core.connections.knimerelativeto.RelativeToUtil;
 import org.knime.filehandling.core.connections.local.LocalFSConnection;
 import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.port.FileSystemPortObject;
@@ -95,12 +100,18 @@ public class CreateFileSystemConnectionPortUtil implements CreateLocalBDEPortUti
     @Override
     public PortObjectSpec configure() throws InvalidSettingsException {
         m_fsId = FSConnectionRegistry.getInstance().getKey();
+
+        if (m_settings.getWorkingDirectoryMode() == WorkingDirMode.USER_HOME
+                && StringUtils.isBlank(System.getProperty("user.home"))) {
+            throw new InvalidSettingsException("Unable to identify user home directory (system property 'user.home' not set or empty)");
+        }
+
         return createSpec(m_fsId);
     }
 
     @Override
     public PortObject execute(final LocalSparkContext sparkContext, final ExecutionContext exec) throws Exception {
-        final String workingDir = m_settings.getWorkingDirectory();
+        final String workingDir = getWorkingDirectory();
         m_connection = new LocalFSConnection(workingDir, LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
         testConnection(m_connection);
@@ -115,6 +126,24 @@ public class CreateFileSystemConnectionPortUtil implements CreateLocalBDEPortUti
     private static FileSystemPortObjectSpec createSpec(final String fsId) {
         return new FileSystemPortObjectSpec(LocalFileSystem.FS_TYPE.getName(), fsId,
             LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+    }
+
+    private String getWorkingDirectory() throws InvalidSettingsException, IOException {
+        switch(m_settings.getWorkingDirectoryMode()) {
+            case MANUAL:
+                return m_settings.getManualWorkingDirectory();
+            case USER_HOME:
+                return System.getProperty("user.home");
+            case WORKFLOW_DATA_AREA:
+                final WorkflowContext workflowContext = RelativeToUtil.getWorkflowContext();
+                final Path workflowLocation = workflowContext.getCurrentLocation().toPath().toAbsolutePath().normalize();
+                final Path workflowDataDir = workflowLocation.resolve("data");
+                Files.createDirectories(workflowDataDir);
+                return workflowDataDir.toString();
+            default:
+                throw new InvalidSettingsException(
+                    "Unable to identify workflow directory, unsupported mode: " + m_settings.getWorkingDirectoryMode());
+        }
     }
 
     @Override

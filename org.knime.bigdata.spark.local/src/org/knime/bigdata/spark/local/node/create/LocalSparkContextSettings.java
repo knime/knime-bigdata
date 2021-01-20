@@ -161,9 +161,61 @@ public class LocalSparkContextSettings {
         }
     }
 
+    /**
+     * Enum to model how the working directory of the local file system port should be selected.
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public enum WorkingDirMode implements ButtonGroupEnumInterface {
+
+        /**
+         * Manual working directory selection.
+         */
+        MANUAL,
+
+        /**
+         * Home directory of the user executing the workflow.
+         */
+        USER_HOME,
+
+        /**
+         * Data area of the workflow.
+         */
+        WORKFLOW_DATA_AREA;
+
+        @Override
+        public String getText() {
+            switch (this) {
+                case USER_HOME:
+                    return "Home directory of the current user";
+                case WORKFLOW_DATA_AREA:
+                    return "Current workflow data area";
+                default:
+                    return "Manual:";
+            }
+        }
+
+        @Override
+        public String getActionCommand() {
+            return this.toString();
+        }
+
+        @Override
+        public String getToolTip() {
+            return null;
+        }
+
+        @Override
+        public boolean isDefault() {
+            return this == MANUAL;
+        }
+    }
+
     private static final String DEFAULT_CONTEXT_NAME = "knimeSparkContext";
 
-    private static final String DEFAULT_WORKING_DIR = System.getProperty("user.home");
+    private static final WorkingDirMode DEFAULT_WORKING_DIR_MODE = WorkingDirMode.MANUAL;
+
+    private static final String DEFAULT_MANUAL_WORKING_DIR = System.getProperty("user.home");
 
     private static final String DEFAULT_CUSTOM_SPARK_SETTINGS = "spark.jars: /path/to/some.jar\nspark.sql.shuffle.partitions: 100\n";
 
@@ -196,8 +248,11 @@ public class LocalSparkContextSettings {
 
     private final TimeSettings m_timeShiftSettings = new TimeSettings();
 
-    private final SettingsModelString m_workingDirectory =
-        new SettingsModelString("workingDirectory", DEFAULT_WORKING_DIR);
+    private final SettingsModelString m_workingDirectoryMode =
+        new SettingsModelString("workingDirectoryMode", DEFAULT_WORKING_DIR_MODE.getActionCommand());
+
+    private final SettingsModelString m_manualWorkingDirectory =
+        new SettingsModelString("workingDirectory", DEFAULT_MANUAL_WORKING_DIR);
 
     /**
      * Default constructor.
@@ -385,17 +440,31 @@ public class LocalSparkContextSettings {
     }
 
     /**
-     * @return the working directory of the file system connection
+     * @return the working directory mode
      */
-    public String getWorkingDirectory() {
-        return m_workingDirectory.getStringValue();
+    public WorkingDirMode getWorkingDirectoryMode() {
+        return WorkingDirMode.valueOf(m_workingDirectoryMode.getStringValue());
     }
 
     /**
-     * @return the working directory settings model
+     * @return the working directory mode model
      */
-    public SettingsModelString getWorkingDirectoryModel() {
-        return m_workingDirectory;
+    public SettingsModelString getWorkingDirectoryModeModel() {
+        return m_workingDirectoryMode;
+    }
+
+    /**
+     * @return the manual working directory of the file system connection
+     */
+    public String getManualWorkingDirectory() {
+        return m_manualWorkingDirectory.getStringValue();
+    }
+
+    /**
+     * @return the manual working directory settings model
+     */
+    public SettingsModelString getManualWorkingDirectoryModel() {
+        return m_manualWorkingDirectory;
     }
 
     /**
@@ -446,7 +515,8 @@ public class LocalSparkContextSettings {
         m_timeShiftSettings.saveSettingsTo(settings.addNodeSettings("timeshift"));
 
         if (m_hasWorkingDirectorySetting) {
-            m_workingDirectory.saveSettingsTo(settings);
+            m_workingDirectoryMode.saveSettingsTo(settings);
+            m_manualWorkingDirectory.saveSettingsTo(settings);
         }
     }
 
@@ -477,7 +547,10 @@ public class LocalSparkContextSettings {
         }
 
         if (m_hasWorkingDirectorySetting) {
-            m_workingDirectory.validateSettings(settings);
+            if (settings.containsKey("workingDirectoryMode")) { // added in 4.3.1
+                m_workingDirectoryMode.validateSettings(settings);
+            }
+            m_manualWorkingDirectory.validateSettings(settings);
         }
 
         final LocalSparkContextSettings tmpSettings = new LocalSparkContextSettings(m_hasWorkingDirectorySetting);
@@ -508,7 +581,8 @@ public class LocalSparkContextSettings {
             }
         }
 
-        if (m_hasWorkingDirectorySetting && StringUtils.isBlank(getWorkingDirectory())) {
+        if (m_hasWorkingDirectorySetting && getWorkingDirectoryMode() == WorkingDirMode.MANUAL
+                && StringUtils.isBlank(getManualWorkingDirectory())) {
             errors.add("Working directory required.");
         }
 
@@ -541,7 +615,10 @@ public class LocalSparkContextSettings {
         }
 
         if (m_hasWorkingDirectorySetting) {
-            m_workingDirectory.loadSettingsFrom(settings);
+            if (settings.containsKey("workingDirectoryMode")) { // added in 4.3.1
+                m_workingDirectoryMode.loadSettingsFrom(settings);
+            }
+            m_manualWorkingDirectory.loadSettingsFrom(settings);
         }
 
         updateEnabledness();

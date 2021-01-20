@@ -46,10 +46,17 @@
         </ul>
         </option>
         <option name="Working directory">
-            Specify the <i>working directory</i> of the resulting file system connection. The working
-	        directory must be specified as an absolute path. A working directory allows downstream nodes to access files/folders using <i>relative</i>
-	        paths, i.e. paths that do not have a leading slash. The default working directory is the root "/", under which all the
-	        document libraries are located.
+        	Specify the <i>working directory</i> of the resulting file system connection.
+        	The working directory is a local directory. Based on the working directory, downstream nodes can access 
+        	files/folders using <i>relative</i> paths and do not have to specify full (absolute) paths.
+        	<ul>
+        		<li><b>Manual:</b> Sets the working directory to the given (absolute) path.</li>
+        		<li><b>Home directory:</b> Sets the working directory to the home directory of the user executing
+        		this node, e.g. <tt>C:\Users\myuser</tt>.</li>
+        		<li><b>Current workflow data area:</b> Sets the working directory to the <i>data area</i> of the
+        		current workflow. The data area is a directory called <tt>data</tt> inside the directory of the 
+        		current workflow.</li>
+        	</ul>
         </option>
 		</tab>
 		
