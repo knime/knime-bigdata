@@ -45,12 +45,14 @@
  */
 package org.knime.bigdata.spark.local.node.create;
 
+import static org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.WorkingDirMode.MANUAL;
+import static org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.WorkingDirMode.USER_HOME;
+import static org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.WorkingDirMode.WORKFLOW_DATA_AREA;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -60,6 +62,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.WorkingDirMode;
 import org.knime.bigdata.spark.node.util.context.create.TimeDialogPanel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -75,7 +78,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.FileSystemBrowser.DialogType;
 import org.knime.core.node.util.FileSystemBrowser.FileSelectionMode;
 import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 import org.knime.filehandling.core.connections.local.LocalFSConnection;
 import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.defaultnodesettings.fileselection.FileSelectionDialog;
@@ -97,10 +99,18 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
 
     private final boolean m_hasWorkingDirectorySetting;
 
-    private final ChangeListener m_workingDirListener = e -> updateWorkingDirSetting();
+    private final DialogComponentButtonGroup m_workingDirMode;
 
-    private final WorkingDirectoryChooser m_workingDirChooser =
-        new WorkingDirectoryChooser(WORKING_DIR_HISTORY_ID, this::createFSConnection);
+    private final ChangeListener m_workingDirListener = e -> updateManualWorkingDirSetting();
+
+    private final FileSelectionDialog m_manualWorkingDirChooser =
+        new FileSelectionDialog(WORKING_DIR_HISTORY_ID, //
+            25, // history length
+            this::createFSConnection, //
+            DialogType.SAVE_DIALOG, //
+            FileSelectionMode.DIRECTORIES_ONLY, //
+            new String[0], //
+            e -> {});
 
     private final ChangeListener m_hiveDirListener = e -> updateHiveDirSetting();
 
@@ -119,6 +129,9 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
     LocalEnvironmentCreatorNodeDialog3(final boolean hasWorkingDirectorySetting) {
         m_hasWorkingDirectorySetting = hasWorkingDirectorySetting;
         m_settings = new LocalSparkContextSettings(hasWorkingDirectorySetting);
+
+        m_workingDirMode = new DialogComponentButtonGroup(m_settings.getWorkingDirectoryModeModel(), null, false,
+            new WorkingDirMode[]{MANUAL, USER_HOME, WORKFLOW_DATA_AREA});
 
         addTab("Settings", createSettingsTab());
         m_timeShift = new TimeDialogPanel(m_settings.getTimeShiftSettings());
@@ -183,11 +196,30 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
     }
 
     private JComponent createFileSystemPanel() {
-        final JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+        final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(createTitledBorder("File System settings"));
-        panel.add(Box.createHorizontalStrut(5));
-        panel.add(m_workingDirChooser);
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = gbc.gridy = 0;
+        gbc.insets = new Insets(0, 5, 0, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(new JLabel("Working directory:"), gbc);
+        gbc.gridx++;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(m_workingDirMode.getButton(MANUAL.getActionCommand()), gbc);
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 20, 0, 0);
+        panel.add(m_manualWorkingDirChooser.getPanel(), gbc);
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(m_workingDirMode.getButton(USER_HOME.getActionCommand()), gbc);
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(m_workingDirMode.getButton(WORKFLOW_DATA_AREA.getActionCommand()), gbc);
+
+        m_workingDirMode.getModel().addChangeListener(this);
+
         return panel;
     }
 
@@ -304,7 +336,8 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
 
         if (eventSource == m_settings.getUseCustomSparkSettingsModel() //
             || eventSource == m_settings.getSqlSupportModel() //
-            || eventSource == m_settings.getUseHiveDataFolderModel()) {
+            || eventSource == m_settings.getUseHiveDataFolderModel() //
+            || eventSource == m_settings.getWorkingDirectoryModeModel()) {
 
             updateEnabledness();
         }
@@ -313,10 +346,11 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
 	private void updateEnabledness() {
         m_settings.updateEnabledness();
         m_hiveDirChooser.setEnabled(m_settings.isHiveEnabled() && m_settings.useHiveDataFolder());
+        m_manualWorkingDirChooser.setEnabled(m_settings.getWorkingDirectoryMode() == MANUAL);
 	}
 
-    private void updateWorkingDirSetting() {
-        m_settings.getWorkingDirectoryModel().setStringValue(m_workingDirChooser.getSelectedWorkingDirectory());
+    private void updateManualWorkingDirSetting() {
+        m_settings.getManualWorkingDirectoryModel().setStringValue(m_manualWorkingDirChooser.getSelected());
     }
 
     private void updateHiveDirSetting() {
@@ -324,7 +358,7 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
     }
 
     private FSConnection createFSConnection() {
-        return new LocalFSConnection(m_settings.getWorkingDirectory(), LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+        return new LocalFSConnection(m_settings.getManualWorkingDirectory(), LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
     }
 
     /**
@@ -335,7 +369,7 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
         m_settings.validateDeeper();
         m_settings.saveSettingsTo(settings);
 
-        m_workingDirChooser.addCurrentSelectionToHistory();
+        m_manualWorkingDirChooser.addCurrentSelectionToHistory();
         m_hiveDirChooser.addCurrentSelectionToHistory();
     }
 
@@ -351,8 +385,8 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
             updateEnabledness();
 
             if (m_hasWorkingDirectorySetting) {
-                m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
-                m_workingDirChooser.addListener(m_workingDirListener);
+                m_manualWorkingDirChooser.setSelected(m_settings.getManualWorkingDirectory());
+                m_manualWorkingDirChooser.addListener(m_workingDirListener);
             }
 
         } catch (InvalidSettingsException e) {
@@ -366,8 +400,8 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
         m_hiveDirChooser.onClose();
 
         if (m_hasWorkingDirectorySetting) {
-            m_workingDirChooser.removeListener(m_workingDirListener);
-            m_workingDirChooser.onClose();
+            m_manualWorkingDirChooser.removeListener(m_workingDirListener);
+            m_manualWorkingDirChooser.onClose();
         }
     }
 }
