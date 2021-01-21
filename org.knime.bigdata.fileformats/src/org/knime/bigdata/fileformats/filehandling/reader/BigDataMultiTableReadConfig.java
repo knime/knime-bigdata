@@ -67,6 +67,7 @@ public final class BigDataMultiTableReadConfig extends
     public BigDataMultiTableReadConfig() {
         super(new DefaultTableReadConfig<>(new BigDataReaderConfig()), BigDataTableReadConfigSerializer.INSTANCE,
             BigDataTableReadConfigSerializer.INSTANCE);
+        getTableReadConfig().setLimitRowsForSpec(false);
     }
 
     @Override

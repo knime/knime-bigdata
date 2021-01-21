@@ -85,8 +85,16 @@
 			<option name="Fail on differing specs">
 				If checked, the node will fail if not all files contain the same columns i.e. column names.
 			</option>
+			<option name="Support changing file schemas">
+			  If selected, the reader will compute the table specification on execution.
+			  This behavior is required if the content of the configured file/folder changes between executions, 
+			  i.e., columns are added/removed to/from file(s) or their types change.
+			  NOTE: When checked, the node will not output a table specification during configure and won't apply transformations
+			  (therefore the transformation tab is disabled).
+			</option>
+		</tab>
      	   
-     	   
+     	<tab name="Transformation">
      	   <option name="Transformations">
 				This tab displays every column as a row in a table that allows modifying the structure of the output table.
 				It supports reordering, filtering and renaming columns. It is also possible to change the type of the columns.
