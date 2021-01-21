@@ -89,11 +89,15 @@ import org.knime.filehandling.core.util.SettingsUtils;
 public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C>>
     extends AbstractTableReaderNodeDialog<C, KnimeType> {
 
+    private static final String TRANSFORMATION_TAB = "Transformation";
+
     private final DefaultMultiTableReadConfig<C, DefaultTableReadConfig<C>> m_config;
 
     private final DialogComponentReaderFileChooser m_fileChooser;
 
     private final JCheckBox m_failOnDifferingSpecs = new JCheckBox("Fail on differing specs");
+
+    private final JCheckBox m_supportChangingFileSchemas = new JCheckBox("Support changing file schemas");
 
     /**
      * Constructor.
@@ -116,7 +120,14 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
             FilterMode.FILES_IN_FOLDERS);
         pathSettings.addChangeListener(e -> handlePathSettingsChange());
         m_failOnDifferingSpecs.addActionListener(e -> configChanged());
+        m_supportChangingFileSchemas.addActionListener(e -> configChanged());
+        m_supportChangingFileSchemas.addActionListener(e -> updateTransformationTableEnabledStatus());
         addTab("Settings", createSettingsPanel());
+        addTab(TRANSFORMATION_TAB, createTransformationTab());
+    }
+
+    private void updateTransformationTableEnabledStatus() {
+        setEnabled(!m_supportChangingFileSchemas.isSelected(), TRANSFORMATION_TAB);
     }
 
     private void handlePathSettingsChange() {
@@ -136,12 +147,13 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
 
     private JPanel createSettingsPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
-        GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
-        JPanel fileChooserPanel = m_fileChooser.getComponentPanel();
+        final GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
+        final JPanel fileChooserPanel = m_fileChooser.getComponentPanel();
         fileChooserPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input location"));
         panel.add(fileChooserPanel, gbc.build());
         panel.add(createMultiFilePanel(), gbc.incY().build());
-        panel.add(createTransformationTab(), gbc.fillBoth().setWeightY(1.0).incY().build());
+        panel.add(createTableSpecificationPanel(), gbc.incY().build());
+        panel.add(createPreview(), gbc.incY().fillBoth().setWeightY(1.0).build());
         return panel;
     }
 
@@ -150,6 +162,15 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options for multiple files"));
         GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
         panel.add(m_failOnDifferingSpecs, gbc.build());
+        panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
+        return panel;
+    }
+
+    private JPanel createTableSpecificationPanel() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Table specification"));
+        final GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
+        panel.add(m_supportChangingFileSchemas, gbc.build());
         panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
         return panel;
     }
@@ -174,8 +195,12 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
     }
 
     private void saveToConfig() {
-        m_config.setTableSpecConfig(getTableSpecConfig());
         m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
+        final boolean saveTableSpecConfig = !m_supportChangingFileSchemas.isSelected();
+        m_config.setSaveTableSpecConfig(saveTableSpecConfig);
+        if (saveTableSpecConfig) {
+            m_config.setTableSpecConfig(getTableSpecConfig());
+        }
     }
 
     @Override
@@ -184,10 +209,12 @@ public final class BigDataTableReaderNodeDialog<C extends ReaderSpecificConfig<C
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
         m_config.loadInDialog(settings, specs);
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
+        updateMultiFileEnabledStatus();
+        m_supportChangingFileSchemas.setSelected(!m_config.saveTableSpecConfig());
+        updateTransformationTableEnabledStatus();
         if (m_config.hasTableSpecConfig()) {
             loadFromTableSpecConfig(m_config.getTableSpecConfig());
         }
-        updateMultiFileEnabledStatus();
     }
 
     @Override

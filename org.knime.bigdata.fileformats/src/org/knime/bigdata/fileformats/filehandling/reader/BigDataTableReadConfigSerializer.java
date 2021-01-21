@@ -78,6 +78,8 @@ enum BigDataTableReadConfigSerializer implements
 
     private static final String CFG_TABLE_SPEC_CONFIG = "table_spec_config" + SettingsModel.CFGKEY_INTERNAL;
 
+    private static final String CFG_SAVE_TABLE_SPEC_CONFIG = "save_table_spec_config" + SettingsModel.CFGKEY_INTERNAL;
+
     @Override
     public void loadInDialog(
         final DefaultMultiTableReadConfig<BigDataReaderConfig, DefaultTableReadConfig<BigDataReaderConfig>> config,
@@ -91,6 +93,7 @@ enum BigDataTableReadConfigSerializer implements
         }
         final NodeSettingsRO settingsTab = SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB);
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS, true));
+        config.setSaveTableSpecConfig(settingsTab.getBoolean(CFG_SAVE_TABLE_SPEC_CONFIG, true));
     }
 
     private static TableSpecConfig loadTableSpecConfig(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -107,6 +110,10 @@ enum BigDataTableReadConfigSerializer implements
         }
         final NodeSettingsRO settingsTab = settings.getNodeSettings(SettingsUtils.CFG_SETTINGS_TAB);
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS));
+        // introduced with 4.3.1
+        if (settingsTab.containsKey(CFG_SAVE_TABLE_SPEC_CONFIG)) {
+            config.setSaveTableSpecConfig(settingsTab.getBoolean(CFG_SAVE_TABLE_SPEC_CONFIG));
+        }
     }
 
     @Override
@@ -118,6 +125,7 @@ enum BigDataTableReadConfigSerializer implements
         }
         final NodeSettingsWO settingsTab = SettingsUtils.getOrAdd(settings, SettingsUtils.CFG_SETTINGS_TAB);
         settingsTab.addBoolean(CFG_FAIL_ON_DIFFERING_SPECS, config.failOnDifferingSpecs());
+        settingsTab.addBoolean(CFG_SAVE_TABLE_SPEC_CONFIG, config.saveTableSpecConfig());
     }
 
     @Override
@@ -135,6 +143,10 @@ enum BigDataTableReadConfigSerializer implements
         }
         final NodeSettingsRO settingsTab = settings.getNodeSettings(SettingsUtils.CFG_SETTINGS_TAB);
         settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS);
+        // added in 4.3.1
+        if (settingsTab.containsKey(CFG_SAVE_TABLE_SPEC_CONFIG)) {
+            settingsTab.getBoolean(CFG_SAVE_TABLE_SPEC_CONFIG);
+        }
     }
 
 }
