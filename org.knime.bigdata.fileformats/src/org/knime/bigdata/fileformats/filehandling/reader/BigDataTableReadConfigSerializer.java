@@ -102,6 +102,8 @@ enum BigDataTableReadConfigSerializer
             } catch (InvalidSettingsException ex) {
                 LOGGER.debug("Failed to load the TableSpecConfig", ex);
             }
+        } else {
+            config.setTableSpecConfig(null);
         }
         final NodeSettingsRO settingsTab = SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB);
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS, true));
@@ -118,6 +120,8 @@ enum BigDataTableReadConfigSerializer
         throws InvalidSettingsException {
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             config.setTableSpecConfig(loadTableSpecConfig(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG)));
+        }else {
+            config.setTableSpecConfig(null);
         }
         final NodeSettingsRO settingsTab = settings.getNodeSettings(SettingsUtils.CFG_SETTINGS_TAB);
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS));

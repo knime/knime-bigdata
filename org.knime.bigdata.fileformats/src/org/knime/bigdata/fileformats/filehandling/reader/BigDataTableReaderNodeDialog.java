@@ -197,9 +197,7 @@ public final class BigDataTableReaderNodeDialog
         m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
         final boolean saveTableSpecConfig = !m_supportChangingFileSchemas.isSelected();
         m_config.setSaveTableSpecConfig(saveTableSpecConfig);
-        if (saveTableSpecConfig) {
-            m_config.setTableSpecConfig(getTableSpecConfig());
-        }
+        m_config.setTableSpecConfig(saveTableSpecConfig ? getTableSpecConfig() : null);
     }
 
     @Override
