@@ -9,6 +9,10 @@
 	<shortDescription>Creates a Spark DataFrame/RDD from given Text file.</shortDescription>
 	<fullDescription>
 		<intro>
+		    <p><i>This node supports the 
+		    </i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html#path"><i>path flow variable.</i></a>
+		    <i> For further information about file handling in general see the 
+		    </i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.</i></a><br/></p>
 			Creates a Spark DataFrame/RDD from given Text file.
 						
 			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
@@ -29,6 +33,9 @@
 					Browsing is disabled if the connector node hasn't been executed since the workflow has been opened.
 					(Re)execute the connector node to enable browsing.</li>
 				</ul>
+                <i>The location can be exposed as or automatically set via a 
+                </i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html#path">
+                <i>path flow variable.</i></a>
 			</option>
 		</tab>
 	</fullDescription>
