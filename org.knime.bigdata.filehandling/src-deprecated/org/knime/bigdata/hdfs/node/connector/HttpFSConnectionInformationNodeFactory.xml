@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
-    icon="./httpfsconnection16x16.png" type="Source" deprecated="true">
-    <name>HttpFS Connection</name>
+<knimeNode 
+	icon="./httpfsconnection16x16.png" type="Source"
+	xmlns="http://knime.org/node/v4.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd">
+    <name>HttpFS Connection (legacy)</name>
 
     <shortDescription>
         Configures the connection information used to connect to 
@@ -11,6 +13,14 @@
 
     <fullDescription>
         <intro>
+			<p>
+				<i>This legacy file handling node has been replaced by the
+				</i><a href="https://kni.me/n/9V6dK9DhFkfwctbL"><i>HDFS Connector</i></a><i>
+				and will become deprecated in the foreseeable future. For further information about the 
+				new file handling framework see the
+				</i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.
+				</i></a><br/>
+			</p>
             This node configures the connection information that will be used to
             connect to a remote host.
         </intro>
