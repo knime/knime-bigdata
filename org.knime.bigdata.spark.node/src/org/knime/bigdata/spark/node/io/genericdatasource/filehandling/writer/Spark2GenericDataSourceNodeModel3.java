@@ -39,6 +39,7 @@ import org.knime.bigdata.spark.core.jar.bundle.BundleGroupSparkJarRegistry;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
 import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.FileSystemPortChecker;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
@@ -63,6 +64,7 @@ import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.WriteP
 import org.knime.filehandling.core.defaultnodesettings.status.NodeModelStatusConsumer;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage.MessageType;
 import org.knime.filehandling.core.port.FileSystemPortObject;
+import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
 
 /**
@@ -106,6 +108,9 @@ public class Spark2GenericDataSourceNodeModel3<T extends Spark2GenericDataSource
         if (inSpecs == null || inSpecs.length != 2 || inSpecs[0] == null || inSpecs[1] == null) {
             throw new InvalidSettingsException("File system or Spark data  input missing");
         }
+
+        final FileSystemPortObjectSpec spec = (FileSystemPortObjectSpec)inSpecs[0];
+        FileSystemPortChecker.checkFileSystemPortHadoopCompatibility(spec);
 
         m_settings.getFileChooserModel().configureInModel(inSpecs, m_statusConsumer);
         m_statusConsumer.setWarningsIfRequired(createWarningMessageConsumer());

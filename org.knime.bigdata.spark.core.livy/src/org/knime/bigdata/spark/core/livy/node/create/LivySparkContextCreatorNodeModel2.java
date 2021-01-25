@@ -25,10 +25,12 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContext;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
+import org.knime.bigdata.spark.core.port.FileSystemPortChecker;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -43,6 +45,8 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  */
 public class LivySparkContextCreatorNodeModel2 extends AbstractLivySparkContextCreatorNodeModel {
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(LivySparkContextCreatorNodeModel2.class);
+
     /**
      * Default Constructor.
      */
@@ -56,8 +60,10 @@ public class LivySparkContextCreatorNodeModel2 extends AbstractLivySparkContextC
             throw new InvalidSettingsException("File system connection missing");
         }
 
-        final FileSystemPortObjectSpec spec = (FileSystemPortObjectSpec)inSpecs[0];
         m_settings.validateDeeper();
+
+        final FileSystemPortObjectSpec spec = (FileSystemPortObjectSpec)inSpecs[0];
+        FileSystemPortChecker.checkFileSystemPortHadoopCompatibility(spec);
 
         configureSparkContext(m_sparkContextId, spec.getFileSystemId(), m_settings, getCredentialsProvider());
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_sparkContextId)};
