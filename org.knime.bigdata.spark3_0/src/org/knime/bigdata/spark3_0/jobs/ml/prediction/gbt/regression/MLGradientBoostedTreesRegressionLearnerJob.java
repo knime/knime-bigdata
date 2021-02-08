@@ -96,7 +96,7 @@ public class MLGradientBoostedTreesRegressionLearnerJob
 
         final GBTRegressionModel gbtModel = MLUtils.findFirstStageOfType(pipelineModel, GBTRegressionModel.class);
 
-        final MLDecisionTreeEnsembleMetaData metaData = new MLDecisionTreeEnsembleMetaData(gbtModel.numTrees(),
+        final MLDecisionTreeEnsembleMetaData metaData = new MLDecisionTreeEnsembleMetaData(gbtModel.getNumTrees(),
             gbtModel.totalNumNodes(), gbtModel.treeWeights(), gbtModel.featureImportances().toArray());
         MLUtils.addNominalValueMappingsToMetaData(pipelineModel, metaData);
         return metaData;

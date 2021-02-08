@@ -41,6 +41,7 @@ import org.apache.spark.scheduler.SparkListenerNodeBlacklistedForStage;
 import org.apache.spark.scheduler.SparkListenerNodeUnblacklisted;
 import org.apache.spark.scheduler.SparkListenerSpeculativeTaskSubmitted;
 import org.apache.spark.scheduler.SparkListenerStageCompleted;
+import org.apache.spark.scheduler.SparkListenerStageExecutorMetrics;
 import org.apache.spark.scheduler.SparkListenerStageSubmitted;
 import org.apache.spark.scheduler.SparkListenerTaskEnd;
 import org.apache.spark.scheduler.SparkListenerTaskGettingResult;
@@ -231,5 +232,12 @@ public class KNIMEDatabricksSparkListener implements SparkListenerInterface {
      */
     @Override
     public void onNodeBlacklistedForStage(final SparkListenerNodeBlacklistedForStage arg0) {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onStageExecutorMetrics(final SparkListenerStageExecutorMetrics executorMetrics) {
     }
 }

@@ -32,8 +32,6 @@ import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-
 import scala.Tuple2;
 
 /**
@@ -365,31 +363,6 @@ public class RDDUtilsInJava {
                 throw new KNIMESparkException(String.format(errorMessage, fields[index].name()));
             }
         }
-    }
-
-    /**
-     *
-     * @param aUserIx
-     * @param aProductIx
-     * @param aRatingIx - optional ratings index, use -1 if no ratings are available
-     * @param aInputRdd
-     * @return ratings rdd
-     */
-    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx,
-        final int aRatingIx, final JavaRDD<Row> aInputRdd) {
-        final JavaRDD<Rating> ratings = aInputRdd.map(new Function<Row, Rating>() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Rating call(final Row aRow) {
-                if (aRatingIx > -1) {
-                    return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx),
-                        RDDUtils.getDouble(aRow, aRatingIx));
-                } else {
-                    return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), -1);
-                }
-            }
-        });
-        return ratings;
     }
 
     /**

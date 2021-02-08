@@ -46,8 +46,6 @@ import org.knime.bigdata.spark3_0.jobs.mllib.prediction.bayes.naive.NaiveBayesJo
 import org.knime.bigdata.spark3_0.jobs.mllib.prediction.decisiontree.DecisionTreeJobRunFactory;
 import org.knime.bigdata.spark3_0.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobRunFactory;
 import org.knime.bigdata.spark3_0.jobs.mllib.prediction.ensemble.randomforest.RandomForestJobRunFactory;
-import org.knime.bigdata.spark3_0.jobs.mllib.prediction.linear.logistic.LogisticRegressionJobRunFactory;
-import org.knime.bigdata.spark3_0.jobs.mllib.prediction.linear.regression.LinearRegressionJobRunFactory;
 import org.knime.bigdata.spark3_0.jobs.mllib.prediction.linear.svm.SVMJobRunFactory;
 import org.knime.bigdata.spark3_0.jobs.mllib.prediction.predictor.PredictorSparkJobRunFactory;
 import org.knime.bigdata.spark3_0.jobs.mllib.reduction.pca.PCAJobRunFactory;
@@ -117,8 +115,6 @@ public class Spark_3_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new DecisionTreeJobRunFactory(),
             new GradientBoostedTreesJobRunFactory(),
             new RandomForestJobRunFactory(),
-            new LinearRegressionJobRunFactory(),
-            new LogisticRegressionJobRunFactory(),
             new SVMJobRunFactory(),
             new PredictorSparkJobRunFactory(),
             new PCAJobRunFactory(),
