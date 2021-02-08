@@ -4,24 +4,24 @@ Bundle-Name: Local Executor for Apache Spark
 Bundle-SymbolicName: org.knime.bigdata.spark.local;singleton:=true
 Bundle-Version: 4.4.0.qualifier
 Bundle-ClassPath: knime.jar,
- libs/spark-hive-thriftserver_2.11-2.4.7.jar
+ libs/spark-hive-thriftserver_2.12-3.0.1.jar
 Bundle-Activator: org.knime.bigdata.spark.local.SparkLocalPlugin
 Export-Package: org.knime.bigdata.spark.local.db,
  org.knime.bigdata.spark.local.testing
 Require-Bundle: org.knime.bigdata.spark.core;bundle-version="[4.0.0,5.0.0)",
  org.knime.bigdata.spark.node;bundle-version="[4.0.0,5.0.0)",
- org.knime.bigdata.spark2_4;bundle-version="[4.0.0,5.0.0)",
- org.scala-lang.scala-library;bundle-version="[2.11.0,2.12.0)",
- org.scala-lang.scala-reflect;bundle-version="[2.11.0,2.12.0)",
- org.scala-lang.scala-compiler;bundle-version="[2.11.0,2.12.0)",
- org.scala-lang.scalap;bundle-version="[2.11.0,2.12.0)",
- org.scala-lang.modules.scala-xml_2.11;bundle-version="1.0.5",
+ org.knime.bigdata.spark3_0;bundle-version="[4.0.0,5.0.0)",
+ org.scala-lang.scala-library;bundle-version="[2.12.0,2.13.0)",
+ org.scala-lang.scala-reflect;bundle-version="[2.12.0,2.13.0)",
+ org.scala-lang.scala-compiler;bundle-version="[2.12.0,2.13.0)",
+ org.scala-lang.scalap;bundle-version="[2.12.0,2.13.0)",
+ org.scala-lang.modules.scala-xml_2.12;bundle-version="1.2.0",
  org.knime.core;bundle-version="3.6.0",
  org.knime.base;bundle-version="3.6.0",
  org.apache.hadoop.client;bundle-version="[2.7.6,3.0.0)",
  org.apache.log4j;bundle-version="1.2.15",
  org.apache.cxf.cxf-core;bundle-version="3.0.7",
- org.apache.spark_2.11;bundle-version="2.4.0",
+ org.apache.spark_2.12;bundle-version="[3.0.0,3.1.0)",
  org.apache.commons.lang3;bundle-version="3.2.1",
  org.knime.base.filehandling;bundle-version="3.6.0",
  org.knime.bigdata.commons;bundle-version="3.6.0",

@@ -6,21 +6,21 @@
 		the binary Spark build -->
 	<parent>
 		<groupId>org.apache.spark</groupId>
-		<artifactId>spark-parent_2.11</artifactId>
-		<version>2.4.7</version>
+		<artifactId>spark-parent_2.12</artifactId>
+		<version>3.0.1</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.knime.bigdata</groupId>
 	<artifactId>spark-local-fetch-jars</artifactId>
-	<version>2.4.7</version>
+	<version>3.0.1</version>
 	<packaging>pom</packaging>
 
 	<name>Jar fetcher for local Spark</name>
 	<description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
 	<properties>
-		<spark.version>2.4.7</spark.version>
+		<spark.version>3.0.1</spark.version>
 		<scalastyle.skip>true</scalastyle.skip>
 		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
@@ -52,7 +52,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-sql_2.11</artifactId>
+			<artifactId>spark-sql_2.12</artifactId>
 			<version>${spark.version}</version>
 			<exclusions>
 				<!-- Netty 3.x is implicitly provided via the org.apache.hadoop.client OSGI bundle -->
@@ -69,22 +69,22 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-avro_2.11</artifactId>
+			<artifactId>spark-avro_2.12</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-hive_2.11</artifactId>
+			<artifactId>spark-hive_2.12</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-hive-thriftserver_2.11</artifactId>
+			<artifactId>spark-hive-thriftserver_2.12</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.11</artifactId>
+			<artifactId>spark-mllib_2.12</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
 	</dependencies>

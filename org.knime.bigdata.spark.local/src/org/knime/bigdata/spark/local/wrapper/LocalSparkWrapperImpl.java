@@ -41,10 +41,10 @@ import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
-import org.knime.bigdata.spark2_4.api.NamedObjects;
-import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
-import org.knime.bigdata.spark2_4.api.SparkJob;
-import org.knime.bigdata.spark2_4.api.SparkJobWithFiles;
+import org.knime.bigdata.spark3_0.api.NamedObjects;
+import org.knime.bigdata.spark3_0.api.SimpleSparkJob;
+import org.knime.bigdata.spark3_0.api.SparkJob;
+import org.knime.bigdata.spark3_0.api.SparkJobWithFiles;
 
 import scala.Option;
 
