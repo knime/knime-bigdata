@@ -28,6 +28,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +83,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
 
     private final DialogComponentStringSelection m_sparkVersion = new DialogComponentStringSelection(
         m_settings.getSparkVersionModel(), "Spark version: ", new LivySparkContextProvider().getSupportedSparkVersions()
-            .stream().map(SparkVersion::getLabel).toArray(String[]::new));
+            .stream().map(SparkVersion::getLabel).sorted(Collections.reverseOrder()).toArray(String[]::new));
 
     private final DialogComponentString m_livyUrl =
         new DialogComponentString(m_settings.getLivyUrlModel(), "Livy URL:", true, 35);

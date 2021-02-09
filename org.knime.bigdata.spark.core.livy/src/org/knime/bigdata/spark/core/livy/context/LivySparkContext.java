@@ -43,7 +43,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.livy.CreateSessionHandle;
+import org.apache.livy.Handle;
 import org.apache.livy.Job;
+import org.apache.livy.JobHandle;
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
@@ -211,6 +213,12 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 
         setProxyUserIfNecessary(config, livyHttpConf);
 
+        // transfer kryo serializer version if set
+        if (config.getCustomSparkSettings().containsKey("spark.knime.kryo.serializer")) {
+            livyHttpConf.setProperty("livy.client.http.kryo.serializer",
+                config.getCustomSparkSettings().get("spark.knime.kryo.serializer"));
+        }
+
         // transfer all custom Spark settings
         for (final Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
             final String settingName = customSparkSetting.getKey();
@@ -310,6 +318,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             createRemoteSparkContext(exec);
             contextWasCreated = true;
 
+            if (m_livyClient.requiresKryoSerializerDetector()) {
+                exec.setProgress(0.5, "Uploading and running job to detect kryo serializer version.");
+                detectKryoVersion(exec);
+            }
+
             exec.setProgress(0.6, "Uploading Spark jobs");
             uploadJobJar(exec);
             validateAndPrepareContext(exec);
@@ -329,6 +342,17 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
 
         return contextWasCreated;
+    }
+
+    private void detectKryoVersion(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+        LOGGER.debug("Uploading Kryo version detector job jar.");
+        uploadKryoVersionDetectorJob(exec);
+
+        LOGGER.debug("Running Kryo version detector job jar.");
+        final String kryoVersion = runKryoVersionDetectorJob(exec);
+
+        LOGGER.debug("Using Kryo serializer version: " + kryoVersion);
+        m_livyClient.setKryoSerializerVersion(kryoVersion);
     }
 
     private void validateAndPrepareContext(final ExecutionMonitor exec) throws KNIMESparkException {
@@ -417,6 +441,22 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
+    private void uploadKryoVersionDetectorJob(final ExecutionMonitor exec) throws KNIMESparkException {
+        try {
+            final Future<?> uploadFuture = m_livyClient.uploadKryoSerializerDetector();
+            waitForFuture(uploadFuture, exec);
+        } catch (final Exception e) {
+            throw new KNIMESparkException("Failed to upload Kryo version detector job: " + e.getMessage(), e);
+        }
+    }
+
+    private String runKryoVersionDetectorJob(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+        final JobHandle<String> handle = m_livyClient.runKryoSerializerDetector();
+        final String kryoVersion = waitForFuture(handle, exec);
+        handleOperationResult(handle);
+        return kryoVersion;
+    }
+
     private void uploadJobJar(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         final File jobJarFile = getJobJar().getJarFile();
         LOGGER.debug(String.format("Uploading job jar: %s", jobJarFile.getAbsolutePath()));
@@ -427,6 +467,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private void createRemoteSparkContext(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         final CreateSessionHandle handle = m_livyClient.startOrConnectSession();
         waitForFuture(handle, exec);
+        handleOperationResult(handle);
+    }
+
+    static void handleOperationResult(final Handle<?> handle) throws KNIMESparkException, CanceledExecutionException {
         switch(handle.getHandleState()) {
             case DONE_CANCELLED:
                 throw new CanceledExecutionException();
