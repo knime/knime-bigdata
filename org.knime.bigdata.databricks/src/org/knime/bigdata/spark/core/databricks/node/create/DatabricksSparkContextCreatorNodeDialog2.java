@@ -179,7 +179,7 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
 
     private final DialogComponentStringSelection m_sparkVersion = new DialogComponentStringSelection(
         m_settings.getSparkVersionModel(), null, new DatabricksSparkContextProvider().getSupportedSparkVersions()
-            .stream().map(SparkVersion::getLabel).toArray(String[]::new));
+            .stream().map(SparkVersion::getLabel).sorted(Collections.reverseOrder()).toArray(String[]::new));
 
     private final DialogComponentString m_databricksUrl =
         new DialogComponentString(m_settings.getDatabricksInstanceURLModel(), null, true, 40);
