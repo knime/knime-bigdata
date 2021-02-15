@@ -114,7 +114,12 @@ public final class ListKnimeType implements KnimeType {
         throw new IllegalStateException("This is a list type.");
     }
 
-    KnimeType getElementType() {
+    /**
+     * Returns the element type, possible a list as well.
+     *
+     * @return the type of element in this list (can be a nested list)
+     */
+    public KnimeType getElementType() {
         return m_elementType;
     }
 
