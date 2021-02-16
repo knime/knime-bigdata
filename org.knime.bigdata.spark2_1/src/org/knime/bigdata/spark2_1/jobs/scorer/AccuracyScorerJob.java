@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark2_1.jobs.scorer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +29,16 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.StructField;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.accuracy.AccuracyScorerJobOutput;
 import org.knime.bigdata.spark2_1.api.RDDUtilsInJava;
 import org.knime.bigdata.spark2_1.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark2_1.api.TypeConverters;
 
 import scala.Tuple2;
 
@@ -82,8 +87,18 @@ public class AccuracyScorerJob extends AbstractScorerJob {
             i++;
         }
 
+        final List<Object> convertedLabels = convertLabels(labels, dataset.schema().fields()[classCol]);
         return new AccuracyScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount,
-            labels, 0 /* TODO missing values */);
+            convertedLabels, 0 /* TODO missing values */);
+    }
+
+    private static List<Object> convertLabels(final List<Object> sparkObjects, final StructField struct) {
+        final IntermediateToSparkConverter<? extends DataType> converter = TypeConverters.getConverter(struct.dataType());
+        final ArrayList<Object> convertedObjects = new ArrayList<>(sparkObjects.size());
+        for (final Object sparkObject : sparkObjects) {
+            convertedObjects.add(converter.convert(sparkObject));
+        }
+        return convertedObjects;
     }
 
     @Override

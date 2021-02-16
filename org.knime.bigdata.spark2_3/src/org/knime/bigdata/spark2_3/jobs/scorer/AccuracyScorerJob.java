@@ -23,17 +23,21 @@ package org.knime.bigdata.spark2_3.jobs.scorer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.DataType;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.accuracy.AccuracyScorerJobOutput;
 import org.knime.bigdata.spark2_3.api.RDDUtilsInJava;
 import org.knime.bigdata.spark2_3.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark2_3.api.TypeConverters;
 
 import scala.Tuple2;
 
@@ -82,8 +86,14 @@ public class AccuracyScorerJob extends AbstractScorerJob {
             i++;
         }
 
+        final IntermediateToSparkConverter<? extends DataType> labelConverter =
+            TypeConverters.getConverter(dataset.schema().fields()[classCol].dataType());
+        final List<Object> convertedLabels = labels.stream() //
+                .map(labelConverter::convert) //
+                .collect(Collectors.toList());
+
         return new AccuracyScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount,
-            labels, 0 /* TODO missing values */);
+            convertedLabels, 0 /* TODO missing values */);
     }
 
     @Override

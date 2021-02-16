@@ -130,6 +130,10 @@ public class LivyJobSerializationUtils {
                 } else {
                     fieldsToSerializeToStagingfile.add(key);
                 }
+
+                assert valueClass.getCanonicalName().startsWith("java.") || valueClass.getCanonicalName().startsWith("org.knime.") //
+                    || valueClass.isArray() //
+                    : "Found serialized field " + key + " with unknown value class: " + valueClass.getCanonicalName();
             }
         }
     }
@@ -210,6 +214,10 @@ public class LivyJobSerializationUtils {
             Object deserializedValue = Base64SerializationUtils
                 .deserializeFromBase64((String)deserializedInternalMap.get(serializedField), classLoader);
             deserializedInternalMap.put(serializedField, deserializedValue);
+
+            final String valueClass = deserializedValue.getClass().getCanonicalName();
+            assert valueClass.startsWith("java.") || valueClass.startsWith("org.knime.") //
+                : "Found serialized field " + serializedField + " with unknown value class: " + valueClass;
         }
 
     }
