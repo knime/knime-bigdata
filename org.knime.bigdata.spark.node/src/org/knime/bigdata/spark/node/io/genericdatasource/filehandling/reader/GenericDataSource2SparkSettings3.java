@@ -26,6 +26,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.context.ports.PortsConfiguration;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 
@@ -47,18 +48,19 @@ public class GenericDataSource2SparkSettings3 {
 
     /** Required input path. */
     public static final String CFG_INPUT_PATH = "inputPath";
+
     private final SettingsModelReaderFileChooser m_inputPathChooser;
 
     /** Upload bundled jar. */
     private static final String CFG_UPLOAD_DRIVER = "uploadDriver";
-    private static final boolean DEFAULT_UPLOAD_DRIVER = false;
 
+    private static final boolean DEFAULT_UPLOAD_DRIVER = false;
 
     private boolean m_uploadDriver = DEFAULT_UPLOAD_DRIVER;
 
     /**
-     * Default constructor.
-     * Custom constructors should overwrite {@link #newValidateInstance()} too.
+     * Default constructor. Custom constructors should overwrite {@link #newValidateInstance()} too.
+     *
      * @param format - Short or long format name in spark.
      * @param minSparkVersion - Minimum spark version.
      * @param hasDriver - True if this data source has a driver jar.
@@ -70,7 +72,8 @@ public class GenericDataSource2SparkSettings3 {
         m_minSparkVersion = minSparkVersion;
         m_hasDriver = hasDriver;
         m_inputPathChooser = new SettingsModelReaderFileChooser(CFG_INPUT_PATH, portsConfig,
-            GenericDataSource2SparkNodeFactory3.FS_INPUT_PORT_GRP_NAME, FilterMode.FOLDER);
+            GenericDataSource2SparkNodeFactory3.FS_INPUT_PORT_GRP_NAME,
+            EnumConfig.create(FilterMode.FOLDER, FilterMode.FOLDER));
     }
 
     /**
@@ -95,7 +98,9 @@ public class GenericDataSource2SparkSettings3 {
     }
 
     /** @return Spark format name */
-    public String getFormat() { return m_format;  }
+    public String getFormat() {
+        return m_format;
+    }
 
     /**
      * @param otherVersion - Version to check
@@ -106,10 +111,14 @@ public class GenericDataSource2SparkSettings3 {
     }
 
     /** @return Minimum required spark version */
-    public SparkVersion getMinSparkVersion() { return m_minSparkVersion; }
+    public SparkVersion getMinSparkVersion() {
+        return m_minSparkVersion;
+    }
 
     /** @return True if this data source requires additional jar files */
-    public boolean hasDriver() { return m_hasDriver; }
+    public boolean hasDriver() {
+        return m_hasDriver;
+    }
 
     /**
      * @return Absolute input path model
@@ -119,9 +128,14 @@ public class GenericDataSource2SparkSettings3 {
     }
 
     /** @return True if bundled jar should be uploaded */
-    public boolean uploadDriver() { return m_uploadDriver; }
+    public boolean uploadDriver() {
+        return m_uploadDriver;
+    }
+
     /** @param uploadDriver - True if bundled jars should be uploaded */
-    public void setUploadDriver(final boolean uploadDriver) { m_uploadDriver = uploadDriver; }
+    public void setUploadDriver(final boolean uploadDriver) {
+        m_uploadDriver = uploadDriver;
+    }
 
     /** @param settings - Settings to save current settings in */
     protected void saveSettingsTo(final NodeSettingsWO settings) {
@@ -151,6 +165,7 @@ public class GenericDataSource2SparkSettings3 {
 
     /**
      * Validate current settings
+     *
      * @throws InvalidSettingsException
      */
     public void validateSettings() throws InvalidSettingsException {
@@ -175,6 +190,7 @@ public class GenericDataSource2SparkSettings3 {
 
     /**
      * Loads the settings from the given settings object using default values for invalid or missing settings.
+     *
      * @param settings - Settings to load
      */
     protected void loadSettings(final NodeSettingsRO settings) {

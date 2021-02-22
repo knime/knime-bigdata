@@ -121,8 +121,7 @@ final class FileFormatWriter2NodeDialog<T> extends NodeDialogPane {
         final String fileHistoryID = factory.getName() + "_writer";
         final FlowVariableModel fileFVM =
             createFlowVariableModel(m_writerConfig.getLocationKeyChain(), FSLocationVariableType.INSTANCE);
-        m_filePanel = new DialogComponentWriterFileChooser(m_fileChooserModel, fileHistoryID, fileFVM, FilterMode.FILE,
-            FilterMode.FOLDER);
+        m_filePanel = new DialogComponentWriterFileChooser(m_fileChooserModel, fileHistoryID, fileFVM);
         m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_writerConfig.getMappingModel(), true);
 
         addTab("Settings", createSettingsPanel());

@@ -113,8 +113,7 @@ public final class BigDataTableReaderNodeDialog
             Stream.concat(Stream.of(SettingsUtils.CFG_SETTINGS_TAB), Arrays.stream(pathSettings.getKeysForFSLocation()))
                 .toArray(String[]::new);
         final FlowVariableModel locationFvm = createFlowVariableModel(keyChain, FSLocationVariableType.INSTANCE);
-        m_fileChooser = new DialogComponentReaderFileChooser(pathSettings, "parquet", locationFvm, FilterMode.FILE,
-            FilterMode.FILES_IN_FOLDERS);
+        m_fileChooser = new DialogComponentReaderFileChooser(pathSettings, "parquet", locationFvm);
         pathSettings.addChangeListener(e -> handlePathSettingsChange());
         m_failOnDifferingSpecs.addActionListener(e -> configChanged());
         m_supportChangingFileSchemas.addActionListener(e -> configChanged());

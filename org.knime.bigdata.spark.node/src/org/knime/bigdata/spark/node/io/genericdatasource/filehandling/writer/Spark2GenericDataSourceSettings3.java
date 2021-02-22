@@ -20,8 +20,6 @@
  */
 package org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer;
 
-import java.util.EnumSet;
-
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.SparkSaveMode;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
@@ -31,6 +29,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
@@ -56,30 +55,38 @@ public class Spark2GenericDataSourceSettings3 {
 
     /** Required output path. */
     public static final String CFG_OUTPUT_PATH = "outputPath";
+
     private final SettingsModelWriterFileChooser m_outputPathChooser;
 
     /** Upload bundled jar. */
     private static final String CFG_UPLOAD_DRIVER = "uploadDriver";
+
     private static final boolean DEFAULT_UPLOAD_DRIVER = false;
+
     private boolean m_uploadDriver = DEFAULT_UPLOAD_DRIVER;
 
     /** Partition data by columns */
     private static final String CFG_PARTITION_BY = "partitionBy";
+
     private DataColumnSpecFilterConfiguration m_partitionBy = null;
 
     /** Overwrite result partition count (@see #setNumPartitions(int)) */
     private static final String CFG_OVERWRITE_NUM_PARTITIONS = "overwriteNumPartitions";
+
     private static final boolean DEFAULT_OVERWRITE_NUM_PARTITIONS = false;
+
     private boolean m_overwriteNumPartitions = DEFAULT_OVERWRITE_NUM_PARTITIONS;
 
     /** Partition count (@see {@link #setOverwriteNumPartitions(boolean)}) */
     private static final String CFG_NUM_PARTITIONS = "numPartitions";
+
     private static final int DEFAULT_NUM_PARTITIONS = 1;
+
     private int m_numPartitions = DEFAULT_NUM_PARTITIONS;
 
     /**
-     * Default construct.
-     * Custom constructors should overwrite {@link #newValidateInstance()} too.
+     * Default construct. Custom constructors should overwrite {@link #newValidateInstance()} too.
+     *
      * @param format - Short or long format name in spark.
      * @param minSparkVersion - Minimum spark version.
      * @param supportsPartitioning - True if this format has partition by column support.
@@ -93,10 +100,10 @@ public class Spark2GenericDataSourceSettings3 {
         m_minSparkVersion = minSparkVersion;
         m_supportsPartitioning = supportsPartitioning;
         m_hasDriver = hasDriver;
-        m_outputPathChooser = new SettingsModelWriterFileChooser(
-            CFG_OUTPUT_PATH, portsConfig, Spark2GenericDataSourceNodeFactory3.FS_INPUT_PORT_GRP_NAME,
-            FilterMode.FOLDER, FileOverwritePolicy.FAIL,
-            EnumSet.of(FileOverwritePolicy.FAIL, FileOverwritePolicy.OVERWRITE, FileOverwritePolicy.APPEND, FileOverwritePolicy.IGNORE));
+        m_outputPathChooser = new SettingsModelWriterFileChooser(CFG_OUTPUT_PATH, portsConfig,
+            Spark2GenericDataSourceNodeFactory3.FS_INPUT_PORT_GRP_NAME,
+            EnumConfig.create(FilterMode.FOLDER), EnumConfig.create(FileOverwritePolicy.FAIL,
+                FileOverwritePolicy.OVERWRITE, FileOverwritePolicy.APPEND, FileOverwritePolicy.IGNORE));
     }
 
     /**
@@ -109,7 +116,8 @@ public class Spark2GenericDataSourceSettings3 {
      * @param outputPathChooser - The output file chooser.
      */
     protected Spark2GenericDataSourceSettings3(final String format, final SparkVersion minSparkVersion,
-        final boolean supportsPartitioning, final boolean hasDriver, final SettingsModelWriterFileChooser outputPathChooser) {
+        final boolean supportsPartitioning, final boolean hasDriver,
+        final SettingsModelWriterFileChooser outputPathChooser) {
 
         m_format = format;
         m_minSparkVersion = minSparkVersion;
@@ -120,11 +128,14 @@ public class Spark2GenericDataSourceSettings3 {
 
     /** @return New instance of this settings (overwrite this in custom settings) */
     protected Spark2GenericDataSourceSettings3 newValidateInstance() {
-        return new Spark2GenericDataSourceSettings3(m_format, m_minSparkVersion, m_supportsPartitioning, m_hasDriver, m_outputPathChooser);
+        return new Spark2GenericDataSourceSettings3(m_format, m_minSparkVersion, m_supportsPartitioning, m_hasDriver,
+            m_outputPathChooser);
     }
 
     /** @return Spark format name */
-    public String getFormat() { return m_format; }
+    public String getFormat() {
+        return m_format;
+    }
 
     /**
      * @param otherVersion - Version to check
@@ -135,10 +146,14 @@ public class Spark2GenericDataSourceSettings3 {
     }
 
     /** @return Minimum required spark version */
-    public SparkVersion getMinSparkVersion() { return m_minSparkVersion; }
+    public SparkVersion getMinSparkVersion() {
+        return m_minSparkVersion;
+    }
 
     /** @return True if this data source requires additional jar files */
-    public boolean hasDriver() { return m_hasDriver; }
+    public boolean hasDriver() {
+        return m_hasDriver;
+    }
 
     /**
      * @return the output path file chooser model
@@ -162,24 +177,47 @@ public class Spark2GenericDataSourceSettings3 {
     }
 
     /** @return True if bundled jar should be uploaded */
-    public boolean uploadDriver() { return m_uploadDriver; }
+    public boolean uploadDriver() {
+        return m_uploadDriver;
+    }
+
     /** @param uploadDriver - True if bundled jars should be uploaded */
-    public void setUploadDriver(final boolean uploadDriver) { m_uploadDriver = uploadDriver; }
+    public void setUploadDriver(final boolean uploadDriver) {
+        m_uploadDriver = uploadDriver;
+    }
 
     /** @return True if this data source supports partitioning */
-    public boolean supportsPartitioning() { return m_supportsPartitioning; }
+    public boolean supportsPartitioning() {
+        return m_supportsPartitioning;
+    }
+
     /** @return Partition column filter configuration */
-    public DataColumnSpecFilterConfiguration getPartitionBy() { return m_partitionBy; }
+    public DataColumnSpecFilterConfiguration getPartitionBy() {
+        return m_partitionBy;
+    }
 
     /** @return Number of partition (see {@link Spark2GenericDataSourceSettings3#overwriteNumPartitions}) */
-    public int getNumPartitions() { return m_numPartitions; }
-    /** @param numPartitions - Number of output partitions */
-    public void setNumPartitions(final int numPartitions) { m_numPartitions = numPartitions; }
+    public int getNumPartitions() {
+        return m_numPartitions;
+    }
 
-    /** @return True if output number of partition should be overwritten (see {@link Spark2GenericDataSourceSettings3#setNumPartitions}) */
-    public boolean overwriteNumPartitions() { return m_overwriteNumPartitions; }
+    /** @param numPartitions - Number of output partitions */
+    public void setNumPartitions(final int numPartitions) {
+        m_numPartitions = numPartitions;
+    }
+
+    /**
+     * @return True if output number of partition should be overwritten (see
+     *         {@link Spark2GenericDataSourceSettings3#setNumPartitions})
+     */
+    public boolean overwriteNumPartitions() {
+        return m_overwriteNumPartitions;
+    }
+
     /** @param overwriteNumPartitions - True if number of output partition should be overwritten */
-    public void setOverwriteNumPartitions(final boolean overwriteNumPartitions) { m_overwriteNumPartitions = overwriteNumPartitions; }
+    public void setOverwriteNumPartitions(final boolean overwriteNumPartitions) {
+        m_overwriteNumPartitions = overwriteNumPartitions;
+    }
 
     /**
      * Internal method to save settings.
@@ -220,6 +258,7 @@ public class Spark2GenericDataSourceSettings3 {
 
     /**
      * Validate current settings
+     *
      * @throws InvalidSettingsException
      */
     public void validateSettings() throws InvalidSettingsException {
@@ -247,6 +286,7 @@ public class Spark2GenericDataSourceSettings3 {
 
     /**
      * Loads the settings from the given settings object using default values for invalid or missing settings.
+     *
      * @param settings - Settings to load
      */
     protected void loadSettings(final NodeSettingsRO settings) {
@@ -257,6 +297,7 @@ public class Spark2GenericDataSourceSettings3 {
 
     /**
      * Guess default settings by provided table spec.
+     *
      * @param spec - Spark input data table spec.
      */
     public void loadDefault(final DataTableSpec spec) {

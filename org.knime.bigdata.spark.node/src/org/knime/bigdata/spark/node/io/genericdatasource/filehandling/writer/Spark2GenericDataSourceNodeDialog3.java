@@ -60,7 +60,6 @@ import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.DialogComponentWriterFileChooser;
-import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 
 /**
  * @author Sascha Wolke, KNIME.com
@@ -108,7 +107,7 @@ public class Spark2GenericDataSourceNodeDialog3<T extends Spark2GenericDataSourc
         FlowVariableModel fvm = createFlowVariableModel(m_settings.getFileChooserModel().getKeysForFSLocation(),
             FSLocationVariableType.INSTANCE);
         m_outputPathChooser = new DialogComponentWriterFileChooser(m_settings.getFileChooserModel(), FILE_HISTORY_ID,
-            fvm, FilterMode.FOLDER);
+            fvm);
         outputPathPanel.add(Box.createHorizontalStrut(5));
         outputPathPanel.add(m_outputPathChooser.getComponentPanel());
         outputPathPanel.add(Box.createHorizontalStrut(5));

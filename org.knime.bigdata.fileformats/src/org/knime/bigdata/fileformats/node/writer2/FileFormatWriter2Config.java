@@ -64,6 +64,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.writer.SettingsModelWriterFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.util.SettingsUtils;
@@ -113,9 +115,8 @@ final class FileFormatWriter2Config<T> {
         m_formatFactory = factory;
 
         m_fileChooserModel = new SettingsModelWriterFileChooser(CFG_FILE_CHOOSER, portsConfig,
-            AbstractFileFormatWriter2NodeFactory.CONNECTION_INPUT_PORT_GRP_NAME, FilterMode.FILE,
-            org.knime.filehandling.core.defaultnodesettings.filechooser.writer.FileOverwritePolicy.FAIL,
-            m_formatFactory.getSupportedPolicies(),
+            AbstractFileFormatWriter2NodeFactory.CONNECTION_INPUT_PORT_GRP_NAME, EnumConfig.create(FilterMode.FILE, FilterMode.FOLDER),
+            EnumConfig.create(FileOverwritePolicy.FAIL, m_formatFactory.getSupportedPolicies()),
             // TODO limit to this suffix?
             new String[]{factory.getFilenameSuffix()});
 

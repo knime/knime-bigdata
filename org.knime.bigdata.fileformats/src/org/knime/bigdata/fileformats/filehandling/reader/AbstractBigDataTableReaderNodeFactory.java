@@ -59,6 +59,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.context.NodeCreationConfiguration;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
 import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
@@ -99,7 +100,7 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     private SettingsModelReaderFileChooser createFCSettingsModel(final NodeCreationConfiguration nodeCreationConfig) {
         return new SettingsModelReaderFileChooser("file_selection",
             nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
-            FilterMode.FILE, m_fileExtensions);
+            EnumConfig.create(FilterMode.FILE, FilterMode.FILES_IN_FOLDERS), m_fileExtensions);
     }
 
     @Override

@@ -49,7 +49,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.DialogComponentReaderFileChooser;
-import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage.MessageType;
 
@@ -99,7 +98,7 @@ public class GenericDataSource2SparkNodeDialog3<T extends GenericDataSource2Spar
         final FlowVariableModel fvm = createFlowVariableModel(m_settings.getFileChooserModel().getKeysForFSLocation(),
             FSLocationVariableType.INSTANCE);
         m_inputPathChooser = new DialogComponentReaderFileChooser(m_settings.getFileChooserModel(), FILE_HISTORY_ID,
-            fvm, FilterMode.FILE, FilterMode.FOLDER);
+            fvm);
         inputPathPanel.add(Box.createHorizontalStrut(5));
         inputPathPanel.add(m_inputPathChooser.getComponentPanel());
         inputPathPanel.add(Box.createHorizontalStrut(5));
