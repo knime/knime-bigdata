@@ -48,12 +48,15 @@
  */
 package org.knime.bigdata.databricks.rest.dbfs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * AddBlock request container to create files.
  *
  * @see <a href="https://docs.databricks.com/api/latest/dbfs.html#add-block">DBFS API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AddBlock {
 
     /**

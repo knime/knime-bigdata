@@ -48,11 +48,14 @@
  */
 package org.knime.bigdata.databricks.rest.contexts;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Context create request.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContextCreate {
 
     /**

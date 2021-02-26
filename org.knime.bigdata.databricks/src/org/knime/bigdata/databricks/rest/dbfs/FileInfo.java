@@ -48,12 +48,15 @@
  */
 package org.knime.bigdata.databricks.rest.dbfs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * FileInfo container.
  *
  * @see <a href="https://docs.databricks.com/api/latest/dbfs.html#fileinfo">DBFS API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FileInfo {
     /**
      * The path of the file or directory.

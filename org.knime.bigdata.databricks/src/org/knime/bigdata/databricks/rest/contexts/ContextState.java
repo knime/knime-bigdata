@@ -48,11 +48,14 @@
  */
 package org.knime.bigdata.databricks.rest.contexts;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * State of a context.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public enum ContextState {
     /**
      * Context gets created

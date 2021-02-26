@@ -45,11 +45,14 @@
  */
 package org.knime.bigdata.databricks.rest.jobs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Path to a jar library in DBFS or S3.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class JarLibirary {
 
     /**

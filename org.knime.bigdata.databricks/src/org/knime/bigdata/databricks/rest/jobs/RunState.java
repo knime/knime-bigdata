@@ -45,11 +45,14 @@
  */
 package org.knime.bigdata.databricks.rest.jobs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Job run state.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RunState {
 
     /**

@@ -48,12 +48,15 @@
  */
 package org.knime.bigdata.databricks.rest.commands;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Command status or result.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
 @SuppressWarnings("javadoc")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public enum CommandState {
     Queued,
     Running,
