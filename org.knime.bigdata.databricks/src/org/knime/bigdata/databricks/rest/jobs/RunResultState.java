@@ -48,12 +48,15 @@
  */
 package org.knime.bigdata.databricks.rest.jobs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * The result state of the run.
  *
  * @see <a href="https://docs.databricks.com/api/latest/jobs.html#jobsrunresultstate">Jobs API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public enum RunResultState {
         /**
          * The task completed successfully.

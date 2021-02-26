@@ -45,12 +45,15 @@
  */
 package org.knime.bigdata.databricks.rest.clusters;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Container for cluster identifier.
  *
  * @see <a href="https://docs.databricks.com/api/latest/clusters.html#clusterinfo">Cluster API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Cluster {
 
     /**

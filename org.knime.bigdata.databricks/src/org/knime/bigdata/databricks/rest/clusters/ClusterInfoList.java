@@ -47,11 +47,14 @@ package org.knime.bigdata.databricks.rest.clusters;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * List of {@link ClusterInfo}.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterInfoList {
 
     /**
