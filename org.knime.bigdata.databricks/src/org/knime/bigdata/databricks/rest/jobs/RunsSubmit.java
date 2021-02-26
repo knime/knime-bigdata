@@ -47,12 +47,15 @@ package org.knime.bigdata.databricks.rest.jobs;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Run submit request.
  *
  * @see <a href="https://docs.databricks.com/api/latest/jobs.html#runs-submit">Jobs API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RunsSubmit {
 
     /**

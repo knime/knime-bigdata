@@ -48,6 +48,8 @@
  */
 package org.knime.bigdata.databricks.rest.clusters;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * The state of a cluster. The current allowable state transitions are as follows:
  *   PENDING -> RUNNING
@@ -63,6 +65,7 @@ package org.knime.bigdata.databricks.rest.clusters;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public enum ClusterState {
 
         /** Indicates that a cluster is in the process of being created. */

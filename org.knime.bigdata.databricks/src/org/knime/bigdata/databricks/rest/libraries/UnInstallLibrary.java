@@ -50,12 +50,15 @@ package org.knime.bigdata.databricks.rest.libraries;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Install or uninstall libraries request container.
  *
  * @see <a href="https://docs.databricks.com/api/latest/libraries.html#install">Libraries API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UnInstallLibrary {
 
     /**

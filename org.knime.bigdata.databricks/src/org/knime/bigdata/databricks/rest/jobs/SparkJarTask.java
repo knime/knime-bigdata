@@ -47,11 +47,14 @@ package org.knime.bigdata.databricks.rest.jobs;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Spark jar request.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SparkJarTask {
 
     /**

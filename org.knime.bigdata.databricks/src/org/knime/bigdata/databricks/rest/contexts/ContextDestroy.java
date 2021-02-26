@@ -48,11 +48,14 @@
  */
 package org.knime.bigdata.databricks.rest.contexts;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Destroy a context request.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContextDestroy {
 
     /**

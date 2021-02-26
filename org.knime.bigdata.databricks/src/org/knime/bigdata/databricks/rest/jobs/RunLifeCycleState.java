@@ -48,6 +48,8 @@
  */
 package org.knime.bigdata.databricks.rest.jobs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * The life cycle state of a run. Allowed state transitions are:
  *  PENDING -> RUNNING -> TERMINATING -> TERMINATED
@@ -59,6 +61,7 @@ package org.knime.bigdata.databricks.rest.jobs;
  * @see <a href="https://docs.databricks.com/api/latest/jobs.html#jobsrunlifecyclestate">Jobs API</a>
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public enum RunLifeCycleState {
         /**
          * The run has been triggered. If there is not already an active run of the same job, the cluster and execution

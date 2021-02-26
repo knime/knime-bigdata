@@ -48,11 +48,14 @@
  */
 package org.knime.bigdata.databricks.rest.libraries;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * The status of a library on a specific cluster.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public enum LibraryInstallStatus {
         /** No action has yet been taken to install the library. This state should be very short lived. */
         PENDING,
