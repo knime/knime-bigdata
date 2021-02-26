@@ -135,9 +135,12 @@ public class DatabricksDBConnectionController extends UserDBConnectionController
             props.put("transportMode", "http");
             props.put("ssl", "1");
             props.put("httpPath", httpPath);
-            props.put("AuthMech", "3");
             props.put("UID", m_user);
             props.put("PWD", m_password);
+
+            if (!props.containsKey("AuthMech")) { // let the user overwrite this
+                props.put("AuthMech", "3");
+            }
         }
 
         return props;
