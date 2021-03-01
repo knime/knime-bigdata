@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.knime.features.bigdata.spark"
-      label="KNIME Extension for Apache Spark"
+      id="org.knime.features.bigdata.spark.legacy"
+      label="KNIME Extension for Apache Spark (legacy Spark versions)"
       version="4.4.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for assembling, executing and managing Apache Spark applications.
+      KNIME nodes for assembling, executing and managing Apache Spark applications
+      on legacy Spark versions.
    </description>
 
    <copyright>
@@ -728,66 +729,78 @@ propagated with or for interoperation with KNIME.
    </license>
 
    <includes
-         id="org.knime.features.bigdata.connectors"
+         id="org.knime.features.bigdata.spark"
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark.core"
+         id="org.knime.bigdata.spark.core.sparkjobserver"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark.core.livy"
+         id="org.knime.bigdata.spark1_2"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark.node"
+         id="org.knime.bigdata.spark1_3"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark2_4"
+         id="org.knime.bigdata.spark1_5"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark3_0"
+         id="org.knime.bigdata.spark1_6"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.pmml.compilation.java"
+         id="org.knime.bigdata.spark1_6_cdh5_9"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark2_0"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark2_1"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark2_2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark2_3"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.databricks.spark-csv_2.10"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.knime.python2"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.python.typeextensions"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.python2.serde.flatbuffers"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark.migration"
+         id="org.apache.commons.csv"
          download-size="0"
          install-size="0"
          version="0.0.0"

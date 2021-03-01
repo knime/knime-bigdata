@@ -18,6 +18,9 @@
    <feature id="org.knime.features.bigdata.spark" >
           <category name="knime-bigdata" />
    </feature>
+   <feature id="org.knime.features.bigdata.spark.legacy" >
+          <category name="knime-bigdata" />
+   </feature>
    <feature id="org.knime.features.bigdata.spark.local" >
           <category name="knime-bigdata" />
    </feature>
@@ -37,6 +40,9 @@
           <category name="knime-bigdata" />
    </feature>
    <feature id="org.knime.features.bigdata.spark.source" >
+          <category name="knime-bigdata" />
+   </feature>
+   <feature id="org.knime.features.bigdata.spark.legacy.source" >
           <category name="knime-bigdata" />
    </feature>
    <feature id="org.knime.features.bigdata.spark.local.source" >

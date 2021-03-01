@@ -62,6 +62,7 @@
 		<module>org.knime.features.bigdata.databricks</module>
 		<module>org.knime.features.bigdata.fileformats</module>
 		<module>org.knime.features.bigdata.spark</module>
+		<module>org.knime.features.bigdata.spark.legacy</module>
 		<module>org.knime.features.bigdata.spark.local</module>
 		<module>org.knime.features.bigdata.testing</module>
 		<module>org.knime.update.bigdata</module>
