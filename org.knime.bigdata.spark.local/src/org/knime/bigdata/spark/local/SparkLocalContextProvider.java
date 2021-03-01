@@ -21,7 +21,7 @@ import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 

@@ -45,7 +45,7 @@ import org.knime.bigdata.spark.core.livy.node.create.ui.SettingsModelKeyValue;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;

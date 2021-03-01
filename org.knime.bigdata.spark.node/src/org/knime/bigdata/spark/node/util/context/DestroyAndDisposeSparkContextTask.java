@@ -18,7 +18,7 @@
  * History
  *   Created on May 24, 2018 by bjoern
  */
-package org.knime.bigdata.spark.node.util.context.create;
+package org.knime.bigdata.spark.node.util.context;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;

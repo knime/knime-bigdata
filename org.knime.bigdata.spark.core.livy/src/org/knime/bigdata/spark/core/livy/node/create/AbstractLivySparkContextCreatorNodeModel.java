@@ -30,7 +30,7 @@ import java.util.UUID;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.util.BackgroundTasks;
-import org.knime.bigdata.spark.node.util.context.create.DestroyAndDisposeSparkContextTask;
+import org.knime.bigdata.spark.node.util.context.DestroyAndDisposeSparkContextTask;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;

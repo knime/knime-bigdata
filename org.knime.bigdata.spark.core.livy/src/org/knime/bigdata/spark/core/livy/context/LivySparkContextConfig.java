@@ -10,7 +10,7 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 
 /**

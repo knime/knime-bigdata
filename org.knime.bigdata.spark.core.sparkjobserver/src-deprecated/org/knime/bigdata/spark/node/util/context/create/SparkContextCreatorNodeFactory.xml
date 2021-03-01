@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" deprecated="true">
     <name>Create Spark Context (Jobserver)</name>
     
     <shortDescription>Creates a new Spark context via Spark Jobserver.</shortDescription>
@@ -8,6 +8,9 @@
     <fullDescription>
         <intro>
             Creates a new Spark context via Spark Jobserver. 
+
+            <p>The Spark Jobserver is deprecated and the
+            <a href="https://kni.me/n/KTzMyfLj7V8lGhrz">Create Spark Context (Livy)</a> node should be used instead.</p>
 
             <p>The default settings of the node are taken from the Spark preference page which
             you can open via <i>File->Preferences->KNIME->Big Data->Spark</i>.</p>

@@ -125,7 +125,6 @@ import org.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactor
 import org.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory;
 import org.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory;
 import org.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory;
-import org.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory;
 import org.knime.bigdata.spark.node.util.context.destroy.SparkDestroyContextNodeFactory;
 import org.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory;
 import org.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeFactory;
@@ -236,7 +235,6 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkAccuracyScorerNodeFactory(),
             new SparkEntropyScorerNodeFactory(),
             new SparkNumericScorerNodeFactory(),
-            new SparkContextCreatorNodeFactory(),
             new Spark2ImpalaNodeFactory(),
             new Impala2SparkNodeFactory2(),
             new PySparkInner11NodeFactory(),

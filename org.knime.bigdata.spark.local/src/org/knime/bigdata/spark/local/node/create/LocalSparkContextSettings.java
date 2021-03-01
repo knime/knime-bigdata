@@ -38,7 +38,7 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;

@@ -35,7 +35,7 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
      */
     @Override
     public CompatibilityChecker getChecker() {
-        return AllVersionCompatibilityChecker.INSTANCE;
+        return JobserverPlugin.JOBSERVER_SPARK_VERSION_CHECKER;
     }
 
     /**
@@ -43,7 +43,7 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
      */
     @Override
     public SparkVersion getHighestSupportedSparkVersion() {
-        return SparkVersion.ALL[SparkVersion.ALL.length - 1];
+        return JobserverPlugin.HIGHEST_SUPPORTED_SPARK_VERSION;
     }
 
     /**

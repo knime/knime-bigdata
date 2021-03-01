@@ -12,7 +12,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterParameter;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.LocalSparkVersion;
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
 
 /**
  * Implementation of {@link SparkContextConfig} interface for local Spark.

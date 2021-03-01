@@ -26,7 +26,7 @@ import java.util.Map;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 
 /**

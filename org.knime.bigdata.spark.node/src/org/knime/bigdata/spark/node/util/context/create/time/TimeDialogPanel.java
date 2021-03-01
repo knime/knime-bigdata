@@ -1,4 +1,4 @@
-package org.knime.bigdata.spark.node.util.context.create;
+package org.knime.bigdata.spark.node.util.context.create.time;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.bigdata.spark.node.util.context.create.TimeSettings.TimeShiftStrategy;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.time.util.DialogComponentTimeZoneSelection;

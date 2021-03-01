@@ -13,4 +13,10 @@
 	</SparkJarProvider>
 </extension>
 
+<extension point="org.knime.bigdata.spark.core.SparkNodeFactoryProvider">
+  <SparkNodeFactoryProvider
+        ProviderClass="org.knime.bigdata.spark.core.sparkjobserver.JobserverNodeFactoryProvider">
+  </SparkNodeFactoryProvider>
+</extension>
+
 </plugin>

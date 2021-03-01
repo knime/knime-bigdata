@@ -48,7 +48,7 @@ import org.knime.bigdata.spark.core.livy.LivySparkContextProvider;
 import org.knime.bigdata.spark.core.livy.node.create.LivySparkContextCreatorNodeSettings.ExecutorAllocation;
 import org.knime.bigdata.spark.core.livy.node.create.ui.DialogComponentKeyValueEdit;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.util.context.create.TimeDialogPanel;
+import org.knime.bigdata.spark.node.util.context.create.time.TimeDialogPanel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
