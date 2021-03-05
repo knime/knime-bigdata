@@ -50,9 +50,11 @@ package org.knime.bigdata.database.impala;
 
 import java.sql.JDBCType;
 import java.sql.SQLType;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.time.localdate.LocalDateCellFactory;
@@ -82,19 +84,20 @@ public class ImpalaTypeMappingService extends AbstractDBDataTypeMappingService<I
         super(ImpalaSource.class, ImpalaDestination.class);
 
         // Default consumption paths
-        final Map<DataType, SQLType> defaultConsumptionMap = new LinkedHashMap<>(getDefaultConsumptionMap());
-        defaultConsumptionMap.put(BooleanCell.TYPE, JDBCType.BOOLEAN);
-        defaultConsumptionMap.put(ZonedDateTimeCellFactory.TYPE, JDBCType.VARCHAR); // not supported in Impala
-        defaultConsumptionMap.put(LocalDateCellFactory.TYPE, JDBCType.TIMESTAMP);
+        final Map<DataType, Triple<DataType, Class<?>, SQLType>> defaultConsumptionMap =
+                new LinkedHashMap<>(getDefaultConsumptionTriples());
+        addTriple(defaultConsumptionMap, BooleanCell.TYPE, Boolean.class, JDBCType.BOOLEAN);
+        addTriple(defaultConsumptionMap, ZonedDateTimeCellFactory.TYPE, String.class, JDBCType.VARCHAR); // not supported in Impala
+        addTriple(defaultConsumptionMap, LocalDateCellFactory.TYPE, LocalDate.class, JDBCType.TIMESTAMP);
 
         // Impala supports time columns, but parquet can't store a time as timestamp...
-        defaultConsumptionMap.put(LocalTimeCellFactory.TYPE, JDBCType.VARCHAR);
+        addTriple(defaultConsumptionMap, LocalTimeCellFactory.TYPE, String.class, JDBCType.VARCHAR);
 
-        setDefaultConsumptionPathsFrom(defaultConsumptionMap);
+        setDefaultConsumptionTriples(defaultConsumptionMap);
 
 
         // Default production paths
-        setDefaultProductionPathsFrom(getDefaultProductionMap());
+        setDefaultProductionTriples(getDefaultProductionTriples());
 
         // SQL type to database column type mapping
         addColumnType(JDBCType.BIT, "boolean");

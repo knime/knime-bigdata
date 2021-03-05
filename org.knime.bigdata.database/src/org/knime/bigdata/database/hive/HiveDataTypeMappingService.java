@@ -53,6 +53,7 @@ import java.sql.SQLType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.time.localtime.LocalTimeCellFactory;
@@ -85,14 +86,15 @@ public class HiveDataTypeMappingService extends AbstractDBDataTypeMappingService
         super(DBSource.class, DBDestination.class);
 
         // Default consumption paths
-        final Map<DataType, SQLType> defaultConsumptionMap = new LinkedHashMap<>(getDefaultConsumptionMap());
-        defaultConsumptionMap.put(BooleanCell.TYPE, JDBCType.BOOLEAN);
-        defaultConsumptionMap.put(ZonedDateTimeCellFactory.TYPE, JDBCType.VARCHAR);
-        defaultConsumptionMap.put(LocalTimeCellFactory.TYPE, JDBCType.VARCHAR);
-        setDefaultConsumptionPathsFrom(defaultConsumptionMap);
+        final Map<DataType, Triple<DataType, Class<?>, SQLType>> defaultConsumptionMap =
+                new LinkedHashMap<>(getDefaultConsumptionTriples());
+        addTriple(defaultConsumptionMap, BooleanCell.TYPE, Boolean.class, JDBCType.BOOLEAN);
+        addTriple(defaultConsumptionMap, ZonedDateTimeCellFactory.TYPE, String.class, JDBCType.VARCHAR);
+        addTriple(defaultConsumptionMap, LocalTimeCellFactory.TYPE, String.class, JDBCType.VARCHAR);
+        setDefaultConsumptionTriples(defaultConsumptionMap);
 
         // Default production paths
-        setDefaultProductionPathsFrom(getDefaultProductionMap());
+        setDefaultProductionTriples(getDefaultProductionTriples());
 
         // SQL type to database column type mapping
         addColumnType(JDBCType.BIT, "boolean");
