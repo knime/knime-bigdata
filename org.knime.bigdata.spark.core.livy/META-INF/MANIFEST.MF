@@ -12,6 +12,7 @@ Require-Bundle: org.knime.bigdata.commons;bundle-version="3.6.0",
   org.knime.bigdata.spark.node;bundle-version="[4.0.0,5.0.0)",
   org.knime.core;bundle-version="[4.0.0,5.0.0)",
   org.apache.log4j;bundle-version="1.2.15",
+  javax.activation;bundle-version="[1,2)",
   org.eclipse.core.net;bundle-version="1.3.0",
   org.eclipse.ui.workbench,
   org.apache.livy.api;bundle-version="0.4.1.knime9",
@@ -28,6 +29,7 @@ Require-Bundle: org.knime.bigdata.commons;bundle-version="3.6.0",
   org.apache.commons.lang3;bundle-version="[3.3.1,4.0.0)",
   org.knime.kerberos;bundle-version="3.8.0",
   org.xerial.snappy.snappy-java;bundle-version="[1.1.7,2.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
+Automatic-Module-Name: org.knime.bigdata.spark.core.livy

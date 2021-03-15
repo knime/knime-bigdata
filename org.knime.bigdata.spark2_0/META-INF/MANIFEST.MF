@@ -27,6 +27,7 @@ Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
   org.scalactic_2.11;bundle-version="2.2.6",
   org.scalanlp.breeze-merged_2.11;bundle-version="[0.11.2,0.12.0)",
   org.knime.rsyntaxtextarea;bundle-version="[4.0.0,5.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
+Automatic-Module-Name: org.knime.bigdata.spark2.0
