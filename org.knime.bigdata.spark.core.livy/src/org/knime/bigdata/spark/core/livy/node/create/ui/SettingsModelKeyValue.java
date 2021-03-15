@@ -387,7 +387,7 @@ public class SettingsModelKeyValue extends SettingsModel {
         final LinkedHashMap<String, String> data = new LinkedHashMap<>();
 
         @SuppressWarnings("unchecked")
-        final Enumeration<ConfigStringEntry> rows = settings.getNodeSettings(getConfigName()).children();
+        final Enumeration<ConfigStringEntry> rows = (Enumeration<ConfigStringEntry>)settings.getNodeSettings(getConfigName()).children();
         while (rows.hasMoreElements()) {
             final ConfigStringEntry row = rows.nextElement();
             if (data.put(row.getKey(), row.getString()) != null) {
