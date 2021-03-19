@@ -41,7 +41,6 @@ try {
                     'knime-database-proprietary',
                     'knime-datageneration',
                     'knime-distance',
-                    'knime-dl4j',
                     'knime-ensembles',
                     'knime-expressions',
                     'knime-filehandling',
