@@ -49,7 +49,7 @@ public class FileSystemPortChecker {
         final Optional<FSConnection> optionalFSConn = spec.getFileSystemConnection();
         if (optionalFSConn.isPresent()) {
             try (final FSConnection conn = optionalFSConn.get()) {
-                if (!conn.getURIExporters().containsKey(URIExporterIDs.DEFAULT_HADOOP)) {
+                if (!conn.getURIExporterFactories().containsKey(URIExporterIDs.DEFAULT_HADOOP)) {
                     throw new InvalidSettingsException(
                         String.format("Connected file system '%s' is not Hadoop-compatible", spec.getFileSystemType()));
                 }
