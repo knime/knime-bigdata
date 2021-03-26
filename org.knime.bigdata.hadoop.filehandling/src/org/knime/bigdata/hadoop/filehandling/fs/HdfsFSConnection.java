@@ -53,11 +53,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
 import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.uriexport.PathURIExporter;
-import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporterFactory;
+import org.knime.filehandling.core.connections.uriexport.URIExporterFactoryMapBuilder;
 import org.knime.filehandling.core.connections.uriexport.URIExporterID;
 import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
-import org.knime.filehandling.core.connections.uriexport.URIExporterMapBuilder;
+import org.knime.filehandling.core.connections.uriexport.path.PathURIExporterFactory;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -69,9 +69,9 @@ public class HdfsFSConnection implements FSConnection {
 
     private static final long CACHE_TTL_MILLIS = 60000;
 
-    private static final Map<URIExporterID, URIExporter> URI_EXPORTERS = new URIExporterMapBuilder() //
-            .add(URIExporterIDs.DEFAULT, PathURIExporter.getInstance()) //
-            .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporter.getInstance()) //
+    private static final Map<URIExporterID, URIExporterFactory> URI_EXPORTER_FACTORIES = new URIExporterFactoryMapBuilder() //
+            .add(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
+            .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
             .build();
 
     private final HdfsFileSystem m_filesystem;
@@ -109,7 +109,7 @@ public class HdfsFSConnection implements FSConnection {
     }
 
     @Override
-    public Map<URIExporterID, URIExporter> getURIExporters() {
-        return URI_EXPORTERS;
+    public Map<URIExporterID, URIExporterFactory> getURIExporterFactories() {
+        return URI_EXPORTER_FACTORIES;
     }
 }

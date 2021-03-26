@@ -73,7 +73,11 @@ import org.knime.core.util.FileUtil;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.connections.uriexport.URIExporter;
+import org.knime.filehandling.core.connections.uriexport.URIExporterConfig;
+import org.knime.filehandling.core.connections.uriexport.URIExporterFactory;
 import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.noconfig.NoConfigURIExporterFactory;
 
 /**
  * KNIME-side implementation of {@link StagingAreaAccess} that accesses the staging area using a {@code FSConnection}.
@@ -144,12 +148,20 @@ public class RemoteFSControllerNIO implements RemoteFSController {
             if (m_fsConnection.getFileSystem().supportedFileAttributeViews().contains("posix")) {
                 Files.setPosixFilePermissions(m_stagingArea, STAGING_AREA_PERMISSIONS);
             }
-            final URI uri = m_fsConnection.getURIExporters().get(URIExporterIDs.DEFAULT_HADOOP).toUri(m_stagingArea);
+            final URI uri = convertPathToURI(m_stagingArea);
             m_stagingAreaString = URIUtil.toUnencodedString(uri);
             m_stagingAreaIsPath = uri.getScheme() == null;
         } catch (final IOException|URISyntaxException e) {
             throw new KNIMESparkException("Failed to create staging area: " + e.getMessage(), e);
         }
+    }
+    
+    private URI convertPathToURI(final FSPath fsPath) throws URISyntaxException {
+        final NoConfigURIExporterFactory uriExporterFactory =
+            (NoConfigURIExporterFactory)m_fsConnection.getURIExporterFactories().get(URIExporterIDs.DEFAULT_HADOOP);
+        final URIExporter uriExporter = uriExporterFactory.getExporter();
+        final URI uri = uriExporter.toUri(fsPath);
+        return uri;
     }
 
     @Override
