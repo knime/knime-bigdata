@@ -22,13 +22,7 @@
 <entry key="array-size" type="xint" value="0"/>
 </config>
 <config key="inVars">
-<entry key="array-size" type="xint" value="1"/>
-<config key="0">
-<entry key="Name" type="xstring" value="hdfsPath"/>
-<entry key="JavaName" type="xstring" value="v_hdfsPath"/>
-<entry key="JavaType" type="xstring" value="java.lang.String"/>
-<entry key="Type" type="xstring" value="STRING"/>
-</config>
+<entry key="array-size" type="xint" value="0"/>
 </config>
 <entry key="version" type="xstring" isnull="true" value=""/>
 <entry key="templateUUID" type="xstring" value="590e7a6e-6b80-45b2-a5ba-d3751f51c8c8"/>
