@@ -113,8 +113,10 @@ final class ParquetRandomAccessibleReadSupport extends ReadSupport<ParquetRandom
 
         private ParquetRandomAccessible m_row;
 
+        private final Type[] m_types;
+
         ParquetRandomAccessibleConverter(final Type[] types) {
-            m_row = new ParquetRandomAccessible(types);
+            m_types = types;
         }
 
         @Override
@@ -128,7 +130,7 @@ final class ParquetRandomAccessibleReadSupport extends ReadSupport<ParquetRandom
 
         @Override
         public void start() {
-            m_row.reset();
+            m_row = new ParquetRandomAccessible(m_types);
         }
 
         @Override

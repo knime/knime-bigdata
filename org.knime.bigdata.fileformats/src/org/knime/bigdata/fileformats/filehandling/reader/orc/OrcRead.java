@@ -55,6 +55,7 @@ import java.util.OptionalLong;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.Reader;
 import org.apache.orc.RecordReader;
+import org.apache.orc.TypeDescription;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCell;
 import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCellFactory;
@@ -67,7 +68,7 @@ import org.knime.filehandling.core.node.table.reader.read.Read;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDataCell> {
+final class OrcRead implements Read<FSPath, BigDataCell> {
 
     private final long m_rowCount;
 
@@ -77,51 +78,46 @@ final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDa
 
     private final VectorizedRowBatch m_batch;
 
-    private final OrcCell[] m_cells;
+    private final TypeDescription m_schema;
 
     private int m_batchIndex = 0;
 
     private long m_rowCounter = 0;
+
 
     OrcRead(final Reader reader, final FSPath path) throws IOException {
         m_rowCount = reader.getNumberOfRows();
         m_rows = reader.rows();
         m_batch = reader.getSchema().createRowBatch();
         m_path = path;
-        m_cells = reader.getSchema().getChildren().stream().map(OrcCellFactory::create).toArray(OrcCell[]::new);
+        m_schema = reader.getSchema();
     }
 
     @Override
     public RandomAccessible<BigDataCell> next() throws IOException {
         m_rowCounter++;
-
+        final OrcCell[] cells = createCells();
         if (m_rowCounter == 1 || m_batchIndex >= m_batch.size) {
             if (m_rows.nextBatch(m_batch)) {
                 m_batchIndex = 0;
-                for (int i = 0; i < m_cells.length; i++) {
-                    m_cells[i].setColVector(m_batch.cols[i]);
-                }
             } else {
                 return null;
             }
         }
-        for (OrcCell cell : m_cells) {
+        for (int i = 0; i < cells.length; i++) {
+            cells[i].setColVector(m_batch.cols[i]);
+            cells[i].setIndexInColumn(m_batchIndex);
+        }
+        for (OrcCell cell : cells) {
             cell.setIndexInColumn(m_batchIndex);
         }
         m_batchIndex++;
 
-        return this;
+        return new OrcRandomAccessible(cells);
     }
 
-    @Override
-    public int size() {
-        return m_cells.length;
-    }
-
-    @Override
-    public OrcCell get(final int idx) {
-        final OrcCell cell = m_cells[idx];
-        return cell.isNull() ? null : cell;
+    private OrcCell[] createCells() {
+        return m_schema.getChildren().stream().map(OrcCellFactory::create).toArray(OrcCell[]::new);
     }
 
     @Override
@@ -142,6 +138,27 @@ final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDa
     @Override
     public void close() throws IOException {
         m_rows.close();
+    }
+
+    private static final class OrcRandomAccessible implements RandomAccessible<BigDataCell> {
+
+        private final OrcCell[] m_cells;
+
+        OrcRandomAccessible(final OrcCell[] cells) {
+            m_cells = cells;
+        }
+
+        @Override
+        public int size() {
+            return m_cells.length;
+        }
+
+        @Override
+        public BigDataCell get(final int idx) {
+            OrcCell cell = m_cells[idx];
+            return cell.isNull() ? null : cell;
+        }
+
     }
 
 }

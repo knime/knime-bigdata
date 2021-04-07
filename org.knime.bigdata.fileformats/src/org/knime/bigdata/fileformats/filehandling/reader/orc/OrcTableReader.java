@@ -57,16 +57,19 @@ import org.apache.orc.Reader;
 import org.apache.orc.TypeDescription;
 import org.apache.orc.TypeDescription.Category;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataValueAccessFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.ListKnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
+import org.knime.core.columnar.batch.SequentialBatchReadable;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.TableReader;
 import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
+import org.knime.filehandling.core.node.table.reader.ftrf.adapter.SequentialBatchReadableAdapter;
 import org.knime.filehandling.core.node.table.reader.read.Read;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
@@ -144,6 +147,12 @@ final class OrcTableReader implements GenericTableReader<FSPath, BigDataReaderCo
             default:
                 throw new IllegalArgumentException(String.format("The ORC type '%s' is not supported.", category));
         }
+    }
+
+    @Override
+    public SequentialBatchReadable readContent(final FSPath item, final TableReadConfig<BigDataReaderConfig> config,
+        final TypedReaderTableSpec<KnimeType> spec) {
+        return new SequentialBatchReadableAdapter<>(item, config, spec, this, 1024, BigDataValueAccessFactory.INSTANCE);
     }
 
 }
