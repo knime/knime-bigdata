@@ -55,6 +55,8 @@ import org.knime.database.agent.AbstractDBAgentFactory;
 import org.knime.database.agent.DBAgentFactory;
 import org.knime.database.agent.binning.DBBinner;
 import org.knime.database.agent.loader.DBLoader;
+import org.knime.database.agent.metadata.DBMetadataReader;
+import org.knime.database.agent.metadata.impl.DefaultDBMetadataReader;
 import org.knime.database.agent.sampling.DBSampling;
 import org.knime.database.agent.sampling.impl.DefaultDBSampling;
 import org.knime.database.attribute.AttributeCollection;
@@ -67,9 +69,14 @@ import org.knime.database.attribute.AttributeCollection.Accessibility;
  */
 public class HiveAgentFactory extends AbstractDBAgentFactory {
 
+    private static final AttributeCollection METADATA_ATTRIBUTES;
+    static {
+        final AttributeCollection.Builder builder = AttributeCollection.builder(DefaultDBMetadataReader.ATTRIBUTES);
+        builder.add(Accessibility.HIDDEN, DefaultDBMetadataReader.ATTRIBUTE_CAPABILITY_MULTI_DBS, false);
+        METADATA_ATTRIBUTES = builder.build();
+    }
 
     private static final AttributeCollection SAMPLING_ATTRIBUTES;
-
     static {
         final AttributeCollection.Builder builder = AttributeCollection.builder(DefaultDBSampling.ATTRIBUTES);
         builder.add(Accessibility.HIDDEN, DefaultDBSampling.ATTRIBUTE_CAPABILITY_RANDOM, true);
@@ -80,14 +87,13 @@ public class HiveAgentFactory extends AbstractDBAgentFactory {
     /**
     * Constructs a {@link HiveAgentFactory}.
     */
-   public HiveAgentFactory() {
-        putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
-
-        putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
+    public HiveAgentFactory() {
+        putCreator(DBBinner.class, parameters -> new HiveCaseSupportedBinner(parameters.getSessionReference()));
         putCreator(DBLoader.class, parameters -> new BigDataLoader(parameters.getSessionReference()));
-        putCreator(DBBinner.class, parameters -> {
-            return new HiveCaseSupportedBinner(parameters.getSessionReference());
-        });
-   }
+        putAttributes(DBMetadataReader.class, METADATA_ATTRIBUTES);
+        putCreator(DBMetadataReader.class, parameters -> new DefaultDBMetadataReader(parameters.getSessionReference()));
+        putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
+        putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
+    }
 
 }

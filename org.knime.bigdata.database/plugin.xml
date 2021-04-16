@@ -47,36 +47,40 @@
    </extension>
    <extension
          point="org.knime.database.Agent">
+<!-- Hive -->         
       <Agent
             dbTypes="hive"
             factory="org.knime.bigdata.database.hive.HiveAgentFactory"
-            interface="org.knime.database.agent.sampling.DBSampling">
-      </Agent>
-            <Agent
-            dbTypes="hive"
-            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
-            interface="org.knime.database.agent.binning.DBBinner">
-      </Agent>
-      <Agent
-            dbTypes="impala"
-            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
-            interface="org.knime.database.agent.sampling.DBSampling">
-      </Agent>
-      <Agent
-            dbTypes="impala"
-            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
-            interface="org.knime.database.agent.binning.DBBinner">
-      </Agent>
+            interface="org.knime.database.agent.binning.DBBinner"/>
        <Agent
             dbTypes="hive"
             factory="org.knime.bigdata.database.hive.HiveAgentFactory"
-            interface="org.knime.database.agent.loader.DBLoader">
-        </Agent>
+            interface="org.knime.database.agent.loader.DBLoader"/>
+      <Agent
+            dbTypes="hive"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.metadata.DBMetadataReader"/>
+      <Agent
+            dbTypes="hive"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.sampling.DBSampling"/>
+<!-- Impala -->         
+      <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.binning.DBBinner"/>
         <Agent
             dbTypes="impala"
             factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
-            interface="org.knime.database.agent.loader.DBLoader">
-        </Agent>
+            interface="org.knime.database.agent.loader.DBLoader"/>
+      <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.metadata.DBMetadataReader"/>
+      <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.sampling.DBSampling"/>
    </extension>
    <!-- ********************************** DB Aggregation Functions ********************************** -->
    
