@@ -100,6 +100,7 @@ import org.knime.base.node.jsnippet.ui.JSnippetFieldsController;
 import org.knime.base.node.jsnippet.ui.JSnippetTextArea;
 import org.knime.base.node.jsnippet.ui.JarListPanel;
 import org.knime.base.node.jsnippet.ui.OutFieldsTable;
+import org.knime.base.node.jsnippet.util.JDK11ClasspathLibraryInfo;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
@@ -493,7 +494,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 
             if (doUpdate) {
                 jarManager.clearClassFileSources();
-                jarManager.addCurrentJreClassFileSource();
+                jarManager.addClassFileSource(new JDK11ClasspathLibraryInfo());
                 for (File classPathEntry : m_autoCompletionClassPath) {
                     if (classPathEntry.isFile()) {
                         jarManager.addClassFileSource(classPathEntry);
