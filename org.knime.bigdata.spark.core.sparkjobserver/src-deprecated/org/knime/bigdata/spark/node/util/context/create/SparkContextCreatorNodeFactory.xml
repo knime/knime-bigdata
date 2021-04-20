@@ -9,7 +9,7 @@
         <intro>
             Creates a new Spark context via Spark Jobserver. 
 
-            <p>The Spark Jobserver is deprecated and the
+            <p>Support for Spark Jobserver is deprecated and the
             <a href="https://kni.me/n/KTzMyfLj7V8lGhrz">Create Spark Context (Livy)</a> node should be used instead.</p>
 
             <p>The default settings of the node are taken from the Spark preference page which
