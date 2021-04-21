@@ -30,6 +30,9 @@ import javax.ws.rs.ext.RuntimeDelegate;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -38,6 +41,18 @@ import org.osgi.framework.BundleContext;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class JobserverPlugin extends AbstractUIPlugin {
+
+	/**
+	 * Compatibility checker for the Spark versions lower than 3.0, supported by the Jobserver connector plugin.
+	 */
+	public static final CompatibilityChecker JOBSERVER_SPARK_VERSION_CHECKER = new FixedVersionCompatibilityChecker(
+			SparkVersion.V_1_2, SparkVersion.V_1_3, SparkVersion.V_1_5, SparkVersion.V_1_6, SparkVersion.V_1_6_CDH_5_9,
+			SparkVersion.V_2_0, SparkVersion.V_2_1, SparkVersion.V_2_2, SparkVersion.V_2_3, SparkVersion.V_2_4);
+
+	/**
+	 * The highest Spark 2.x version supported by the Jobserver integration.
+	 */
+	public static final SparkVersion HIGHEST_SUPPORTED_SPARK_VERSION = SparkVersion.V_2_4;
 
 	/**
 	 * Holds the singleton instance of the Spark Jobserver connector plugin,

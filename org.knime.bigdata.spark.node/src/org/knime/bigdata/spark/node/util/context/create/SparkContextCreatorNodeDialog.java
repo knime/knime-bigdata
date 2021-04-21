@@ -22,6 +22,8 @@ package org.knime.bigdata.spark.node.util.context.create;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -101,7 +103,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
         panel.add(new DialogComponentStringSelection(m_settings.getSparkVersionModel(),
-                "Spark version: ", SparkVersion.getAllVersionLabels()).getComponentPanel(), gbc);
+                "Spark version: ", getAllSparkVersionLabels()).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentString(m_settings.getContextNameModel(), "Context name: ", true, 30).getComponentPanel(), gbc);
@@ -132,6 +134,21 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
                 "Hide warning about an existing Spark context").getComponentPanel(), gbc);
 
         return panel;
+    }
+
+    /**
+     * @return all supported spark version labels
+     */
+    private static String[] getAllSparkVersionLabels() {
+        final SparkVersion[] versions = new SparkVersion[]{SparkVersion.V_1_2, SparkVersion.V_1_3, SparkVersion.V_1_5,
+            SparkVersion.V_1_6, SparkVersion.V_1_6_CDH_5_9, SparkVersion.V_2_0, SparkVersion.V_2_1, SparkVersion.V_2_2,
+            SparkVersion.V_2_3, SparkVersion.V_2_4};
+        final String[] labels = new String[versions.length];
+        for (int i = 0; i < versions.length; i++) {
+            labels[i] = versions[i].getLabel();
+        }
+        Arrays.sort(labels, Collections.reverseOrder());
+        return labels;
     }
 
     @Override
