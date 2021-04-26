@@ -58,7 +58,6 @@ import javax.crypto.IllegalBlockSizeException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.SnappyCodec;
-import org.apache.xmlbeans.impl.piccolo.io.FileFormatException;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
@@ -94,14 +93,14 @@ public abstract class AbstractFileFormatReader {
      *
      * @param schemas
      *            the schemas
-     * @throws FileFormatException
-     *             thrown is schemas do not match
+     * @throws BigDataFileFormatException
+     *             thrown if schemas do not match
      */
-    protected static void checkSchemas(final List<DataTableSpec> schemas) throws FileFormatException {
+    protected static void checkSchemas(final List<DataTableSpec> schemas) {
         final DataTableSpec refSchema = schemas.get(0);
         for (int i = 1; i < schemas.size(); i++) {
             if (!schemas.get(i).equals(refSchema)) {
-                throw new FileFormatException("Schemas of input files do not match.");
+                throw new BigDataFileFormatException("Schemas of input files do not match.");
             }
         }
     }
