@@ -70,7 +70,7 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.ftrf.adapter.SequentialBatchReadableAdapter;
+import org.knime.filehandling.core.node.table.reader.ftrf.adapter.batch.SequentialBatchReadableAdapter;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 

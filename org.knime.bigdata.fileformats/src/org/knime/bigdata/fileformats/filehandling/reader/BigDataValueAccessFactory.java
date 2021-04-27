@@ -59,9 +59,9 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.ListKnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType;
 import org.knime.core.columnar.data.DataSpec;
-import org.knime.filehandling.core.node.table.reader.ftrf.adapter.ValueAccess;
-import org.knime.filehandling.core.node.table.reader.ftrf.adapter.ValueAccess.DefaultObjectAccess;
-import org.knime.filehandling.core.node.table.reader.ftrf.adapter.ValueAccessFactory;
+import org.knime.filehandling.core.node.table.reader.ftrf.adapter.batch.ValueAccess;
+import org.knime.filehandling.core.node.table.reader.ftrf.adapter.batch.ValueAccessFactory;
+import org.knime.filehandling.core.node.table.reader.ftrf.adapter.batch.ValueAccess.DefaultObjectAccess;
 
 public enum BigDataValueAccessFactory implements ValueAccessFactory<KnimeType> {
         INSTANCE;
