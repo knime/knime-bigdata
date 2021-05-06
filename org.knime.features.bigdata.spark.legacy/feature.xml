@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.knime.features.bigdata.spark.legacy"
-      label="KNIME Extension for Apache Spark (legacy Spark versions)"
+      label="KNIME Extension for Apache Spark (legacy)"
       version="4.4.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for assembling, executing and managing Apache Spark applications
-      on legacy Spark versions.
+      KNIME nodes for assembling, executing and managing Apache Spark applications. Supports only legacy Spark versions 1.x and 2.0 - 2.3.
    </description>
 
    <copyright>
@@ -729,11 +728,29 @@ propagated with or for interoperation with KNIME.
    </license>
 
    <includes
-         id="org.knime.features.bigdata.spark"
+         id="org.knime.features.bigdata.connectors"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark.core"
+         download-size="0"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.knime.bigdata.spark.core.sparkjobserver"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark.core.livy"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark.node"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -801,6 +818,38 @@ propagated with or for interoperation with KNIME.
 
    <plugin
          id="org.apache.commons.csv"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.knime.pmml.compilation.java"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.knime.python2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.python.typeextensions"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.python2.serde.flatbuffers"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.spark.migration"
          download-size="0"
          install-size="0"
          version="0.0.0"
