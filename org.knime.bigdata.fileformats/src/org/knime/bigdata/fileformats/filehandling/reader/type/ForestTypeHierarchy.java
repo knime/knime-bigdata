@@ -55,9 +55,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.knime.core.node.util.CheckUtils;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.NoCompatibleTypeException;
+import org.knime.filehandling.core.node.table.reader.type.hierarchy.TraversableTypeHierarchy;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TreeTypeHierarchy;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TreeTypeHierarchy.TreeNode;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
@@ -71,7 +73,8 @@ import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarch
  * @param <T> the type used to identify external types
  * @param <V> the type used for values
  */
-public final class ForestTypeHierarchy<T, V> implements TypeHierarchy<T, V>, Iterable<TreeTypeHierarchy<T, V>> {
+public final class ForestTypeHierarchy<T, V>
+    implements TypeHierarchy<T, V>, TraversableTypeHierarchy<T>, Iterable<TreeTypeHierarchy<T, V>> {
 
     private final List<TreeTypeHierarchy<T, V>> m_trees;
 
@@ -82,13 +85,13 @@ public final class ForestTypeHierarchy<T, V> implements TypeHierarchy<T, V>, Ite
 
     private static <T, V> void checkDisjunct(final List<TreeTypeHierarchy<T, V>> trees) {
         List<Set<T>> types = trees.stream()//
-                .map(ForestTypeHierarchy::extractTypes)//
-                .collect(toList());
+            .map(ForestTypeHierarchy::extractTypes)//
+            .collect(toList());
         final int sizeOfUnionIfDisjunct = types.stream().mapToInt(Set::size).sum();
         final int sizeOfUnion = types.stream()//
-                .reduce(ForestTypeHierarchy::addAllToFirst)//
-                .orElseThrow(() -> new IllegalArgumentException("All hierarchies are empty."))//
-                .size();
+            .reduce(ForestTypeHierarchy::addAllToFirst)//
+            .orElseThrow(() -> new IllegalArgumentException("All hierarchies are empty."))//
+            .size();
         CheckUtils.checkArgument(sizeOfUnionIfDisjunct == sizeOfUnion, "The provided hierarchies are not disjunct.");
     }
 
@@ -178,6 +181,17 @@ public final class ForestTypeHierarchy<T, V> implements TypeHierarchy<T, V>, Ite
             return m_typeResolver != null;
         }
 
+    }
+
+    @Override
+    public void traverseToRoot(final T startType, final Consumer<T> visitor) {
+        for (TreeTypeHierarchy<T, V> tree : m_trees) {
+            if (tree.contains(startType)) {
+                tree.traverseToRoot(startType, visitor);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Unsupported startType encountered: " + startType);
     }
 
 }
