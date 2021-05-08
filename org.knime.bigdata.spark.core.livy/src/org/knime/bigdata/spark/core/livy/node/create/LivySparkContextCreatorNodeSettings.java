@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
+import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
 import org.knime.bigdata.spark.core.livy.LivySparkContextProvider;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConnInfoConfig;
@@ -135,7 +136,7 @@ public class LivySparkContextCreatorNodeSettings {
     private final SettingsModelInteger m_settingsVersion = new SettingsModelInteger("settingsVersion", 1);
 
     private final SettingsModelString m_sparkVersion =
-        new SettingsModelString("sparkVersion", LivySparkContextProvider.HIGHEST_SUPPORTED_SPARK_VERSION.getLabel());
+        new SettingsModelString("sparkVersion", LivySparkContextProvider.HIGHEST_SUPPORTED_AND_AVAILABLE_SPARK_VERSION.getLabel());
 
     private final SettingsModelString m_livyUrl = new SettingsModelString("livyUrl", "http://localhost:8998/");
 
@@ -290,7 +291,7 @@ public class LivySparkContextCreatorNodeSettings {
     /**
      * @return the {@link SparkVersion} to assume.
      */
-    public SparkVersion getSparkVersion() {
+    public final SparkVersion getSparkVersion() {
         return SparkVersion.fromLabel(m_sparkVersion.getStringValue());
     }
 
@@ -574,10 +575,6 @@ public class LivySparkContextCreatorNodeSettings {
         if (settings.containsKey("timeshift")) { // added in 4.2
             m_timeShiftSettings.validateSettings(settings.getNodeSettings("timeshift"));
         }
-
-        final LivySparkContextCreatorNodeSettings tmpSettings = new LivySparkContextCreatorNodeSettings();
-        tmpSettings.loadSettingsFrom(settings);
-        tmpSettings.validateDeeper();
     }
 
     /**
@@ -587,6 +584,13 @@ public class LivySparkContextCreatorNodeSettings {
      */
     public void validateDeeper() throws InvalidSettingsException {
         final List<String> errors = new ArrayList<>();
+        
+        if (!JobRunFactoryRegistry.hasJobsForSparkVersion(getSparkVersion())) {
+            errors.add(String.format(
+                "Support for Spark %s is not installed. Please install the respective extension which adds support for Spark %s.", //
+                getSparkVersion().getLabel(), //
+                getSparkVersion().getLabel()));
+        }
 
         SparkPreferenceValidator.validateRESTEndpointURL(getLivyUrl(), errors, "Livy");
 

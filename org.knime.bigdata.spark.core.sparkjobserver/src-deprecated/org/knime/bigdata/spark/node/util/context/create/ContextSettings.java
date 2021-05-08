@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
@@ -341,6 +342,13 @@ public class ContextSettings {
     public void validateSettings() throws InvalidSettingsException {
 
         final ArrayList<String> errors = new ArrayList<>();
+        
+        if (!JobRunFactoryRegistry.hasJobsForSparkVersion(getSparkVersion())) {
+            errors.add(String.format(
+                "Support for Spark %s is not installed. Please install the respective extension which adds support for Spark %s.", //
+                getSparkVersion().getLabel(), //
+                getSparkVersion().getLabel()));
+        }
 
         SparkPreferenceValidator.validateSparkContextName(getContextName(), errors);
         SparkPreferenceValidator.validateRESTEndpointURL(getJobServerUrl(), errors, "jobserver");

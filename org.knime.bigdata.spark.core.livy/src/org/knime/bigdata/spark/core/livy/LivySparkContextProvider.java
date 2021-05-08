@@ -17,6 +17,7 @@ import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
+import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContext;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConnInfoConfig;
@@ -43,15 +44,32 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
      * The highest Spark version currently supported by the Apache Livy integration.
      */
     public static final SparkVersion HIGHEST_SUPPORTED_SPARK_VERSION;
+    
+    /**
+     * The highest Spark version currently supported by the Apache Livy integration and for which we have Spark jobs
+     * available (which are in their own plugin).
+     */
+    public static final SparkVersion HIGHEST_SUPPORTED_AND_AVAILABLE_SPARK_VERSION;
 
     static {
-        SparkVersion currHighest = LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions().iterator().next();
+        SparkVersion highestSupported =
+            LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions().iterator().next();
+
+        SparkVersion highestSupportedAndAvailable = null;
+
         for (SparkVersion curr : LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions()) {
-            if (currHighest.compareTo(curr) < 0) {
-                currHighest = curr;
+
+            if (highestSupported.compareTo(curr) < 0) {
+                highestSupported = curr;
+            }
+
+            if (JobRunFactoryRegistry.hasJobsForSparkVersion(curr)
+                && (highestSupportedAndAvailable == null || highestSupportedAndAvailable.compareTo(curr) < 0)) {
+                highestSupportedAndAvailable = curr;
             }
         }
-        HIGHEST_SUPPORTED_SPARK_VERSION = currHighest;
+        HIGHEST_SUPPORTED_SPARK_VERSION = highestSupported;
+        HIGHEST_SUPPORTED_AND_AVAILABLE_SPARK_VERSION = highestSupportedAndAvailable;
     }
 
     /**
@@ -69,7 +87,7 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
     public SparkVersion getHighestSupportedSparkVersion() {
         return HIGHEST_SUPPORTED_SPARK_VERSION;
     }
-
+    
     /**
      * {@inheritDoc}
      */

@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark.core.job;
 
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
 import org.knime.bigdata.spark.core.exception.MissingJobException;
 import org.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -76,5 +77,16 @@ public class JobRunFactoryRegistry
         } else {
             return (JobRunFactory<I, O>)factory;
         }
+    }
+
+    /**
+     * Tests whether any jobs are registered for the given Spark version. Since BD-1111 (Split KNIME Extension for
+     * Apache Spark into legacy and current) it is possible to not have jobs installed for a particular Spark version.
+     *
+     * @param sparkVersion
+     * @return true, if jobs are available, false otherwise.
+     */
+    public static boolean hasJobsForSparkVersion(final SparkVersion sparkVersion) {
+        return getInstance().get(SparkContextConstants.FETCH_ROWS_JOB_ID, sparkVersion) != null;
     }
 }
