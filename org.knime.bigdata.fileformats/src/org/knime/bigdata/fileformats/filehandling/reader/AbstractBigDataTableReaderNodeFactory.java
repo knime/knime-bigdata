@@ -123,6 +123,11 @@ public abstract class AbstractBigDataTableReaderNodeFactory
     }
 
     @Override
+    protected final ProductionPathProvider<KnimeType> createProductionPathProvider() {
+        return BigDataReadAdapterFactory.INSTANCE.createProductionPathProvider();
+    }
+
+    @Override
     protected final String extractRowKey(final BigDataCell value) {
         return value.getString();
     }

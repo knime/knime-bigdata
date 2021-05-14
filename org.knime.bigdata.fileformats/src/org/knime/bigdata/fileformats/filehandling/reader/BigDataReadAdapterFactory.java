@@ -53,6 +53,8 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ProducerRegistry;
+import org.knime.filehandling.core.node.table.reader.HierarchyAwareProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
 import org.knime.filehandling.core.node.table.reader.ReadAdapter;
 import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
 
@@ -81,6 +83,11 @@ enum BigDataReadAdapterFactory implements ReadAdapterFactory<KnimeType, BigDataC
     @Override
     public DataType getDefaultType(final KnimeType type) {
         return KnimeTypeHierarchies.DEFAULT_TYPES.get(type);
+    }
+
+    ProductionPathProvider<KnimeType> createProductionPathProvider() {
+        return new HierarchyAwareProductionPathProvider<>(REGISTRY,
+                KnimeTypeHierarchies.TYPE_HIERARCHY, this::getDefaultType, (t, p) -> true);
     }
 
 }

@@ -55,7 +55,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.knime.core.data.DataType;
@@ -133,7 +133,7 @@ public enum PrimitiveKnimeType implements KnimeType {
     }
 
     private static Set<Class<?>> asSet(final Class<?>... classes) {
-        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(classes)));
+        return Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(classes)));
     }
 
     @Override

@@ -170,7 +170,7 @@ public final class KnimeTypeHierarchies {
      * Integer                        Date                |                                              |
      *                                               List(Long)                                List(Local Date & Time)
      *                                                    |                                              |
-     *                                              List(Integer)                                      Date
+     *                                              List(Integer)                                    List(Date)
      * </pre>
      *
      * The other two sub-hierarchies are much simpler and consist only of the {@link PrimitiveKnimeType#BINARY} and its
