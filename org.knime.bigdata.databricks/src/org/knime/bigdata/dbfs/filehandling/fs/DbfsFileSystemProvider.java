@@ -185,8 +185,8 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
      * @return The attributes.
      */
     public static BaseFileAttributes createBaseFileAttrs(final FileInfo info, final DbfsPath path) {
-        FileTime time = FileTime.fromMillis(0);
-        return new BaseFileAttributes(!info.is_dir, path, time, time, time, info.file_size, false, false, null);
+        FileTime mtime = FileTime.fromMillis(info.modification_time);
+        return new BaseFileAttributes(!info.is_dir, path, mtime, mtime, mtime, info.file_size, false, false, null);
     }
 
     @Override
@@ -203,8 +203,12 @@ public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, Dbf
 
     @Override
     protected boolean isHiddenInternal(final DbfsPath path) throws IOException {
-        final String name = path.getFileName().toString();
-        return name.startsWith(".") || name.startsWith("_");
+        if (path.isRoot()) {
+            return false;
+        } else {
+            final String name = path.getFileName().toString();
+            return name.startsWith(".") || name.startsWith("_");
+        }
     }
 
 }

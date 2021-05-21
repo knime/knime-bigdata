@@ -50,11 +50,14 @@ package org.knime.bigdata.databricks.rest.dbfs;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
- * Wrapper class for {@link DBFSAPI} that suppresses authentication popups.
+ * Wrapper class for {@link DBFSAPI} that suppresses authentication popups and performs percent-encoding of URL query
+ * params (necessary, because JAX-RS and CXF only perform application/x-www-form-urlencoded).
  *
  * @author Alexander Bondaletov
  */
@@ -72,6 +75,14 @@ public class DBFSAPIWrapper implements DBFSAPI {
         m_api = api;
     }
 
+    private static final String percentEncodeQueryValue(final String value) {
+        try {
+            return new URI("dummy", "dummy", "/", value, null).getRawQuery();
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
     private interface Invoker<T> {
         T invoke() throws IOException;
     }
@@ -84,12 +95,13 @@ public class DBFSAPIWrapper implements DBFSAPI {
 
     @Override
     public FileInfo getStatus(final String path) throws IOException {
-        return invoke(() -> m_api.getStatus(path));
+
+        return invoke(() -> m_api.getStatus(percentEncodeQueryValue(path)));
     }
 
     @Override
     public FileInfoList list(final String path) throws IOException {
-        return invoke(() -> m_api.list(path));
+        return invoke(() -> m_api.list(percentEncodeQueryValue(path)));
     }
 
     @Override
@@ -118,7 +130,7 @@ public class DBFSAPIWrapper implements DBFSAPI {
 
     @Override
     public FileBlock read(final String path, final long offset, final long length) throws IOException {
-        return invoke(() -> m_api.read(path, offset, length));
+        return invoke(() -> m_api.read(percentEncodeQueryValue(path), offset, length));
     }
 
     @Override

@@ -49,6 +49,7 @@
 package org.knime.bigdata.databricks.rest.dbfs;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * FileInfo container.
@@ -72,4 +73,11 @@ public class FileInfo {
      * The length of the file in bytes or zero if the path is a directory.
      */
     public long file_size;
+
+    /**
+     * Millis since the epoch, that the file/folder was modified. If this {@link FileInfo} describes a directory on AWS
+     * S3, then the value is always 0 (according to Databricks REST API docs).
+     */
+    @JsonProperty(required = false)
+    public long modification_time;
 }
