@@ -298,7 +298,11 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
 
     @Override
     protected boolean isHiddenInternal(final HdfsPath path) throws IOException {
-        final String name = path.getFileName().toString();
-        return name.startsWith(".") || name.startsWith("_");
+        if (path.isRoot()) {
+            return false;
+        } else {
+            final String name = path.getFileName().toString();
+            return name.startsWith(".") || name.startsWith("_");
+        }
     }
 }
