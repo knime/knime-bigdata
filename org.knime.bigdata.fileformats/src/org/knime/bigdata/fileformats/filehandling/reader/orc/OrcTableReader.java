@@ -64,7 +64,6 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.PrimitiveKnimeType
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.TableReader;
 import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
 import org.knime.filehandling.core.node.table.reader.read.Read;
@@ -76,13 +75,13 @@ import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.T
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class OrcTableReader implements GenericTableReader<FSPath, BigDataReaderConfig, KnimeType, BigDataCell> {
+final class OrcTableReader implements TableReader<BigDataReaderConfig, KnimeType, BigDataCell> {
 
     @Override
-    public Read<FSPath, BigDataCell> read(final FSPath path, final TableReadConfig<BigDataReaderConfig> config)
+    public Read<BigDataCell> read(final FSPath path, final TableReadConfig<BigDataReaderConfig> config)
         throws IOException {
         Reader reader = createReader(path);
-        return new OrcRead(reader, path);
+        return new OrcRead(reader);
     }
 
     private static Reader createReader(final FSPath path) throws IOException {

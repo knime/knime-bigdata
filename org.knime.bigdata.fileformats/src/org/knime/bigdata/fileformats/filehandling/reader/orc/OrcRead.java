@@ -49,7 +49,6 @@
 package org.knime.bigdata.fileformats.filehandling.reader.orc;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
@@ -58,7 +57,6 @@ import org.apache.orc.RecordReader;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCell;
 import org.knime.bigdata.fileformats.filehandling.reader.orc.cell.OrcCellFactory;
-import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
 import org.knime.filehandling.core.node.table.reader.read.Read;
 
@@ -67,13 +65,11 @@ import org.knime.filehandling.core.node.table.reader.read.Read;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDataCell> {
+final class OrcRead implements Read<BigDataCell>, RandomAccessible<BigDataCell> {
 
     private final long m_rowCount;
 
     private final RecordReader m_rows;
-
-    private final FSPath m_path;
 
     private final VectorizedRowBatch m_batch;
 
@@ -83,11 +79,10 @@ final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDa
 
     private long m_rowCounter = 0;
 
-    OrcRead(final Reader reader, final FSPath path) throws IOException {
+    OrcRead(final Reader reader) throws IOException {
         m_rowCount = reader.getNumberOfRows();
         m_rows = reader.rows();
         m_batch = reader.getSchema().createRowBatch();
-        m_path = path;
         m_cells = reader.getSchema().getChildren().stream().map(OrcCellFactory::create).toArray(OrcCell[]::new);
     }
 
@@ -132,11 +127,6 @@ final class OrcRead implements Read<FSPath, BigDataCell>, RandomAccessible<BigDa
     @Override
     public long getProgress() {
         return m_rowCounter;
-    }
-
-    @Override
-    public Optional<FSPath> getItem() {
-        return Optional.of(m_path);
     }
 
     @Override

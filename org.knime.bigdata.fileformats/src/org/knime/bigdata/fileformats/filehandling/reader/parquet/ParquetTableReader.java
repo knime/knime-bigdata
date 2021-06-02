@@ -66,7 +66,7 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.GenericTableReader;
+import org.knime.filehandling.core.node.table.reader.TableReader;
 import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
@@ -75,7 +75,7 @@ import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.T
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class ParquetTableReader implements GenericTableReader<FSPath, BigDataReaderConfig, KnimeType, BigDataCell> {
+final class ParquetTableReader implements TableReader<BigDataReaderConfig, KnimeType, BigDataCell> {
 
     @SuppressWarnings("resource") // It's the responsibility of the caller to close the read
     @Override
@@ -91,7 +91,7 @@ final class ParquetTableReader implements GenericTableReader<FSPath, BigDataRead
         final ParquetRandomAccessibleReadSupport readSupport = new ParquetRandomAccessibleReadSupport();
         final ParquetReader<ParquetRandomAccessible> parquetReader =
             ParquetReader.builder(readSupport, hadoopPath).withConf(configuration).build();
-        return new ParquetRead(path, parquetReader, rowCount);
+        return new ParquetRead(parquetReader, rowCount);
     }
 
     @Override
