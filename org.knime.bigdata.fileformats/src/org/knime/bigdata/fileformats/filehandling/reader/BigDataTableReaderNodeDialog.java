@@ -72,6 +72,7 @@ import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelF
 import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
 import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
+import org.knime.filehandling.core.node.table.reader.dialog.SourceIdentifierColumnPanel;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.AbstractTableReaderNodeDialog;
 import org.knime.filehandling.core.node.table.reader.preview.dialog.GenericItemAccessor;
 import org.knime.filehandling.core.util.GBCBuilder;
@@ -94,6 +95,8 @@ public final class BigDataTableReaderNodeDialog
     private final JCheckBox m_failOnDifferingSpecs = new JCheckBox("Fail on differing specs");
 
     private final JCheckBox m_supportChangingFileSchemas = new JCheckBox("Support changing file schemas");
+
+    private final SourceIdentifierColumnPanel m_pathColumnPanel = new SourceIdentifierColumnPanel("Path");
 
     /**
      * Constructor.
@@ -118,6 +121,7 @@ public final class BigDataTableReaderNodeDialog
         m_failOnDifferingSpecs.addActionListener(e -> configChanged());
         m_supportChangingFileSchemas.addActionListener(e -> configChanged());
         m_supportChangingFileSchemas.addActionListener(e -> updateTransformationTableEnabledStatus());
+        m_pathColumnPanel.addChangeListener(e -> configChanged());
         addTab("Settings", createSettingsPanel());
         addTab(TRANSFORMATION_TAB, createTransformationTab());
     }
@@ -149,6 +153,7 @@ public final class BigDataTableReaderNodeDialog
         panel.add(fileChooserPanel, gbc.build());
         panel.add(createMultiFilePanel(), gbc.incY().build());
         panel.add(createTableSpecificationPanel(), gbc.incY().build());
+        panel.add(m_pathColumnPanel, gbc.incY().build());
         panel.add(createPreview(), gbc.incY().fillBoth().setWeightY(1.0).build());
         return panel;
     }
@@ -194,6 +199,8 @@ public final class BigDataTableReaderNodeDialog
 
     private void saveToConfig() {
         m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
+        m_config.setPrependItemIdentifierColumn(m_pathColumnPanel.isPrependSourceIdentifierColumn());
+        m_config.setItemIdentifierColumnName(m_pathColumnPanel.getSourceIdentifierColumnName());
         final boolean saveTableSpecConfig = !m_supportChangingFileSchemas.isSelected();
         m_config.setSaveTableSpecConfig(saveTableSpecConfig);
         m_config.setTableSpecConfig(saveTableSpecConfig ? getTableSpecConfig() : null);
@@ -205,6 +212,7 @@ public final class BigDataTableReaderNodeDialog
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
         m_config.loadInDialog(settings, specs);
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
+        m_pathColumnPanel.load(m_config.prependItemIdentifierColumn(), m_config.getItemIdentifierColumnName());
         updateMultiFileEnabledStatus();
         m_supportChangingFileSchemas.setSelected(!m_config.saveTableSpecConfig());
         updateTransformationTableEnabledStatus();
