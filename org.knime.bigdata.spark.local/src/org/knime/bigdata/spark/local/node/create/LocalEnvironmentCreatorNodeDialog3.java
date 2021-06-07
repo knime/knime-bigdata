@@ -77,9 +77,8 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.FileSystemBrowser.DialogType;
 import org.knime.core.node.util.FileSystemBrowser.FileSelectionMode;
+import org.knime.filehandling.core.connections.DefaultFSConnectionFactory;
 import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.local.LocalFSConnection;
-import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.defaultnodesettings.fileselection.FileSelectionDialog;
 
 /**
@@ -358,7 +357,7 @@ public class LocalEnvironmentCreatorNodeDialog3 extends NodeDialogPane implement
     }
 
     private FSConnection createFSConnection() {
-        return new LocalFSConnection(m_settings.getManualWorkingDirectory(), LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+        return DefaultFSConnectionFactory.createLocalFSConnection(m_settings.getManualWorkingDirectory());
     }
 
     /**

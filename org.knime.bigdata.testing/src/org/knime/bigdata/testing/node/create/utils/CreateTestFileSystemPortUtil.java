@@ -58,10 +58,13 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.filehandling.core.connections.DefaultFSConnectionFactory;
+import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
+import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
-import org.knime.filehandling.core.connections.local.LocalFSConnection;
-import org.knime.filehandling.core.connections.local.LocalFileSystem;
+import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
@@ -94,8 +97,9 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
 
         switch (sparkScheme) {
             case SPARK_LOCAL:
-                return new FileSystemPortObjectSpec(LocalFileSystem.FS_TYPE.getName(), fsId,
-                    LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+                final FSLocationSpec locationSpec =
+                    new DefaultFSLocationSpec(FSCategory.CONNECTED, FSType.LOCAL_FS.getTypeId());
+                return new FileSystemPortObjectSpec(FSType.LOCAL_FS.getTypeId(), fsId, locationSpec);
             case SPARK_JOBSERVER:
             case SPARK_LIVY:
                 return TestingHdfsConnectionFactory.createSpec(fsId, flowVars);
@@ -131,7 +135,7 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
         switch (sparkScheme) {
             case SPARK_LOCAL:
                 final String workingDir = Platform.getLocation().toString();
-                return new LocalFSConnection(workingDir, LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+                return DefaultFSConnectionFactory.createLocalFSConnection(workingDir);
             case SPARK_JOBSERVER:
             case SPARK_LIVY:
                 return TestingHdfsConnectionFactory.createConnection(flowVars);

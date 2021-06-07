@@ -50,13 +50,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.local.LocalFSConnection;
-import org.knime.filehandling.core.connections.local.LocalFileSystem;
+import org.knime.filehandling.core.connections.local.LocalFSConnectionConfig;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 import org.knime.filehandling.core.testing.FSTestInitializerProvider;
 
@@ -75,7 +76,7 @@ public class LocalHdfsTestInitializerProvider extends DefaultFSTestInitializerPr
     public LocalHdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
         final Path workingDir = Files.createTempDirectory("knime-hdfs-nio-wrapper-local-test");
         final LocalFSConnection localFsConnection =
-            new LocalFSConnection(workingDir.toString(), LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+            new LocalFSConnection(new LocalFSConnectionConfig(workingDir.toString()));
         return new LocalHdfsTestInitializer(new LocalHdfsFSConnection(localFsConnection));
     }
 

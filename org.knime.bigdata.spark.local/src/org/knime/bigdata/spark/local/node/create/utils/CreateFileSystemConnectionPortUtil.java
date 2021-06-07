@@ -62,11 +62,14 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.WorkflowContext;
+import org.knime.filehandling.core.connections.DefaultFSConnectionFactory;
+import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
+import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
+import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.knimerelativeto.RelativeToUtil;
-import org.knime.filehandling.core.connections.local.LocalFSConnection;
-import org.knime.filehandling.core.connections.local.LocalFileSystem;
+import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
@@ -112,7 +115,7 @@ public class CreateFileSystemConnectionPortUtil implements CreateLocalBDEPortUti
     @Override
     public PortObject execute(final LocalSparkContext sparkContext, final ExecutionContext exec) throws Exception {
         final String workingDir = getWorkingDirectory();
-        m_connection = new LocalFSConnection(workingDir, LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+        m_connection = DefaultFSConnectionFactory.createLocalFSConnection(workingDir);
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
         testConnection(m_connection);
         return new FileSystemPortObject(createSpec(m_fsId));
@@ -124,8 +127,9 @@ public class CreateFileSystemConnectionPortUtil implements CreateLocalBDEPortUti
     }
 
     private static FileSystemPortObjectSpec createSpec(final String fsId) {
-        return new FileSystemPortObjectSpec(LocalFileSystem.FS_TYPE.getName(), fsId,
-            LocalFileSystem.CONNECTED_FS_LOCATION_SPEC);
+        final FSLocationSpec locationSpec =
+            new DefaultFSLocationSpec(FSCategory.CONNECTED, FSType.LOCAL_FS.getTypeId());
+        return new FileSystemPortObjectSpec(FSType.LOCAL_FS.getTypeId(), fsId, locationSpec);
     }
 
     private String getWorkingDirectory() throws InvalidSettingsException, IOException {
