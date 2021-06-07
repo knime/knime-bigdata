@@ -45,11 +45,8 @@
  */
 package org.knime.bigdata.hadoop.filehandling.node;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnectionConfig;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
@@ -65,11 +62,11 @@ import org.knime.filehandling.core.connections.base.auth.EmptyAuthProviderSettin
 import org.knime.filehandling.core.connections.base.auth.UserAuthProviderSettings;
 
 /**
- * Settings for {@link HdfsConnectorNodeModel}.
+ * Settings for HDFS Connector node.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnectorNodeSettings {
+class HdfsConnectorNodeSettings {
 
     private static final HdfsProtocol DEFAULT_PROTOCOL = HdfsProtocol.HDFS;
 
@@ -209,18 +206,6 @@ public class HdfsConnectorNodeSettings {
     }
 
     /**
-     * @return Hadoop compatible URI using scheme, host and port
-     * @throws IOException
-     */
-    public URI getHadopURI() throws IOException {
-        try {
-            return new URI(getProtocol().getHadoopScheme(), null, getHost(), getPort(), null, null, null);
-        } catch (final URISyntaxException e) {
-            throw new IOException("Failed to create Hadoop URI", e);
-        }
-    }
-
-    /**
      * @return protocol settings model
      */
     SettingsModelString getHadoopProtocolSettingsModel() {
@@ -325,5 +310,24 @@ public class HdfsConnectorNodeSettings {
     public String getUser() {
         return m_auth.<UserAuthProviderSettings>getSettingsForAuthType(HdfsAuth.SIMPLE) //
                 .getUser();
+    }
+
+    /**
+     * Convert this settings to a {@link HdfsFSConnectionConfig} instance.
+     *
+     * @return a {@link HdfsFSConnectionConfig} using this settings
+     */
+    public HdfsFSConnectionConfig toFSConnectionConfig() {
+        final HdfsFSConnectionConfig.Builder builder = HdfsFSConnectionConfig.builder() //
+            .withEndpoint(getProtocol().getHadoopScheme(), getHost(), getPort()) //
+            .withWorkingDirectory(getWorkingDirectory());
+
+        if (useKerberos()) {
+            builder.withKerberosAuthentication();
+        } else {
+            builder.withSimpleAuthentication(getUser());
+        }
+
+        return builder.build();
     }
 }

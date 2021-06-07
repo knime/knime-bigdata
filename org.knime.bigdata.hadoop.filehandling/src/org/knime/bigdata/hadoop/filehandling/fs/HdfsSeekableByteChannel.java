@@ -59,7 +59,7 @@ import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPath> {
+class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPath> {
 
     /**
      * Constructs an {@link TempFileSeekableByteChannel} for HDFS.

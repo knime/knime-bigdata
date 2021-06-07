@@ -80,7 +80,7 @@ import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSystem> {
+class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSystem> {
 
     @SuppressWarnings("resource")
     private FileSystem getHadoopFS() {
@@ -152,8 +152,9 @@ public class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, Hdf
      *
      * @return {@code true} if the given path contains at least one child file or directory, {@code false} otherwise
      */
+    @Override
     @SuppressWarnings("resource")
-    private boolean isNonEmptyDir(final HdfsPath path) throws IOException {
+    protected boolean isNonEmptyDirectory(final HdfsPath path) throws IOException {
         final FileSystem fs = getHadoopFS();
         final Path hadoopPath = path.toHadoopPath();
 

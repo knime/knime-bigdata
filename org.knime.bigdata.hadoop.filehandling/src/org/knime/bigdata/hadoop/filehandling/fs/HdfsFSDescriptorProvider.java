@@ -42,59 +42,45 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2021-06-03 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.hadoop.filehandling.fs;
 
-import java.io.IOException;
-
-import org.apache.hadoop.fs.FileSystem;
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.bigdata.hadoop.filehandling.testing.HdfsTestInitializerProvider;
+import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.connections.meta.FSTypeRegistry;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptor;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptorProvider;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.base.PathURIExporterFactory;
 
 /**
- * HDFS implementation of {@link FSConnection} interface.
+ * HDFS file system descriptor.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsFSConnection implements FSConnection {
+public class HdfsFSDescriptorProvider extends BaseFSDescriptorProvider {
 
-    private static final long CACHE_TTL_MILLIS = 60000;
-
-    private final HdfsFileSystem m_filesystem;
+    /**
+     * The file system type of the Hadoop file system.
+     */
+    public static final FSType FS_TYPE = FSTypeRegistry.getOrCreateFSType("hdfs", "Hadoop File System (HDFS)");
 
     /**
      * Default constructor.
-     *
-     * @param config Connection configuration to use.
-     * @throws IOException
      */
-    public HdfsFSConnection(final HdfsFSConnectionConfig config) throws IOException {
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, config);
-    }
-
-    /**
-     * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
-     *
-     * @param hadoopFileSystem already initialized and open Hadoop file system to use
-     */
-    public HdfsFSConnection(final FileSystem hadoopFileSystem) {
-        final String workingDirectory = hadoopFileSystem.getWorkingDirectory().toUri().getPath();
-        final HdfsFSConnectionConfig config = HdfsFSConnectionConfig.builder() //
-                .withEndpoint("hdfs", "localhost", 1234) // never used
-                .withWorkingDirectory(workingDirectory) //
-                .build();
-        m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, config, hadoopFileSystem);
-    }
-
-    @Override
-    public HdfsFileSystem getFileSystem() {
-        return m_filesystem;
-    }
-
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    public HdfsFSDescriptorProvider() {
+        super(HdfsFSDescriptorProvider.FS_TYPE, //
+            new BaseFSDescriptor.Builder() //
+                .withSeparator(HdfsFileSystem.PATH_SEPARATOR) //
+                .<HdfsFSConnectionConfig>withConnectionFactory(HdfsFSConnection::new) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
+                .withCanGetPosixAttributes(true) //
+                .withTestInitializerProvider(new HdfsTestInitializerProvider()) //
+                .build());
     }
 
 }

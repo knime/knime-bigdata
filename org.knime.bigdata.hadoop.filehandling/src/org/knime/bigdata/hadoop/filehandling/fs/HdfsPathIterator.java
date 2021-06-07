@@ -62,7 +62,7 @@ import org.knime.filehandling.core.connections.base.attributes.BaseFileAttribute
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsPathIterator extends BasePathIterator<HdfsPath> {
+class HdfsPathIterator extends BasePathIterator<HdfsPath> {
 
     /**
      * @param path the path to list

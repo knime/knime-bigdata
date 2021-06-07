@@ -47,7 +47,6 @@ package org.knime.bigdata.hadoop.filehandling.fs;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
@@ -58,12 +57,8 @@ import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil.UserGroupInformationCallback;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
 import org.knime.core.node.NodeLogger;
-import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
-import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.base.BaseFileSystem;
 import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 
@@ -77,11 +72,6 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HdfsFileSystem.class);
 
     /**
-     * URI scheme of this {@link FSFileSystem}.
-     */
-    public static final String FS_TYPE = "hdfs";
-
-    /**
      * Character to use as path separator
      */
     public static final String PATH_SEPARATOR = "/";
@@ -92,55 +82,38 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
      * Default constructor.
      *
      * @param cacheTTL The time to live for cached elements in milliseconds.
-     * @param settings Connection settings.
+     * @param config Connection configuration.
      * @throws IOException
      */
-    public HdfsFileSystem(final long cacheTTL, final HdfsConnectorNodeSettings settings) throws IOException {
+    public HdfsFileSystem(final long cacheTTL, final HdfsFSConnectionConfig config) throws IOException {
         super(new HdfsFileSystemProvider(), //
-            createURI(settings), //
             cacheTTL, //
-            settings.getWorkingDirectory(), //
-            createFSLocationSpec(settings.getHost()));
+            config.getWorkingDirectory(), //
+            config.createFSLocationSpec());
 
-        final URI fsURI = settings.getHadopURI();
-        final Configuration hadoopConf = createHadoopConfiguration(settings, fsURI);
-        m_hadoopFileSystem = openHadoopFileSystem(settings, hadoopConf, fsURI);
+        final URI fsURI = config.getHadopURI();
+        final Configuration hadoopConf = createHadoopConfiguration(config, fsURI);
+        m_hadoopFileSystem = openHadoopFileSystem(config, hadoopConf, fsURI);
     }
 
     /**
      * Non public constructor to create an instance using an existing Hadoop file system in integration tests.
      **/
-    HdfsFileSystem(final long cacheTTL, final URI uri, final String host, final String workingDirectory,
-        final FileSystem hadoopFileSystem) {
-
+    HdfsFileSystem(final long cacheTTL, final HdfsFSConnectionConfig config, final FileSystem hadoopFileSystem) {
         super(new HdfsFileSystemProvider(), //
-            uri, //
             cacheTTL, //
-            workingDirectory, //
-            createFSLocationSpec(host));
+            config.getWorkingDirectory(), //
+            config.createFSLocationSpec());
 
         m_hadoopFileSystem = hadoopFileSystem;
     }
 
-    /**
-     * @param settings settings.
-     * @return URI from settings.
-     * @throws URISyntaxException
-     */
-    private static URI createURI(final HdfsConnectorNodeSettings settings) throws IOException {
-        try {
-            return new URI(FS_TYPE, null, settings.getHost(), settings.getPort(), null, null, null);
-        } catch (final URISyntaxException e) {
-            throw new IOException("Failed to create file system URI: " + e.getMessage(), e);
-        }
-    }
-
     @SuppressWarnings("resource")
-    private static Configuration createHadoopConfiguration(final HdfsConnectorNodeSettings settings, final URI uri) {
+    private static Configuration createHadoopConfiguration(final HdfsFSConnectionConfig connectionConfig, final URI uri) {
         final CommonConfigContainer commonConfig = CommonConfigContainer.getInstance();
         final Configuration config;
 
-        if (settings.useKerberos()) {
+        if (connectionConfig.useKerberos()) {
             config = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
         } else {
             config = ConfigurationFactory.createBaseConfigurationWithSimpleAuth();
@@ -167,29 +140,21 @@ public class HdfsFileSystem extends BaseFileSystem<HdfsPath> {
         return config;
     }
 
-    private static FileSystem openHadoopFileSystem(final HdfsConnectorNodeSettings settings, final Configuration config,
+    private static FileSystem openHadoopFileSystem(final HdfsFSConnectionConfig connectionConfig, final Configuration config,
         final URI uri) throws IOException {
 
         final UserGroupInformationCallback<FileSystem> fsCallback =
             ugi -> ugi.doAs((PrivilegedExceptionAction<FileSystem>)() -> FileSystem.get(uri, config)); // NOSONAR cast required
 
         try {
-            if (settings.useKerberos()) {
+            if (connectionConfig.useKerberos()) {
                 return UserGroupUtil.runWithProxyUserUGIIfNecessary(fsCallback);
             } else {
-                return UserGroupUtil.runWithRemoteUserUGI(settings.getUser(), fsCallback);
+                return UserGroupUtil.runWithRemoteUserUGI(connectionConfig.getUsername(), fsCallback);
             }
         } catch (Exception e) {
             throw ExceptionUtil.wrapAsIOException(e);
         }
-    }
-
-    /**
-     * @param host HDFS name node or WebHDFS/HTTPFS endpoint
-     * @return the {@link FSLocationSpec} for a HDFS file system.
-     */
-    public static DefaultFSLocationSpec createFSLocationSpec(final String host) {
-        return new DefaultFSLocationSpec(FSCategory.CONNECTED, HdfsFileSystem.FS_TYPE + ":" + host);
     }
 
     /**

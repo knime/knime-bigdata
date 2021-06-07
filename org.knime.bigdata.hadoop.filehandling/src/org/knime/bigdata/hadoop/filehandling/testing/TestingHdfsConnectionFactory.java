@@ -54,9 +54,8 @@ import java.util.Map;
 
 import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsAuth;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnectionConfig;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSDescriptorProvider;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsProtocol;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
@@ -67,9 +66,13 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  * @author Sascha Wolke, KNIME GmbH
  * @noreference This is testing code and its API is subject to change without notice.
  */
-public class TestingHdfsConnectionFactory {
+public final class TestingHdfsConnectionFactory {
 
     private static final String WORKING_DIR = "/";
+
+    private TestingHdfsConnectionFactory() {
+        // no instance
+    }
 
     /**
      * Creates a {@link FileSystemPortObjectSpec} with the given file system ID and settings from the given map of flow
@@ -83,7 +86,13 @@ public class TestingHdfsConnectionFactory {
         final Map<String, FlowVariable> flowVariables) {
 
         final URI uri = URI.create(TestflowVariable.getString(TestflowVariable.HDFS_URL, flowVariables));
-        return new FileSystemPortObjectSpec(HdfsFileSystem.FS_TYPE, fsId, HdfsFileSystem.createFSLocationSpec(uri.getHost()));
+        final HdfsFSConnectionConfig config = HdfsFSConnectionConfig.builder() //
+                .withEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()) //
+                .withWorkingDirectory(WORKING_DIR) //
+                .build();
+        return new FileSystemPortObjectSpec(HdfsFSDescriptorProvider.FS_TYPE.getTypeId(), //
+            fsId, //
+            config.createFSLocationSpec());
     }
 
     /**
@@ -98,22 +107,21 @@ public class TestingHdfsConnectionFactory {
         final URI uri = URI.create(TestflowVariable.getString(TestflowVariable.HDFS_URL, flowVariables));
         final HdfsProtocol protocol = HdfsProtocol.valueOf(uri.getScheme().toUpperCase());
         final String authMethod = TestflowVariable.getString(TestflowVariable.HDFS_AUTH_METHOD, flowVariables);
-        final HdfsConnectorNodeSettings settings;
+        final HdfsFSConnectionConfig.Builder configBuilder = HdfsFSConnectionConfig.builder() //
+            .withEndpoint(protocol.getHadoopScheme(), uri.getHost(), uri.getPort()) //
+            .withWorkingDirectory(WORKING_DIR); //
 
         if (authMethod.equalsIgnoreCase("kerberos")) {
-            settings = new HdfsConnectorNodeSettings(protocol, uri.getHost(), true, uri.getPort(),
-                HdfsAuth.KERBEROS, null, WORKING_DIR);
+            configBuilder.withKerberosAuthentication();
         } else if (authMethod.equalsIgnoreCase("password")) {
             final String user = TestflowVariable.getString(TestflowVariable.HDFS_USERNAME, flowVariables);
-            settings = new HdfsConnectorNodeSettings(protocol, uri.getHost(), true, uri.getPort(),
-                HdfsAuth.SIMPLE, user, WORKING_DIR);
+            configBuilder.withSimpleAuthentication(user);
         } else if (authMethod.equalsIgnoreCase("none")) {
-            settings = new HdfsConnectorNodeSettings(protocol, uri.getHost(), true, uri.getPort(),
-                HdfsAuth.SIMPLE, null, WORKING_DIR);
+            configBuilder.withSimpleAuthentication(null);
         } else {
             throw new IllegalArgumentException("Unsupported HDFS authentication method: " + authMethod);
         }
 
-        return new HdfsFSConnection(settings);
+        return new HdfsFSConnection(configBuilder.build());
     }
 }

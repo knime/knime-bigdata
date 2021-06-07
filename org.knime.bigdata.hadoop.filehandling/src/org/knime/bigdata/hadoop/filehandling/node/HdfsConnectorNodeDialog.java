@@ -90,7 +90,7 @@ import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionListener {
+class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionListener {
 
     private static final String WORKING_DIR_HISTORY_ID = "hdfs.workingDir";
 
@@ -329,7 +329,7 @@ public class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionLis
 
     private FSConnection createFSConnection() throws IOException {
         HdfsConnectorNodeSettings clonedSettings = new HdfsConnectorNodeSettings(m_settings);
-        return new HdfsFSConnection(clonedSettings);
+        return new HdfsFSConnection(clonedSettings.toFSConnectionConfig());
     }
 
     @Override

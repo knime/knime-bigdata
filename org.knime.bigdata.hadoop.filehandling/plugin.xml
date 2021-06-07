@@ -7,11 +7,11 @@
             category-path="/io/connectors"
             factory-class="org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeFactory" />
    </extension>
+   <extension point="org.knime.filehandling.core.FSDescriptorProvider">
+      <FSDescriptorProvider class="org.knime.bigdata.hadoop.filehandling.fs.HdfsFSDescriptorProvider" />
+   </extension>
    <extension
          point="org.knime.filehandling.FSTestInitializerProvider">
-      <FSTestInitializerProvider
-            ProviderClass="org.knime.bigdata.hadoop.filehandling.testing.HdfsTestInitializerProvider">
-      </FSTestInitializerProvider>
       <FSTestInitializerProvider
             ProviderClass="org.knime.bigdata.hadoop.filesystem.testing.LocalHdfsTestInitializerProvider">
       </FSTestInitializerProvider>

@@ -46,17 +46,17 @@
 package org.knime.bigdata.hadoop.filehandling.testing;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnectionConfig;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSDescriptorProvider;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsAuth;
-import org.knime.bigdata.hadoop.filehandling.node.HdfsConnectorNodeSettings;
 import org.knime.bigdata.hadoop.filehandling.node.HdfsProtocol;
 import org.knime.filehandling.core.connections.FSLocationSpec;
-import org.knime.filehandling.core.connections.base.auth.AuthType;
+import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
@@ -69,56 +69,45 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
     @SuppressWarnings("resource")
     @Override
     public HdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
-        validateConfiguration(configuration);
-
-        final String workingDirPrefix = configuration.get("workingDirPrefix");
-        final String workingDir = generateRandomizedWorkingDir(workingDirPrefix, HdfsFileSystem.PATH_SEPARATOR);
-
-        final HdfsProtocol protocol = HdfsProtocol.valueOf(configuration.get("protocol").toUpperCase());
-        int port = configuration.containsKey("port") ? Integer.parseInt(configuration.get("port")) : protocol.getDefaultPort();
-
-        final AuthType authType;
-        if (configuration.get("auth").equalsIgnoreCase(HdfsAuth.SIMPLE.getSettingsKey())) {
-            authType = HdfsAuth.SIMPLE;
-        } else {
-            authType = HdfsAuth.KERBEROS;
-        }
-
-        final HdfsConnectorNodeSettings settings = new HdfsConnectorNodeSettings( //
-            protocol, //
-            configuration.get("host"), //
-            true, // custom port
-            port, //
-            authType, //
-            configuration.get("user"), //
-            workingDir);
-
-        return new HdfsTestInitializer(new HdfsFSConnection(settings));
+        return new HdfsTestInitializer(new HdfsFSConnection(toFSConnectionConfig(configuration)));
     }
 
-    private static void validateConfiguration(final Map<String, String> configuration) {
-        checkArgumentNotBlank(configuration.get("protocol"), "protocol must be specified (one of HDFS, WEBHDFS, WEBHDFS_SSL, HTTPFS, HTTPFS_SSL)");
+    private HdfsFSConnectionConfig toFSConnectionConfig(final Map<String, String> configuration) {
+        final HdfsFSConnectionConfig.Builder builder = HdfsFSConnectionConfig.builder();
+
+        final String protocol = configuration.get("protocol");
+        checkArgumentNotBlank(protocol, "protocol must be specified (one of HDFS, WEBHDFS, WEBHDFS_SSL, HTTPFS, HTTPFS_SSL)");
+        final HdfsProtocol hdfsProtocol;
         try {
-            HdfsProtocol.valueOf(configuration.get("protocol").toUpperCase());
+            hdfsProtocol = HdfsProtocol.valueOf(protocol.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown protocol: " + configuration.get("protocol"));
         }
 
-        checkArgumentNotBlank(configuration.get("host"), "host must be specified");
-
+        final String host = getParameter(configuration, "host");
+        final int port;
         if (configuration.containsKey("port")) {
             checkArgumentNotBlank(configuration.get("port"), "port is optional, but must not be blank if set");
+            port = Integer.parseInt(configuration.get("port"));
+        } else {
+            port = hdfsProtocol.getDefaultPort();
         }
+        builder.withEndpoint(hdfsProtocol.getHadoopScheme(), host, port);
 
-        checkArgumentNotBlank(configuration.get("workingDirPrefix"), "Working directory prefix must be specified.");
+        final String workingDir = generateRandomizedWorkingDir(getParameter(configuration, "workingDirPrefix"),
+            HdfsFileSystem.PATH_SEPARATOR);
+        builder.withWorkingDirectory(workingDir);
 
-        checkArgumentNotBlank(configuration.get("auth"), "Auth type must be specified.");
-
-        if (configuration.get("auth").equalsIgnoreCase(HdfsAuth.SIMPLE.getSettingsKey())) {
-            checkArgumentNotBlank(configuration.get("user"), "User must be specified.");
-        } else if (!configuration.get("auth").equalsIgnoreCase(HdfsAuth.KERBEROS.getSettingsKey())) {
+        final String auth = getParameter(configuration, "auth");
+        if (auth.equalsIgnoreCase(HdfsAuth.SIMPLE.getSettingsKey())) {
+            builder.withSimpleAuthentication(getParameter(configuration, "user"));
+        } else if (auth.equalsIgnoreCase(HdfsAuth.KERBEROS.getSettingsKey())) {
+            builder.withKerberosAuthentication();
+        } else {
             throw new IllegalArgumentException("Unknown authentication type.");
         }
+
+        return builder.build();
     }
 
     private static void checkArgumentNotBlank(final String arg, final String message) {
@@ -128,14 +117,12 @@ public class HdfsTestInitializerProvider extends DefaultFSTestInitializerProvide
     }
 
     @Override
-    public String getFSType() {
-        return HdfsFileSystem.FS_TYPE;
+    public FSType getFSType() {
+        return HdfsFSDescriptorProvider.FS_TYPE;
     }
 
     @Override
     public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
-        validateConfiguration(configuration);
-        final URI fsURI = URI.create(configuration.get("uri"));
-        return HdfsFileSystem.createFSLocationSpec(fsURI.getHost());
+        return toFSConnectionConfig(configuration).createFSLocationSpec();
     }
 }

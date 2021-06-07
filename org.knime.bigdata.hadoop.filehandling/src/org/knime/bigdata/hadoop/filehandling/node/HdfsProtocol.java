@@ -59,7 +59,7 @@ public enum HdfsProtocol {
     /**
      * @return Hadoop compatible scheme
      */
-    String getHadoopScheme() {
+    public String getHadoopScheme() {
         switch (this) {
             case HDFS:
                 return "hdfs";

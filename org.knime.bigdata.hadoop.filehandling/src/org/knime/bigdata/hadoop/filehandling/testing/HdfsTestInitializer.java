@@ -62,7 +62,7 @@ import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath, HdfsFileSystem> {
+class HdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath, HdfsFileSystem> {
 
     private final FileSystem m_hadoopFileSystem;
 

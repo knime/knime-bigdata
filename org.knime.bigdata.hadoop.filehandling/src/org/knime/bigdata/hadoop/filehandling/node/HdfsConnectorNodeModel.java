@@ -52,7 +52,8 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnectionConfig;
+import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSDescriptorProvider;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -72,7 +73,7 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsConnectorNodeModel extends NodeModel {
+class HdfsConnectorNodeModel extends NodeModel {
 
     private String m_fsId;
 
@@ -91,15 +92,17 @@ public class HdfsConnectorNodeModel extends NodeModel {
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         m_settings.validateValues();
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        return new PortObjectSpec[]{createSpec()};
+        final HdfsFSConnectionConfig config = m_settings.toFSConnectionConfig();
+        return new PortObjectSpec[]{createSpec(config)};
     }
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_connection = new HdfsFSConnection(m_settings);
-        FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
+        final HdfsFSConnectionConfig config = m_settings.toFSConnectionConfig();
+        m_connection = new HdfsFSConnection(config);
         testConnection(m_connection);
-        return new PortObject[]{new FileSystemPortObject(createSpec())};
+        FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
+        return new PortObject[]{new FileSystemPortObject(createSpec(config))};
     }
 
     @SuppressWarnings("resource")
@@ -113,9 +116,9 @@ public class HdfsConnectorNodeModel extends NodeModel {
         }
     }
 
-    private FileSystemPortObjectSpec createSpec() {
-        return new FileSystemPortObjectSpec(m_settings.getProtocol().getText(), m_fsId,
-            HdfsFileSystem.createFSLocationSpec(m_settings.getHost()));
+    private FileSystemPortObjectSpec createSpec(final HdfsFSConnectionConfig config) {
+        return new FileSystemPortObjectSpec(HdfsFSDescriptorProvider.FS_TYPE.getTypeId(), m_fsId,
+            config.createFSLocationSpec());
     }
 
     @Override
