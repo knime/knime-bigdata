@@ -51,6 +51,7 @@ import java.time.Duration;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnectionConfig;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
@@ -67,11 +68,11 @@ import org.knime.filehandling.core.connections.base.auth.UserPasswordAuthProvide
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
- * Settings for {@link KnoxHdfsConnectorNodeModel}.
+ * Settings for KNOX Connector node.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class KnoxHdfsConnectorNodeSettings {
+class KnoxHdfsConnectorNodeSettings {
 
     private static final String DEFAULT_URL = "https://server:8443/gateway/default";
 
@@ -325,5 +326,20 @@ public class KnoxHdfsConnectorNodeSettings {
      */
     SettingsModelIntegerBounded getReceiveTimeoutSettingsModel() {
         return m_receiveTimeout;
+    }
+
+    /**
+     * Convert this settings to a {@link KnoxHdfsFSConnectionConfig} instance.
+     *
+     * @param credentialsProvider provider of credential variables
+     * @return a {@link KnoxHdfsFSConnectionConfig} using this settings
+     */
+    public KnoxHdfsFSConnectionConfig toFSConnectionConfig(final CredentialsProvider credentialsProvider) {
+        return KnoxHdfsFSConnectionConfig.builder() //
+            .withEndpointUrl(getURL()) //
+            .withWorkingDirectory(getWorkingDirectory()) //
+            .withUserAndPassword(getUser(credentialsProvider), getPassword(credentialsProvider)) //
+            .withConnectionTimeout(getConnectionTimeout()) //
+            .withReceiveTimeout(getReceiveTimeout()).build();
     }
 }

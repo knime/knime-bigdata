@@ -51,7 +51,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnection;
-import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnectionConfig;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSDescriptorProvider;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -71,9 +72,7 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class KnoxHdfsConnectorNodeModel extends NodeModel {
-
-    private static final String FILE_SYSTEM_NAME = KnoxHdfsFileSystem.FS_TYPE;
+class KnoxHdfsConnectorNodeModel extends NodeModel {
 
     private String m_fsId;
 
@@ -93,15 +92,17 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
         m_settings.validateValues();
         m_settings.configureInModel(inSpecs, m -> {}, getCredentialsProvider());
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        return new PortObjectSpec[]{createSpec()};
+        final KnoxHdfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+        return new PortObjectSpec[]{createSpec(config)};
     }
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_connection = new KnoxHdfsFSConnection(m_settings, getCredentialsProvider());
-        FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
+        final KnoxHdfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+        m_connection = new KnoxHdfsFSConnection(config);
         testConnection(m_connection);
-        return new PortObject[]{new FileSystemPortObject(createSpec())};
+        FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
+        return new PortObject[]{new FileSystemPortObject(createSpec(config))};
     }
 
     @SuppressWarnings("resource")
@@ -113,9 +114,9 @@ public class KnoxHdfsConnectorNodeModel extends NodeModel {
         }
     }
 
-    private FileSystemPortObjectSpec createSpec() {
-        return new FileSystemPortObjectSpec(FILE_SYSTEM_NAME, m_fsId,
-            KnoxHdfsFileSystem.createFSLocationSpec(m_settings.getHost()));
+    private FileSystemPortObjectSpec createSpec(final KnoxHdfsFSConnectionConfig config) {
+        return new FileSystemPortObjectSpec(KnoxHdfsFSDescriptorProvider.FS_TYPE.getTypeId(), m_fsId,
+            config.createFSLocationSpec());
     }
 
     @Override

@@ -69,7 +69,7 @@ import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public final class ExceptionMapper {
+final class ExceptionMapper {
 
     private ExceptionMapper() {
     }

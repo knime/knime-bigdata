@@ -7,10 +7,7 @@
             category-path="/io/connectors"
             factory-class="org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeFactory" />
    </extension>
-   <extension
-         point="org.knime.filehandling.FSTestInitializerProvider">
-      <FSTestInitializerProvider
-            ProviderClass="org.knime.bigdata.hadoop.filehandling.knox.testing.KnoxHdfsTestInitializerProvider">
-      </FSTestInitializerProvider>
+   <extension point="org.knime.filehandling.core.FSDescriptorProvider">
+      <FSDescriptorProvider class="org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSDescriptorProvider" />
    </extension>
 </plugin>

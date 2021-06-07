@@ -68,7 +68,7 @@ import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPath, KnoxHdfsFileSystem> {
+class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPath, KnoxHdfsFileSystem> {
 
     private final WebHDFSAPI m_client;
     private final ExecutorService m_uploadExecutor;

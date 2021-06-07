@@ -48,13 +48,16 @@ package org.knime.bigdata.hadoop.filehandling.knox.testing;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnection;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSConnectionConfig;
+import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFSDescriptorProvider;
 import org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystem;
-import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSettings;
 import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
@@ -64,40 +67,24 @@ import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
  */
 public class KnoxHdfsTestInitializerProvider extends DefaultFSTestInitializerProvider {
 
-    private static final int DEFAULT_TIMEOUT = 10;
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
     @SuppressWarnings("resource")
     @Override
     public KnoxHdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
-        validateConfiguration(configuration);
-
-        final String workingDirPrefix = configuration.get("workingDirPrefix");
-        final String workingDir = generateRandomizedWorkingDir(workingDirPrefix, KnoxHdfsFileSystem.PATH_SEPARATOR);
-
-        final KnoxHdfsConnectorNodeSettings settings = new KnoxHdfsConnectorNodeSettings( //
-            configuration.get("url"), //
-            configuration.get("user"), //
-            configuration.get("pass"), //
-            workingDir, //
-            getTimeout(configuration),
-            getTimeout(configuration));
-
-        return new KnoxHdfsTestInitializer(new KnoxHdfsFSConnection(settings, null));
+        return new KnoxHdfsTestInitializer(new KnoxHdfsFSConnection(toFSConnectionConfig(configuration)));
     }
 
-    private static void validateConfiguration(final Map<String, String> configuration) {
+    private KnoxHdfsFSConnectionConfig toFSConnectionConfig(final Map<String, String> configuration) {
         checkArgumentNotBlank(configuration.get("url"), "url must be specified.");
         try {
-            final URI fsURI = new URI(configuration.get("url"));
+            final URI fsURI = new URI(getParameter(configuration, "url"));
+            checkArgumentNotBlank(fsURI.getScheme(), "Invalid or missing scheme in URI.");
             checkArgumentNotBlank(fsURI.getHost(), "Invalid or missing host in URI.");
             checkArgumentNotBlank(fsURI.getPath(), "Invalid or missing path in URI.");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid KNOX endpoint URI.", e);
         }
-
-        checkArgumentNotBlank(configuration.get("workingDirPrefix"), "Working directory prefix must be specified.");
-        checkArgumentNotBlank(configuration.get("user"), "User must be specified.");
-        checkArgumentNotBlank(configuration.get("pass"), "Pass must be specified.");
 
         try {
             if (configuration.containsKey("timeout") && Integer.parseInt(configuration.get("timeout")) < 0) {
@@ -106,11 +93,20 @@ public class KnoxHdfsTestInitializerProvider extends DefaultFSTestInitializerPro
         } catch (final NumberFormatException e) {
             throw new IllegalArgumentException("Invalid timeout format.", e);
         }
+
+        final String workingDir = generateRandomizedWorkingDir(getParameter(configuration, "workingDirPrefix"),
+            KnoxHdfsFileSystem.PATH_SEPARATOR);
+        return KnoxHdfsFSConnectionConfig.builder() //
+            .withEndpointUrl(configuration.get("url")) //
+            .withWorkingDirectory(workingDir) //
+            .withUserAndPassword(getParameter(configuration, "user"), getParameter(configuration, "pass")) //
+            .withConnectionTimeout(getTimeout(configuration)).withReceiveTimeout(getTimeout(configuration)) //
+            .build();
     }
 
-    private static int getTimeout(final Map<String, String> configuration) {
+    private static Duration getTimeout(final Map<String, String> configuration) {
         if (configuration.containsKey("timeout")) {
-            return Integer.parseInt(configuration.get("timeout"));
+            return Duration.ofSeconds(Integer.parseInt(configuration.get("timeout")));
         } else {
             return DEFAULT_TIMEOUT;
         }
@@ -123,14 +119,12 @@ public class KnoxHdfsTestInitializerProvider extends DefaultFSTestInitializerPro
     }
 
     @Override
-    public String getFSType() {
-        return KnoxHdfsFileSystem.FS_TYPE;
+    public FSType getFSType() {
+        return KnoxHdfsFSDescriptorProvider.FS_TYPE;
     }
 
     @Override
     public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
-        validateConfiguration(configuration);
-        final URI fsURI = URI.create(configuration.get("url"));
-        return KnoxHdfsFileSystem.createFSLocationSpec(fsURI.getHost());
+        return toFSConnectionConfig(configuration).createFSLocationSpec();
     }
 }

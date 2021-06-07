@@ -86,7 +86,7 @@ import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, KnoxHdfsFileSystem> {
+class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, KnoxHdfsFileSystem> {
 
     @SuppressWarnings("resource")
     private WebHDFSAPI getClient() {
@@ -157,7 +157,8 @@ public class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsP
      *
      * @return {@code true} if the given path contains at least one child file or directory, {@code false} otherwise
      */
-    private boolean isNonEmptyDir(final KnoxHdfsPath path) throws IOException {
+    @Override
+    protected boolean isNonEmptyDirectory(final KnoxHdfsPath path) throws IOException {
         try  {
             // The summary includes the target in the file count, if it is a file
             // or the directory in the directory count if it is a directory.

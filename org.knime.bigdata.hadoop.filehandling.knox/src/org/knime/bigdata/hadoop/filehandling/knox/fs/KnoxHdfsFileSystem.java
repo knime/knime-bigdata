@@ -47,8 +47,6 @@ package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -59,12 +57,7 @@ import java.util.regex.Pattern;
 
 import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
-import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSettings;
-import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
-import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.base.BaseFileSystem;
 
 /**
@@ -73,11 +66,6 @@ import org.knime.filehandling.core.connections.base.BaseFileSystem;
  * @author Sascha Wolke, KNIME GmbH
  */
 public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
-
-    /**
-     * URI scheme of this {@link FSFileSystem}.
-     */
-    public static final String FS_TYPE = "hdfs-knox";
 
     /**
      * Character to use as path separator
@@ -92,25 +80,20 @@ public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
      * Default constructor.
      *
      * @param cacheTTL The time to live for cached elements in milliseconds.
-     * @param settings Connection settings.
-     * @param cp credentials provider to use, might be {@code null} if not required
-     * @throws IOException
+     * @param config Connection configuration.
      */
-    public KnoxHdfsFileSystem(final long cacheTTL, final KnoxHdfsConnectorNodeSettings settings,
-        final CredentialsProvider cp) throws IOException {
-
+    public KnoxHdfsFileSystem(final long cacheTTL, final KnoxHdfsFSConnectionConfig config) {
         super(new KnoxHdfsFileSystemProvider(), //
-            createURI(settings), //
             cacheTTL, //
-            settings.getWorkingDirectory(), //
-            createFSLocationSpec(settings.getHost()));
+            config.getWorkingDirectory(), //
+            config.createFSLocationSpec());
 
         m_client = KnoxHDFSClient.createClientBasicAuth( //
-            getRESTEndpointURL(settings.getURL()), //
-            settings.getUser(cp), //
-            settings.getPassword(cp), //
-            settings.getReceiveTimeout(), //
-            settings.getConnectionTimeout()); //
+            getRESTEndpointURL(config.getEndpointUrl()), //
+            config.getUsername(), //
+            config.getPassword(), //
+            config.getReceiveTimeout(), //
+            config.getConnectionTimeout()); //
         m_uploadExecutor = new ThreadPoolExecutor(0, 10, //
             10L, TimeUnit.SECONDS, //
             new SynchronousQueue<Runnable>());
@@ -127,28 +110,6 @@ public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
         }
 
         return toReturn;
-    }
-
-    /**
-     * @param settings settings.
-     * @return URI from settings.
-     * @throws URISyntaxException
-     */
-    private static URI createURI(final KnoxHdfsConnectorNodeSettings settings) throws IOException {
-        try {
-            final URI endpoint = URI.create(settings.getURL());
-            return new URI(FS_TYPE, null, endpoint.getHost(), endpoint.getPort(), endpoint.getPath(), null, null);
-        } catch (final URISyntaxException e) {
-            throw new IOException("Failed to create file system URI: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * @param hostname of the KNOX gateway
-     * @return the {@link FSLocationSpec} for a KNOX file system.
-     */
-    public static DefaultFSLocationSpec createFSLocationSpec(final String hostname) {
-        return new DefaultFSLocationSpec(FSCategory.CONNECTED, KnoxHdfsFileSystem.FS_TYPE + ":" + hostname);
     }
 
     WebHDFSAPI getClient() {

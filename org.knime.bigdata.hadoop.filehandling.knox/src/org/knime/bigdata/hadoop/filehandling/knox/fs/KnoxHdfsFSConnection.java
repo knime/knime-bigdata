@@ -45,19 +45,9 @@
  */
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
-import org.knime.bigdata.hadoop.filehandling.knox.node.KnoxHdfsConnectorNodeSettings;
 import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.uriexport.URIExporterFactory;
-import org.knime.filehandling.core.connections.uriexport.URIExporterFactoryMapBuilder;
-import org.knime.filehandling.core.connections.uriexport.URIExporterID;
-import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
-import org.knime.filehandling.core.connections.uriexport.path.PathURIExporterFactory;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -67,12 +57,6 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  */
 public class KnoxHdfsFSConnection implements FSConnection {
 
-    private static final Map<URIExporterID, URIExporterFactory> URI_EXPORTER_FACTORIES =
-        new URIExporterFactoryMapBuilder() //
-            .add(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
-            .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
-            .build();
-
     private static final long CACHE_TTL_MILLIS = 6000;
 
     private final KnoxHdfsFileSystem m_filesystem;
@@ -80,12 +64,10 @@ public class KnoxHdfsFSConnection implements FSConnection {
     /**
      * Default constructor.
      *
-     * @param settings Connection settings.
-     * @param cp credentials provider to use, might be {@code null} if not required
-     * @throws IOException
+     * @param config Connection configuration to use.
      */
-    public KnoxHdfsFSConnection(final KnoxHdfsConnectorNodeSettings settings, final CredentialsProvider cp) throws IOException {
-        m_filesystem = new KnoxHdfsFileSystem(CACHE_TTL_MILLIS, settings, cp);
+    public KnoxHdfsFSConnection(final KnoxHdfsFSConnectionConfig config) {
+        m_filesystem = new KnoxHdfsFileSystem(CACHE_TTL_MILLIS, config);
     }
 
     @Override
@@ -105,8 +87,4 @@ public class KnoxHdfsFSConnection implements FSConnection {
         return m_filesystem.getClient();
     }
 
-    @Override
-    public Map<URIExporterID, URIExporterFactory> getURIExporterFactories() {
-        return URI_EXPORTER_FACTORIES;
-    }
 }

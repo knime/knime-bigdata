@@ -42,59 +42,45 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2021-06-03 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
-import static org.knime.bigdata.hadoop.filehandling.knox.fs.KnoxHdfsFileSystemProvider.toBaseFileAttributes;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.DirectoryStream.Filter;
-import java.nio.file.Path;
-import java.util.ArrayList;
-
-import org.knime.bigdata.filehandling.knox.rest.FileStatus;
-import org.knime.filehandling.core.connections.base.BasePathIterator;
-import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
+import org.knime.bigdata.hadoop.filehandling.knox.testing.KnoxHdfsTestInitializerProvider;
+import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.connections.meta.FSTypeRegistry;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptor;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptorProvider;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.base.PathURIExporterFactory;
 
 /**
- * Iterator that iterates over a given array of {@link FileStatus} objects and converts them to {@link KnoxHdfsPath}s.
+ * WebHDFS via KNOX file system descriptor.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class KnoxHdfsPathIterator extends BasePathIterator<KnoxHdfsPath> {
+public class KnoxHdfsFSDescriptorProvider extends BaseFSDescriptorProvider {
+
+    /**
+     * The file system type of the Hadoop file system.
+     */
+    public static final FSType FS_TYPE = FSTypeRegistry.getOrCreateFSType("hdfs-knox", "WebHDFS via KNOX");
 
     /**
      * Default constructor.
-     *
-     * @param path the path to list
-     * @param stats file and folder stats
-     * @param filter the filter
-     * @throws IOException
-     * @throws FileNotFoundException
      */
-    @SuppressWarnings("resource")
-    public KnoxHdfsPathIterator(final KnoxHdfsPath path, final FileStatus[] stats,
-        final Filter<? super Path> filter) throws IOException {
-
-        super(path, filter);
-
-        final KnoxHdfsFileSystem fileSystem = path.getFileSystem();
-        final ArrayList<KnoxHdfsPath> result = new ArrayList<>(stats.length);
-
-        for (final FileStatus stat : stats) {
-            final KnoxHdfsPath current = (KnoxHdfsPath)path.resolve(stat.pathSuffix);
-            final BaseFileAttributes attributes = toBaseFileAttributes(current, stat);
-
-            // the newOutputStream... methods do not play well with symbolic links,
-            // avoid caching of them
-            if (!attributes.isSymbolicLink()) {
-                fileSystem.addToAttributeCache(current, attributes);
-            }
-
-            result.add(current);
-        }
-
-        setFirstPage(result.iterator()); // NOSONAR
+    public KnoxHdfsFSDescriptorProvider() {
+        super(KnoxHdfsFSDescriptorProvider.FS_TYPE, //
+            new BaseFSDescriptor.Builder() //
+                .withSeparator(KnoxHdfsFileSystem.PATH_SEPARATOR) //
+                .withConnectionFactory(KnoxHdfsFSConnection::new) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
+                .withCanGetPosixAttributes(true) //
+                .withTestInitializerProvider(new KnoxHdfsTestInitializerProvider()) //
+                .build());
     }
+
 }
