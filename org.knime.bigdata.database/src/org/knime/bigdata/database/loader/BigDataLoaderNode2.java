@@ -183,7 +183,7 @@ public class BigDataLoaderNode2
             }
             try (FSConnection connection = targetFolderModel.getConnection()) {
                 final NoConfigURIExporterFactory uriExporterFactory =
-                    (NoConfigURIExporterFactory) connection.getURIExporterFactories().get(URIExporterIDs.DEFAULT_HADOOP);
+                    (NoConfigURIExporterFactory) connection.getURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP);
                 final URIExporter uriExporter = uriExporterFactory.getExporter();
                 final String targetFileString = URIUtil.toUnencodedString(uriExporter.toUri(targetFile));
                 exec.setProgress("Loading data file into DB table...");

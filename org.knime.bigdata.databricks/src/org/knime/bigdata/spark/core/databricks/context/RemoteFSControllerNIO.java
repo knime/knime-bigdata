@@ -191,7 +191,7 @@ public class RemoteFSControllerNIO implements RemoteFSController {
 
     private URI convertPathToURI(final FSPath fsPath) throws URISyntaxException {
         final NoConfigURIExporterFactory uriExporterFactory =
-            (NoConfigURIExporterFactory)m_fsConnection.getURIExporterFactories().get(URIExporterIDs.DEFAULT_HADOOP);
+            (NoConfigURIExporterFactory)m_fsConnection.getURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP);
         final URIExporter uriExporter = uriExporterFactory.getExporter();
         final URI uri = uriExporter.toUri(fsPath);
         return uri;

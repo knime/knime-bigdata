@@ -160,7 +160,7 @@ public class GenericDataSource2SparkNodeModel3<T extends GenericDataSource2Spark
     private static URI convertPathToURI(final FSConnection fsConnection, final FSPath fsPath)
         throws URISyntaxException {
         final NoConfigURIExporterFactory uriExporterFactory =
-                (NoConfigURIExporterFactory)fsConnection.getURIExporterFactories().get(URIExporterIDs.DEFAULT_HADOOP);
+                (NoConfigURIExporterFactory)fsConnection.getURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP);
             final URIExporter uriExporter = uriExporterFactory.getExporter();
             final URI uri = uriExporter.toUri(fsPath);
         return uri;

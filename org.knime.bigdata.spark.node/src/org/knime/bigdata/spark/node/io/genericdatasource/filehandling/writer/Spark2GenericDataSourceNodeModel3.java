@@ -251,7 +251,7 @@ public class Spark2GenericDataSourceNodeModel3<T extends Spark2GenericDataSource
     private static URI convertPathToURI(final FSConnection fsConnection, final FSPath fsPath)
         throws URISyntaxException {
         final NoConfigURIExporterFactory uriExporterFactory =
-                (NoConfigURIExporterFactory)fsConnection.getURIExporterFactories().get(URIExporterIDs.DEFAULT_HADOOP);
+                (NoConfigURIExporterFactory)fsConnection.getURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP);
             final URIExporter uriExporter = uriExporterFactory.getExporter();
             final URI uri = uriExporter.toUri(fsPath);
         return uri;
