@@ -44,61 +44,42 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 23, 2019 (Sascha Wolke, KNIME GmbH): created
+ *   2021-06-03 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.dbfs.filehandling.testing;
+package org.knime.bigdata.dbfs.filehandling.fs;
 
-import java.io.IOException;
-import java.util.Map;
-
-import org.knime.bigdata.dbfs.filehandler.DBFSConnection;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
-import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.workflow.FlowVariable;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
+import org.knime.bigdata.dbfs.filehandling.testing.DbfsFSTestInitializerProvider;
+import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.connections.meta.FSTypeRegistry;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptor;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptorProvider;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.base.PathURIExporterFactory;
 
 /**
- * Provides factory methods to create {@link DbfsFSConnection} instances for testing purposes.
+ * Databricks file system descriptor.
  *
  * @author Sascha Wolke, KNIME GmbH
- * @noreference This is testing code and its API is subject to change without notice.
  */
-public final class TestingDbfsFSConnectionFactory {
-
-    private TestingDbfsFSConnectionFactory() {
-    }
+public class DbfsFSDescriptorProvider extends BaseFSDescriptorProvider {
 
     /**
-     * Creates a {@link FileSystemPortObjectSpec} from the given map of flow variables.
-     *
-     * @param fsId file system connection identifier
-     * @param flowVariables A map of flow variables that provide the Spark context settings.
-     * @return a {@link FileSystemPortObjectSpec} of the {@link DBFSConnection}
-     * @throws InvalidSettingsException on invalid or missing flow variables
+     * The file system type of the Databricks file system.
      */
-    public static FileSystemPortObjectSpec createFileSystemPortSpec(final String fsId,
-        final Map<String, FlowVariable> flowVariables) throws InvalidSettingsException {
-
-        return DatabricksSparkContextCreatorNodeSettings2 //
-            .fromFlowVariables(flowVariables) //
-            .createFileSystemSpec(fsId, null);
-    }
+    public static final FSType FS_TYPE = FSTypeRegistry.getOrCreateFSType("dbfs", "Databricks File System (DBFS)");
 
     /**
-     * Creates a {@link DbfsFSConnection} from the given map of flow variables.
-     *
-     * @param flowVariables A map of flow variables that provide the Spark context settings.
-     * @return a {@link DbfsFSConnection} instance
-     * @throws InvalidSettingsException on invalid or missing flow variables
-     * @throws IOException on connection initialization failures
+     * Default constructor.
      */
-    public static FSConnection createFSConnection(final Map<String, FlowVariable> flowVariables)
-        throws InvalidSettingsException, IOException {
-
-        return DatabricksSparkContextCreatorNodeSettings2 //
-            .fromFlowVariables(flowVariables) //
-            .createDatabricksFSConnection(null);
+    public DbfsFSDescriptorProvider() {
+        super(DbfsFSDescriptorProvider.FS_TYPE, //
+            new BaseFSDescriptor.Builder() //
+                .withSeparator(DbfsFileSystem.PATH_SEPARATOR) //
+                .withConnectionFactory(DbfsFSConnection::new) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
+                .withTestInitializerProvider(new DbfsFSTestInitializerProvider()) //
+                .build());
     }
+
 }

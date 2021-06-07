@@ -183,10 +183,7 @@
    <extension point="org.knime.database.nodes.LoaderNode2">
       <LoaderNode2 dbTypes="databricks" class="org.knime.bigdata.database.loader.BigDataLoaderNode2"/>
    </extension>
-   <extension
-         point="org.knime.filehandling.FSTestInitializerProvider">
-         <FSTestInitializerProvider
-               ProviderClass="org.knime.bigdata.dbfs.filehandling.testing.DbfsFSTestInitializerProvider">
-         </FSTestInitializerProvider>         
+   <extension point="org.knime.filehandling.core.FSDescriptorProvider">
+      <FSDescriptorProvider class="org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider" />
    </extension>
 </plugin>

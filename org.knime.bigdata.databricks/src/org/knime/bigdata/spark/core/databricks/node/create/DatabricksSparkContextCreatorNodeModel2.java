@@ -104,7 +104,7 @@ public class DatabricksSparkContextCreatorNodeModel2
         m_settings.validate(m_variableContext);
 
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        final FileSystemPortObjectSpec fsPortSpec = m_settings.createFileSystemSpec(m_fsId);
+        final FileSystemPortObjectSpec fsPortSpec = m_settings.createFileSystemSpec(m_fsId, getCredentialsProvider());
         configureSparkContext(m_sparkContextId, m_fsId, m_settings, getCredentialsProvider());
 
         final PortObjectSpec sparkPortSpec;
@@ -123,7 +123,8 @@ public class DatabricksSparkContextCreatorNodeModel2
         m_fsConnection = m_settings.createDatabricksFSConnection(getCredentialsProvider());
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
         testFileSystemConnection(m_fsConnection);
-        final FileSystemPortObject fsPortObject = new FileSystemPortObject(m_settings.createFileSystemSpec(m_fsId));
+        final FileSystemPortObject fsPortObject =
+            new FileSystemPortObject(m_settings.createFileSystemSpec(m_fsId, getCredentialsProvider()));
 
         // configure context
         exec.setProgress(0.2, "Configuring Databricks Spark context");

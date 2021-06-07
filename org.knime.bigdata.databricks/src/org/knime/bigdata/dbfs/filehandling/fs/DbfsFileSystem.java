@@ -50,21 +50,12 @@ package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.Collections;
 
-import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
-import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
-import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.core.node.workflow.ICredentials;
-import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
-import org.knime.filehandling.core.connections.FSCategory;
-import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.base.BaseFileSystem;
 
 
@@ -83,70 +74,28 @@ public class DbfsFileSystem extends BaseFileSystem<DbfsPath> {
     private final DBFSAPI m_client;
 
     /**
-     * @param uri the URI for the file system
      * @param cacheTTL The time to live for cached elements in milliseconds.
-     * @param settings The settings.
-     * @param credentialsProvider The {@link CredentialsProvider}.
+     * @param config The file system configuration.
      * @throws IOException
      */
-    protected DbfsFileSystem(final URI uri, final long cacheTTL, final DbfsConnectorNodeSettings settings,
-        final CredentialsProvider credentialsProvider)
-            throws IOException {
-        super(new DbfsFileSystemProvider(), uri, cacheTTL, settings.getWorkingDirectory(),
-            createFSLocationSpec(uri.getHost()));
+    protected DbfsFileSystem(final long cacheTTL, final DbfsFSConnectionConfig config) throws IOException {
+        super(new DbfsFileSystemProvider(), //
+            cacheTTL, //
+            config.getWorkingDirectory(), //
+            config.createFSLocationSpec());
 
-        m_client = createClient(settings, credentialsProvider);
+        m_client = createClient(config);
     }
 
-    /**
-     * @param deployment Databricks deployment host
-     * @return the {@link FSLocationSpec} for a Databricks file system.
-     */
-    public static DefaultFSLocationSpec createFSLocationSpec(final String deployment) {
-        return new DefaultFSLocationSpec(FSCategory.CONNECTED,
-            String.format("%s:%s", DbfsFileSystemProvider.FS_TYPE, deployment));
-    }
-
-    private static DBFSAPI createClient(final DbfsConnectorNodeSettings settings,
-        final CredentialsProvider credentialsProvider) throws UnsupportedEncodingException {
-
-        final DbfsAuthenticationNodeSettings authSettings = settings.getAuthenticationSettings();
-
-        if (authSettings.getAuthType() == AuthType.TOKEN) {
-
-            final String token = authSettings.useTokenCredentials() //
-                ? getCredentials(authSettings.getTokenCredentialsName(), credentialsProvider).getPassword()
-                : authSettings.getTokenModel().getStringValue();
-
-            return DatabricksRESTClient.create(settings.getDeploymentUrl(), DBFSAPI.class, token,
-                settings.getReadTimeout(), settings.getConnectionTimeout());
+    private static DBFSAPI createClient(final DbfsFSConnectionConfig config) throws UnsupportedEncodingException {
+        if (config.useToken()) {
+            return DatabricksRESTClient.create(config.getDeploymentUrl(), DBFSAPI.class, config.getToken(),
+                config.getReadTimeout(), config.getConnectionTimeout());
         } else {
-            String username;
-            String password;
-
-            if (authSettings.useUserPassCredentials()) {
-                final ICredentials creds =
-                    getCredentials(authSettings.getUserPassCredentialsName(), credentialsProvider);
-                username = creds.getLogin();
-                password = creds.getPassword();
-            } else {
-                username = authSettings.getUserModel().getStringValue();
-                password = authSettings.getPasswordModel().getStringValue();
-            }
-
-            return DatabricksRESTClient.create(settings.getDeploymentUrl(), DBFSAPI.class, username, password,
-                settings.getReadTimeout(), settings.getConnectionTimeout());
+            return DatabricksRESTClient.create(config.getDeploymentUrl(), DBFSAPI.class, config.getUsername(),
+                config.getPassword(), config.getReadTimeout(), config.getConnectionTimeout());
         }
     }
-
-    private static ICredentials getCredentials(final String name, final CredentialsProvider credProvider) {
-        if (credProvider == null) {
-            throw new IllegalStateException("Credential provider is not available");
-        }
-        return credProvider.get(name);
-    }
-
-
 
     /**
      * @return the client

@@ -74,11 +74,11 @@ import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 
 /**
- * Node dialog for the {@link DbfsConnectorNodeModel} node.
+ * Node dialog for the DBFS Connector node.
  *
  * @author Alexander Bondaletov
  */
-public class DbfsConnectorNodeDialog extends NodeDialogPane {
+class DbfsConnectorNodeDialog extends NodeDialogPane {
 
     private final DbfsConnectorNodeSettings m_settings;
     private final WorkingDirectoryChooser m_workingDirChooser;
@@ -197,7 +197,7 @@ public class DbfsConnectorNodeDialog extends NodeDialogPane {
     }
 
     private FSConnection createFSConnection() throws IOException {
-        return new DbfsFSConnection(m_settings, getCredentialsProvider());
+        return new DbfsFSConnection(m_settings.toFSConnectionConfig(getCredentialsProvider()));
     }
 
     @Override

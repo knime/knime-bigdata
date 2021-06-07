@@ -62,7 +62,7 @@ import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
  *
  * @author Alexander Bondaletov
  */
-public class DbfsSeekableByteChannel extends TempFileSeekableByteChannel<DbfsPath> {
+class DbfsSeekableByteChannel extends TempFileSeekableByteChannel<DbfsPath> {
 
     /**
      * Creates new instance.

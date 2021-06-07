@@ -46,7 +46,6 @@
 package org.knime.bigdata.spark.core.databricks.node.create;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,8 +54,8 @@ import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider;
 import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
@@ -218,14 +217,17 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
      * Create a Databricks file system connection spec from this settings.
      *
      * @param fsId file system connection identifier
+     * @param credentialsProvider Provider for the credentials
      * @return databricks file system port object spec
+     * @throws InvalidSettingsException
      */
-    public FileSystemPortObjectSpec createFileSystemSpec(final String fsId) {
-        final URI uri = URI.create(getDatabricksInstanceURL());
+    public FileSystemPortObjectSpec createFileSystemSpec(final String fsId,
+        final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
+
         return new FileSystemPortObjectSpec( //
-            DbfsFileSystemProvider.FS_NAME, //
+            DbfsFSDescriptorProvider.FS_TYPE.getTypeId(), //
             fsId, //
-            DbfsFileSystem.createFSLocationSpec(uri.getHost()));
+            createDbfsFSConnectionConfig(credentialsProvider).createFSLocationSpec());
     }
 
     /**
@@ -240,6 +242,12 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
     public FSConnection createDatabricksFSConnection(final CredentialsProvider credentialsProvider)
         throws IOException, InvalidSettingsException {
 
+        return new DbfsFSConnection(createDbfsFSConnectionConfig(credentialsProvider));
+    }
+
+    private DbfsFSConnectionConfig createDbfsFSConnectionConfig(final CredentialsProvider credentialsProvider)
+        throws InvalidSettingsException {
+
         final DbfsConnectorNodeSettings settings = new DbfsConnectorNodeSettings();
         settings.getUrlModel().setStringValue(getDatabricksInstanceURL());
         settings.getWorkingDirectoryModel().setStringValue(getWorkingDirectory());
@@ -250,7 +258,7 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
         m_authSettings.saveSettingsForModel(tempSettings);
         settings.getAuthenticationSettings().loadSettingsForModel(tempSettings);
 
-        return new DbfsFSConnection(settings, credentialsProvider);
+        return settings.toFSConnectionConfig(credentialsProvider);
     }
 
     /**

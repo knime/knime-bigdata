@@ -51,7 +51,6 @@ package org.knime.bigdata.databricks.node;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
@@ -66,7 +65,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
- * Authentication settings for {@link DbfsConnectorNodeModel}.
+ * Authentication settings for DBFS Connector node.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */

@@ -49,15 +49,15 @@
 package org.knime.bigdata.dbfs.filehandling.testing;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 
-import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
-import org.knime.core.node.util.CheckUtils;
 import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 
 /**
@@ -72,39 +72,35 @@ public class DbfsFSTestInitializerProvider extends DefaultFSTestInitializerProvi
 
     private static final String KEY_WORKDIR_PREFIX = "workingDirPrefix";
 
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
+
     @SuppressWarnings("resource")
     @Override
     public DbfsFSTestInitializer setup(final Map<String, String> configuration) throws IOException {
-        validateConfiguration(configuration);
-
-        final String workDir =
-            generateRandomizedWorkingDir(getParameter(configuration, KEY_WORKDIR_PREFIX), DbfsFileSystem.PATH_SEPARATOR);
-
-        final DbfsConnectorNodeSettings settings = new DbfsConnectorNodeSettings();
-        settings.getUrlModel().setStringValue(getParameter(configuration, KEY_URL));
-        settings.getAuthenticationSettings().setAuthType(AuthType.TOKEN);
-        settings.getAuthenticationSettings().getTokenModel().setStringValue(getParameter(configuration, KEY_TOKEN));
-        settings.getWorkingDirectoryModel().setStringValue(workDir);
-
-        final DbfsFSConnection fsConnection = new DbfsFSConnection(settings, null);
-        return new DbfsFSTestInitializer(fsConnection);
+        return new DbfsFSTestInitializer(new DbfsFSConnection(toFSConnectionConfig(configuration)));
     }
 
-    private static void validateConfiguration(final Map<String, String> configuration) {
-        CheckUtils.checkArgumentNotNull(configuration.get(KEY_URL), "url must be specified.");
-        CheckUtils.checkArgumentNotNull(configuration.get(KEY_TOKEN), "token must be specified.");
-        CheckUtils.checkArgumentNotNull(configuration.get(KEY_WORKDIR_PREFIX), "workingDirPrefix must be specified.");
+    private DbfsFSConnectionConfig toFSConnectionConfig(final Map<String, String> configuration) {
+        final String workDir = generateRandomizedWorkingDir(getParameter(configuration, KEY_WORKDIR_PREFIX),
+            DbfsFileSystem.PATH_SEPARATOR);
+
+        return DbfsFSConnectionConfig.builder() //
+            .withDeploymentUrl(getParameter(configuration, KEY_URL)) //
+            .withWorkingDirectory(workDir) //
+            .withToken(getParameter(configuration, KEY_TOKEN)) //
+            .withConnectionTimeout(DEFAULT_TIMEOUT) //
+            .withReadTimeout(DEFAULT_TIMEOUT) //
+            .build();
     }
 
     @Override
-    public String getFSType() {
-        return DbfsFileSystemProvider.FS_TYPE;
+    public FSType getFSType() {
+        return DbfsFSDescriptorProvider.FS_TYPE;
     }
 
     @Override
     public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
-        validateConfiguration(configuration);
-        return DbfsFileSystem.createFSLocationSpec(getParameter(configuration, KEY_URL));
+        return toFSConnectionConfig(configuration).createFSLocationSpec();
     }
 
 }

@@ -53,7 +53,7 @@ import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * Factory class for the {@link DbfsConnectorNodeModel} node.
+ * Factory class for the DBFS Connector node.
  *
  * @author Alexander Bondaletov
  */

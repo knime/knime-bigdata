@@ -85,16 +85,7 @@ import org.knime.filehandling.core.connections.base.attributes.BaseFileAttribute
  *
  * @author Alexander Bondaletov
  */
-public class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSystem> {
-    /**
-     * Databricks DBFS URI scheme.
-     */
-    public static final String FS_TYPE = "dbfs";
-
-    /**
-     * Human readable name of this file system.
-     */
-    public static final String FS_NAME = "Databricks File System (DBFS)";
+class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSystem> {
 
     @Override
     protected SeekableByteChannel newByteChannelInternal(final DbfsPath path, final Set<? extends OpenOption> options,

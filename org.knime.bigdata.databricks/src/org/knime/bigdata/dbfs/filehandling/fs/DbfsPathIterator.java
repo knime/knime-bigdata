@@ -63,7 +63,7 @@ import org.knime.filehandling.core.connections.base.BasePathIterator;
  *
  * @author Alexander Bondaletov
  */
-public class DbfsPathIterator extends BasePathIterator<DbfsPath> {
+class DbfsPathIterator extends BasePathIterator<DbfsPath> {
 
     /**
      * Creates iterator instance.

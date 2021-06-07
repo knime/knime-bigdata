@@ -57,6 +57,7 @@ import java.time.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
@@ -64,9 +65,11 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.workflow.ICredentials;
 
 /**
- * Settings for the {@link DbfsConnectorNodeModel} node.
+ * Settings for the DBFS Connector node.
  *
  * @author Alexander Bondaletov
  */
@@ -306,4 +309,45 @@ public class DbfsConnectorNodeSettings {
         }
         return toReturn;
     }
+
+    /**
+     * Convert this settings to a {@link DbfsFSConnectionConfig} instance.
+     *
+     * @param credentialsProvider provider of credential variables
+     * @return a {@link DbfsFSConnectionConfig} using this settings
+     */
+    public DbfsFSConnectionConfig toFSConnectionConfig(final CredentialsProvider credentialsProvider) {
+        final DbfsFSConnectionConfig.Builder builder = DbfsFSConnectionConfig.builder() //
+            .withDeploymentUrl(getDeploymentUrl()) //
+            .withWorkingDirectory(getWorkingDirectory()) //
+            .withConnectionTimeout(getConnectionTimeout()) //
+            .withReadTimeout(getReadTimeout());
+
+        if (m_authSettings.getAuthType() == AuthType.TOKEN) {
+            final String token = m_authSettings.useTokenCredentials() //
+                ? getCredentials(m_authSettings.getTokenCredentialsName(), credentialsProvider).getPassword()
+                : m_authSettings.getTokenModel().getStringValue();
+            builder.withToken(token);
+        } else {
+            if (m_authSettings.useUserPassCredentials()) {
+                final ICredentials creds =
+                    getCredentials(m_authSettings.getUserPassCredentialsName(), credentialsProvider);
+                builder.withUserAndPassword(creds.getLogin(), creds.getPassword());
+            } else {
+                builder.withUserAndPassword(m_authSettings.getUserModel().getStringValue(),
+                    m_authSettings.getPasswordModel().getStringValue());
+            }
+        }
+
+        return builder.build();
+    }
+
+    private static ICredentials getCredentials(final String name, final CredentialsProvider credProvider) {
+        if (credProvider == null) {
+            throw new IllegalStateException("Credential provider is not available");
+        }
+
+        return credProvider.get(name);
+    }
+
 }

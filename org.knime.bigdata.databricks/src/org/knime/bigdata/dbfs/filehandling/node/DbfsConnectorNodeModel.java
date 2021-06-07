@@ -48,12 +48,12 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
-import static org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider.FS_NAME;
-
 import java.io.File;
 import java.io.IOException;
 
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -74,7 +74,7 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Alexander Bondaletov
  */
-public class DbfsConnectorNodeModel extends NodeModel {
+class DbfsConnectorNodeModel extends NodeModel {
 
     private final DbfsConnectorNodeSettings m_settings = new DbfsConnectorNodeSettings();
 
@@ -88,29 +88,32 @@ public class DbfsConnectorNodeModel extends NodeModel {
         super(new PortType[] {}, new PortType[] { FileSystemPortObject.TYPE });
     }
 
-    @SuppressWarnings("resource")
-    @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        m_fsConnection = new DbfsFSConnection(m_settings, getCredentialsProvider());
-
-        ((DbfsFileSystem)m_fsConnection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
-
-        FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
-
-        return new PortObject[] { new FileSystemPortObject(createSpec()) };
-    }
-
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        final DbfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        return new PortObjectSpec[] { createSpec() };
+        return new PortObjectSpec[]{createSpec(config)};
     }
 
-    private FileSystemPortObjectSpec createSpec() {
-        return new FileSystemPortObjectSpec(FS_NAME, m_fsId,
-            DbfsFileSystem.createFSLocationSpec(m_settings.getHost()));
+    @Override
+    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
+        final DbfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+        m_fsConnection = new DbfsFSConnection(config);
+        testConnection(m_fsConnection);
+        FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
+        return new PortObject[]{new FileSystemPortObject(createSpec(config))};
     }
 
+    private FileSystemPortObjectSpec createSpec(final DbfsFSConnectionConfig config) {
+        return new FileSystemPortObjectSpec(DbfsFSDescriptorProvider.FS_TYPE.getTypeId(), //
+            m_fsId, //
+            config.createFSLocationSpec());
+    }
+
+    @SuppressWarnings("resource")
+    private static void testConnection(final DbfsFSConnection connection) throws IOException {
+        ((DbfsFileSystem)connection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
+    }
 
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)

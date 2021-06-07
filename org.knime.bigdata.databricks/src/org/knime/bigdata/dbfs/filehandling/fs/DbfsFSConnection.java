@@ -49,20 +49,10 @@
 package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
 
-import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
 import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.connections.uriexport.URIExporterFactory;
-import org.knime.filehandling.core.connections.uriexport.URIExporterFactoryMapBuilder;
-import org.knime.filehandling.core.connections.uriexport.URIExporterID;
-import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
-import org.knime.filehandling.core.connections.uriexport.path.PathURIExporterFactory;
 import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
 
 /**
@@ -72,34 +62,18 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  */
 public class DbfsFSConnection implements FSConnection {
 
-    private static final Map<URIExporterID, URIExporterFactory> URI_EXPORTER_FACTORIES =
-        new URIExporterFactoryMapBuilder() //
-            .add(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
-            .add(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
-            .build();
-
     private static final long CACHE_TTL = 6000;
 
     private final DbfsFileSystem m_filesystem;
 
     /**
-     * Creates new instance.
+     * Default constructor using a {@link DbfsFSConnectionConfig}.
      *
-     * @param settings The node settins.
-     * @param credentialsProvider The credential provider.
-     *
+     * @param config connection configuration
      * @throws IOException
-     *
      */
-    public DbfsFSConnection(final DbfsConnectorNodeSettings settings,
-        final CredentialsProvider credentialsProvider) throws IOException {
-
-        try {
-            final URI uri = new URI(settings.getDeploymentUrl());
-            m_filesystem = new DbfsFileSystem(uri, CACHE_TTL, settings, credentialsProvider);
-        } catch (URISyntaxException ex) {// NOSONAR
-            throw new IOException("Invalid URL: " + settings.getDeploymentUrl());
-        }
+    public DbfsFSConnection(final DbfsFSConnectionConfig config) throws IOException {
+        m_filesystem = new DbfsFileSystem(CACHE_TTL, config);
     }
 
     @Override
@@ -112,8 +86,4 @@ public class DbfsFSConnection implements FSConnection {
         return new NioFileSystemBrowser(this);
     }
 
-    @Override
-    public Map<URIExporterID, URIExporterFactory> getURIExporterFactories() {
-        return URI_EXPORTER_FACTORIES;
-    }
 }
