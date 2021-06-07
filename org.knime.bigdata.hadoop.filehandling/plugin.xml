@@ -9,11 +9,6 @@
    </extension>
    <extension point="org.knime.filehandling.core.FSDescriptorProvider">
       <FSDescriptorProvider class="org.knime.bigdata.hadoop.filehandling.fs.HdfsFSDescriptorProvider" />
-   </extension>
-   <extension
-         point="org.knime.filehandling.FSTestInitializerProvider">
-      <FSTestInitializerProvider
-            ProviderClass="org.knime.bigdata.hadoop.filesystem.testing.LocalHdfsTestInitializerProvider">
-      </FSTestInitializerProvider>
+      <FSDescriptorProvider class="org.knime.bigdata.hadoop.filesystem.testing.LocalHdfsFSDescriptorProvider" />
    </extension>
 </plugin>

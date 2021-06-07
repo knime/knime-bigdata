@@ -53,11 +53,12 @@ import java.util.Map;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
+import org.knime.filehandling.core.connections.DefaultFSConnectionFactory;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
+import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSLocationSpec;
-import org.knime.filehandling.core.connections.local.LocalFSConnection;
-import org.knime.filehandling.core.connections.local.LocalFSConnectionConfig;
+import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 import org.knime.filehandling.core.testing.FSTestInitializerProvider;
 
@@ -69,24 +70,23 @@ import org.knime.filehandling.core.testing.FSTestInitializerProvider;
  */
 public class LocalHdfsTestInitializerProvider extends DefaultFSTestInitializerProvider {
 
-    private static final String FS_TYPE = "hdfs-local-nio-wrapper";
 
     @SuppressWarnings("resource")
     @Override
     public LocalHdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
         final Path workingDir = Files.createTempDirectory("knime-hdfs-nio-wrapper-local-test");
-        final LocalFSConnection localFsConnection =
-            new LocalFSConnection(new LocalFSConnectionConfig(workingDir.toString()));
+        final FSConnection localFsConnection =
+            DefaultFSConnectionFactory.createLocalFSConnection(workingDir.toString());
         return new LocalHdfsTestInitializer(new LocalHdfsFSConnection(localFsConnection));
     }
 
     @Override
-    public String getFSType() {
-        return FS_TYPE;
+    public FSType getFSType() {
+        return LocalHdfsFSDescriptorProvider.FS_TYPE;
     }
 
     @Override
     public FSLocationSpec createFSLocationSpec(final Map<String, String> configuration) {
-        return new DefaultFSLocationSpec(FSCategory.CONNECTED, FS_TYPE);
+        return new DefaultFSLocationSpec(FSCategory.CONNECTED, LocalHdfsFSDescriptorProvider.FS_TYPE.getTypeId());
     }
 }

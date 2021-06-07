@@ -44,52 +44,37 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Aug 31, 2020 (Sascha Wolke, KNIME GmbH): created
+ *   Jun 4, 2021 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.hadoop.filesystem.testing;
 
-import java.io.IOException;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.LocalFileSystem;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
-import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
-import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
-import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
-import org.knime.core.node.util.FileSystemBrowser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.connections.meta.FSTypeRegistry;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptor;
+import org.knime.filehandling.core.connections.meta.base.BaseFSDescriptorProvider;
+import org.knime.filehandling.core.connections.uriexport.URIExporterIDs;
+import org.knime.filehandling.core.connections.uriexport.base.PathURIExporterFactory;
 
 /**
- * Provides a {@link HdfsFileSystem}, that wraps a {@link NioFileSystem}, that wraps a {@link LocalFileSystem}. This
- * {@link FSConnection} only exists for testing purposes (to easily test the {@link NioFileSystem}).
+ * Descriptor containing a testing provider only.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class LocalHdfsFSConnection implements FSConnection {
+public class LocalHdfsFSDescriptorProvider extends BaseFSDescriptorProvider {
 
-    private final HdfsFileSystem m_hdfsFileSystem;
-    private final NioFileSystem m_hadoopFileSystem;
-    private final FSFileSystem<?> m_localFileSystem;
+    static final FSType FS_TYPE =
+        FSTypeRegistry.getOrCreateFSType("hdfs-local-nio-wrapper", "Hadoop NIO testing wrapper");
 
-    @SuppressWarnings("resource")
-    LocalHdfsFSConnection(final FSConnection localFsConnection) throws IOException {
-        m_localFileSystem = localFsConnection.getFileSystem();
-        final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
-        m_hadoopFileSystem = (NioFileSystem)NioFileSystemUtil //
-                .getHadoopPath(m_localFileSystem.getWorkingDirectory(), hadoopFileSystemConfig) //
-                .getFileSystem(hadoopFileSystemConfig);
-        m_hdfsFileSystem = new HdfsFSConnection(m_hadoopFileSystem).getFileSystem();
-    }
-
-    @Override
-    public HdfsFileSystem getFileSystem() {
-        return m_hdfsFileSystem;
-    }
-
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
+    /**
+     * Default constructor.
+     */
+    public LocalHdfsFSDescriptorProvider() {
+        super(LocalHdfsFSDescriptorProvider.FS_TYPE, //
+            new BaseFSDescriptor.Builder() //
+                .withSeparator("/") //
+                .withConnectionFactory(c -> null) //
+                .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
+                .withTestInitializerProvider(new LocalHdfsTestInitializerProvider()) //
+                .build());
     }
 }

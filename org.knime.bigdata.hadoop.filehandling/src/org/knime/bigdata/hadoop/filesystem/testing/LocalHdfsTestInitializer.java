@@ -54,7 +54,6 @@ import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsPath;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFiles;
-import org.knime.filehandling.core.connections.local.LocalFileSystem;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
 
 /**
@@ -62,9 +61,7 @@ import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class LocalHdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath, HdfsFileSystem> {
-
-    private final LocalFileSystem m_localFileSystem;
+class LocalHdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath, HdfsFileSystem> {
 
     /**
      * Default constructor
@@ -73,7 +70,6 @@ public class LocalHdfsTestInitializer extends DefaultFSTestInitializer<HdfsPath,
      */
     public LocalHdfsTestInitializer(final LocalHdfsFSConnection fsConnection) {
         super(fsConnection);
-        m_localFileSystem = fsConnection.getLocalFileSystem();
     }
 
     @Override
