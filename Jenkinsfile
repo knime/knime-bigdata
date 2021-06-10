@@ -46,7 +46,6 @@ try {
                     'knime-ensembles',
                     'knime-expressions',
                     'knime-filehandling',
-                    'knime-filehandling-connectors',
                     'knime-h2o',
                     'knime-itemset',
                     'knime-jep',
