@@ -86,7 +86,7 @@ enum BigDataTableReadConfigSerializer
 
     private static final String CFG_SAVE_TABLE_SPEC_CONFIG = "save_table_spec_config" + SettingsModel.CFGKEY_INTERNAL;
 
-    private static final String CFG_PREPEND_PATH_COLUMN = "prepend_path_column" + SettingsModel.CFGKEY_INTERNAL;
+    private static final String CFG_APPEND_PATH_COLUMN = "append_path_column" + SettingsModel.CFGKEY_INTERNAL;
 
     private static final String CFG_PATH_COLUMN_NAME = "path_column_name" + SettingsModel.CFGKEY_INTERNAL;
 
@@ -141,8 +141,8 @@ enum BigDataTableReadConfigSerializer
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS, true));
         config.setSaveTableSpecConfig(settingsTab.getBoolean(CFG_SAVE_TABLE_SPEC_CONFIG, true));
         // introduced in 4.4.0
-        config.setPrependItemIdentifierColumn(
-            settingsTab.getBoolean(CFG_PREPEND_PATH_COLUMN, config.prependItemIdentifierColumn()));
+        config.setAppendItemIdentifierColumn(
+            settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN, config.appendItemIdentifierColumn()));
         config.setItemIdentifierColumnName(
             settingsTab.getString(CFG_PATH_COLUMN_NAME, config.getItemIdentifierColumnName()));
     }
@@ -168,8 +168,8 @@ enum BigDataTableReadConfigSerializer
             config.setSaveTableSpecConfig(settingsTab.getBoolean(CFG_SAVE_TABLE_SPEC_CONFIG));
         }
         // introduced in 4.4.0
-        if (settingsTab.containsKey(CFG_PREPEND_PATH_COLUMN)) {
-            config.setPrependItemIdentifierColumn(settingsTab.getBoolean(CFG_PREPEND_PATH_COLUMN));
+        if (settingsTab.containsKey(CFG_APPEND_PATH_COLUMN)) {
+            config.setAppendItemIdentifierColumn(settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN));
             config.setItemIdentifierColumnName(settingsTab.getString(CFG_PATH_COLUMN_NAME));
         }
     }
@@ -183,7 +183,7 @@ enum BigDataTableReadConfigSerializer
         final NodeSettingsWO settingsTab = SettingsUtils.getOrAdd(settings, SettingsUtils.CFG_SETTINGS_TAB);
         settingsTab.addBoolean(CFG_FAIL_ON_DIFFERING_SPECS, config.failOnDifferingSpecs());
         settingsTab.addBoolean(CFG_SAVE_TABLE_SPEC_CONFIG, config.saveTableSpecConfig());
-        settingsTab.addBoolean(CFG_PREPEND_PATH_COLUMN, config.prependItemIdentifierColumn());
+        settingsTab.addBoolean(CFG_APPEND_PATH_COLUMN, config.appendItemIdentifierColumn());
         settingsTab.addString(CFG_PATH_COLUMN_NAME, config.getItemIdentifierColumnName());
     }
 
@@ -206,8 +206,8 @@ enum BigDataTableReadConfigSerializer
             settingsTab.getBoolean(CFG_SAVE_TABLE_SPEC_CONFIG);
         }
         // introduced in 4.4.0
-        if (settingsTab.containsKey(CFG_PREPEND_PATH_COLUMN)) {
-            settingsTab.getBoolean(CFG_PREPEND_PATH_COLUMN);
+        if (settingsTab.containsKey(CFG_APPEND_PATH_COLUMN)) {
+            settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN);
             settingsTab.getString(CFG_PATH_COLUMN_NAME);
         }
     }

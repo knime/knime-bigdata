@@ -199,7 +199,7 @@ public final class BigDataTableReaderNodeDialog
 
     private void saveToConfig() {
         m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
-        m_config.setPrependItemIdentifierColumn(m_pathColumnPanel.isPrependSourceIdentifierColumn());
+        m_config.setAppendItemIdentifierColumn(m_pathColumnPanel.isAppendSourceIdentifierColumn());
         m_config.setItemIdentifierColumnName(m_pathColumnPanel.getSourceIdentifierColumnName());
         final boolean saveTableSpecConfig = !m_supportChangingFileSchemas.isSelected();
         m_config.setSaveTableSpecConfig(saveTableSpecConfig);
@@ -212,7 +212,7 @@ public final class BigDataTableReaderNodeDialog
         m_fileChooser.loadSettingsFrom(SettingsUtils.getOrEmpty(settings, SettingsUtils.CFG_SETTINGS_TAB), specs);
         m_config.loadInDialog(settings, specs);
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
-        m_pathColumnPanel.load(m_config.prependItemIdentifierColumn(), m_config.getItemIdentifierColumnName());
+        m_pathColumnPanel.load(m_config.appendItemIdentifierColumn(), m_config.getItemIdentifierColumnName());
         updateMultiFileEnabledStatus();
         m_supportChangingFileSchemas.setSelected(!m_config.saveTableSpecConfig());
         updateTransformationTableEnabledStatus();
