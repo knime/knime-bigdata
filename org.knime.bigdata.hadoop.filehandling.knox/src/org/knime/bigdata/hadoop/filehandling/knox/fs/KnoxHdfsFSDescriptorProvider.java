@@ -75,6 +75,13 @@ public class KnoxHdfsFSDescriptorProvider extends BaseFSDescriptorProvider {
         super(KnoxHdfsFSDescriptorProvider.FS_TYPE, //
             new BaseFSDescriptor.Builder() //
                 .withSeparator(KnoxHdfsFileSystem.PATH_SEPARATOR) //
+                .withCanCheckAccessReadOnFiles(true) //
+                .withCanCheckAccessReadOnFolders(true) //
+                .withCanCheckAccessWriteOnFiles(true) //
+                .withCanCheckAccessWriteOnFolders(true) //
+                .withCanCheckAccessExecuteOnFiles(true) //
+                .withCanCheckAccessExecuteOnFolders(true) //
+                .withCanGetPosixAttributes(true) //
                 .withConnectionFactory(KnoxHdfsFSConnection::new) //
                 .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
                 .withURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //

@@ -76,6 +76,7 @@ public class HdfsFSDescriptorProvider extends BaseFSDescriptorProvider {
             new BaseFSDescriptor.Builder() //
                 .withSeparator(HdfsFileSystem.PATH_SEPARATOR) //
                 .<HdfsFSConnectionConfig>withConnectionFactory(HdfsFSConnection::new) //
+                .withCanGetPosixAttributes(true) //
                 .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
                 .withURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //
                 .withCanGetPosixAttributes(true) //
