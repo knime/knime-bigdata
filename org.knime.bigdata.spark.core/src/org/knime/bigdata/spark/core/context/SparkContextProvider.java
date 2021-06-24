@@ -29,7 +29,6 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -82,18 +81,33 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      */
     Optional<SparkContext<T>> createDefaultSparkContextIfPossible();
 
+    /**
+     * Creates a new testing Spark context ID based on the given map of flow variables. Which flow variables are
+     * expected is up to the implementing class.
+     *
+     * @param flowVariables A map of flow variables used to configure the context. Which flow variables are expected is
+     *            up to the implementing class.
+     * @return a new Spark context ID based on the given map of flow variables.
+     * @noreference This is testing code and its API is subject to change without notice.
+     * @see TestflowVariable
+     * @throws InvalidSettingsException on invalid settings in flow variables
+     */
+    public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
+        throws InvalidSettingsException;
 
     /**
      * Creates a new Spark context configuration based on the given map of flow variables. Which flow variables are
      * expected is up to the implementing class.
      *
+     * @param sparkContextId context ID of the testing spark context.
      * @param flowVariables A map of flow variables used to configure the context. Which flow variables are expected is
      *            up to the implementing class.
+     * @param fsConnectionId ID of file system connection to use
      * @return a new Spark context configuration based on the given map of flow variables.
      * @noreference This is testing code and its API is subject to change without notice.
      * @see TestflowVariable
      * @throws InvalidSettingsException on invalid settings in flow variables
      */
-    public T createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables,
-        final PortObjectSpec fsPortObjectSpec) throws InvalidSettingsException;
+    public T createTestingSparkContextConfig(final SparkContextID sparkContextId,
+        final Map<String, FlowVariable> flowVariables, final String fsConnectionId) throws InvalidSettingsException;
 }

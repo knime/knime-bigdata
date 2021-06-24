@@ -22,7 +22,7 @@ import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
 import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
-import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -102,15 +102,22 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
         return Optional.empty();
     }
 
+    @Override
+    public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
+        throws InvalidSettingsException {
+
+        final String contextName = TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
+        return LocalSparkContextSettings.createSparkContextID(contextName);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public LocalSparkContextConfig createTestingSparkContextConfig(final Map<String, FlowVariable> flowVariables,
-        final PortObjectSpec fsPortObjectSpec) {
+    public LocalSparkContextConfig createTestingSparkContextConfig(final SparkContextID contextID,
+        final Map<String, FlowVariable> flowVariables, final String fsId) {
 
         final String contextName = TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
-        final SparkContextID contextID = LocalSparkContextSettings.createSparkContextID(contextName);
         final int numberOfThreads = TestflowVariable.getInt(TestflowVariable.SPARK_LOCAL_THREADS, flowVariables);
         final boolean deleteObjectsOnDispose = true;
         final boolean useCustomSparkSettings =

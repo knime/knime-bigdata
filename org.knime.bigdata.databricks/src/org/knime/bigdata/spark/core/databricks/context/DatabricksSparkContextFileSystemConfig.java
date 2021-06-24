@@ -131,34 +131,23 @@ public class DatabricksSparkContextFileSystemConfig extends DatabricksSparkConte
         }
     }
 
+    /**
+     * Indicates whether some other object shares the same file system type and context configuration.
+     *
+     * @see DatabricksSparkContextConfig#equals(Object)
+     */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((m_fileSystemId == null) ? 0 : m_fileSystemId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final Object obj) { // NOSONAR super class implements hashCode
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DatabricksSparkContextFileSystemConfig other = (DatabricksSparkContextFileSystemConfig)obj;
-        if (m_fileSystemId == null) {
-            if (other.m_fileSystemId != null) {
-                return false;
-            }
-        } else if (!m_fileSystemId.equals(other.m_fileSystemId)) {
-            return false;
-        }
-        return true;
+        return super.equals(obj);
     }
 
 }

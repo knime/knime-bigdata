@@ -10,8 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
-import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -20,7 +19,6 @@ import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContext;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextConfig;
-import org.knime.bigdata.spark.core.livy.context.LivySparkContextConnInfoConfig;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextFileSystemConfig;
 import org.knime.bigdata.spark.core.livy.node.create.LivySparkContextCreatorNodeSettings;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
@@ -29,9 +27,7 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings.TimeShiftStrategy;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
-import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
-import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
 /**
  * Spark context provider that provides Apache Livy connectivity.
@@ -149,12 +145,19 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
         return Optional.empty();
     }
 
+    @Override
+    public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
+        throws InvalidSettingsException {
+
+        return LivySparkContextCreatorNodeSettings.createSparkContextID("testflowContext");
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public LivySparkContextConfig createTestingSparkContextConfig(final Map<String, FlowVariable> flowVariables,
-        final PortObjectSpec fsPortObjectSpec) throws InvalidSettingsException {
+    public LivySparkContextConfig createTestingSparkContextConfig(final SparkContextID sparkContextId,
+        final Map<String, FlowVariable> flowVariables, final String fsConnectionId) throws InvalidSettingsException {
 
         final SparkVersion sparkVersion =
             SparkVersion.fromLabel(TestflowVariable.getString(TestflowVariable.SPARK_VERSION, flowVariables));
@@ -183,27 +186,16 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
                 .parseSettingsString(TestflowVariable.getString(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables));
         }
 
-        final SparkContextID sparkContextId =
-            LivySparkContextCreatorNodeSettings.createSparkContextID("testflowContext");
-
         final TimeShiftStrategy timeShiftStrategy = TimeShiftStrategy.NONE;
         final ZoneId timeShiftZoneId = null;
         final boolean failOnDifferentClusterTimeZone = false;
 
-        if (fsPortObjectSpec instanceof ConnectionInformationPortObjectSpec) {
-            final ConnectionInformation remoteFsConnectionInfo =
-                ((ConnectionInformationPortObjectSpec)fsPortObjectSpec).getConnectionInformation();
-            return new LivySparkContextConnInfoConfig(sparkVersion, livyUrl, authenticationType, stagingAreaFolder,
-                connectTimeoutSeconds, responseTimeoutSeconds, jobCheckFrequencySeconds, customSparkSettings,
-                sparkContextId, remoteFsConnectionInfo, timeShiftStrategy, timeShiftZoneId, failOnDifferentClusterTimeZone);
-        } else if (fsPortObjectSpec instanceof FileSystemPortObjectSpec) {
-            final String fsId = ((FileSystemPortObjectSpec)fsPortObjectSpec).getFileSystemId();
-
+        if (StringUtils.isBlank(fsConnectionId)) {
+            throw new InvalidSettingsException("File system ID required.");
+        } else {
             return new LivySparkContextFileSystemConfig(sparkVersion, livyUrl, authenticationType, stagingAreaFolder,
                 connectTimeoutSeconds, responseTimeoutSeconds, jobCheckFrequencySeconds, customSparkSettings,
-                sparkContextId, fsId, timeShiftStrategy, timeShiftZoneId, failOnDifferentClusterTimeZone);
-        } else {
-            throw new InvalidSettingsException("Unknown file system port spec.");
+                sparkContextId, fsConnectionId, timeShiftStrategy, timeShiftZoneId, failOnDifferentClusterTimeZone);
         }
     }
 

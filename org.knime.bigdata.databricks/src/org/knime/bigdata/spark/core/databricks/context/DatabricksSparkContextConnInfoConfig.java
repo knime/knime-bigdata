@@ -119,34 +119,23 @@ public class DatabricksSparkContextConnInfoConfig extends DatabricksSparkContext
         return new RemoteFSControllerConnInfo(m_remoteFsConnectionInfo, getStagingAreaFolder(), getClusterId());
     }
 
+    /**
+     * Indicates whether some other object shares the same file system type and context configuration.
+     *
+     * @see DatabricksSparkContextConfig#equals(Object)
+     */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((m_remoteFsConnectionInfo == null) ? 0 : m_remoteFsConnectionInfo.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final Object obj) { // NOSONAR super class implements hashCode
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DatabricksSparkContextConnInfoConfig other = (DatabricksSparkContextConnInfoConfig)obj;
-        if (m_remoteFsConnectionInfo == null) {
-            if (other.m_remoteFsConnectionInfo != null) {
-                return false;
-            }
-        } else if (!m_remoteFsConnectionInfo.equals(other.m_remoteFsConnectionInfo)) {
-            return false;
-        }
-        return true;
+        return super.equals(obj);
     }
 
 }

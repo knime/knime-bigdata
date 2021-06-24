@@ -20,6 +20,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.context.JobserverSparkContext
 import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
@@ -108,12 +109,21 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
         return Optional.of(defaultSparkContext);
     }
 
+    @Override
+    public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
+        throws InvalidSettingsException {
+
+        final String jobServerUrl = TestflowVariable.getString(TestflowVariable.SPARK_SJS_URL, flowVariables);
+        final String contextName = TestflowVariable.getString(TestflowVariable.SPARK_SJS_CONTEXTNAME, flowVariables);
+        return SparkContextID.fromConnectionDetails(jobServerUrl, contextName);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public JobServerSparkContextConfig createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables,
-        final PortObjectSpec fsPortObjectSpec) {
+    public JobServerSparkContextConfig createTestingSparkContextConfig(final SparkContextID contextId,
+        final Map<String, FlowVariable> flowVariables, final String fsConnectionId) {
 
         final String jobServerUrl = TestflowVariable.getString(TestflowVariable.SPARK_SJS_URL, flowVariables);
         final boolean authentication =

@@ -166,4 +166,19 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
         }
         m_fsId = null;
     }
+
+    /**
+     * @return file system ID of connection
+     */
+    public String getFileSystemID() {
+        return m_fsId;
+    }
+
+    /**
+     * @return {@code true} if file system is connected
+     */
+    public boolean isConnected() {
+        return m_connection != null;
+    }
+
 }

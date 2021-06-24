@@ -23,8 +23,10 @@ package org.knime.bigdata.testing.node.create;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.testing.TestingSparkContextConfigFactory;
@@ -33,6 +35,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.testing.FlowVariableReader;
+import org.knime.bigdata.testing.node.create.utils.CreateTestFileSystemPortUtil;
 import org.knime.bigdata.testing.node.create.utils.CreateTestPortUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -78,6 +81,12 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
      */
     protected abstract CreateTestPortUtil getFileSystemPortUtil();
 
+    /**
+     * Map with cached file system connections used by spark testing contexts.
+     */
+    private static final ConcurrentHashMap<SparkContextID, CreateTestFileSystemPortUtil> SPARK_CONTEXT_FILE_SYSTEMS =
+        new ConcurrentHashMap<>();
+
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final Map<String, FlowVariable> flowVars;
@@ -88,10 +97,12 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
             throw new InvalidSettingsException("Failed to read flowvariables.csv: " + e.getMessage(), e);
         }
 
-        final SparkContextIDScheme sparkScheme = TestingSparkContextConfigFactory.createContextIDScheme(flowVars);
-        final PortObjectSpec dbPortSpec = getDatabasePortUtil().configure(sparkScheme, flowVars);
-        final PortObjectSpec fsPortSpec = getFileSystemPortUtil().configure(sparkScheme, flowVars);
-        final SparkContextConfig sparkConfig = TestingSparkContextConfigFactory.create(sparkScheme, flowVars, fsPortSpec);
+        final SparkContextID sparkContextId = TestingSparkContextConfigFactory.createContextID(flowVars);
+        final PortObjectSpec dbPortSpec = getDatabasePortUtil().configure(sparkContextId.getScheme(), flowVars);
+        final PortObjectSpec fsPortSpec = getFileSystemPortUtil().configure(sparkContextId.getScheme(), flowVars);
+        final String sparkContextFileSystemId = getOrCreateSparkFileSystem(sparkContextId, flowVars);
+        final SparkContextConfig sparkConfig =
+            TestingSparkContextConfigFactory.create(sparkContextId, flowVars, sparkContextFileSystemId);
         configureSparkContext(sparkConfig);
         final SparkContextPortObjectSpec sparkPortSpec = new SparkContextPortObjectSpec(sparkConfig.getSparkContextID());
 
@@ -99,6 +110,18 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
         m_sparkConfig = sparkConfig;
 
         return new PortObjectSpec[]{dbPortSpec, fsPortSpec, sparkPortSpec};
+    }
+
+    private static String getOrCreateSparkFileSystem(final SparkContextID sparkContextId,
+        final Map<String, FlowVariable> flowVars) throws InvalidSettingsException {
+
+        CreateTestFileSystemPortUtil portUtil = SPARK_CONTEXT_FILE_SYSTEMS.get(sparkContextId); // NOSONAR: don't wrap exceptions
+        if (portUtil == null) {
+            portUtil = new CreateTestFileSystemPortUtil();
+            portUtil.configure(sparkContextId.getScheme(), flowVars);
+            SPARK_CONTEXT_FILE_SYSTEMS.put(sparkContextId, portUtil);
+        }
+        return portUtil.getFileSystemID();
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -121,6 +144,9 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
         final PortObject fsPortObject =
             getFileSystemPortUtil().execute(sparkScheme, flowVars, exec, credentialsProvider);
 
+        // ensure spark context file system is connected
+        ensureSparkFileSystemIsOpen(m_sparkConfig.getSparkContextID(), flowVars, exec, credentialsProvider);
+
         // then try to open the Spark context
         exec.setProgress(0.1, "Configuring Spark context");
         final SparkContextPortObject sparkPortObject = new SparkContextPortObject(m_sparkConfig.getSparkContextID());
@@ -133,6 +159,18 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
             getDatabasePortUtil().execute(sparkScheme, flowVars, exec, credentialsProvider);
 
         return new PortObject[]{dbPortObject, fsPortObject, sparkPortObject};
+    }
+
+    private static void ensureSparkFileSystemIsOpen(final SparkContextID sparkContextId,
+        final Map<String, FlowVariable> flowVars, final ExecutionContext exec,
+        final CredentialsProvider credentialsProvider) throws Exception {
+
+        final CreateTestFileSystemPortUtil portUtil = SPARK_CONTEXT_FILE_SYSTEMS.get(sparkContextId);
+        if (portUtil == null) {
+            throw new IllegalArgumentException("Unknown spark context: " + sparkContextId);
+        } else if (!portUtil.isConnected()) {
+            portUtil.execute(sparkContextId.getScheme(), flowVars, exec, credentialsProvider);
+        }
     }
 
     /**

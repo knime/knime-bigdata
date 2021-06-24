@@ -85,4 +85,23 @@ public class LivySparkContextFileSystemConfig extends LivySparkContextConfig {
         }
     }
 
+    /**
+     * Indicates whether some other object shares the same file system type and context configuration.
+     *
+     * @see LivySparkContextConfig#equals(Object)
+     */
+    @Override
+    public boolean equals(final Object obj) { // NOSONAR super class implements hashCode
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        return super.equals(obj);
+    }
+
 }
