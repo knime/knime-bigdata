@@ -68,10 +68,10 @@ import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.connections.FSLocationSpec;
-import org.knime.filehandling.core.connections.knimerelativeto.RelativeToUtil;
 import org.knime.filehandling.core.connections.meta.FSType;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
+import org.knime.filehandling.core.util.WorkflowContextUtil;
 
 /**
  * Utility to create {@link FileSystemPortObject} based file system output ports.
@@ -139,7 +139,7 @@ public class CreateFileSystemConnectionPortUtil implements CreateLocalBDEPortUti
             case USER_HOME:
                 return System.getProperty("user.home");
             case WORKFLOW_DATA_AREA:
-                final WorkflowContext workflowContext = RelativeToUtil.getWorkflowContext();
+                final WorkflowContext workflowContext = WorkflowContextUtil.getWorkflowContext();
                 final Path workflowLocation = workflowContext.getCurrentLocation().toPath().toAbsolutePath().normalize();
                 final Path workflowDataDir = workflowLocation.resolve("data");
                 Files.createDirectories(workflowDataDir);
