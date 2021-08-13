@@ -39,6 +39,8 @@ public class MLMetaData extends JobOutput {
 
     private static final String KEY_NOMINAL_TARGET_VALUES = "nominalTargetValues";
 
+    private static final String KEY_NOMINAL_FEATURE_VALUES = "nominalFeatureValues";
+
     private static final String KEY_ADDITIONAL_VALUES = "additionalValues";
 
     public MLMetaData() {
@@ -61,12 +63,21 @@ public class MLMetaData extends JobOutput {
         return this;
     }
 
+    public MLMetaData withNominalFeatureValues(final List<String> nominalValues) {
+        set(KEY_NOMINAL_FEATURE_VALUES, nominalValues);
+        return this;
+    }
+
     public Map<Integer, List<String>> getNominalFeatureValueMappings() {
         Map<Integer, List<String>> toReturn = get(KEY_NOMINAL_FEATURE_VALUE_MAP);
         if (toReturn == null) {
             toReturn = Collections.emptyMap();
         }
         return toReturn;
+    }
+
+    public List<String> getNominalFeatureValues() {
+        return get(KEY_NOMINAL_FEATURE_VALUES);
     }
 
     public List<String> getNominalTargetValueMappings() {

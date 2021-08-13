@@ -64,6 +64,7 @@ import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.ML
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.regression.MLDecisionTreeRegressionLearnerNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationLearnerNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.gbt.regression.MLGradientBoostedTreesRegressionLearnerNodeFactory;
+import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionLearnerNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.predictor.classification.MLPredictorClassificationNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.predictor.regression.MLPredictorRegressionNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerNodeFactory;
@@ -277,8 +278,11 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Impala2SparkNodeFactory(),
             new SparkJavaSnippetSourceNodeFactory(),
             new MLlibPCANodeFactory(),
+
+            // ML based learner and predicter nodes
             new MLDecisionTreeClassificationLearnerNodeFactory(),
             new MLDecisionTreeRegressionLearnerNodeFactory(),
+            new MLLinearRegressionLearnerNodeFactory(),
             new MLRandomForestClassificationLearnerNodeFactory(),
             new MLRandomForestRegressionLearnerNodeFactory(),
             new MLGradientBoostedTreesClassificationLearnerNodeFactory(),

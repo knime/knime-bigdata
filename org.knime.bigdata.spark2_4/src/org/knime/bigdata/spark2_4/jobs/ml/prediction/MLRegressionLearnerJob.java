@@ -30,6 +30,7 @@ import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Predictor;
+import org.apache.spark.ml.feature.OneHotEncoderEstimator;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.sql.Dataset;
@@ -69,6 +70,7 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
         final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
 
         final List<String> actualFeatureColumns = new ArrayList<>();
+        final List<String> oneHotFeatureColumns = new ArrayList<>();
         final List<PipelineStage> stages = new ArrayList<>();
 
         final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
@@ -84,9 +86,28 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
                     .setHandleInvalid("keep"));
 
                 actualFeatureColumns.add(indexedFeatureColumn);
+                if (useNominalDummyVariables()) {
+                    oneHotFeatureColumns.add(indexedFeatureColumn);
+                }
             } else {
                 actualFeatureColumns.add(field.name());
             }
+        }
+
+        if (!oneHotFeatureColumns.isEmpty()) {
+            final String[] inputColumns = oneHotFeatureColumns.toArray(new String[0]);
+            final String[] outputColumns = new String[inputColumns.length];
+            for (int i = 0; i < inputColumns.length; i++) {
+                final String outputCol = inputColumns[i] + "_one_hot";
+                outputColumns[i] = outputCol;
+                // replace feature column with one hot output column
+                actualFeatureColumns.set(actualFeatureColumns.indexOf(inputColumns[i]), outputCol);
+            }
+            final OneHotEncoderEstimator oneHotEncoder = new OneHotEncoderEstimator() //
+                    .setInputCols(inputColumns) //
+                    .setOutputCols(outputColumns) //
+                    .setHandleInvalid("keep"); // last row indicates invalid values
+            stages.add(oneHotEncoder);
         }
 
         // assemble vector
@@ -137,8 +158,9 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
      *
      * @param input The job input.
      * @return a regressor.
+     * @throws KNIMESparkException
      */
-    protected abstract Predictor<?, ?, ?> createRegressor(final I input);
+    protected abstract Predictor<?, ?, ?> createRegressor(final I input) throws KNIMESparkException;
 
     /**
      * Subclasses must implement this method to provide some meta data on the learned model.
@@ -158,4 +180,13 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
      */
     protected abstract Path generateModelInterpreterData(final SparkContext sparkContext, final PipelineModel model)
         throws Exception;
+
+    /**
+     * Subclasses can overwrite this method to convert nominal values into dummy variables.
+     *
+     * @return {@code true} if a one hot encoder should be used on nominal values
+     */
+    protected boolean useNominalDummyVariables() {
+        return false;
+    }
 }
