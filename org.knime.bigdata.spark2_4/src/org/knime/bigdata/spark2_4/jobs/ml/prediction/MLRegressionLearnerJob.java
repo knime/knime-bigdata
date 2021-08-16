@@ -106,7 +106,8 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
             final OneHotEncoderEstimator oneHotEncoder = new OneHotEncoderEstimator() //
                     .setInputCols(inputColumns) //
                     .setOutputCols(outputColumns) //
-                    .setHandleInvalid("keep"); // last row indicates invalid values
+                    .setDropLast(true) //
+                    .setHandleInvalid("error"); // inputs are the string indexer from above and they should always present
             stages.add(oneHotEncoder);
         }
 
