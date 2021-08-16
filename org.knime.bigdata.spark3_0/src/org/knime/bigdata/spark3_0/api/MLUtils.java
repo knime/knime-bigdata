@@ -128,9 +128,6 @@ public class MLUtils {
         final List<String> oneHotEncoderOutputCols = oneHotEncoder //
                 .map(encoder -> Arrays.asList(encoder.getOutputCols())) //
                 .orElse(new ArrayList<>(0));
-        final String onHotEncoderHandleInvalid = oneHotEncoder //
-                .map(OneHotEncoderModel::getHandleInvalid) //
-                .orElse("");
 
         // find string indexer by one hot encoder output column / vector assembler input column
         final HashMap<String, StringIndexerModel> oneHotStringIndexer = new HashMap<>();
@@ -155,10 +152,11 @@ public class MLUtils {
         for (final String vecInputCol : vectorAssembler.getInputCols()) {
             final StringIndexerModel stringIndexer = oneHotStringIndexer.get(vecInputCol);
             if (stringIndexer != null) {
-                for (final String label : stringIndexer.labelsArray()[0]) {
-                    featureValues.add(stringIndexer.getInputCol() + "=" + label);
+                final String[] labels = stringIndexer.labelsArray()[0];
+                for (int i = 0; i < labels.length - 1; i++) {
+                    featureValues.add(stringIndexer.getInputCol() + "=" + labels[i]);
                 }
-                if (onHotEncoderHandleInvalid.equalsIgnoreCase("keep")) {
+                if (stringIndexer.getHandleInvalid().equalsIgnoreCase("keep")) {
                     featureValues.add(stringIndexer.getInputCol() + "=?");
                 }
             } else {
