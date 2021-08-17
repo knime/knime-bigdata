@@ -102,14 +102,14 @@ public class NioFileSystem extends FileSystem {
     }
 
     private FSPath toFSPath(final Path p) {
-        final String absolutPath = p.toUri().getPath();
+        String absolutePath = p.toUri().getPath();
 
         // on windows we have to remove the leading / before the drive
-        if (absolutPath.startsWith("/") && Path.isWindowsAbsolutePath(absolutPath, true)) {
-            return m_fsFileSystem.getPath(absolutPath.substring(1));
-        } else {
-            return m_fsFileSystem.getPath(absolutPath);
+        if (absolutePath.startsWith("/") && Path.isWindowsAbsolutePath(absolutePath, true)) {
+            absolutePath = absolutePath.substring(1);
         }
+
+        return m_fsFileSystem.getPath(absolutePath.replace("/", m_fsFileSystem.getSeparator()));
     }
 
     private Path toHadoopPath(final FSPath p) throws IOException {
