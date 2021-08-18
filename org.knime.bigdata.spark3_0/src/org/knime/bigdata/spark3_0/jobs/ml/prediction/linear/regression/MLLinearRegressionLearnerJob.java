@@ -29,7 +29,7 @@ import org.apache.spark.ml.regression.LinearRegressionSummary;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
-import org.knime.bigdata.spark.node.ml.prediction.linear.MLLinearLearnerMetaData;
+import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionLearnerMetaData;
 import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionLearnerJobInput;
 import org.knime.bigdata.spark3_0.api.MLUtils;
 import org.knime.bigdata.spark3_0.jobs.ml.prediction.MLRegressionLearnerJob;
@@ -97,7 +97,7 @@ public class MLLinearRegressionLearnerJob extends MLRegressionLearnerJob<MLLinea
     @Override
     protected MLMetaData createModelMetaData(final PipelineModel pipelineModel) {
         final LinearRegressionModel lrModel = MLUtils.findFirstStageOfType(pipelineModel, LinearRegressionModel.class);
-        final MLLinearLearnerMetaData metaData = new MLLinearLearnerMetaData() //
+        final MLLinearRegressionLearnerMetaData metaData = new MLLinearRegressionLearnerMetaData() //
                 .withCoefficients(lrModel.coefficients().toArray()) //
                 .withIntercept(lrModel.intercept());
 

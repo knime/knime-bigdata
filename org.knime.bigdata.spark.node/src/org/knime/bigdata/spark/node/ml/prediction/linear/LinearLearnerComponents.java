@@ -72,7 +72,7 @@ public class LinearLearnerComponents extends MLlibNodeComponents<LinearLearnerSe
      * @param settings the {@link LinearMethodsSettings}
      */
     public LinearLearnerComponents(final LinearLearnerSettings settings) {
-        super(settings, false, false);
+        super(settings, settings.getMode() == LinearLearnerMode.LOGISTIC_REGRESSION, false);
     }
 
     /**

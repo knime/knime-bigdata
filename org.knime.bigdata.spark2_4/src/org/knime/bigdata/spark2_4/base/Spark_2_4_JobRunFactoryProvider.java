@@ -33,6 +33,7 @@ import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.classification
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.regression.MLDecisionTreeRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.gbt.regression.MLGradientBoostedTreesRegressionLearnerJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.linear.classification.MLLogisticRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.linear.regression.MLLinearRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.randomforest.regression.MLRandomForestRegressionLearnerJobRunFactory;
@@ -164,6 +165,7 @@ public class Spark_2_4_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new MLDecisionTreeRegressionLearnerJobRunFactory(),
             new MLGradientBoostedTreesClassificationLearnerJobRunFactory(),
             new MLGradientBoostedTreesRegressionLearnerJobRunFactory(),
+            new MLLogisticRegressionLearnerJobRunFactory(),
             new MLLinearRegressionLearnerJobRunFactory(),
             new MLRandomForestClassificationLearnerJobRunFactory(),
             new MLRandomForestRegressionLearnerJobRunFactory(),

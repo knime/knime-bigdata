@@ -27,6 +27,7 @@ import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.ML
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.regression.MLDecisionTreeRegressionModelHelper;
 import org.knime.bigdata.spark.node.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationModelHelper;
 import org.knime.bigdata.spark.node.ml.prediction.gbt.regression.MLGradientBoostedTreesRegressionModelHelper;
+import org.knime.bigdata.spark.node.ml.prediction.linear.classification.MLLogisticRegressionModelHelper;
 import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionModelHelper;
 import org.knime.bigdata.spark.node.ml.prediction.randomforest.classification.MLRandomForestClassificationModelHelper;
 import org.knime.bigdata.spark.node.ml.prediction.randomforest.regression.MLRandomForestRegressionModelHelper;
@@ -47,6 +48,7 @@ public class MLModelHelperProvider extends DefaultModelHelperProvider<MLModel> {
             new MLDecisionTreeRegressionModelHelper(),
             new MLGradientBoostedTreesClassificationModelHelper(),
             new MLGradientBoostedTreesRegressionModelHelper(),
+            new MLLogisticRegressionModelHelper(),
             new MLLinearRegressionModelHelper(),
             new MLRandomForestClassificationModelHelper(),
             new MLRandomForestRegressionModelHelper());

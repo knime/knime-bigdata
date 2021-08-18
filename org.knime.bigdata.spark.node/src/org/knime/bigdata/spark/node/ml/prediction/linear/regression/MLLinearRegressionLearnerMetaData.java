@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.spark.node.ml.prediction.linear;
+package org.knime.bigdata.spark.node.ml.prediction.linear.regression;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
@@ -26,7 +26,7 @@ import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
-public class MLLinearLearnerMetaData extends MLMetaData {
+public class MLLinearRegressionLearnerMetaData extends MLMetaData {
 
     private static final String KEY_COEFFICIENTS = "coefficients";
 
@@ -53,7 +53,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
     /**
      * Constructor for (de)serialization.
      */
-    public MLLinearLearnerMetaData() {
+    public MLLinearRegressionLearnerMetaData() {
     }
 
     /**
@@ -62,7 +62,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param coefficients coefficients of the model
      * @param intercept intercept of the model
      */
-    public MLLinearLearnerMetaData(final double[] coefficients, final double intercept) {
+    public MLLinearRegressionLearnerMetaData(final double[] coefficients, final double intercept) {
         setDoubleArray(KEY_COEFFICIENTS, coefficients);
         setDouble(KEY_INTERCEPT, intercept);
     }
@@ -71,7 +71,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param coefficients coefficients of the model
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withCoefficients(final double[] coefficients) {
+    public MLLinearRegressionLearnerMetaData withCoefficients(final double[] coefficients) {
         setDoubleArray(KEY_COEFFICIENTS, coefficients);
         return this;
     }
@@ -87,7 +87,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param intercept the intercept
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withIntercept(final double intercept) {
+    public MLLinearRegressionLearnerMetaData withIntercept(final double intercept) {
         setDouble(KEY_INTERCEPT, intercept);
         return this;
     }
@@ -103,7 +103,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param stdErrors coefficients standard errors and intercept in last row if fit intercept enabled
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withCoefficientStandardErrors(final double[] stdErrors) {
+    public MLLinearRegressionLearnerMetaData withCoefficientStandardErrors(final double[] stdErrors) {
         setDoubleArray(KEY_COEFFICIENTS_STD_ERR, stdErrors);
         return this;
     }
@@ -120,7 +120,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param values Two-sided p-value of estimated coefficients and intercept in last row if fit intercept enabled
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withTValues(final double[] values) {
+    public MLLinearRegressionLearnerMetaData withTValues(final double[] values) {
         setDoubleArray(KEY_T_VALUES, values);
         return this;
     }
@@ -137,7 +137,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param values T-statistic of estimated coefficients and intercept in last row if fit intercept enabled
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withPValues(final double[] values) {
+    public MLLinearRegressionLearnerMetaData withPValues(final double[] values) {
         setDoubleArray(KEY_P_VALUES, values);
         return this;
     }
@@ -154,7 +154,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param rSquared R^2^, the coefficient of determination.
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withRSquared(final double rSquared) {
+    public MLLinearRegressionLearnerMetaData withRSquared(final double rSquared) {
         setDouble(KEY_R_SQUARED, rSquared);
         return this;
     }
@@ -170,7 +170,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param rSquaredAdj Adjusted R^2^, the adjusted coefficient of determination.
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withRSquaredAdjusted(final double rSquaredAdj) {
+    public MLLinearRegressionLearnerMetaData withRSquaredAdjusted(final double rSquaredAdj) {
         setDouble(KEY_R_SQUARED_ADJ, rSquaredAdj);
         return this;
     }
@@ -186,7 +186,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      * @param explainedVariance the explained variance regression score.
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withExplainedVariance(final double explainedVariance) {
+    public MLLinearRegressionLearnerMetaData withExplainedVariance(final double explainedVariance) {
         setDouble(KEY_EXPLAINED_VARIANCE, explainedVariance);
         return this;
     }
@@ -203,7 +203,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      *            the absolute error loss or l1-norm loss.
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withMeanAbsoluteError(final double meanAbsoluteError) {
+    public MLLinearRegressionLearnerMetaData withMeanAbsoluteError(final double meanAbsoluteError) {
         setDouble(KEY_MEAN_ABS_ERRRO, meanAbsoluteError);
         return this;
     }
@@ -221,7 +221,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      *            the squared error loss or quadratic loss.
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withMeanSquaredError(final double meanSquaredError) {
+    public MLLinearRegressionLearnerMetaData withMeanSquaredError(final double meanSquaredError) {
         setDouble(KEY_MEAN_SQUARED_ERROR, meanSquaredError);
         return this;
     }
@@ -239,7 +239,7 @@ public class MLLinearLearnerMetaData extends MLMetaData {
      *            error.
      * @return this meta data data instance
      */
-    public MLLinearLearnerMetaData withRootMeanSquaredError(final double rootMeanSquaredError) {
+    public MLLinearRegressionLearnerMetaData withRootMeanSquaredError(final double rootMeanSquaredError) {
         setDouble(KEY_ROOT_MEAN_SQUARED_ERROR, rootMeanSquaredError);
         return this;
     }
