@@ -62,11 +62,12 @@ public abstract class MLLinearLearnerJobInput extends NamedModelLearnerJobInput 
      * @param regParam regularization parameter (only used in RIDGE, LASO or ELASTIC_NET mode)
      * @param elasticNetParam elastic net parameter (only used in ELASTIC_NET mode)
      * @param convergenceTolerance convergence tolerance
+     * @param handleInvalid how to handle invalid data (skip or error)
      */
     protected MLLinearLearnerJobInput(final String namedInputObject, final String namedOutputModel,
         final int targetColIdx, final Integer[] featureColIdxs, final int maxIter, final boolean standardization,
         final boolean fitIntercept, final String regularizer, final double regParam,
-        final double elasticNetParam, final double convergenceTolerance) {
+        final double elasticNetParam, final double convergenceTolerance, final String handleInvalid) {
 
         super(namedInputObject, namedOutputModel, targetColIdx, featureColIdxs);
         set(KEY_MAX_ITER, maxIter);
@@ -76,6 +77,7 @@ public abstract class MLLinearLearnerJobInput extends NamedModelLearnerJobInput 
         set(KEY_REG_PARAM, regParam);
         set(KEY_ELASTIC_NET_PARAM, elasticNetParam);
         set(KEY_CONVERGENCE_TOLERANCE, convergenceTolerance);
+        setHandleInvalid(handleInvalid);
     }
 
     /**

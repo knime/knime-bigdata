@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark2_4.jobs.ml.prediction;
 
+import static org.knime.bigdata.spark2_4.api.SparkExceptionUtil.isMissingValueException;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +69,13 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
     public MLModelLearnerJobOutput runJob(final SparkContext sparkContext, final I input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final String handleInvalid = input.handleInvalid("keep"); // backward compatibility
+        final Dataset<Row> dataset;
+        if (handleInvalid.equalsIgnoreCase("skip")) {
+            dataset = dropRowsWithMissingValues(namedObjects.getDataFrame(input.getFirstNamedInputObject()), input);
+        } else {
+            dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        }
 
         final List<String> actualFeatureColumns = new ArrayList<>();
         final List<String> oneHotFeatureColumns = new ArrayList<>();
@@ -83,13 +91,14 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
                 final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
 
                 stages.add(new StringIndexer().setInputCol(field.name()).setOutputCol(indexedFeatureColumn)
-                    .setHandleInvalid("keep"));
+                    .setHandleInvalid(handleInvalid));
 
                 actualFeatureColumns.add(indexedFeatureColumn);
                 if (useNominalDummyVariables()) {
                     oneHotFeatureColumns.add(indexedFeatureColumn);
                 }
             } else {
+                // note: missing values are handled in vector assembler below
                 actualFeatureColumns.add(field.name());
             }
         }
@@ -113,9 +122,10 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
 
         // assemble vector
         final String featureVectorColumn = "features_" + UUID.randomUUID().toString();
-        final VectorAssembler vectorAssembler =
-            new VectorAssembler().setInputCols(actualFeatureColumns.toArray(new String[0]))
-                .setOutputCol(featureVectorColumn).setHandleInvalid("keep");
+        final VectorAssembler vectorAssembler = new VectorAssembler() //
+            .setInputCols(actualFeatureColumns.toArray(new String[0])) //
+            .setOutputCol(featureVectorColumn) //
+            .setHandleInvalid(handleInvalid); // handle missing values in non categorical columns
         stages.add(vectorAssembler);
 
         // add the regressor
@@ -129,7 +139,16 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
         // assemble pipeline and fit
         final Pipeline pipeline = new Pipeline();
         pipeline.setStages(stages.toArray(new PipelineStage[0]));
-        final PipelineModel model = pipeline.fit(dataset);
+        final PipelineModel model;
+        try {
+            model = pipeline.fit(dataset);
+        } catch (final Exception e) { // NOSONAR
+            if (handleInvalid.equalsIgnoreCase("error") && isMissingValueException(e)) {
+                throw new KNIMESparkException("Observed missing values in input columns.", e);
+            } else {
+                throw e;
+            }
+        }
 
         Path serializedModelDir = null;
         Path serializedModelZip = null;
@@ -152,6 +171,19 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
         final Path modelInterpreterData = generateModelInterpreterData(sparkContext, model);
 
         return new MLModelLearnerJobOutput(serializedModelZip, modelInterpreterData, modelMetaData);
+    }
+
+    /**
+     * Drop all rows in given data set that contains any missing value in target or feature columns.
+     */
+    private Dataset<Row> dropRowsWithMissingValues(final Dataset<Row> dataset, final I input) {
+        final String[] fields = dataset.schema().fieldNames();
+        final ArrayList<String> columns = new ArrayList<>();
+        columns.add(fields[input.getTargetColumnIndex()]);
+        for (int featureColIndex : input.getColumnIdxs()) {
+            columns.add(fields[featureColIndex]);
+        }
+        return dataset.na().drop(columns.toArray(new String[0]));
     }
 
     /**

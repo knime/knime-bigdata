@@ -54,15 +54,16 @@ public class MLLinearRegressionLearnerJobInput extends MLLinearLearnerJobInput {
      * @param elasticNetParam elastic net parameter (only used in ELASTIC_NET mode)
      * @param solver auto, normal or l-bfgs solver to use
      * @param convergenceTolerance convergence tolerance
+     * @param handleInvalid how to handle invalid data (skip or error)
      */
     public MLLinearRegressionLearnerJobInput(final String namedInputObject, final String namedOutputModel,
         final int targetColIdx, final Integer[] featureColIdxs, final String loss,
         final int maxIter, final boolean standardization, final boolean fitIntercept,
         final String regularizer, final double regParam, final double elasticNetParam,
-        final String solver, final double convergenceTolerance) {
+        final String solver, final double convergenceTolerance, final String handleInvalid) {
 
         super(namedInputObject, namedOutputModel, targetColIdx, featureColIdxs, maxIter, standardization, fitIntercept,
-            regularizer, regParam, elasticNetParam, convergenceTolerance);
+            regularizer, regParam, elasticNetParam, convergenceTolerance, handleInvalid);
 
         set(KEY_LOSS_FUNCTION, loss);
         set(KEY_SOLVER, solver);

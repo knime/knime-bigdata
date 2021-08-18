@@ -65,6 +65,9 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
 
     private final SettingsModelDouble m_elasticNetParam = new SettingsModelDoubleBounded("elasticNetParam", 0.5, 0, 1);
 
+    private final SettingsModelString m_handleInvalid =
+            new SettingsModelString("handleInvalid", MLLinearRegressionLearnerHandleInvalid.ERROR.name());
+
     /**
      * @return loss function to optimize
      */
@@ -192,6 +195,20 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
     }
 
     /**
+     * @return handle invalid parameter
+     */
+    public MLLinearRegressionLearnerHandleInvalid getHandleInvalid() {
+        return MLLinearRegressionLearnerHandleInvalid.valueOf(m_handleInvalid.getStringValue());
+    }
+
+    /**
+     * @return handle invalid parameter model
+     */
+    public SettingsModelString getHandleInvalidModel() {
+        return m_handleInvalid;
+    }
+
+    /**
      * Constructor.
      *
      * @param mode Whether this is a settings model for the (deprecated) MLlib learner, or the new ML learner nodes
@@ -245,6 +262,7 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
         m_regularizer.saveSettingsTo(settings);
         m_regParam.saveSettingsTo(settings);
         m_elasticNetParam.saveSettingsTo(settings);
+        m_handleInvalid.saveSettingsTo(settings);
 
         if (m_mode == LinearLearnerMode.LINEAR_REGRESSION) {
             m_lossFunction.saveSettingsTo(settings);
@@ -267,6 +285,7 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
         m_regularizer.validateSettings(settings);
         m_regParam.validateSettings(settings);
         m_elasticNetParam.validateSettings(settings);
+        m_handleInvalid.validateSettings(settings);
 
         if (m_mode == LinearLearnerMode.LINEAR_REGRESSION) {
             m_lossFunction.validateSettings(settings);
@@ -289,6 +308,7 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
         m_regularizer.loadSettingsFrom(settings);
         m_regParam.loadSettingsFrom(settings);
         m_elasticNetParam.loadSettingsFrom(settings);
+        m_handleInvalid.loadSettingsFrom(settings);
 
         if (m_mode == LinearLearnerMode.LINEAR_REGRESSION) {
             m_lossFunction.loadSettingsFrom(settings);

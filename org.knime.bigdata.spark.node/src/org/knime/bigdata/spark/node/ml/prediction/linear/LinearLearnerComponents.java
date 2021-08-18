@@ -63,8 +63,11 @@ public class LinearLearnerComponents extends MLlibNodeComponents<LinearLearnerSe
     private final DialogComponentNumber m_convTol =
         new DialogComponentNumber(getSettings().getConvergenceToleranceModel(), null, 0.000001, 10);
 
+    private final DialogComponentButtonGroup m_handleInvalid = new DialogComponentButtonGroup(
+        getSettings().getHandleInvalidModel(), null, false, MLLinearRegressionLearnerHandleInvalid.values());
+
     private final DialogComponent[] m_components = new DialogComponent[]{m_lossFunction, m_maxIter, m_standardization,
-        m_fitIntercept, m_regularizer, m_regParam, m_elasticNetParam, m_solver, m_convTol};
+        m_fitIntercept, m_regularizer, m_regParam, m_elasticNetParam, m_solver, m_convTol, m_handleInvalid};
 
     /**
      * Constructor.
@@ -161,5 +164,12 @@ public class LinearLearnerComponents extends MLlibNodeComponents<LinearLearnerSe
      */
     public DialogComponentNumber getConvergenceToleranceComponent() {
         return m_convTol;
+    }
+
+    /**
+     * @return handle invalid dialog component
+     */
+    public DialogComponentButtonGroup getHandleInvalidComponent() {
+        return m_handleInvalid;
     }
 }

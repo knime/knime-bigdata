@@ -97,6 +97,9 @@ public class LinearLearnerNodeDialog extends NodeDialogPane {
         addSeparatorAndLabel(settingsTab, "Regularization Options", gbc);
         addRegularizationOptions(settingsTab, gbc);
 
+        addSeparatorAndLabel(settingsTab, "Missing Values in Input Columns", gbc);
+        addMissingValuesOptions(settingsTab, gbc);
+
         return settingsTab;
     }
 
@@ -135,6 +138,11 @@ public class LinearLearnerNodeDialog extends NodeDialogPane {
 
         gbc.gridy++;
         addLine(panel, "Elastic net parameter", m_components.getElasticNetParamComponent().getComponentPanel(), gbc);
+    }
+
+    private void addMissingValuesOptions(final JPanel panel, final GridBagConstraints gbc) {
+        gbc.gridy++;
+        addLine(panel, "Rows with missing values", m_components.getHandleInvalidComponent().getComponentPanel(), gbc);
     }
 
     private void addAdvancedOptions(final JPanel panel, final GridBagConstraints gbc) {

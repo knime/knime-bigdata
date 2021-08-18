@@ -28,8 +28,7 @@
 		
 		<tab name="Settings">
 			<option name="Target column">
-				A numeric column that contains the values to train with. Rows with missing values in this column will
-				be ignored during model training.
+				A numeric column that contains the values to train with.
 			</option>
 
 			<option name="Feature Columns">
@@ -69,6 +68,14 @@
 					<li>Elastic Net (L1+L2) using a given regularization and Elastic Net parameter</li>
 				</ul>
 			</option>
+
+            <option name="Missing Values in Input Columns">
+                Defines how rows with missing values in the target and feature columns should be handled:
+                <ul>
+                    <li>Ignore: Ignores the entire row during model training, if any of the input columns contain a missing value.</li>
+                    <li>Fail: Aborts the node execution with an error, if any of the input columns contain a missing value.</li>
+                </ul>
+            </option>
 		</tab>
 		
 		<tab name="Advanced">

@@ -69,13 +69,13 @@
                 For values in (0,1), the penalty is a combination of L1 and L2.
             </option>
 
-			<option name="Missing Values in Input Columns">
-				Defines how rows with missing values in the target and feature column should be handled.
-				<ul>
-					<li>Ignore rows: Ignore the entire row in model training if any of the input columns contains missing values.</li>
-					<li>Fail with error: Node execution should fail if any of the input columns contains missing values.</li>
-				</ul>
-			</option>
+            <option name="Missing Values in Input Columns">
+                Defines how rows with missing values in the target and feature columns should be handled:
+                <ul>
+                    <li>Ignore: Ignores the entire row during model training, if any of the input columns contain a missing value.</li>
+                    <li>Fail: Aborts the node execution with an error, if any of the input columns contain a missing value.</li>
+                </ul>
+            </option>
 		</tab>
 		
 		<tab name="Advanced">
