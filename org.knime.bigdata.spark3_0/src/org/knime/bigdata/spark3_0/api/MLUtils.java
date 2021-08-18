@@ -120,6 +120,21 @@ public class MLUtils {
      * @param metaData Meta data object to add nominal value mappings to.
      */
     public static void addNominalFeatureValuesMappingsToMetaData(final PipelineModel model, final MLMetaData metaData) { // NOSONAR ignore complexity
+        final List<String> featureValues = getNominalFeatureValuesAddTargetValuesToMetaData(model, metaData);
+        metaData.withNominalFeatureValues(featureValues);
+    }
+
+    /**
+     * Returns nominal feature values for all feature columns and adds value mappings for the target column (if applicable) to
+     * the given {@link MLMetaData}. The given pipeline model is assumed to consist of 0..n {@link StringIndexerModel}
+     * stages, followed by on {@link OneHotEncoder}, followed by one {@link VectorAssembler}. The actual
+     * regression/classification model will not be looked at.
+     *
+     * @param model The fitted pipeline model.
+     * @param metaData Meta data object to add nominal value mappings to.
+     * @return list of feature values
+     */
+    public static List<String> getNominalFeatureValuesAddTargetValuesToMetaData(final PipelineModel model, final MLMetaData metaData) { // NOSONAR ignore complexity
         final VectorAssembler vectorAssembler = findFirstStageOfType(model, VectorAssembler.class);
         final Optional<OneHotEncoderModel> oneHotEncoder = findFirstOptionalStageOfType(model, OneHotEncoderModel.class);
         final List<String> oneHotEncoderInputCols = oneHotEncoder //
@@ -153,18 +168,16 @@ public class MLUtils {
             final StringIndexerModel stringIndexer = oneHotStringIndexer.get(vecInputCol);
             if (stringIndexer != null) {
                 final String[] labels = stringIndexer.labelsArray()[0];
+                // Note that the one hot encoder drops the last category and that's why we skip the last one here too.
                 for (int i = 0; i < labels.length - 1; i++) {
                     featureValues.add(stringIndexer.getInputCol() + "=" + labels[i]);
-                }
-                if (stringIndexer.getHandleInvalid().equalsIgnoreCase("keep")) {
-                    featureValues.add(stringIndexer.getInputCol() + "=?");
                 }
             } else {
                 featureValues.add(vecInputCol);
             }
         }
 
-        metaData.withNominalFeatureValues(featureValues);
+        return featureValues;
     }
 
 }

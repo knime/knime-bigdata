@@ -32,6 +32,7 @@ import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.classification.Classifier;
 import org.apache.spark.ml.classification.ProbabilisticClassifier;
 import org.apache.spark.ml.feature.IndexToString;
+import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
@@ -73,6 +74,7 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
 
         final List<String> actualFeatureColumns = new ArrayList<>();
+        final List<String> oneHotFeatureColumns = new ArrayList<>();
         final List<PipelineStage> stages = new ArrayList<>();
 
         final String targetColumn = dataset.schema().fields()[input.getTargetColumnIndex()].name();
@@ -97,9 +99,29 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
                     .setHandleInvalid("keep"));
 
                 actualFeatureColumns.add(indexedFeatureColumn);
+                if (useNominalDummyVariables()) {
+                    oneHotFeatureColumns.add(indexedFeatureColumn);
+                }
             } else {
                 actualFeatureColumns.add(field.name());
             }
+        }
+
+        if (!oneHotFeatureColumns.isEmpty()) {
+            final String[] inputColumns = oneHotFeatureColumns.toArray(new String[0]);
+            final String[] outputColumns = new String[inputColumns.length];
+            for (int i = 0; i < inputColumns.length; i++) {
+                final String outputCol = inputColumns[i] + "_one_hot";
+                outputColumns[i] = outputCol;
+                // replace feature column with one hot output column
+                actualFeatureColumns.set(actualFeatureColumns.indexOf(inputColumns[i]), outputCol);
+            }
+            final OneHotEncoder oneHotEncoder = new OneHotEncoder() //
+                    .setInputCols(inputColumns) //
+                    .setOutputCols(outputColumns) //
+                    .setDropLast(true) //
+                    .setHandleInvalid("error"); // inputs are the string indexer from above and they should always present
+            stages.add(oneHotEncoder);
         }
 
         // assemble vector
@@ -170,4 +192,12 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
     protected abstract Path generateModelInterpreterData(final SparkContext sparkContext, final PipelineModel model)
         throws Exception;
 
+    /**
+     * Subclasses can overwrite this method to convert nominal values into dummy variables.
+     *
+     * @return {@code true} if a one hot encoder should be used on nominal values
+     */
+    protected boolean useNominalDummyVariables() {
+        return false;
+    }
 }
