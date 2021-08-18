@@ -89,10 +89,11 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
 
         // index the nominal target column
         final String indexedTargetColumn = targetColumn + "_" + UUID.randomUUID().toString();
-        final StringIndexer targetColIndexer = new StringIndexer()
-                .setInputCol(targetColumn)
-                .setOutputCol(indexedTargetColumn)
-                .setHandleInvalid(handleInvalid);
+        final StringIndexer targetColIndexer = new StringIndexer() //
+            .setInputCol(targetColumn) //
+            .setOutputCol(indexedTargetColumn) //
+            .setStringOrderType(getTargetStringOrderType()) //
+            .setHandleInvalid(handleInvalid);
         final StringIndexerModel targetColIndexerModel = targetColIndexer.fit(dataset);
         stages.add(targetColIndexer);
 
@@ -103,7 +104,10 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
             if (field.dataType() == DataTypes.StringType) {
                 final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
 
-                stages.add(new StringIndexer().setInputCol(field.name()).setOutputCol(indexedFeatureColumn)
+                stages.add(new StringIndexer() //
+                    .setInputCol(field.name()) //
+                    .setOutputCol(indexedFeatureColumn) //
+                    .setStringOrderType(getNominalFeatureStringOrderType()) //
                     .setHandleInvalid(handleInvalid));
 
                 actualFeatureColumns.add(indexedFeatureColumn);
@@ -231,5 +235,23 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
      */
     protected boolean useNominalDummyVariables() {
         return false;
+    }
+
+    /**
+     * How to order target string values before indexing them.
+     *
+     * @return string indexer string order type
+     */
+    protected String getTargetStringOrderType() {
+        return "frequencyDesc"; // Spark default / backward compatibility
+    }
+
+    /**
+     * How to order nominal feature string values before indexing them.
+     *
+     * @return string indexer string order type
+     */
+    protected String getNominalFeatureStringOrderType() {
+        return "frequencyDesc"; // Spark default / backward compatibility
     }
 }

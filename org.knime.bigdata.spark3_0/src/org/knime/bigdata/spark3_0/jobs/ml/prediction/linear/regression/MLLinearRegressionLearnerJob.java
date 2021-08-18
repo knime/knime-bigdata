@@ -29,8 +29,8 @@ import org.apache.spark.ml.regression.LinearRegressionSummary;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
-import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionLearnerMetaData;
 import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionLearnerJobInput;
+import org.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionLearnerMetaData;
 import org.knime.bigdata.spark3_0.api.MLUtils;
 import org.knime.bigdata.spark3_0.jobs.ml.prediction.MLRegressionLearnerJob;
 
@@ -43,11 +43,6 @@ import org.knime.bigdata.spark3_0.jobs.ml.prediction.MLRegressionLearnerJob;
 public class MLLinearRegressionLearnerJob extends MLRegressionLearnerJob<MLLinearRegressionLearnerJobInput> {
 
     private static final long serialVersionUID = 2157035134300354540L;
-
-    @Override
-    protected boolean useNominalDummyVariables() {
-        return true;
-    }
 
     @Override
     protected Predictor<?, ?, ?> createRegressor(final MLLinearRegressionLearnerJobInput input)
@@ -124,4 +119,15 @@ public class MLLinearRegressionLearnerJob extends MLRegressionLearnerJob<MLLinea
 
         return metaData;
     }
+
+    @Override
+    protected boolean useNominalDummyVariables() {
+        return true;
+    }
+
+    @Override
+    protected String getNominalFeatureStringOrderType() {
+        return "alphabetAsc";
+    }
+
 }
