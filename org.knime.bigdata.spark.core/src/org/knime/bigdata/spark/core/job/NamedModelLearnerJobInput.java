@@ -35,6 +35,8 @@ public class NamedModelLearnerJobInput extends ColumnsJobInput {
 
     private final static String KEY_TARGET_COLUMN_INDEX = "targetColIdx";
 
+    private static final String KEY_HANDLE_INVALID = "handleInvalid";
+
     /**
      * Paramless constructor for automatic deserialization.
      */
@@ -91,5 +93,24 @@ public class NamedModelLearnerJobInput extends ColumnsJobInput {
      */
     public List<Integer> getFeatureColumIndexes() {
         return getColumnIdxs();
+    }
+
+    /**
+     * @param mode how to handle invalid values (skip, keep or error)
+     */
+    public void setHandleInvalid(final String mode) {
+        set(KEY_HANDLE_INVALID, mode);
+    }
+
+    /**
+     * @param defaultMode mode to return if option was not set
+     * @return how to handle invalid values (skip, keep, error or {@code defaultMode} if not set)
+     */
+    public String handleInvalid(final String defaultMode) {
+        if (has(KEY_HANDLE_INVALID)) {
+            return get(KEY_HANDLE_INVALID);
+        } else {
+            return defaultMode;
+        }
     }
 }

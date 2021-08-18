@@ -113,7 +113,8 @@ public class MLLinearRegressionLearnerNodeModel
             settings.getRegParam(), //
             settings.getElasticNetParam(), //
             settings.getSolver().toSparkName(), //
-            settings.getConvergenceTolerance());
+            settings.getConvergenceTolerance(), //
+            settings.getHandleInvalid().toSparkName());
     }
 
     private static DataTableSpec createCoefficientsAndInterceptTableSpec() {

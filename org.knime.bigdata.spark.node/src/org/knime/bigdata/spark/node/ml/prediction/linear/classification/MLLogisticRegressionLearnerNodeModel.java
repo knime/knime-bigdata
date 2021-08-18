@@ -113,7 +113,8 @@ public class MLLogisticRegressionLearnerNodeModel
             settings.getRegularizer().name(), //
             settings.getRegParam(), //
             settings.getElasticNetParam(), //
-            settings.getConvergenceTolerance());
+            settings.getConvergenceTolerance(), //
+            settings.getHandleInvalid().toSparkName());
     }
 
     private static DataTableSpec createCoefficientsAndInterceptTableSpec(final MLLogisticRegressionLearnerMetaData metaData) {
