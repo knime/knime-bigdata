@@ -52,11 +52,6 @@ public class MLLogisticRegressionLearnerJob extends MLClassificationLearnerJob<M
     private static final long serialVersionUID = 2157035134300354540L;
 
     @Override
-    protected boolean useNominalDummyVariables() {
-        return true;
-    }
-
-    @Override
     protected Classifier<?, ?, ?> createClassifier(final MLLogisticRegressionLearnerJobInput input) {
         final LogisticRegression logisticRegression = new LogisticRegression() //
             .setFamily("auto") //
@@ -185,4 +180,20 @@ public class MLLogisticRegressionLearnerJob extends MLClassificationLearnerJob<M
                     .withWeightedRecall(summary.weightedRecall());
         }
     }
+
+    @Override
+    protected boolean useNominalDummyVariables() {
+        return true;
+    }
+
+    @Override
+    protected String getTargetStringOrderType() {
+        return "alphabetAsc";
+    }
+
+    @Override
+    protected String getNominalFeatureStringOrderType() {
+        return "alphabetAsc";
+    }
+
 }

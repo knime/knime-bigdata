@@ -90,7 +90,10 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
             if (field.dataType() == DataTypes.StringType) {
                 final String indexedFeatureColumn = field.name() + "_" + UUID.randomUUID().toString();
 
-                stages.add(new StringIndexer().setInputCol(field.name()).setOutputCol(indexedFeatureColumn)
+                stages.add(new StringIndexer() //
+                    .setInputCol(field.name()) //
+                    .setOutputCol(indexedFeatureColumn) //
+                    .setStringOrderType(getNominalFeatureStringOrderType()) //
                     .setHandleInvalid(handleInvalid));
 
                 actualFeatureColumns.add(indexedFeatureColumn);
@@ -221,5 +224,13 @@ public abstract class MLRegressionLearnerJob<I extends NamedModelLearnerJobInput
      */
     protected boolean useNominalDummyVariables() {
         return false;
+    }
+
+    /**
+     * How to order nominal feature string values before indexing them.
+     * @return string indexer string order type
+     */
+    protected String getNominalFeatureStringOrderType() {
+        return "frequencyDesc"; // Spark default = backward compatibility
     }
 }
