@@ -58,7 +58,7 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
     private final SettingsModelBoolean m_fitIntercept = new SettingsModelBoolean("fitIntercept", true);
 
     private final SettingsModelString m_regularizer =
-        new SettingsModelString("regularizer", LinearLearnerRegularizer.RIDGE.name());
+        new SettingsModelString("regularizer", LinearLearnerRegularizer.NONE.name());
 
     private final SettingsModelDouble m_regParam =
         new SettingsModelDoubleBounded("regParam", 0.01, 0, Double.MAX_VALUE);
