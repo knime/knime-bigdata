@@ -69,6 +69,10 @@ try {
                     'knime-virtual',
                     'knime-xml',
                 ],
+                ius: [
+                    'org.knime.features.ext.h2o.mojo.spark.feature.group',
+                    'org.knime.features.ext.h2o.spark.feature.group',
+                ],
             ],
             sidecarContainers: [
                 [ image: "${dockerTools.ECR}/knime/mssql-server", namePrefix: "MSSQLSERVER", port: 1433, 
