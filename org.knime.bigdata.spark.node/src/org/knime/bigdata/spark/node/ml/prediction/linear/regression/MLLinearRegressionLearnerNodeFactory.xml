@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
+<knimeNode xmlns="http://knime.org/node/v4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd"
     type="Learner" icon="icon.png">
     <name>Spark Linear Regression Learner</name>
 	<shortDescription>Trains a linear regression model in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
-			Learns a linear regression model. Learning a linear regression model means minimizing a given loss function
-			with regularization. This node uses the
+			This node uses the
 			<a
 				href="https://spark.apache.org/docs/3.0.1/ml-classification-regression.html#regression">
 				spark.ml linear regression
 			</a>
-			implementation to train a regression model in Spark. The target column must be numeric, whereas the
-			feature columns can be either nominal or numerical.
+			implementation to train a linear regression model in Spark, supporting different regularization options.
+			The target column must be numeric, whereas the feature columns can be either nominal or numerical.
 			<p>
 				Use the
 				<i>Spark Predictor (Regression)</i>
@@ -28,22 +26,22 @@
 		
 		<tab name="Settings">
 			<option name="Target column">
-				A numeric column that contains the values to train with.
+				A numeric column that contains the values to train, also known as the <i>dependent variable</i>.
 			</option>
 
 			<option name="Feature Columns">
-				The feature columns to learn the model with. Both nominal and numeric columns are supported,
-				whereby for nominal data dummy variables are automatically created as described in section
-				<a
-					href="https://en.wikipedia.org/wiki/Categorical_variable#Categorical_variables_in_regression">
-					Categorical variables in regression
-				</a>.
-				The dialog allows to select the columns manually (by moving them to the right panel) or via a
-				wildcard/regex selection (all columns whose names match the wildcard/regex are used for learning).
-				In case of manual selection, the behavior for new columns (i.e. that are not available at the
-				time you configure the node) can be specified as either Enforce exclusion (new columns are
-				excluded and therefore not used for learning) or Enforce inclusion (new columns are included
-				and therefore used for learning).
+                The feature columns to learn the model with. Both nominal and numeric columns are supported,
+                whereby for nominal data dummy variables are automatically created as described in section
+                <a
+                    href="https://en.wikipedia.org/wiki/Categorical_variable#Categorical_variables_and_regression">
+                    Categorical variables and regression
+                </a>.
+                The dialog allows you to select the columns manually (by moving them to the right panel) or via a
+                wildcard/regex selection (all columns whose names match the wildcard/regex are used for learning).
+                In case of manual selection, the behavior for new columns (i.e. that are not available at the
+                time you configure the node) can be specified as either Enforce exclusion (new columns are
+                excluded and therefore not used for learning) or Enforce inclusion (new columns are included
+                and therefore used for learning).
 			</option>
 
 			<option name="Loss function">
@@ -59,15 +57,25 @@
 				Note that the coefficients of models will be always returned on the original scale.
 			</option>
 
-			<option name="Regularizer">
-				The supported types of regularization are:
-				<ul>
-					<li>None (a.k.a. ordinary least squares)</li>
-					<li>Ridge Regression (L2) using a given regularization parameter</li>
-					<li>Lasso (L1) using a given regularization parameter</li>
-					<li>Elastic Net (L1+L2) using a given regularization and Elastic Net parameter</li>
-				</ul>
-			</option>
+            <option name="Regularizer">
+                The purpose of the <a href="http://en.wikipedia.org/wiki/Regularization_(mathematics)">regularizer</a> is to encourage
+                simple models and avoid overfitting. The supported types of regularization are:
+                <ul>
+                    <li>None (a.k.a. ordinary least squares)</li>
+                    <li>Ridge Regression (L2) using a given regularization parameter</li>
+                    <li>Lasso (L1) using a given regularization parameter</li>
+                    <li>Elastic Net (L1+L2) using a given regularization and Elastic Net parameter</li>
+                </ul>
+            </option>
+            
+            <option name="Regularization parameter">
+                Defines the regularization penalty.
+            </option>
+            
+            <option name="Elastic net parameter">
+                Defines the mixing parameter between L1 and L2 regularization. 0 corresponds to L2 regularization. 1 corresponds to L1 regularization.
+                For values in (0,1), the penalty is a combination of L1 and L2.
+            </option>
 
             <option name="Missing Values in Input Columns">
                 Defines how rows with missing values in the target and feature columns should be handled:
