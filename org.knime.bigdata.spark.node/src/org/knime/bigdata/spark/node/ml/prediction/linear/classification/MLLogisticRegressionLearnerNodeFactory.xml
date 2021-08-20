@@ -97,7 +97,7 @@
     <ports>
 		<inPort index="0" name="Input data">Input Spark DataFrame with training data.</inPort>
 		<outPort index="0" name="Spark ML linear learner model (regression)">Spark ML linear learner model (regression)</outPort>
-		<outPort index="1" name="Coefficients and Intercept">Coefficients and statistics of the logistic regression model.</outPort>
-		<outPort index="2" name="Model Statistics">Statistical measures of the learned regression model, when applied to the training dataset</outPort>
+		<outPort index="1" name="Coefficients and Intercept">Coefficients and Intercept of the logistic regression model.</outPort>
+		<outPort index="2" name="Accuracy Statistics">Accuracy statistical measures of the learned regression model, when applied to the training dataset</outPort>
     </ports>
 </knimeNode>

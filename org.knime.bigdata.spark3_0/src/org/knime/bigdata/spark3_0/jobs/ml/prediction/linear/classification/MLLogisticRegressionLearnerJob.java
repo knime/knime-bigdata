@@ -20,7 +20,6 @@ package org.knime.bigdata.spark3_0.jobs.ml.prediction.linear.classification;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.SparkContext;
@@ -100,84 +99,84 @@ public class MLLogisticRegressionLearnerJob extends MLClassificationLearnerJob<M
         final boolean isMultinomial = lrModel.org$apache$spark$ml$classification$LogisticRegressionModel$$isMultinomial();
         final MLLogisticRegressionLearnerMetaData metaData = new MLLogisticRegressionLearnerMetaData(isMultinomial);
 
+        final Matrix coeffMatr = lrModel.coefficientMatrix();
         final List<String> featureValues = MLUtils.getNominalFeatureValuesAddTargetValuesToMetaData(pipelineModel, metaData);
-        final ArrayList<String> colNames = new ArrayList<>();
-        colNames.addAll(featureValues);
+
 
         if (isMultinomial) {
-            final ArrayList<ArrayList<Double>> rows = new ArrayList<>();
-            final Matrix coeffMatr = lrModel.coefficientMatrix();
-            final double[] intercept;
-            if (lrModel.getFitIntercept()) {
-                intercept = lrModel.interceptVector().toArray();
-                colNames.add("Intercept");
-            } else {
-                intercept = new double[0];
+            final ArrayList<String> targetLabels = new ArrayList<>();
+            final ArrayList<String> variableLabels = new ArrayList<>();
+            final ArrayList<Double> coefficients = new ArrayList<>();
+
+            final List<String> targetValues = metaData.getNominalTargetValueMappings();
+            final double[] intercept = lrModel.interceptVector().toArray();
+
+            int targetIndex = 0;
+            final Iterator<Vector> rowIter = coeffMatr.rowIter();
+            while(rowIter.hasNext()) {
+                final double[] coeffRow = rowIter.next().toArray();
+                for (int i = 0; i < coeffRow.length; i++) {
+                    targetLabels.add(targetValues.get(targetIndex));
+                    variableLabels.add(featureValues.get(i));
+                    coefficients.add(coeffRow[i]);
+                }
+                if (lrModel.getFitIntercept()) {
+                    targetLabels.add(targetValues.get(targetIndex));
+                    variableLabels.add("Intercept");
+                    coefficients.add(intercept[targetIndex]);
+                }
+                targetIndex++;
             }
 
             final LogisticRegressionTrainingSummary summary = lrModel.summary();
+            final ArrayList<double[]> accuracyStatRows = new ArrayList<>();
             final double[] falsePositiveRate = summary.falsePositiveRateByLabel();
-            colNames.add("False Positive Rate");
             final double[] truePositiveRate = summary.truePositiveRateByLabel();
-            colNames.add("True Positive Rate");
-            final double[] precission = summary.precisionByLabel();
-            colNames.add("Precission");
             final double[] recall = summary.recallByLabel();
-            colNames.add("Recall");
+            final double[] precission = summary.precisionByLabel();
             final double[] fMeasure = summary.fMeasureByLabel();
-            colNames.add("F-measure");
 
-            final Iterator<Vector> rowIter = coeffMatr.rowIter();
-            int i = 0;
-            while(rowIter.hasNext()) {
-                final double[] coeffRow = rowIter.next().toArray();
-                final ArrayList<Double> row = new ArrayList<>(coeffRow.length + 6);
-                for (double coeff : coeffRow) {
-                    row.add(coeff);
-                }
-
-                if (lrModel.getFitIntercept()) {
-                    row.add(intercept[i]);
-                }
-
-                row.add(falsePositiveRate[i]);
-                row.add(truePositiveRate[i]);
-                row.add(precission[i]);
-                row.add(recall[i]);
-                row.add(fMeasure[i]);
-
-                rows.add(row);
+            for (int i = 0; i < falsePositiveRate.length; i++) {
+                accuracyStatRows.add(new double[] { falsePositiveRate[i], truePositiveRate[i], recall[i], precission[i], fMeasure[i] });
             }
 
-            return metaData.withCoefficients(colNames, rows) //
-                    .withAccuracy(summary.accuracy()) //
-                    .withWeightedFalsePositiveRate(summary.weightedFalsePositiveRate()) //
-                    .withWeightedTruePositiveRate(summary.weightedTruePositiveRate()) //
-                    .withWeightedFMeasure(summary.weightedFMeasure()) //
-                    .withWeightedPrecission(summary.weightedPrecision()) //
-                    .withWeightedRecall(summary.weightedRecall());
+            accuracyStatRows.add(new double[] {
+                summary.weightedFalsePositiveRate(), //
+                summary.weightedTruePositiveRate(), //
+                summary.weightedRecall(), //
+                summary.weightedPrecision(), //
+                summary.weightedFMeasure() //
+            });
+
+            return metaData.withCoefficients(targetLabels, variableLabels, coefficients).withAccuracy(accuracyStatRows, summary.accuracy());
 
         } else {
-            final BinaryLogisticRegressionTrainingSummary summary = lrModel.binarySummary();
-            final double[] coeffRow = lrModel.coefficients().toArray();
-            final ArrayList<Double> row = new ArrayList<>(coeffRow.length + 1);
+            final ArrayList<String> targetLabels = new ArrayList<>();
+            final ArrayList<String> variableLabels = new ArrayList<>();
+            final ArrayList<Double> coefficients = new ArrayList<>();
 
-            for (double coeff : coeffRow) {
-                row.add(coeff);
+            variableLabels.addAll(featureValues);
+            for (final double coeff : lrModel.coefficients().toArray()) {
+                coefficients.add(coeff);
             }
 
             if (lrModel.getFitIntercept()) {
-                row.add(lrModel.intercept());
-                colNames.add("Intercept");
+                variableLabels.add("Intercept");
+                coefficients.add(lrModel.intercept());
             }
 
-            return metaData.withCoefficients(colNames, Collections.singletonList(row)) //
-                    .withAccuracy(summary.accuracy()) //
-                    .withWeightedFalsePositiveRate(summary.weightedFalsePositiveRate()) //
-                    .withWeightedTruePositiveRate(summary.weightedTruePositiveRate()) //
-                    .withWeightedFMeasure(summary.weightedFMeasure()) //
-                    .withWeightedPrecission(summary.weightedPrecision()) //
-                    .withWeightedRecall(summary.weightedRecall());
+            final BinaryLogisticRegressionTrainingSummary summary = lrModel.binarySummary();
+            final ArrayList<double[]> accuracyStatRows = new ArrayList<>();
+
+            accuracyStatRows.add(new double[] {
+                summary.weightedFalsePositiveRate(), //
+                summary.weightedTruePositiveRate(), //
+                summary.weightedRecall(), //
+                summary.weightedPrecision(), //
+                summary.weightedFMeasure() //
+            });
+
+            return metaData.withCoefficients(targetLabels, variableLabels, coefficients).withAccuracy(accuracyStatRows, summary.accuracy());
         }
     }
 
