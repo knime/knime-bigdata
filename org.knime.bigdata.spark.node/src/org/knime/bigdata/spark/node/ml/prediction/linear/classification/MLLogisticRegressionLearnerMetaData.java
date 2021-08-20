@@ -17,7 +17,6 @@
  */
 package org.knime.bigdata.spark.node.ml.prediction.linear.classification;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -33,21 +32,16 @@ public class MLLogisticRegressionLearnerMetaData extends MLMetaData {
 
     private static final String KEY_MULTINOMIAL = "multinomial";
 
-    private static final String KEY_COEFF_COL_LABLES = "coefficientColLabels";
+    private static final String KEY_COEFF_TARGETS = "coefficientLogit";
 
-    private static final String KEY_COEFF_ROWS = "coefficientRows";
+    private static final String KEY_COEFF_VARIABLES = "coefficientVariable";
+
+    private static final String KEY_COEFF = "coefficients";
+
+    private static final String KEY_ACCURACY_STAT_ROWS = "accuracyStatisticRows";
 
     private static final String KEY_ACCURACY = "accuracy";
 
-    private static final String KEY_WEIGHTED_FALSE_POSITIVE_RATE = "weightedFalsePositiveRate";
-
-    private static final String KEY_WEIGHTED_TRUE_POSITIVE_RATE = "weightedTruePositiveRate";
-
-    private static final String KEY_WEIGHTED_F_MEASURE = "weightedFMeasure";
-
-    private static final String KEY_WEIGHTED_PRECISION = "weightedPrecision";
-
-    private static final String KEY_WEIGHTED_RECALL = "weightedRecall";
 
     /**
      * Constructor for (de)serialization.
@@ -71,38 +65,52 @@ public class MLLogisticRegressionLearnerMetaData extends MLMetaData {
     }
 
     /**
-     * Set coefficient column labels and rows
-     * @param coeffColLabels labels of the columns
-     * @param coeffRows rows of the coefficient table
+     * Set coefficient target, variables and coefficients
+     *
+     * @param targetsLabels target column labels
+     * @param variableLabels variable column labels
+     * @param coefficients coefficients column values
+     *
      * @return this meta data data instance
      */
-    public MLLogisticRegressionLearnerMetaData withCoefficients(final List<String> coeffColLabels, final List<ArrayList<Double>> coeffRows) {
-        set(KEY_COEFF_COL_LABLES, coeffColLabels);
-        set(KEY_COEFF_ROWS, coeffRows);
+    public MLLogisticRegressionLearnerMetaData withCoefficients(final List<String> targetsLabels, final List<String> variableLabels, final List<Double> coefficients) {
+        set(KEY_COEFF_TARGETS, targetsLabels);
+        set(KEY_COEFF_VARIABLES, variableLabels);
+        set(KEY_COEFF, coefficients);
         return this;
     }
 
-    /**
-     * @return labels of the coefficient table columns
-     */
-    public List<String> getCoefficientCols() {
-        return get(KEY_COEFF_COL_LABLES);
+    public List<String> coeffTagetLabels() {
+        return get(KEY_COEFF_TARGETS);
+    }
+
+    public List<String> coeffVariableLabels() {
+        return get(KEY_COEFF_VARIABLES);
+    }
+
+    public List<Double> coefficients() {
+        return get(KEY_COEFF);
     }
 
     /**
-     * @return rows of the coefficient table
-     */
-    public List<List<Double>> getCoefficientRows() {
-        return get(KEY_COEFF_ROWS);
-    }
-
-    /**
-     * @param accuracy
+     * Set accuracy statistics
+     *
+     * @param accuracyStatRows accuracy rows for each target class and one weighted row
+     * @param accuracy the total number of correctly classified instances out of the total number of instances.
+     *
      * @return this meta data data instance
      */
-    public MLLogisticRegressionLearnerMetaData withAccuracy(final double accuracy) {
+    public MLLogisticRegressionLearnerMetaData withAccuracy(final List<double[]> accuracyStatRows, final double accuracy) {
+        set(KEY_ACCURACY_STAT_ROWS, accuracyStatRows);
         setDouble(KEY_ACCURACY, accuracy);
         return this;
+    }
+
+    /**
+     * @return accuracy statistic rows
+     */
+    public List<double[]> getAccuracyStatRows() {
+        return get(KEY_ACCURACY_STAT_ROWS);
     }
 
     /**
@@ -111,86 +119,6 @@ public class MLLogisticRegressionLearnerMetaData extends MLMetaData {
      */
     public double getAccuracy() {
         return getDouble(KEY_ACCURACY);
-    }
-
-    /**
-     * @param weightedFalsePositiveRate
-     * @return this meta data data instance
-     */
-    public MLLogisticRegressionLearnerMetaData withWeightedFalsePositiveRate(final double weightedFalsePositiveRate) {
-        setDouble(KEY_WEIGHTED_FALSE_POSITIVE_RATE, weightedFalsePositiveRate);
-        return this;
-    }
-
-    /**
-     * @return weighted false positive rate.
-     */
-    public double getWeightedFalsePositiveRate() {
-        return getDouble(KEY_WEIGHTED_FALSE_POSITIVE_RATE);
-    }
-
-    /**
-     * @param weightedTruePositiveRate
-     * @return this meta data data instance
-     */
-    public MLLogisticRegressionLearnerMetaData withWeightedTruePositiveRate(final double weightedTruePositiveRate) {
-        setDouble(KEY_WEIGHTED_TRUE_POSITIVE_RATE, weightedTruePositiveRate);
-        return this;
-    }
-
-    /**
-     * @return weighted true positive rate. (equals to precision, recall and f-measure)
-     */
-    public double getWeightedTruePositiveRate() {
-        return getDouble(KEY_WEIGHTED_TRUE_POSITIVE_RATE);
-    }
-
-    /**
-     * @param weightedFMeasure
-     * @return this meta data data instance
-     */
-    public MLLogisticRegressionLearnerMetaData withWeightedFMeasure(final double weightedFMeasure) {
-        setDouble(KEY_WEIGHTED_F_MEASURE, weightedFMeasure);
-        return this;
-    }
-
-    /**
-     * @return weighted averaged f1-measure.
-     */
-    public double getWeightedFMeasure() {
-        return getDouble(KEY_WEIGHTED_F_MEASURE);
-    }
-
-    /**
-     * @param weightedPrecision
-     * @return this meta data data instance
-     */
-    public MLLogisticRegressionLearnerMetaData withWeightedPrecission(final double weightedPrecision) {
-        setDouble(KEY_WEIGHTED_PRECISION, weightedPrecision);
-        return this;
-    }
-
-    /**
-     * @return weighted averaged precision
-     */
-    public double getWeightedPrecission() {
-        return getDouble(KEY_WEIGHTED_PRECISION);
-    }
-
-    /**
-     * @param weightedRecall
-     * @return this meta data data instance
-     */
-    public MLLogisticRegressionLearnerMetaData withWeightedRecall(final double weightedRecall) {
-        setDouble(KEY_WEIGHTED_RECALL, weightedRecall);
-        return this;
-    }
-
-    /**
-     * @return weighted averaged recall. (equals to precision, recall and f-measure)
-     */
-    public double getWeightedRecall() {
-        return getDouble(KEY_WEIGHTED_RECALL);
     }
 
 }

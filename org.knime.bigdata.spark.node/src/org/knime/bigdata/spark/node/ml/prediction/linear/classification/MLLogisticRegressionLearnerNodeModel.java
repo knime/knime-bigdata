@@ -34,6 +34,7 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataTableSpecCreator;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
@@ -80,7 +81,7 @@ public class MLLogisticRegressionLearnerNodeModel
         return new PortObjectSpec[]{ //
             modelPortSpec, //
             null, // not available in configure
-            createModelStatisticsTableSpec()};
+            null};  // not available in configure
     }
 
     @Override
@@ -91,7 +92,7 @@ public class MLLogisticRegressionLearnerNodeModel
         return new PortObject[]{ //
             modelPortObject, //
             createCoefficientsAndInterceptTable(exec, metaData), //
-            createModelStatisticsTable(exec, metaData)};
+            createAccuracyStatisticsTable(exec, metaData)};
 
     }
 
@@ -119,67 +120,97 @@ public class MLLogisticRegressionLearnerNodeModel
 
     private static DataTableSpec createCoefficientsAndInterceptTableSpec(final MLLogisticRegressionLearnerMetaData metaData) {
         final DataTableSpecCreator specCreator = new DataTableSpecCreator();
+
         if (metaData.isMultinominal()) {
-            specCreator.addColumns(new DataColumnSpecCreator("Target", StringCell.TYPE).createSpec());
+            specCreator.addColumns(new DataColumnSpecCreator("Logit", StringCell.TYPE).createSpec());
         }
-        for (final String label : metaData.getCoefficientCols()) {
-            specCreator.addColumns(new DataColumnSpecCreator(label, DoubleCell.TYPE).createSpec());
-        }
+
+        specCreator.addColumns(new DataColumnSpecCreator("Variable", StringCell.TYPE).createSpec());
+        specCreator.addColumns(new DataColumnSpecCreator("Coeff.", DoubleCell.TYPE).createSpec());
+
         return specCreator.createSpec();
     }
 
     private static BufferedDataTable createCoefficientsAndInterceptTable(final ExecutionContext exec,
         final MLLogisticRegressionLearnerMetaData metaData) {
 
-        final List<String> targetValues = metaData.getNominalTargetValueMappings();
-        final List<List<Double>> coeffRows = metaData.getCoefficientRows();
+        final List<String> targetLabels = metaData.coeffTagetLabels();
+        final List<String> variableLabels = metaData.coeffVariableLabels();
+        final List<Double> coefficients = metaData.coefficients();
 
         final BufferedDataContainer dataContainer = exec.createDataContainer(createCoefficientsAndInterceptTableSpec(metaData));
-        if (metaData.isMultinominal()) {
-            for (int i = 0; i < coeffRows.size(); i++) {
-                final ArrayList<DataCell> rowCells = new ArrayList<>();
-                rowCells.add(new StringCell(targetValues.get(i)));
-                for(final Double cellValue : coeffRows.get(i)) {
-                    rowCells.add(new DoubleCell(cellValue));
-                }
-                dataContainer.addRowToTable(new DefaultRow(RowKey.createRowKey(i + 1L), rowCells));
-
-            }
-        } else {
+        for (int i = 0; i < coefficients.size(); i++) {
             final ArrayList<DataCell> rowCells = new ArrayList<>();
-            for(final Double cellValue : coeffRows.get(0)) {
-                rowCells.add(new DoubleCell(cellValue));
+            if (metaData.isMultinominal()) {
+                rowCells.add(new StringCell(targetLabels.get(i)));
             }
-            dataContainer.addRowToTable(new DefaultRow(RowKey.createRowKey(1L), rowCells));
+            rowCells.add(new StringCell(variableLabels.get(i)));
+            rowCells.add(new DoubleCell(coefficients.get(i)));
+            dataContainer.addRowToTable(new DefaultRow(RowKey.createRowKey(i + 1L), rowCells));
         }
         dataContainer.close();
 
         return dataContainer.getTable();
     }
 
-    private static DataTableSpec createModelStatisticsTableSpec() {
-        return new DataTableSpecCreator() //
+    private static DataTableSpec createAccuracyStatisticsTableSpec(final MLLogisticRegressionLearnerMetaData metaData) {
+        final DataTableSpecCreator specCreator = new DataTableSpecCreator();
+
+        if (metaData.isMultinominal()) {
+            specCreator.addColumns(new DataColumnSpecCreator("Target", StringCell.TYPE).createSpec());
+        }
+
+        return specCreator //
+            .addColumns(new DataColumnSpecCreator("False Positive Rate", DoubleCell.TYPE).createSpec()) //
+            .addColumns(new DataColumnSpecCreator("True Positive Rate", DoubleCell.TYPE).createSpec()) //
+            .addColumns(new DataColumnSpecCreator("Recall", DoubleCell.TYPE).createSpec()) //
+            .addColumns(new DataColumnSpecCreator("Precission", DoubleCell.TYPE).createSpec()) //
+            .addColumns(new DataColumnSpecCreator("F-measure", DoubleCell.TYPE).createSpec()) //
             .addColumns(new DataColumnSpecCreator("Accuracy", DoubleCell.TYPE).createSpec()) //
-            .addColumns(new DataColumnSpecCreator("Weighted False Positive Rate", DoubleCell.TYPE).createSpec()) //
-            .addColumns(new DataColumnSpecCreator("Weighted True Positive Rate", DoubleCell.TYPE).createSpec()) //
-            .addColumns(new DataColumnSpecCreator("Weighted F-measure", DoubleCell.TYPE).createSpec()) //
-            .addColumns(new DataColumnSpecCreator("Weighted Precission", DoubleCell.TYPE).createSpec()) //
-            .addColumns(new DataColumnSpecCreator("Weighted Recall", DoubleCell.TYPE).createSpec()) //
             .createSpec();
     }
 
-    private static BufferedDataTable createModelStatisticsTable(final ExecutionContext exec,
+    private static BufferedDataTable createAccuracyStatisticsTable(final ExecutionContext exec,
         final MLLogisticRegressionLearnerMetaData metaData) {
 
-        final BufferedDataContainer dataContainer = exec.createDataContainer(createModelStatisticsTableSpec());
-        dataContainer.addRowToTable(new DefaultRow( //
-            RowKey.createRowKey(1L), //
-            new DoubleCell(metaData.getAccuracy()), //
-            new DoubleCell(metaData.getWeightedFalsePositiveRate()), //
-            new DoubleCell(metaData.getWeightedTruePositiveRate()), //
-            new DoubleCell(metaData.getWeightedFMeasure()), //
-            new DoubleCell(metaData.getWeightedPrecission()), //
-            new DoubleCell(metaData.getWeightedRecall())));
+        final List<String> targets = metaData.getNominalTargetValueMappings();
+        final BufferedDataContainer dataContainer = exec.createDataContainer(createAccuracyStatisticsTableSpec(metaData));
+
+        final List<double[]> rows = metaData.getAccuracyStatRows();
+        int i;
+        for (i = 0; i < rows.size(); i++) {
+            final ArrayList<DataCell> rowCells = new ArrayList<>();
+            if (metaData.isMultinominal()) {
+                if (i + 1 < rows.size()) {
+                    rowCells.add(new StringCell(targets.get(i)));
+                } else {
+                    rowCells.add(new StringCell("Weighted"));
+                }
+            }
+            for (final double val : rows.get(i)) {
+                rowCells.add(new DoubleCell(val));
+            }
+            if (metaData.isMultinominal()) {
+                rowCells.add(new MissingCell(null)); // accuracy column
+            } else {
+                rowCells.add(new DoubleCell(metaData.getAccuracy()));
+            }
+            dataContainer.addRowToTable(new DefaultRow(RowKey.createRowKey(i + 1L), rowCells));
+        }
+
+        // overall accuracy row
+        if (metaData.isMultinominal()) {
+            dataContainer.addRowToTable(new DefaultRow( //
+                RowKey.createRowKey(i + 1L), //
+                new StringCell("Overall"), //
+                new MissingCell(null), // false positive rate
+                new MissingCell(null), // true positive rate
+                new MissingCell(null), // recall
+                new MissingCell(null), // percission
+                new MissingCell(null), // f-measure
+                new DoubleCell(metaData.getAccuracy()))); //
+        }
+
         dataContainer.close();
 
         return dataContainer.getTable();
