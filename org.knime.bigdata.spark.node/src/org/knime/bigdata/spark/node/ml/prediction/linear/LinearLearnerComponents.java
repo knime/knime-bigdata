@@ -60,6 +60,9 @@ public class LinearLearnerComponents extends MLlibNodeComponents<LinearLearnerSe
     private final DialogComponentButtonGroup m_solver = new DialogComponentButtonGroup(getSettings().getSolderModel(),
         null, false, MLLinearRegressionLearnerSolver.values());
 
+    private final DialogComponentButtonGroup m_family = new DialogComponentButtonGroup(getSettings().getFamilyModel(),
+        null, false, MLLogisticRegressionLearnerFamily.values());
+
     private final DialogComponentNumber m_convTol =
         new DialogComponentNumber(getSettings().getConvergenceToleranceModel(), null, 0.000001, 10);
 
@@ -67,7 +70,7 @@ public class LinearLearnerComponents extends MLlibNodeComponents<LinearLearnerSe
         getSettings().getHandleInvalidModel(), null, false, MLLinearRegressionLearnerHandleInvalid.values());
 
     private final DialogComponent[] m_components = new DialogComponent[]{m_lossFunction, m_maxIter, m_standardization,
-        m_fitIntercept, m_regularizer, m_regParam, m_elasticNetParam, m_solver, m_convTol, m_handleInvalid};
+        m_fitIntercept, m_regularizer, m_regParam, m_elasticNetParam, m_solver, m_family, m_convTol, m_handleInvalid};
 
     /**
      * Constructor.
@@ -157,6 +160,13 @@ public class LinearLearnerComponents extends MLlibNodeComponents<LinearLearnerSe
      */
     public DialogComponentButtonGroup getSolverComponent() {
         return m_solver;
+    }
+
+    /**
+     * @return label distribution family dialog component
+     */
+    public DialogComponentButtonGroup getFamilyComponent() {
+        return m_family;
     }
 
     /**

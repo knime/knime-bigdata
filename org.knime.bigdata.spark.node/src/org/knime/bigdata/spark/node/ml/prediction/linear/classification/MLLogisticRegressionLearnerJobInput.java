@@ -28,6 +28,8 @@ import org.knime.bigdata.spark.node.ml.prediction.linear.MLLinearLearnerJobInput
 @SparkClass
 public class MLLogisticRegressionLearnerJobInput extends MLLinearLearnerJobInput {
 
+    private static final String KEY_FAMILY = "family";
+
     /**
      * Paramless constructor for automatic deserialization.
      */
@@ -47,15 +49,25 @@ public class MLLogisticRegressionLearnerJobInput extends MLLinearLearnerJobInput
      * @param regularizer NONE, RIDGE, LASO or ELASTIC_NET regularization to use
      * @param regParam regularization parameter (only used in RIDGE, LASO or ELASTIC_NET mode)
      * @param elasticNetParam elastic net parameter (only used in ELASTIC_NET mode)
+     * @param family auto, binomial or multinomial
      * @param convergenceTolerance convergence tolerance
      * @param handleInvalid how to handle invalid data (skip or error)
      */
     public MLLogisticRegressionLearnerJobInput(final String namedInputObject, final String namedOutputModel,
         final int targetColIdx, final Integer[] featureColIdxs, final int maxIter, final boolean standardization,
         final boolean fitIntercept, final String regularizer, final double regParam, final double elasticNetParam,
-        final double convergenceTolerance, final String handleInvalid) {
+        final String family, final double convergenceTolerance, final String handleInvalid) {
 
         super(namedInputObject, namedOutputModel, targetColIdx, featureColIdxs, maxIter, standardization, fitIntercept,
             regularizer, regParam, elasticNetParam, convergenceTolerance, handleInvalid);
+        set(KEY_FAMILY, family);
     }
+
+    /**
+     * @return label distribution family
+     */
+    public String getFamily() {
+        return get(KEY_FAMILY);
+    }
+
 }

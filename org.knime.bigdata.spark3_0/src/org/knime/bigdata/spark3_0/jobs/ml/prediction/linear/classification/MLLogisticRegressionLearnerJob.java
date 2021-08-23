@@ -53,7 +53,7 @@ public class MLLogisticRegressionLearnerJob extends MLClassificationLearnerJob<M
     @Override
     protected Classifier<?, ?, ?> createClassifier(final MLLogisticRegressionLearnerJobInput input) {
         final LogisticRegression logisticRegression = new LogisticRegression() //
-            .setFamily("auto") //
+            .setFamily(input.getFamily()) //
             .setMaxIter(input.getMaxIter()) //
             .setStandardization(input.getStandardization()) //
             .setFitIntercept(input.getFitIntercept()) //
