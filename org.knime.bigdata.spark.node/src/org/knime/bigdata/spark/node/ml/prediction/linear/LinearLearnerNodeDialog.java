@@ -149,6 +149,9 @@ public class LinearLearnerNodeDialog extends NodeDialogPane {
         if (m_settings.getMode() == LinearLearnerMode.LINEAR_REGRESSION) {
             gbc.gridy++;
             addLine(panel, "Solver", m_components.getSolverComponent().getComponentPanel(), gbc);
+        } else if (m_settings.getMode() == LinearLearnerMode.LOGISTIC_REGRESSION) {
+            gbc.gridy++;
+            addLine(panel, "Family", m_components.getFamilyComponent().getComponentPanel(), gbc);
         }
 
         gbc.gridy++;

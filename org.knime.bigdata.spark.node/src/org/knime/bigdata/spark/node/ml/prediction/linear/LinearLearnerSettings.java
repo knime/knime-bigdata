@@ -55,6 +55,9 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
     private final SettingsModelString m_solver =
         new SettingsModelString("solver", MLLinearRegressionLearnerSolver.AUTO.name());
 
+    private final SettingsModelString m_family =
+        new SettingsModelString("family", MLLogisticRegressionLearnerFamily.AUTO.name());
+
     private final SettingsModelBoolean m_fitIntercept = new SettingsModelBoolean("fitIntercept", true);
 
     private final SettingsModelString m_regularizer =
@@ -136,6 +139,20 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
      */
     public SettingsModelString getSolderModel() {
         return m_solver;
+    }
+
+    /**
+     * @return label distribution family
+     */
+    public MLLogisticRegressionLearnerFamily getFamily() {
+        return MLLogisticRegressionLearnerFamily.valueOf(m_family.getStringValue());
+    }
+
+    /**
+     * @return label distribution family model
+     */
+    public SettingsModelString getFamilyModel() {
+        return m_family;
     }
 
     /**
@@ -267,6 +284,8 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
         if (m_mode == LinearLearnerMode.LINEAR_REGRESSION) {
             m_lossFunction.saveSettingsTo(settings);
             m_solver.saveSettingsTo(settings);
+        } else if (m_mode == LinearLearnerMode.LOGISTIC_REGRESSION) {
+            m_family.saveSettingsTo(settings);
         }
     }
 
@@ -290,6 +309,8 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
         if (m_mode == LinearLearnerMode.LINEAR_REGRESSION) {
             m_lossFunction.validateSettings(settings);
             m_solver.validateSettings(settings);
+        } else if (m_mode == LinearLearnerMode.LOGISTIC_REGRESSION) {
+            m_family.validateSettings(settings);
         }
     }
 
@@ -313,6 +334,8 @@ public class LinearLearnerSettings extends MLlibNodeSettings {
         if (m_mode == LinearLearnerMode.LINEAR_REGRESSION) {
             m_lossFunction.loadSettingsFrom(settings);
             m_solver.loadSettingsFrom(settings);
+        } else if (m_mode == LinearLearnerMode.LOGISTIC_REGRESSION) {
+            m_family.loadSettingsFrom(settings);
         }
 
         updateEnabledness();

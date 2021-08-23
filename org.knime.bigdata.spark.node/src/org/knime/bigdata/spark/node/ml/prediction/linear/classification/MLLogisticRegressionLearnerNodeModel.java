@@ -114,6 +114,7 @@ public class MLLogisticRegressionLearnerNodeModel
             settings.getRegularizer().name(), //
             settings.getRegParam(), //
             settings.getElasticNetParam(), //
+            settings.getFamily().toSparkName(), //
             settings.getConvergenceTolerance(), //
             settings.getHandleInvalid().toSparkName());
     }
