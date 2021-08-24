@@ -79,6 +79,15 @@
 		</tab>
 		
 		<tab name="Advanced">
+            <option name="Family">
+                <ul>
+                    <li><b>Auto</b> automatically chooses the family as <i>Multinomial</i> if the number of classes in the target column is &gt;2,
+                    and chooses <i>Binomial</i> if the number of classes is &lt;=2.</li>
+                    <li><b>Binomial</b> performs binary logistic regression with pivoting.</li>
+                    <li><b>Multinomial</b> performs multinomial logistic (softmax) regression without pivoting.</li>
+                </ul>
+            </option>
+		
             <option name="Maximum iterations">
                 The maximum number of iterations, if not terminated by <i>Convergence tolerance</i>.
             </option>

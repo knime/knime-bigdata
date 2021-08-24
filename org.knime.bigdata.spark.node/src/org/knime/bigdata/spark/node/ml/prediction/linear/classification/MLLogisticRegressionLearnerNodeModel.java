@@ -165,7 +165,7 @@ public class MLLogisticRegressionLearnerNodeModel
             .addColumns(new DataColumnSpecCreator("False Positive Rate", DoubleCell.TYPE).createSpec()) //
             .addColumns(new DataColumnSpecCreator("True Positive Rate", DoubleCell.TYPE).createSpec()) //
             .addColumns(new DataColumnSpecCreator("Recall", DoubleCell.TYPE).createSpec()) //
-            .addColumns(new DataColumnSpecCreator("Precission", DoubleCell.TYPE).createSpec()) //
+            .addColumns(new DataColumnSpecCreator("Precision", DoubleCell.TYPE).createSpec()) //
             .addColumns(new DataColumnSpecCreator("F-measure", DoubleCell.TYPE).createSpec()) //
             .addColumns(new DataColumnSpecCreator("Accuracy", DoubleCell.TYPE).createSpec()) //
             .createSpec();
