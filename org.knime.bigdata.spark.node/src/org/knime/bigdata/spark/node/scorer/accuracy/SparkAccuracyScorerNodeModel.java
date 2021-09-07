@@ -178,11 +178,11 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
             setWarningMessage("A flow variable was replaced!");
         }
 
-        double accu = isConfigureOnly ? 0.0 : m_viewData.getAccuracy();
-        double error = isConfigureOnly ? 0.0 : m_viewData.getError();
+        double accu = isConfigureOnly ? 0.0 : m_viewData.getAccuracy().orElse(0d);
+        double error = isConfigureOnly ? 0.0 : m_viewData.getError().orElse(0d);;
         int correctCount = isConfigureOnly ? 0 : m_viewData.getCorrectCount();
         int falseCount = isConfigureOnly ? 0 : m_viewData.getFalseCount();
-        double kappa = isConfigureOnly ? 0 : m_viewData.getCohenKappa();
+        double kappa = isConfigureOnly ? 0 : m_viewData.getCohenKappa().orElse(0d);
         pushFlowVariableDouble(accuracyName, accu);
         pushFlowVariableDouble(errorName, error);
         pushFlowVariableInt(correctName, correctCount);
@@ -395,7 +395,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
             new DataCell[]{DataType.getMissingCell(), DataType.getMissingCell(), DataType.getMissingCell(),
                 DataType.getMissingCell(), DataType.getMissingCell(), DataType.getMissingCell(),
                 DataType.getMissingCell(), DataType.getMissingCell(), DataType.getMissingCell(),
-                new DoubleCell(viewData.getAccuracy()), new DoubleCell(viewData.getCohenKappa())}));
+                new DoubleCell(viewData.getAccuracy().orElse(0d)), new DoubleCell(viewData.getCohenKappa().orElse(0d))}));
         accTable.close();
 
         return accTable.getTable();
