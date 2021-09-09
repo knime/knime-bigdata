@@ -53,11 +53,16 @@ import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.AttributeView;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Iterator;
@@ -304,6 +309,18 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
         } else {
             final String name = path.getFileName().toString();
             return name.startsWith(".") || name.startsWith("_");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V extends FileAttributeView> V getFileAttributeViewInternal(final HdfsPath path, final Class<V> type,
+        final LinkOption... options) {
+
+        if (type == AttributeView.class || type == BasicFileAttributeView.class || type == PosixFileAttributeView.class) {
+            return (V)new HdfsFileAttributeView(path, options);
+        } else {
+            return null;
         }
     }
 }
