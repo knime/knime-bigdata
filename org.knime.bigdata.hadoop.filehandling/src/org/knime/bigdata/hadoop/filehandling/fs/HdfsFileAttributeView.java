@@ -44,7 +44,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   6 ����. 2021 �. (Alexander Bondaletov): created
+ *  2021-09-06 (Alexander Bondaletov): created
  */
 package org.knime.bigdata.hadoop.filehandling.fs;
 
