@@ -7,6 +7,7 @@ spark.local.contextName,testflowContext
 spark.local.threads,2
 spark.local.sqlSupport,HIVEQL_WITH_JDBC
 spark.local.thriftserverPort,14999
-spark.local.useHiveDataFolder,false
+spark.local.useHiveDataFolder,true
+spark.local.hiveDataFolder,see-setup-scripts
 tmp.local.parent,see-setup-scripts
 tmp.remote.parent,see-setup-scripts
