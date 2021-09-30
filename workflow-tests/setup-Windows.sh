@@ -1,10 +1,12 @@
 #!/bin/bash
 export FLOWVARS="$(path ${WORKSPACE}/workflow-tests/flowvariables-local-bde.csv)"
-export LOCAL_BDE=true
+export CONDA_DLL_SEARCH_MODIFICATION_ENABLE=1
 
-bd_temp_dir=$(path "${TEMP}/testing-workspace/tmp/bigdata-tests")
-rm -rf "${bd_temp_dir}"
+bd_temp_dir=$(cygpath --mixed "${TEMP}/testing-workspace/tmp/bigdata-tests")
 mkdir -p "${bd_temp_dir}"
-sedi "s|hiveDataFolder,.*\$|hiveDataFolder,${bd_temp_dir}/hive|g" "${FLOWVARS}"
+sedi "s|tmp.local.parent,.*\$|tmp.local.parent,${bd_temp_dir}|g" "${FLOWVARS}"
+sedi "s|tmp.remote.parent,.*\$|tmp.remote.parent,${bd_temp_dir}|g" "${FLOWVARS}"
 
-tar -xf $(cygpath -u "${WORKSPACE}/workflow-tests/local-bde-test-data.tbz2") --directory "$(cygpath -u ${TEMP}/testing-workspace/tmp/bigdata-tests)"
+echo "------- flowvariables.csv -------"
+cat $FLOWVARS
+echo "------- flowvariables.csv -------"

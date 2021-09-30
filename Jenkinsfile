@@ -20,7 +20,8 @@ try {
         knimetools.defaultTychoBuild('org.knime.update.bigdata', 'maven && java11 && large')
     }
     // TEST REGEX
-    def local_bd_tests = '(KnimeOnSpark|SparkLocal|SparkExecutor|SparklingWater|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_all|ORC|Parquet)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db)(?:(?!OS)|OS/__KNIME_OS__/).+'
+    def local_bd_tests = "(KnimeOnSpark|SparkLocal|SparkExecutor|SparklingWater|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_all|ORC|Parquet)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db).+"
+
     def testPrefix = "BigDataTests/${BN}".replaceAll('releases/', '')
     def testRegex = "^/${testPrefix}/${local_bd_tests}"
 

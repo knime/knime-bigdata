@@ -39,6 +39,16 @@ public enum TestflowVariable {
         HOSTNAME("hostname"),
 
         /**
+         * Local temporary directory parent.
+         */
+        TMP_LOCAL_PARENT("tmp.local.parent"),
+
+        /**
+         * Remote temporary directory parent.
+         */
+        TMP_REMOTE_PARENT("tmp.remote.parent"),
+
+        /**
          * Flow variable for the "authenticationmethod" setting of the HDFS connection node. Possible values: Password
          * (use also when using credentials), Kerberos
          */

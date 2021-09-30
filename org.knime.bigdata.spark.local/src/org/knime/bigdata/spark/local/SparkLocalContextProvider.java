@@ -137,8 +137,8 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
             TestflowVariable.getInt(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVariables);
         final boolean useHiveDataFolder =
             TestflowVariable.isTrue(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables);
-        final String hiveDataFolder =
-            TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
+        final String hiveDataFolder = useHiveDataFolder ? //
+            TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables) : null;
 
         return new LocalSparkContextConfig(contextID, contextName, numberOfThreads, deleteObjectsOnDispose,
             useCustomSparkSettings, customSparkSettings, timeShiftStrategy, timeShiftZoneId, failOnDifferentTimeZone,

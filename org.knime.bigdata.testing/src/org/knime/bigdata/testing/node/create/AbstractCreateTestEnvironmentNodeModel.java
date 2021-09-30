@@ -37,6 +37,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.testing.FlowVariableReader;
 import org.knime.bigdata.testing.node.create.utils.CreateTestFileSystemPortUtil;
 import org.knime.bigdata.testing.node.create.utils.CreateTestPortUtil;
+import org.knime.bigdata.testing.node.create.utils.LocalTempDirUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -60,6 +61,8 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
     private static final NodeLogger LOGGER = NodeLogger.getLogger(AbstractCreateTestEnvironmentNodeModel.class);
 
     private SparkContextConfig m_sparkConfig;
+
+    private LocalTempDirUtil m_localTempDirUtil = new LocalTempDirUtil();
 
     /**
      * Default constructor.
@@ -139,10 +142,16 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
         final SparkContextIDScheme sparkScheme = m_sparkConfig.getSparkContextID().getScheme();
         final CredentialsProvider credentialsProvider = getCredentialsProvider();
 
+        // create local temp dir
+        m_localTempDirUtil.createLocalTempDirAndVariables(flowVars, true) //
+            .forEach(v -> Node.invokePushFlowVariable(this, v));
+
         // test remote fs first because it is quick and does not require any resources
         exec.setProgress(0, "Opening remote file system connection");
         final PortObject fsPortObject =
             getFileSystemPortUtil().execute(sparkScheme, flowVars, exec, credentialsProvider);
+        getFileSystemPortUtil().createLocalTempDirAndVariables(flowVars) //
+            .forEach(v -> Node.invokePushFlowVariable(this, v));
 
         // ensure spark context file system is connected
         ensureSparkFileSystemIsOpen(m_sparkConfig.getSparkContextID(), flowVars, exec, credentialsProvider);
@@ -207,11 +216,13 @@ public abstract class AbstractCreateTestEnvironmentNodeModel extends SparkNodeMo
     protected void onDisposeInternal() {
         getDatabasePortUtil().onDispose();
         getFileSystemPortUtil().onDispose();
+        m_localTempDirUtil.closeTempDirFileSystem();
     }
 
     @Override
     protected void resetInternal() {
         getDatabasePortUtil().reset();
         getFileSystemPortUtil().reset();
+        m_localTempDirUtil.closeTempDirFileSystem();
     }
 }

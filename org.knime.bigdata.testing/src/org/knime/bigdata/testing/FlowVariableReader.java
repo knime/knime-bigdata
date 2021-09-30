@@ -161,6 +161,9 @@ public class FlowVariableReader {
     }
     
     private static void ensureRequiredFlowVariables(Map<String, FlowVariable> flowVariables) throws IllegalArgumentException {
+        ensureHas(TestflowVariable.TMP_LOCAL_PARENT, flowVariables);
+        ensureHas(TestflowVariable.TMP_REMOTE_PARENT, flowVariables);
+
         // if the "global" hostname is set, then we can assume to be connecting to something that is not local big data environment
         if (has(TestflowVariable.HOSTNAME, flowVariables)) {
             // HDFS is mandatory when the 

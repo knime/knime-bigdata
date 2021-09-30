@@ -45,76 +45,44 @@
  */
 package org.knime.bigdata.testing.node.create.utils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.core.node.workflow.FlowVariable;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
- * Describes an initializer of one of "Create Big Data Test Environment" node.
+ * Utility to convert a path to a legacy Hadoop path usable in legacy nodes that do not support multiple windows drives.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public interface CreateTestPortUtil {
+public class LegacyHadoopPathUtil {
+
+    private static final boolean WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
+    private static final Pattern startsWithDriveLetterSpecifier = Pattern.compile("^/?[a-zA-Z]:");
+
+    private LegacyHadoopPathUtil() {}
 
     /**
-     * Create the output test {@link PortObjectSpec} instance.
+     * Remove the drive information from given path on windows and validate that the path uses the default drive.
      *
-     * @param sparkScheme spark scheme to match
-     * @param flowVars current flow variables
-     * @return testing {@link PortObjectSpec} instance
-     * @throws InvalidSettingsException
+     * @param path the path to convert with possible drive letter and colon in front
+     * @return path without drive letter and colon
+     * @throws IOException if path contains not the default drive on windows
      */
-    public PortObjectSpec configure(final SparkContextIDScheme sparkScheme, final Map<String, FlowVariable> flowVars)
-        throws InvalidSettingsException;
+    public static String convertToLegacyPath(final String path) throws IOException {
+        if (WINDOWS && startsWithDriveLetterSpecifier.matcher(path).find()) {
+            final String defaultDrive = Paths.get("/").toAbsolutePath().toString().substring(0, 1);
+            final int start = path.startsWith("/") ? 1 : 0;
+            final String pathDrive = path.substring(start, start + 1);
 
-    /**
-     * Create the output test {@link PortObject} and test the wrapped connection if possible.
-     *
-     * @param sparkScheme spark scheme to match
-     * @param flowVars current flow variables
-     * @param exec to display progress
-     * @param credentialsProvider current credentials provider
-     * @return testing {@link PortObject} instance
-     * @throws Exception
-     */
-    public PortObject execute(final SparkContextIDScheme sparkScheme, final Map<String, FlowVariable> flowVars,
-        final ExecutionContext exec, final CredentialsProvider credentialsProvider) throws Exception;
-
-    /**
-     * Create temporary directories if required and return flow variables.
-     *
-     * @param flowVars current flow variables
-     * @return list of flow variables to export
-     * @throws Exception
-     */
-    public default List<FlowVariable> createLocalTempDirAndVariables(final Map<String, FlowVariable> flowVars) throws Exception {
-        return Collections.emptyList();
+            if (!pathDrive.equalsIgnoreCase(defaultDrive)) {
+                throw new IOException("Given path does not use default windows drive, unable to convert: " + path);
+            } else {
+                return path.substring(start + 2);
+            }
+        } else {
+            return path;
+        }
     }
 
-    /**
-     * Called by the framework when the node is disposed.
-     *
-     * @see NodeModel#onDispose()
-     */
-    @SuppressWarnings("javadoc")
-    public default void onDispose() {
-    }
-
-    /**
-     * Called by the framework when the node is reseted.
-     *
-     * @see NodeModel#reset()
-     */
-    @SuppressWarnings("javadoc")
-    public default void reset() {
-    }
 }

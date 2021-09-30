@@ -47,9 +47,12 @@ package org.knime.bigdata.testing.node.create.utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
+import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.dbfs.filehandling.testing.TestingDbfsFSConnectionFactory;
 import org.knime.bigdata.hadoop.filehandling.testing.TestingHdfsConnectionFactory;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
@@ -58,13 +61,17 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.core.node.workflow.VariableType.StringType;
 import org.knime.filehandling.core.connections.DefaultFSConnectionFactory;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
+import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSLocationSpec;
+import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
 
@@ -119,6 +126,31 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
         testConnection(m_connection);
         return new FileSystemPortObject(createSpec(m_fsId, sparkScheme, flowVars));
+    }
+
+    @Override
+    @SuppressWarnings("resource")
+    public List<FlowVariable> createLocalTempDirAndVariables(final Map<String, FlowVariable> flowVars)
+        throws Exception {
+
+        try {
+            final FSPath remoteTempDirParent = m_connection.getFileSystem()
+                .getPath(TestflowVariable.getString(TestflowVariable.TMP_REMOTE_PARENT, flowVars));
+            final FSPath remoteTempDir = FSFiles.createTempDirectory(remoteTempDirParent, "bde-tests-", "-remote");
+
+            final var newVars = new ArrayList<FlowVariable>();
+            newVars.add(new FlowVariable("tmp.remote", StringType.INSTANCE, remoteTempDir.toString()));
+
+            final var legacyPath = LegacyHadoopPathUtil.convertToLegacyPath(remoteTempDir.toUri().getPath());
+            newVars.add(new FlowVariable("tmp.remote.hadoop", StringType.INSTANCE, legacyPath));
+
+            final var fsLocation = remoteTempDir.toFSLocation();
+            newVars.add(new FlowVariable("tmp.remote.path", FSLocationVariableType.INSTANCE, fsLocation));
+
+            return newVars;
+        } catch (final IOException e) {
+            throw new IOException("Failed to create remote temporary directory: " + e.getMessage(), e);
+        }
     }
 
     /**

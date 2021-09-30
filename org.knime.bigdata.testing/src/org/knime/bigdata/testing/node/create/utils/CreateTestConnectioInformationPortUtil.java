@@ -45,8 +45,12 @@
  */
 package org.knime.bigdata.testing.node.create.utils;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
@@ -55,6 +59,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.dbfs.testing.TestingDBFSConnectionInformationFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
 import org.knime.bigdata.filehandling.testing.TestingConnectionInformationFactory;
@@ -62,11 +67,13 @@ import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.core.node.workflow.VariableType.StringType;
 
 /**
  * Utility to create {@link ConnectionInformation} based file system output ports.
@@ -75,7 +82,11 @@ import org.knime.core.node.workflow.FlowVariable;
  */
 public class CreateTestConnectioInformationPortUtil implements CreateTestPortUtil {
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(CreateTestConnectioInformationPortUtil.class);
+
     private ConnectionInformation m_fsConnectionInfo;
+
+    private RemoteFile<? extends Connection> m_remoteTempDir;
 
     /**
      * Output test port type of this utility.
@@ -98,6 +109,47 @@ public class CreateTestConnectioInformationPortUtil implements CreateTestPortUti
         return new ConnectionInformationPortObject(new ConnectionInformationPortObjectSpec(m_fsConnectionInfo));
     }
 
+    @Override
+    public List<FlowVariable> createLocalTempDirAndVariables(final Map<String, FlowVariable> flowVars) throws Exception {
+
+        final ConnectionMonitor<?> monitor = new ConnectionMonitor<>();
+        try {
+            final String randomTmpDirName = "bde-tests-" + UUID.randomUUID().toString().replace("-", "") + "-remote";
+            final String path = TestflowVariable.getString(TestflowVariable.TMP_REMOTE_PARENT, flowVars) //
+                + "/" + randomTmpDirName; // NOSONAR
+            final URI uri = m_fsConnectionInfo.toURI().resolve(LegacyHadoopPathUtil.convertToLegacyPath(path));
+            m_remoteTempDir = RemoteFileFactory.createRemoteFile(uri, m_fsConnectionInfo, monitor);
+            m_remoteTempDir.mkDir();
+
+            final var newVars = new ArrayList<FlowVariable>();
+            newVars.add(new FlowVariable("tmp.remote", StringType.INSTANCE, path));
+            newVars.add(new FlowVariable("tmp.remote.hadoop", StringType.INSTANCE, uri.getPath()));
+            return newVars;
+
+        } catch (final IOException e) {
+            throw new IOException("Failed to create remote temporary directory: " + e.getMessage(), e);
+        } finally {
+            monitor.closeAll();
+        }
+    }
+
+    @Override
+    public void reset() {
+        try {
+            if (m_remoteTempDir != null) {
+                m_remoteTempDir.delete();
+                m_remoteTempDir = null;
+            }
+        } catch (final Exception e) {
+            LOGGER.error("Failed to remove remote temp dir: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void onDispose() {
+        reset();
+    }
+
     /**
      * Create a {@link ConnectionInformation} based on a {@link SparkContextIDScheme} using flow variables.
      *
@@ -118,8 +170,7 @@ public class CreateTestConnectioInformationPortUtil implements CreateTestPortUti
             case SPARK_DATABRICKS:
                 return TestingDBFSConnectionInformationFactory.create(flowVars);
             default:
-                throw new InvalidSettingsException(
-                    "Spark context ID scheme not supported: " + sparkScheme);
+                throw new InvalidSettingsException("Spark context ID scheme not supported: " + sparkScheme);
         }
     }
 

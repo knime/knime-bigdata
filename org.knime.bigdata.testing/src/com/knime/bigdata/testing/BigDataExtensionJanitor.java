@@ -51,8 +51,10 @@ package com.knime.bigdata.testing;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.knime.bigdata.testing.FlowVariableReader;
+import org.knime.bigdata.testing.node.create.utils.LocalTempDirUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.testing.core.TestrunJanitor;
@@ -68,6 +70,8 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
     private final static NodeLogger LOGGER = NodeLogger.getLogger(BigDataExtensionJanitor.class);
 
     private final List<FlowVariable> m_flowVariables = new ArrayList<>();
+
+    private LocalTempDirUtil m_localTempDir = new LocalTempDirUtil();
 
     /** Default constructor. */
     public BigDataExtensionJanitor() {
@@ -85,8 +89,10 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 
     @Override
     public synchronized void before() throws Exception {
+        final Map<String, FlowVariable> flowVarsMap = FlowVariableReader.readFromCsv();
         m_flowVariables.clear();
-        m_flowVariables.addAll(FlowVariableReader.readFromCsv().values());
+        m_flowVariables.addAll(flowVarsMap.values());
+        m_flowVariables.addAll(m_localTempDir.createLocalTempDirAndVariables(flowVarsMap, false));
         m_flowVariables.sort(new Comparator<FlowVariable>() {
             @Override
             public int compare(FlowVariable a, FlowVariable b) {
@@ -97,7 +103,7 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 
     @Override
     public void after() throws Exception {
-        //nothing to do
+        m_localTempDir.closeTempDirFileSystem();
     }
 
     @Override

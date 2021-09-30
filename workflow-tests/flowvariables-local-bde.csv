@@ -1,11 +1,12 @@
 varname,value
 spark.contextIdScheme,sparkLocal
-spark.version,2.4
 spark.settingsOverride,false
 spark.settingsCustom,':'
+spark.version,3.0
 spark.local.contextName,testflowContext
 spark.local.threads,2
 spark.local.sqlSupport,HIVEQL_WITH_JDBC
 spark.local.thriftserverPort,14999
-spark.local.useHiveDataFolder,true
-spark.local.hiveDataFolder,/home/gabriel/knimestuff/workspace/tmp/bigdata-tests/hive/
+spark.local.useHiveDataFolder,false
+tmp.local.parent,see-setup-scripts
+tmp.remote.parent,see-setup-scripts
