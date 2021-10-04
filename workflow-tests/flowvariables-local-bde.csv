@@ -1,7 +1,7 @@
 varname,value
 spark.contextIdScheme,sparkLocal
-spark.settingsOverride,false
-spark.settingsCustom,':'
+spark.settingsOverride,true
+spark.settingsCustom,spark.sql.session.timeZone: UTC
 spark.version,3.0
 spark.local.contextName,testflowContext
 spark.local.threads,2
