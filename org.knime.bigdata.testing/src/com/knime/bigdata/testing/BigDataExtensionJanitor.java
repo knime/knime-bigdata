@@ -80,6 +80,12 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
             LOGGER.info("Setting system property java.security.krb5.conf = " + kerberosConfig);
             System.setProperty("java.security.krb5.conf", kerberosConfig);
         }
+
+        final String user = System.getProperty("user.name");
+        if (user == null || user.isEmpty()) {
+            LOGGER.info("Setting system property user.name = 'test.user'");
+            System.setProperty("user.name", "test.user");
+        }
     }
 
     @Override
