@@ -86,7 +86,7 @@ public class CreateTestConnectioInformationPortUtil implements CreateTestPortUti
 
     private ConnectionInformation m_fsConnectionInfo;
 
-    private RemoteFile<? extends Connection> m_remoteTempDir;
+    private URI m_remoteTempDirUri;
 
     /**
      * Output test port type of this utility.
@@ -117,13 +117,14 @@ public class CreateTestConnectioInformationPortUtil implements CreateTestPortUti
             final String randomTmpDirName = "bde-tests-" + UUID.randomUUID().toString().replace("-", "") + "-remote";
             final String path = TestflowVariable.getString(TestflowVariable.TMP_REMOTE_PARENT, flowVars) //
                 + "/" + randomTmpDirName; // NOSONAR
-            final URI uri = m_fsConnectionInfo.toURI().resolve(LegacyHadoopPathUtil.convertToLegacyPath(path));
-            m_remoteTempDir = RemoteFileFactory.createRemoteFile(uri, m_fsConnectionInfo, monitor);
-            m_remoteTempDir.mkDir();
+            m_remoteTempDirUri = m_fsConnectionInfo.toURI().resolve(LegacyHadoopPathUtil.convertToLegacyPath(path));
+            final RemoteFile<? extends Connection> remoteTempDir = //
+                RemoteFileFactory.createRemoteFile(m_remoteTempDirUri, m_fsConnectionInfo, monitor);
+            remoteTempDir.mkDir();
 
             final var newVars = new ArrayList<FlowVariable>();
             newVars.add(new FlowVariable("tmp.remote", StringType.INSTANCE, path));
-            newVars.add(new FlowVariable("tmp.remote.hadoop", StringType.INSTANCE, uri.getPath()));
+            newVars.add(new FlowVariable("tmp.remote.hadoop", StringType.INSTANCE, m_remoteTempDirUri.getPath()));
             return newVars;
 
         } catch (final IOException e) {
@@ -136,9 +137,16 @@ public class CreateTestConnectioInformationPortUtil implements CreateTestPortUti
     @Override
     public void reset() {
         try {
-            if (m_remoteTempDir != null) {
-                m_remoteTempDir.delete();
-                m_remoteTempDir = null;
+            if (m_remoteTempDirUri != null) {
+                final ConnectionMonitor<?> monitor = new ConnectionMonitor<>();
+                try {
+                    final RemoteFile<? extends Connection> remoteTempDir = //
+                        RemoteFileFactory.createRemoteFile(m_remoteTempDirUri, m_fsConnectionInfo, monitor);
+                    remoteTempDir.delete();
+                    m_remoteTempDirUri = null;
+                } finally {
+                    monitor.closeAll();
+                }
             }
         } catch (final Exception e) {
             LOGGER.error("Failed to remove remote temp dir: " + e.getMessage(), e);
