@@ -12,12 +12,6 @@
 
     <fullDescription>
         <intro>
-        	<p>
-        		<i>This is a legacy file handling node and will be replaced in the foreseeable future.
-        		For further information about the new file handling framework see the </i>
-        		<a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.
-        		</i></a><br/>
-			</p>
             This node allows to change the file permissions of HDFS files and directories.
             Permissions are managed in three distinct scopes e.g. user, group, and others.
             Character 2, 3 and 4 specify the user rights, 5, 6 and 7 the group rights and 8,9 and 10 the rights 
@@ -36,6 +30,12 @@
                 <tr><td>----rwx---</td><td>read, write and execute for the group</td></tr>
                 <tr><td>-------rwx</td><td>read, write and execute for all others</td></tr>
             </table>
+        	<p>
+        		<i>This is a legacy file handling node and will be replaced in the foreseeable future.
+        		For further information about the new file handling framework see the </i>
+        		<a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.
+        		</i></a><br/>
+			</p>
         </intro>
 
         <option name="URI column">

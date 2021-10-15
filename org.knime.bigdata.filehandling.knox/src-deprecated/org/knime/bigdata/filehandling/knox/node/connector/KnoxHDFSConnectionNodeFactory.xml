@@ -11,6 +11,8 @@
 
     <fullDescription>
         <intro>
+            This node configures the connection information that will be used to
+            connect to a HDFS behind a <a href="https://knox.apache.org">Apache KNOX</a> gateway using WebHDFS. 
 			<p>
 				<i>This legacy file handling node has been replaced by the
 				</i><a href="https://kni.me/n/n_j3TLxYRmNWQhmb"><i>HDFS Connector (KNOX)</i></a><i>
@@ -19,8 +21,6 @@
 				</i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.
 				</i></a><br/>
 			</p>
-            This node configures the connection information that will be used to
-            connect to a HDFS behind a <a href="https://knox.apache.org">Apache KNOX</a> gateway using WebHDFS. 
         </intro>
 
         <tab name="General">
