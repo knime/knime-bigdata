@@ -13,6 +13,11 @@
 
     <fullDescription>
         <intro>
+            This node configures the connection information that will be used to
+            connect encrypted to a remote host.
+            
+            <p>SSL configurations can be done in global preferences (KNIME > Big Data Extension > Hadoop)</p>
+
 			<p>
 				<i>This legacy file handling node has been replaced by the
 				</i><a href="https://kni.me/n/9V6dK9DhFkfwctbL"><i>HDFS Connector</i></a><i>
@@ -21,10 +26,6 @@
 				</i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.
 				</i></a><br/>
 			</p>
-            This node configures the connection information that will be used to
-            connect encrypted to a remote host.
-            
-            <p>SSL configurations can be done in global preferences (KNIME > Big Data Extension > Hadoop)</p>
         </intro>
 
         <option name="Host">
