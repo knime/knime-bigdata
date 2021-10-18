@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME BigData File Format Extension
 Bundle-SymbolicName: org.knime.bigdata.fileformats;singleton:=true
-Bundle-Version: 4.4.1.qualifier
+Bundle-Version: 4.4.2.qualifier
 Bundle-ClassPath: fileformat.jar,
  libs/parquet-pig-1.11.1.jar
 Bundle-Activator: org.knime.bigdata.fileformats.FileFormatPlugin
