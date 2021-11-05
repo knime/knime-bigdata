@@ -54,6 +54,7 @@ try {
                     'knime-jfreechart',
                     'knime-js-base',
                     'knime-kerberos',
+                    'knime-office365',
                     'knime-on-spark',
                     'knime-perl',
                     'knime-pmml-translation',
