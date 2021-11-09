@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
+import org.apache.parquet.schema.OriginalType;
 import org.knime.bigdata.fileformats.filehandling.reader.AbstractBigDataTableReaderNodeFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
@@ -56,7 +57,7 @@ import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 
 /**
- * Node factory for the Parquet Reader.
+ * Node factory for the Parquet Reader using legacy {@link OriginalType}.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */

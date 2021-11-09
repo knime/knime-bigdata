@@ -48,42 +48,97 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import java.util.Arrays;
+import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.parquet.hadoop.api.InitContext;
+import org.apache.parquet.hadoop.api.ReadSupport;
+import org.apache.parquet.io.api.Converter;
+import org.apache.parquet.io.api.GroupConverter;
+import org.apache.parquet.io.api.RecordMaterializer;
+import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCell;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCellFactory;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
 
 /**
+ * {@link ReadSupport} for reading records from Parquet into a {@link ParquetRandomAccessible}.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+@SuppressWarnings("javadoc")
+abstract class AbstractParquetRandomAccessibleReadSupport extends ReadSupport<ParquetRandomAccessible> {
 
-    private final ParquetCell[] m_cells;
-
-    ParquetRandomAccessible(final Type[] types) {
-        m_cells = Arrays.stream(types)//
-            .map(ParquetCellFactory::create)//
-            .toArray(ParquetCell[]::new);
+    @Override
+    public ReadContext init(final InitContext context) {
+        return new ReadContext(context.getFileSchema());
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
+    public RecordMaterializer<ParquetRandomAccessible> prepareForRead(final Configuration configuration,
+        final Map<String, String> keyValueMetaData, final MessageType fileSchema, final ReadContext readContext) {
+        return new ParquetRandomAccessibleMaterializer( //
+            createParquetCells(fileSchema.getFields().toArray(new Type[0])));
     }
 
-    @Override
-    public ParquetCell get(final int idx) {
-        return m_cells[idx];
-    }
+    protected abstract ParquetCell[] createParquetCells(final Type[] types);
 
-    void reset() {
-        for (ParquetCell cell : m_cells) {
-            cell.reset();
+    /**
+     * {@link RecordMaterializer} for materializing a record from Parquet into a {@link ParquetRandomAccessible}.
+     *
+     * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+     */
+    private static class ParquetRandomAccessibleMaterializer extends RecordMaterializer<ParquetRandomAccessible> {
+
+        private final ParquetRandomAccessibleConverter m_converter;
+
+        ParquetRandomAccessibleMaterializer(final ParquetCell[] cells) {
+            m_converter = new ParquetRandomAccessibleConverter(cells);
         }
+
+        @Override
+        public ParquetRandomAccessible getCurrentRecord() {
+            return m_converter.getRow();
+        }
+
+        @Override
+        public GroupConverter getRootConverter() {
+            return m_converter;
+        }
+
     }
 
+    /**
+     * Root converter for reading records from a Parquet file.</br>
+     * Note that it always returns the same {@link ParquetRandomAccessible} which is overwritten with the new record.
+     *
+     * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+     */
+    private static class ParquetRandomAccessibleConverter extends GroupConverter {
+
+        private ParquetRandomAccessible m_row;
+
+        ParquetRandomAccessibleConverter(final ParquetCell[] cells) {
+            m_row = new ParquetRandomAccessible(cells);
+        }
+
+        @Override
+        public Converter getConverter(final int fieldIndex) {
+            return m_row.get(fieldIndex).getConverter();
+        }
+
+        ParquetRandomAccessible getRow() {
+            return m_row;
+        }
+
+        @Override
+        public void start() {
+            m_row.reset();
+        }
+
+        @Override
+        public void end() {
+            // nothing to do
+        }
+
+    }
 }

@@ -32,7 +32,7 @@
    </node>
    <node
          category-path="/io/read"
-         deprecated="false"
+         deprecated="true"
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory"
          hidden="false">
    </node>
