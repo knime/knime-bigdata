@@ -81,7 +81,7 @@ final class ParquetTableReader2 extends AbstractParquetTableReader {
     }
 
     private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
-        return true;
+        return config.getReaderSpecificConfig().failOnUnsupportedColumnTypes();
     }
 
 }

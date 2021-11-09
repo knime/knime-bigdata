@@ -12,16 +12,22 @@
     
     <fullDescription>
         <intro>
-            <p><i>This node supports the 
-            </i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html#path"><i>path flow variable.</i></a>
-            <i> For further information about file handling in general see the 
-            </i><a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.</i></a><br/></p>
             <p>
             Reader for Parquet files. It reads either single files or all files in a given directory.
             </p>
+
             <p>
-            This reader supports only primitive and repeated groups with primitive values. Complex nested structures are unsupported.
+            This reader supports only Parquet files with primitive and repeated groups with primitive
+            values. Complex nested structures are unsupported.
             </p>
+
+            <p>
+            <i>This node can access a variety of different</i>
+            <a href="https://docs.knime.com/2021-06/analytics_platform_file_handling_guide/index.html#analytics-platform-file-systems"><i>file systems.</i></a> 
+            <i>More information about file handling in KNIME can be found in the official</i> 
+            <a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html"><i>File Handling Guide.</i></a>
+            </p>
+
          </intro>
          <tab name="Settings">
      	   <option name="Read from">
@@ -105,6 +111,10 @@
 			  i.e., columns are added/removed to/from file(s) or their types change.
 			  NOTE: When checked, the node will not output a table specification during configure and won't apply transformations
 			  (therefore the transformation tab is disabled).
+			</option>
+			<option name="Unsupported column types">
+			   Parquet files can contain columns with types that are not supported by this node, for example complex nested types.
+			   This option allows to select whether the node should fail, or just ignore such columns.
 			</option>
 			<option name="Path column">
 			    If checked, the node will append a path column with the provided name to the output table.

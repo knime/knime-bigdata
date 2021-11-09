@@ -65,7 +65,7 @@ import org.knime.core.node.NodeLogger;
  */
 @SuppressWarnings("javadoc")
 final class ParquetRandomAccessibleReadSupport2 extends AbstractParquetRandomAccessibleReadSupport {
-    private final static NodeLogger LOGGER = NodeLogger.getLogger(ParquetRandomAccessibleReadSupport2.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(ParquetRandomAccessibleReadSupport2.class);
 
     private final boolean m_failOnUnsupportedColumnTypes;
 

@@ -90,6 +90,8 @@ enum BigDataTableReadConfigSerializer
 
     private static final String CFG_PATH_COLUMN_NAME = "path_column_name" + SettingsModel.CFGKEY_INTERNAL;
 
+    private static final String CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE = "fail_on_unsupported_column_type" + SettingsModel.CFGKEY_INTERNAL;
+
     private final TableSpecConfigSerializer<KnimeType> m_tableSpecConfigSerializer;
 
     private enum KnimeTypeSerializer implements NodeSettingsSerializer<KnimeType> {
@@ -145,6 +147,11 @@ enum BigDataTableReadConfigSerializer
             settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN, config.appendItemIdentifierColumn()));
         config.setItemIdentifierColumnName(
             settingsTab.getString(CFG_PATH_COLUMN_NAME, config.getItemIdentifierColumnName()));
+
+        final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
+        // introduced in 4.5.0
+        bigDataConfig.setFailOnUnsupportedColumnTypes(
+            settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes()));
     }
 
     private TableSpecConfig<KnimeType> loadTableSpecConfig(final NodeSettingsRO settings)
@@ -172,6 +179,12 @@ enum BigDataTableReadConfigSerializer
             config.setAppendItemIdentifierColumn(settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN));
             config.setItemIdentifierColumnName(settingsTab.getString(CFG_PATH_COLUMN_NAME));
         }
+
+        final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
+        // introduced in 4.5.0
+        if (settingsTab.containsKey(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE)) {
+            bigDataConfig.setFailOnUnsupportedColumnTypes(settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE));
+        }
     }
 
     @Override
@@ -185,6 +198,9 @@ enum BigDataTableReadConfigSerializer
         settingsTab.addBoolean(CFG_SAVE_TABLE_SPEC_CONFIG, config.saveTableSpecConfig());
         settingsTab.addBoolean(CFG_APPEND_PATH_COLUMN, config.appendItemIdentifierColumn());
         settingsTab.addString(CFG_PATH_COLUMN_NAME, config.getItemIdentifierColumnName());
+
+        final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
+        settingsTab.addBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes());
     }
 
     @Override
@@ -209,6 +225,10 @@ enum BigDataTableReadConfigSerializer
         if (settingsTab.containsKey(CFG_APPEND_PATH_COLUMN)) {
             settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN);
             settingsTab.getString(CFG_PATH_COLUMN_NAME);
+        }
+        // introduced in 4.5.0
+        if (settingsTab.containsKey(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE)) {
+            settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE);
         }
     }
 

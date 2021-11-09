@@ -57,9 +57,31 @@ import org.knime.filehandling.core.node.table.reader.config.ReaderSpecificConfig
  */
 public final class BigDataReaderConfig implements ReaderSpecificConfig<BigDataReaderConfig> {
 
+    private boolean m_failOnUnsupportedColumnTypes = true;
+
     @Override
     public BigDataReaderConfig copy() {
-        return new BigDataReaderConfig();
+        final var copy = new BigDataReaderConfig();
+        copy.m_failOnUnsupportedColumnTypes = this.m_failOnUnsupportedColumnTypes;
+        return copy;
+    }
+
+    /**
+     * Set whenever the reader node should fail on unsupported column types.
+     *
+     * @param fail {@code true} if the node should fail with an exception on unsupported column types or {@code false} if
+     *         columns should be ignored
+     */
+    public void setFailOnUnsupportedColumnTypes(final boolean fail) {
+        m_failOnUnsupportedColumnTypes = fail;
+    }
+
+    /**
+     * @return {@code true} if the node should fail with an exception on unsupported column types or {@code false} if
+     *         columns should be ignored
+     */
+    public boolean failOnUnsupportedColumnTypes() {
+        return m_failOnUnsupportedColumnTypes;
     }
 
 }

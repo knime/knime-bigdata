@@ -53,8 +53,12 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.core.data.convert.map.ProductionPath;
@@ -98,6 +102,10 @@ public final class BigDataTableReaderNodeDialog
 
     private final SourceIdentifierColumnPanel m_pathColumnPanel = new SourceIdentifierColumnPanel("Path");
 
+    private final JRadioButton m_failOnUnsupportedColumnTypes = new JRadioButton("Fail", true);
+
+    private final JRadioButton m_skipUnsupportedColumnTypes = new JRadioButton("Ignore column");
+
     /**
      * Constructor.
      *
@@ -105,11 +113,13 @@ public final class BigDataTableReaderNodeDialog
      * @param config {@link StorableMultiTableReadConfig} for managing the node configuration
      * @param readFactory {@link MultiTableReadFactory} for the actual reading
      * @param productionPathProvider {@link ProductionPathProvider} providing {@link ProductionPath ProductionPaths}
+     * @param hasFailOnUnsupportedColumnTypeOption if reader has an option to ignore unknown column types
      */
     public BigDataTableReaderNodeDialog(final SettingsModelReaderFileChooser pathSettings,
         final BigDataMultiTableReadConfig config,
         final MultiTableReadFactory<FSPath, BigDataReaderConfig, KnimeType> readFactory,
-        final ProductionPathProvider<KnimeType> productionPathProvider) {
+        final ProductionPathProvider<KnimeType> productionPathProvider,
+        final boolean hasFailOnUnsupportedColumnTypeOption) {
         super(readFactory, productionPathProvider, true);
         m_config = config;
         final String[] keyChain =
@@ -122,7 +132,9 @@ public final class BigDataTableReaderNodeDialog
         m_supportChangingFileSchemas.addActionListener(e -> configChanged());
         m_supportChangingFileSchemas.addActionListener(e -> updateTransformationTableEnabledStatus());
         m_pathColumnPanel.addChangeListener(e -> configChanged());
-        addTab("Settings", createSettingsPanel());
+        m_failOnUnsupportedColumnTypes.addActionListener(e -> configChanged());
+        m_skipUnsupportedColumnTypes.addActionListener(e -> configChanged());
+        addTab("Settings", createSettingsPanel(hasFailOnUnsupportedColumnTypeOption));
         addTab(TRANSFORMATION_TAB, createTransformationTab());
     }
 
@@ -145,14 +157,14 @@ public final class BigDataTableReaderNodeDialog
         return m_fileChooser.getSettingsModel().getFilterMode() != FilterMode.FILE;
     }
 
-    private JPanel createSettingsPanel() {
+    private JPanel createSettingsPanel(final boolean hasFailOnUnsupportedColumnTypeOption) {
         final JPanel panel = new JPanel(new GridBagLayout());
         final GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
         final JPanel fileChooserPanel = m_fileChooser.getComponentPanel();
         fileChooserPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input location"));
         panel.add(fileChooserPanel, gbc.build());
         panel.add(createMultiFilePanel(), gbc.incY().build());
-        panel.add(createTableSpecificationPanel(), gbc.incY().build());
+        panel.add(createParquetFileOptionsPanel(hasFailOnUnsupportedColumnTypeOption), gbc.incY().build());
         panel.add(m_pathColumnPanel, gbc.incY().build());
         panel.add(createPreview(), gbc.incY().fillBoth().setWeightY(1.0).build());
         return panel;
@@ -168,12 +180,24 @@ public final class BigDataTableReaderNodeDialog
         return panel;
     }
 
-    private JPanel createTableSpecificationPanel() {
-        final JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Table specification"));
+    private JPanel createParquetFileOptionsPanel(final boolean hasFailOnUnsupportedColumnTypeOption) {
+        final var panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parquet options"));
         final GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
         panel.add(m_supportChangingFileSchemas, gbc.build());
-        panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
+        panel.add(Box.createHorizontalGlue(), gbc.incX().setWeightX(1.0).setWidth(3).build());
+
+        if (hasFailOnUnsupportedColumnTypeOption) {
+            panel.add(new JLabel("Unsupported column types: "), gbc.incY().setX(0).setWidth(1).setWeightX(0).build());
+            panel.add(m_failOnUnsupportedColumnTypes, gbc.incX().build());
+            panel.add(m_skipUnsupportedColumnTypes, gbc.incX().build());
+            panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
+
+            final var group = new ButtonGroup();
+            group.add(m_failOnUnsupportedColumnTypes);
+            group.add(m_skipUnsupportedColumnTypes);
+        }
+
         return panel;
     }
 
@@ -204,6 +228,7 @@ public final class BigDataTableReaderNodeDialog
         final boolean saveTableSpecConfig = !m_supportChangingFileSchemas.isSelected();
         m_config.setSaveTableSpecConfig(saveTableSpecConfig);
         m_config.setTableSpecConfig(saveTableSpecConfig ? getTableSpecConfig() : null);
+        m_config.getReaderSpecificConfig().setFailOnUnsupportedColumnTypes(m_failOnUnsupportedColumnTypes.isSelected());
     }
 
     @Override
@@ -215,6 +240,11 @@ public final class BigDataTableReaderNodeDialog
         m_pathColumnPanel.load(m_config.appendItemIdentifierColumn(), m_config.getItemIdentifierColumnName());
         updateMultiFileEnabledStatus();
         m_supportChangingFileSchemas.setSelected(!m_config.saveTableSpecConfig());
+        if (m_config.getReaderSpecificConfig().failOnUnsupportedColumnTypes()) {
+            m_failOnUnsupportedColumnTypes.setSelected(true);
+        } else {
+            m_skipUnsupportedColumnTypes.setSelected(true);
+        }
         updateTransformationTableEnabledStatus();
         return m_config;
     }
