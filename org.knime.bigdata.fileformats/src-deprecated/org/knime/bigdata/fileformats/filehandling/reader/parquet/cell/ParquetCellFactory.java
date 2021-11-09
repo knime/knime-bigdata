@@ -176,22 +176,22 @@ public final class ParquetCellFactory {
                     return configureForLong(builder);
                 case TIMESTAMP_MICROS://NOSONAR
                     return builder//
-                        .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTimeMicros)//
-                        .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTimeMicros)//
-                        .withObjAccess(LocalDate.class, Accesses::getLocalDateMicros)//
-                        .withObjAccess(String.class, Accesses::getZonedDateTimeStringMicros)//
+                        .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTimeOfEpochMicros)//
+                        .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTimeOfEpochMicros)//
+                        .withObjAccess(LocalDate.class, Accesses::getLocalDateOfEpochMicros)//
+                        .withObjAccess(String.class, Accesses::getZonedDateTimeStringOfEpochMicros)//
                         .build();
                 case TIMESTAMP_MILLIS://NOSONAR
                     return builder//
-                        .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTimeMillis)//
-                        .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTimeMillis)//
-                        .withObjAccess(LocalDate.class, Accesses::getLocalDateMillis)//
-                        .withObjAccess(String.class, Accesses::getZonedDateTimeStringMillis)//
+                        .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTimeOfEpochMillis)//
+                        .withObjAccess(ZonedDateTime.class, Accesses::getZonedDateTimeOfEpochMillis)//
+                        .withObjAccess(LocalDate.class, Accesses::getLocalDateOfEpochMillis)//
+                        .withObjAccess(String.class, Accesses::getZonedDateTimeStringEpochMillis)//
                         .build();
                 case TIME_MICROS:
                     return builder//
-                        .withObjAccess(LocalTime.class, Accesses::getLocalTime)//
-                        .withObjAccess(String.class, Accesses::getLocalTimeString)//
+                        .withObjAccess(LocalTime.class, Accesses::getLocalTimeOfMicrosDay)//
+                        .withObjAccess(String.class, Accesses::getLocalTimeStringOfMicrosDay)//
                         .build();
                 case UINT_64:
                     return builder//
@@ -264,16 +264,16 @@ public final class ParquetCellFactory {
                         .build();
                 case DATE:
                     return builder//
-                        .withObjAccess(LocalDate.class, Accesses::getLocalDate)//
-                        .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTime)//
-                        .withObjAccess(String.class, Accesses::getLocalDateString)//
+                        .withObjAccess(LocalDate.class, Accesses::getLocalDateOfEpochDay)//
+                        .withObjAccess(LocalDateTime.class, Accesses::getLocalDateTimeOfEpochDay)//
+                        .withObjAccess(String.class, Accesses::getLocalDateStringOfEpochDay)//
                         .build();
                 case DECIMAL:
                     return configureForIntDecimal(type, builder);
                 case TIME_MILLIS:
                     return builder//
-                        .withObjAccess(LocalTime.class, Accesses::getLocalTime)//
-                        .withObjAccess(String.class, Accesses::getLocalTimeString)//
+                        .withObjAccess(LocalTime.class, Accesses::getLocalTimeOfMillisOfDay)//
+                        .withObjAccess(String.class, Accesses::getLocalTimeStringOfMillisOfDay)//
                         .build();
                 default:
                     throw unsupportedOriginalType(ot, type.getPrimitiveTypeName());
