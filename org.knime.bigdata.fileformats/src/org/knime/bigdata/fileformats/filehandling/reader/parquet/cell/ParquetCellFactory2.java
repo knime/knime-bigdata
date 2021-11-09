@@ -385,4 +385,12 @@ public final class ParquetCellFactory2 {
         return groupColumn.getBigDataCells();
     }
 
+    /**
+     * Create a legacy list cell.
+     * @param elementCell list element cells
+     * @return cell to access list
+     */
+    public static ParquetCell createListLegacyCell(final ParquetCell elementCell) {
+        return new ListParquetLegacyCell(elementCell);
+    }
 }

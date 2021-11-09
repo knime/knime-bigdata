@@ -320,6 +320,9 @@ final class ParquetTypeHelper {
             return fail("exactly one element in list group required");
         } else if (!groupType.getType(0).isRepetition(Repetition.REPEATED)) {
             return fail("repeated element in list group required");
+        } else if (groupType.getType(0).isPrimitive()) {
+            final var elementType = groupType.getType(0).asPrimitiveType();
+            return createLegacyListColumn(groupType.getName(), elementType);
         } else {
             return createListGroupColumn(groupType.getName(), groupType.getType(0).asGroupType());
         }
@@ -371,4 +374,16 @@ final class ParquetTypeHelper {
         return new GroupParquetColumn(converter, columnSpecs, ParquetCellFactory2.getBigDataCells(converter));
     }
 
+    private static ParquetColumn createLegacyListColumn(final String groupName, final PrimitiveType elementType) {
+        final var elementCol = getParquetColumn(elementType).asPrimitiveColumn();
+
+        if (elementCol.getErrorMessage() == null) {
+            final var knimeType = elementCol.getKnimeType();
+            final var cell = elementCol.getParquetCell();
+
+            return new PrimitiveParquetColumn(new ListKnimeType(knimeType), groupName,  ParquetCellFactory2.createListLegacyCell(cell));
+        } else {
+            return fail(String.format("Unsupported child type: %s", elementCol.getErrorMessage()));
+        }
+    }
 }

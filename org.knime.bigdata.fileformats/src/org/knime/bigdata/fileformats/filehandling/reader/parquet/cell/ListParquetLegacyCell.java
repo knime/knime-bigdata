@@ -53,36 +53,41 @@ import static java.util.stream.Collectors.joining;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.parquet.io.api.Binary;
 import org.apache.parquet.io.api.Converter;
 import org.apache.parquet.io.api.GroupConverter;
+import org.apache.parquet.io.api.PrimitiveConverter;
 
 /**
- * {@link ParquetCell} for reading lists format with a repeated group element:
+ * {@link ParquetCell} for reading legacy lists format without the repeated group element:
  *
  * <pre>
  *   required group my_list (LIST) {
- *     repeated group list {
- *       optional binary element (UTF8);
- *     }
+ *     repeated binary element (UTF8);
  *   }
  * </pre>
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ListParquetCell extends GroupConverter implements ParquetCell {
+final class ListParquetLegacyCell extends GroupConverter implements ParquetCell {
 
     private final ParquetCell m_elementConverter;
+
+    private final PrimitiveConverter m_primitiveElementConverter;
 
     private final List<ParquetCell> m_values = new ArrayList<>();
 
     private boolean m_isNull = true;
 
-    ListParquetCell(final ParquetCell elementCell) {
+    ListParquetLegacyCell(final ParquetCell elementCell) {
         m_elementConverter = elementCell;
+        m_primitiveElementConverter = m_elementConverter.getConverter().asPrimitiveConverter();
     }
 
-    private ListParquetCell(final ListParquetCell toCopy) {
+    private ListParquetLegacyCell(final ListParquetLegacyCell toCopy) {
         m_elementConverter = toCopy.m_elementConverter.copy();
+        m_primitiveElementConverter = m_elementConverter.getConverter().asPrimitiveConverter();
         m_isNull = toCopy.m_isNull;
         m_values.addAll(toCopy.m_values);
     }
@@ -120,23 +125,49 @@ final class ListParquetCell extends GroupConverter implements ParquetCell {
 
     @Override
     public Converter getConverter(final int fieldIndex) {
-        return new GroupConverter() {
+        return new PrimitiveConverter() { // NOSONAR
 
             @Override
-            public Converter getConverter(final int innerFieldIndex) {
-                return m_elementConverter.getConverter();
-            }
-
-            @Override
-            public void start() {
+            public void addBinary(final Binary value) {
                 m_elementConverter.reset();
-            }
-
-            @Override
-            public void end() {
+                m_primitiveElementConverter.addBinary(value);
                 m_values.add(m_elementConverter.copy());
             }
 
+            @Override
+            public void addBoolean(final boolean value) {
+                m_elementConverter.reset();
+                m_primitiveElementConverter.addBoolean(value);
+                m_values.add(m_elementConverter.copy());
+            }
+
+            @Override
+            public void addDouble(final double value) {
+                m_elementConverter.reset();
+                m_primitiveElementConverter.addDouble(value);
+                m_values.add(m_elementConverter.copy());
+            }
+
+            @Override
+            public void addFloat(final float value) {
+                m_elementConverter.reset();
+                m_primitiveElementConverter.addFloat(value);
+                m_values.add(m_elementConverter.copy());
+            }
+
+            @Override
+            public void addInt(final int value) {
+                m_elementConverter.reset();
+                m_primitiveElementConverter.addInt(value);
+                m_values.add(m_elementConverter.copy());
+            }
+
+            @Override
+            public void addLong(final long value) {
+                m_elementConverter.reset();
+                m_primitiveElementConverter.addLong(value);
+                m_values.add(m_elementConverter.copy());
+            }
         };
     }
 
@@ -153,7 +184,7 @@ final class ListParquetCell extends GroupConverter implements ParquetCell {
 
     @Override
     public ParquetCell copy() {
-        return new ListParquetCell(this);
+        return new ListParquetLegacyCell(this);
     }
 
     @Override
