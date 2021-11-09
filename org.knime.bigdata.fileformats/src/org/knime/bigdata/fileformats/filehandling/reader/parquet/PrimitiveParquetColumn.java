@@ -44,47 +44,73 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 8, 2021 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
+import java.util.List;
+
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
+import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
 /**
+ * Represents a primitive Parquet column with one KNIME column (one-to-one relation).
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+public class PrimitiveParquetColumn extends ParquetColumn {
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
+    private final String m_name;
+    private final KnimeType m_knimeType;
+    private final ParquetCell m_parquetCell;
 
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
+    PrimitiveParquetColumn(final KnimeType knimeType, final String name, final ParquetCell parquetCell) {
+        m_knimeType = knimeType;
+        m_name = name;
+        m_parquetCell = parquetCell;
+    }
+
+    /**
+     * @return the Parquet cell of this column
+     */
+    public ParquetCell getParquetCell() {
+        return m_parquetCell;
+    }
+
+    /**
+     * @return {@link KnimeType} of this column
+     */
+    public KnimeType getKnimeType() {
+        return m_knimeType;
+    }
+
+    /**
+     * @return name of this column
+     */
+    public String getName() {
+        return m_name;
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
+    public void addConverterProviders(final List<ParquetConverterProvider> converters) {
+        converters.add(m_parquetCell);
     }
 
     @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
+    public void addColumnSpecs(final TypedReaderTableSpecBuilder<KnimeType> specBuilder) {
+        specBuilder.addColumn(m_name, m_knimeType, true);
     }
 
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
+    @Override
+    public void addColumnCells(final List<BigDataCell> cells) {
+        cells.add(m_parquetCell);
     }
 
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
-        }
+    @Override
+    public PrimitiveParquetColumn asPrimitiveColumn() {
+        return this;
     }
-
 }

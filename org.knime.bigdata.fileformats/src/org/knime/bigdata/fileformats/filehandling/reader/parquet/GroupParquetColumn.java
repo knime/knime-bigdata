@@ -44,47 +44,88 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 7, 2021 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
+import java.util.Collections;
+import java.util.List;
+
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderColumnSpec;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
 /**
+ * Represents a Parquet column with one or more KNIME columns (one-to-n relation).
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+class GroupParquetColumn extends ParquetColumn {
 
-    private final ParquetConverterProvider[] m_converters;
+    private final ParquetConverterProvider m_converterProvider;
+
+    private final List<TypedReaderColumnSpec<KnimeType>> m_columnSpecs;
+
     private final BigDataCell[] m_cells;
 
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
+    private final String m_error;
+
+    GroupParquetColumn(final ParquetConverterProvider converterProvider,
+        final List<TypedReaderColumnSpec<KnimeType>> columnSpecs, final BigDataCell[] cells) {
+        m_converterProvider = converterProvider;
+        m_columnSpecs = columnSpecs;
         m_cells = cells;
+        m_error = null;
+    }
+
+    GroupParquetColumn(final String error) {
+        m_converterProvider = null;
+        m_columnSpecs = null;
+        m_cells = null;
+        m_error = error;
+    }
+
+    /**
+     * @return {@code true} if the column should be skipped
+     */
+    @Override
+    public boolean skipColumn() {
+        return m_error != null;
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
+    public String getErrorMessage() {
+        return m_error;
     }
 
     @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
-    }
-
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
-    }
-
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
+    public void addConverterProviders(final List<ParquetConverterProvider> converters) {
+        if (!skipColumn()) {
+            converters.add(m_converterProvider);
         }
+    }
+
+    @Override
+    public void addColumnSpecs(final TypedReaderTableSpecBuilder<KnimeType> specBuilder) {
+        if (!skipColumn()) {
+            for (final var spec : m_columnSpecs) {
+                specBuilder.addColumn(spec);
+            }
+        }
+    }
+
+    @Override
+    public void addColumnCells(final List<BigDataCell> cells) {
+        if (!skipColumn()) {
+            Collections.addAll(cells, m_cells);
+        }
+    }
+
+    @Override
+    public GroupParquetColumn asGroupColumn() {
+        return this;
     }
 
 }

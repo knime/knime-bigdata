@@ -44,47 +44,30 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 14, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.fileformats.filehandling.reader.parquet;
+package org.knime.bigdata.fileformats.filehandling.reader.parquet.cell;
 
 import org.apache.parquet.io.api.Converter;
-import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
 
 /**
+ * A {@link Converter} provider for reading from Parquet.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+public interface ParquetConverterProvider {
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
+    /**
+     * Returns the converter that is filled by Parquet.
+     *
+     * @return the {@link Converter} for Parquet
+     */
+    Converter getConverter();
 
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
-    }
-
-    @Override
-    public int size() {
-        return m_cells.length;
-    }
-
-    @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
-    }
-
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
-    }
-
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
-        }
-    }
+    /**
+     * Resets the value in this converter.
+     */
+    void reset();
 
 }

@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import org.apache.parquet.pig.convert.DecimalUtils;
 import org.apache.parquet.schema.DecimalMetadata;
 import org.apache.parquet.schema.PrimitiveType;
+import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.Containers.BinaryContainer;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.Containers.IntContainer;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.Containers.LongContainer;
@@ -69,16 +70,32 @@ final class DecimalAccess {
 
     private final int m_scale;
 
-    DecimalAccess(final DecimalMetadata decimalMetaData) {
-        m_precision = decimalMetaData.getPrecision();
-        m_scale = decimalMetaData.getScale();
+    DecimalAccess(final int precision, final int scale) {
+        m_precision = precision;
+        m_scale = scale;
     }
 
+    @Deprecated
+    DecimalAccess(final DecimalMetadata decimalMetaData) {
+        this(decimalMetaData.getPrecision(), decimalMetaData.getScale());
+    }
+
+    @Deprecated
     DecimalAccess(final PrimitiveType type, final int maxSupportedPrecision) {
-        this(type.getDecimalMetadata());
+        this(type.getDecimalMetadata().getPrecision(), type.getDecimalMetadata().getScale(),
+            type.getPrimitiveTypeName(), maxSupportedPrecision);
+    }
+
+    DecimalAccess(final int precision, final int scale, final PrimitiveTypeName typeName, final int maxSupportedPrecision) {
+        this(precision, scale);
         CheckUtils.checkArgument(m_precision <= maxSupportedPrecision,
             "The precision %s is too high for the primitive type %s which only supports a precision up to %s.",
-            m_precision, type.getPrimitiveTypeName(), maxSupportedPrecision);
+            m_precision, typeName, maxSupportedPrecision);
+    }
+
+    int getInt(final IntContainer container) {
+        assert m_scale == 0 : "The scale must be 0 if the value should be read as int.";
+        return container.getInt();
     }
 
     long getLong(final IntContainer container) {
@@ -113,6 +130,12 @@ final class DecimalAccess {
 
     double getDouble(final LongContainer container) {
         return BigDecimal.valueOf(container.getLong(), m_scale).doubleValue();
+    }
+
+    int getInt(final BinaryContainer container) {
+        assert m_scale == 0
+            && m_precision <= 9 : "The scale must be 0 and the precision <= 9 if the value should be read as int";
+        return getBigDecimal(container).intValue();
     }
 
     long getLong(final BinaryContainer container) {

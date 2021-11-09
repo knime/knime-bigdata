@@ -48,10 +48,13 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import java.util.Arrays;
+import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.parquet.hadoop.api.InitContext;
 import org.apache.parquet.hadoop.api.ReadSupport;
-import org.apache.parquet.schema.Type;
+import org.apache.parquet.io.api.RecordMaterializer;
+import org.apache.parquet.schema.MessageType;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCellFactory;
 
@@ -64,9 +67,16 @@ import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCel
 final class ParquetRandomAccessibleReadSupport extends AbstractParquetRandomAccessibleReadSupport {
 
     @Override
-    protected ParquetCell[] createParquetCells(final Type[] types) {
-        return Arrays.stream(types)//
-            .map(ParquetCellFactory::create)//
-            .toArray(ParquetCell[]::new);
+    public ReadContext init(final InitContext context) {
+        return new ReadContext(context.getFileSchema());
     }
+
+    @Override
+    public RecordMaterializer<ParquetRandomAccessible> prepareForRead(final Configuration configuration,
+        final Map<String, String> keyValueMetaData, final MessageType fileSchema, final ReadContext readContext) {
+
+        return createMaterializer(
+            fileSchema.getFields().stream().map(ParquetCellFactory::create).toArray(ParquetCell[]::new));
+    }
+
 }

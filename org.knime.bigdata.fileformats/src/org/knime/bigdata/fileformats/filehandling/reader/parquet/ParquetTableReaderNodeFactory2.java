@@ -42,49 +42,41 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- *
- * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
+import org.apache.parquet.schema.LogicalTypeAnnotation;
+import org.knime.bigdata.fileformats.filehandling.reader.AbstractBigDataTableReaderNodeFactory;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 
 /**
+ * Node factory for the Parquet Reader using {@link LogicalTypeAnnotation}.
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+public final class ParquetTableReaderNodeFactory2 extends AbstractBigDataTableReaderNodeFactory {
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
+    private static final String[] FILE_SUFFIXES = {".parquet"};
 
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
+    /**
+     * Constructor.
+     */
+    public ParquetTableReaderNodeFactory2() {
+        super(FILE_SUFFIXES);
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
+    protected boolean hasFailOnUnknownColumnTypeOption() {
+        return true;
     }
 
     @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
-    }
-
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
-    }
-
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
-        }
+    protected GenericTableReader<FSPath, BigDataReaderConfig, KnimeType, BigDataCell> createReader() {
+        return new ParquetTableReader2();
     }
 
 }

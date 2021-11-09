@@ -42,49 +42,46 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- *
- * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
-import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.apache.parquet.schema.LogicalTypeAnnotation;
+import org.apache.parquet.schema.MessageType;
+import org.apache.parquet.schema.Type;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
 /**
+ * Parquet table reader using {@link LogicalTypeAnnotation}.
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+final class ParquetTableReader2 extends AbstractParquetTableReader {
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
-
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
+    @Override
+    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
+        return new ParquetRandomAccessibleReadSupport2(failOnUnsupportedColumnTypes(config));
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
-    }
+    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
+        final MessageType schema) {
 
-    @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
-    }
+        final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
+        final boolean failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes(config);
 
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
-    }
-
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
+        for (Type field : schema.getFields()) {
+            ParquetTypeHelper.getParquetColumn(field, failOnUnsupportedColumnTypes).addColumnSpecs(specBuilder);
         }
+
+        return specBuilder.build();
+    }
+
+    private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
+        return true;
     }
 
 }

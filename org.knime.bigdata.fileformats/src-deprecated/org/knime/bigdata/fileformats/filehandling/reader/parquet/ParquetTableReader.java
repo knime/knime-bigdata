@@ -51,7 +51,9 @@ package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
 import org.apache.parquet.schema.Type;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
@@ -63,17 +65,20 @@ import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.T
 final class ParquetTableReader extends AbstractParquetTableReader {
 
     @Override
-    protected AbstractParquetRandomAccessibleReadSupport createReadSupport() {
+    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
         return new ParquetRandomAccessibleReadSupport();
     }
 
     @Override
-    protected TypedReaderTableSpec<KnimeType> convertToSpec(final MessageType schema) {
+    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
+        final MessageType schema) {
+
         final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
         for (Type field : schema.getFields()) {
             final KnimeType type = ParquetKnimeTypeFactory.fromType(field);
             specBuilder.addColumn(field.getName(), type, true);
         }
+
         return specBuilder.build();
     }
 

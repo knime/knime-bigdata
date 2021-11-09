@@ -48,28 +48,15 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet.cell;
 
-import org.apache.parquet.io.api.Converter;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.core.node.context.DeepCopy;
 
 /**
- * A {@link BigDataCell} for reading from Parquet.</br>
+ * A {@link BigDataCell} that provides a converter for reading from Parquet.</br>
  * Implements {@link DeepCopy} to satisfy the Parquet API for lists.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public interface ParquetCell extends BigDataCell, DeepCopy<ParquetCell> {
-
-    /**
-     * Returns the converter that is filled by Parquet.
-     *
-     * @return the {@link Converter} for Parquet
-     */
-    Converter getConverter();
-
-    /**
-     * Resets the value in this cell.
-     */
-    void reset();
+public interface ParquetCell extends ParquetConverterProvider, BigDataCell, DeepCopy<ParquetCell> {
 
 }

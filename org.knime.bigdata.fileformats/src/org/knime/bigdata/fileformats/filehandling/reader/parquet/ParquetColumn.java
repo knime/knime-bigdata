@@ -44,47 +44,46 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 7, 2021 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
+import java.util.List;
+
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
 /**
+ * Represents a Parquet column and one or more KNIME columns.
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+abstract class ParquetColumn {
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
-
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
+    /**
+     * @return {@code true} if the column should be skipped
+     */
+    public boolean skipColumn() {
+        return false;
     }
 
-    @Override
-    public int size() {
-        return m_cells.length;
+    public String getErrorMessage() {
+        return null;
     }
 
-    @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
+    public abstract void addConverterProviders(final List<ParquetConverterProvider> converters);
+
+    public abstract void addColumnSpecs(final TypedReaderTableSpecBuilder<KnimeType> specBuilder);
+
+    public abstract void addColumnCells(final List<BigDataCell> cells);
+
+    public PrimitiveParquetColumn asPrimitiveColumn() {
+        throw new UnsupportedOperationException();
     }
 
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
+    public GroupParquetColumn asGroupColumn() {
+        throw new UnsupportedOperationException();
     }
-
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
-        }
-    }
-
 }

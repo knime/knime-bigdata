@@ -44,47 +44,56 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Nov 7, 2021 (Sascha Wolke, KNIME GmbH): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
+import java.util.List;
+
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
 
 /**
+ * Represents a Parquet column that contains an unsupported type and an error message.
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+class UnsupportedParquetColumn extends ParquetColumn {
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
+    private final String m_error;
 
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
+    UnsupportedParquetColumn(final String error) {
+        m_error = error;
+    }
+
+    /**
+     * @return {@code true} if the column should be skipped
+     */
+    @Override
+    public boolean skipColumn() {
+        return m_error != null;
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
+    public String getErrorMessage() {
+        return m_error;
     }
 
     @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
+    public void addConverterProviders(final List<ParquetConverterProvider> converters) {
+        // nothing to add, skip column
     }
 
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
+    @Override
+    public void addColumnSpecs(final TypedReaderTableSpecBuilder<KnimeType> specBuilder) {
+        // nothing to add, skip column
     }
 
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
-        }
+    @Override
+    public void addColumnCells(final List<BigDataCell> cells) {
+        // nothing to add, skip column
     }
 
 }

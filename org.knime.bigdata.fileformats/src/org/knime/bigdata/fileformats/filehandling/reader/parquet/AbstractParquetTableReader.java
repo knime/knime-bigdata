@@ -52,12 +52,10 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.parquet.format.converter.ParquetMetadataConverter;
 import org.apache.parquet.hadoop.ParquetFileReader;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.metadata.BlockMetaData;
-import org.apache.parquet.hadoop.metadata.FileMetaData;
-import org.apache.parquet.hadoop.metadata.ParquetMetadata;
+import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
@@ -83,23 +81,25 @@ abstract class AbstractParquetTableReader implements TableReader<BigDataReaderCo
 
         final Configuration configuration = NioFileSystemUtil.getConfiguration();
         final org.apache.hadoop.fs.Path hadoopPath = getHadoopPath(path, configuration);
+        final long rowCount;
 
-        final ParquetMetadata meta =
-            ParquetFileReader.readFooter(configuration, hadoopPath, ParquetMetadataConverter.NO_FILTER);
-        final long rowCount = meta.getBlocks().stream().mapToLong(BlockMetaData::getRowCount).sum();
+        try (final var reader = ParquetFileReader.open(HadoopInputFile.fromPath(hadoopPath, configuration))) {
+            rowCount = reader.getFooter().getBlocks().stream().mapToLong(BlockMetaData::getRowCount).sum();
+        }
 
         final ParquetReader<ParquetRandomAccessible> parquetReader =
-            ParquetReader.builder(createReadSupport(), hadoopPath).withConf(configuration).build();
+            ParquetReader.builder(createReadSupport(config), hadoopPath).withConf(configuration).build();
         return new ParquetRead(parquetReader, rowCount);
     }
 
-    protected abstract AbstractParquetRandomAccessibleReadSupport createReadSupport();
+    protected abstract AbstractParquetRandomAccessibleReadSupport
+        createReadSupport(final TableReadConfig<BigDataReaderConfig> config);
 
     @Override
     public TypedReaderTableSpec<KnimeType> readSpec(final FSPath path,
         final TableReadConfig<BigDataReaderConfig> config, final ExecutionMonitor exec) throws IOException {
         final MessageType schema = extractSchema(path);
-        return convertToSpec(schema);
+        return convertToSpec(config, schema);
     }
 
     private static MessageType extractSchema(final FSPath path) throws IOException {
@@ -110,13 +110,14 @@ abstract class AbstractParquetTableReader implements TableReader<BigDataReaderCo
 
     private static MessageType extractSchema(final Configuration configuration, final Path hadoopPath)
         throws IOException {
-        final ParquetMetadata meta =
-            ParquetFileReader.readFooter(configuration, hadoopPath, ParquetMetadataConverter.NO_FILTER);
-        final FileMetaData fileMetaData = meta.getFileMetaData();
-        return fileMetaData.getSchema();
+
+        try (final var reader = ParquetFileReader.open(HadoopInputFile.fromPath(hadoopPath, configuration))) {
+            return reader.getFileMetaData().getSchema();
+        }
     }
 
-    protected abstract TypedReaderTableSpec<KnimeType> convertToSpec(final MessageType schema);
+    protected abstract TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
+        final MessageType schema);
 
     private static Path getHadoopPath(final FSPath path, final Configuration configuration) throws IOException {
         return NioFileSystemUtil.getHadoopPath(path, configuration);

@@ -48,17 +48,13 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import java.util.Map;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.parquet.hadoop.api.InitContext;
 import org.apache.parquet.hadoop.api.ReadSupport;
 import org.apache.parquet.io.api.Converter;
 import org.apache.parquet.io.api.GroupConverter;
 import org.apache.parquet.io.api.RecordMaterializer;
-import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.Type;
+import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCell;
+import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
 
 /**
  * {@link ReadSupport} for reading records from Parquet into a {@link ParquetRandomAccessible}.
@@ -68,19 +64,15 @@ import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetCel
 @SuppressWarnings("javadoc")
 abstract class AbstractParquetRandomAccessibleReadSupport extends ReadSupport<ParquetRandomAccessible> {
 
-    @Override
-    public ReadContext init(final InitContext context) {
-        return new ReadContext(context.getFileSchema());
+    protected ParquetRandomAccessibleMaterializer createMaterializer(final ParquetCell[] cells) {
+        return new ParquetRandomAccessibleMaterializer(cells, cells);
     }
 
-    @Override
-    public RecordMaterializer<ParquetRandomAccessible> prepareForRead(final Configuration configuration,
-        final Map<String, String> keyValueMetaData, final MessageType fileSchema, final ReadContext readContext) {
-        return new ParquetRandomAccessibleMaterializer( //
-            createParquetCells(fileSchema.getFields().toArray(new Type[0])));
-    }
+    protected ParquetRandomAccessibleMaterializer createMaterializer(final ParquetConverterProvider[] converters,
+        final BigDataCell[] cells) {
 
-    protected abstract ParquetCell[] createParquetCells(final Type[] types);
+        return new ParquetRandomAccessibleMaterializer(converters, cells);
+    }
 
     /**
      * {@link RecordMaterializer} for materializing a record from Parquet into a {@link ParquetRandomAccessible}.
@@ -91,8 +83,8 @@ abstract class AbstractParquetRandomAccessibleReadSupport extends ReadSupport<Pa
 
         private final ParquetRandomAccessibleConverter m_converter;
 
-        ParquetRandomAccessibleMaterializer(final ParquetCell[] cells) {
-            m_converter = new ParquetRandomAccessibleConverter(cells);
+        ParquetRandomAccessibleMaterializer(final ParquetConverterProvider[] converters, final BigDataCell[] cells) {
+            m_converter = new ParquetRandomAccessibleConverter(converters, cells);
         }
 
         @Override
@@ -117,13 +109,13 @@ abstract class AbstractParquetRandomAccessibleReadSupport extends ReadSupport<Pa
 
         private ParquetRandomAccessible m_row;
 
-        ParquetRandomAccessibleConverter(final ParquetCell[] cells) {
-            m_row = new ParquetRandomAccessible(cells);
+        ParquetRandomAccessibleConverter(final ParquetConverterProvider[] converters, final BigDataCell[] cells) {
+            m_row = new ParquetRandomAccessible(converters, cells);
         }
 
         @Override
         public Converter getConverter(final int fieldIndex) {
-            return m_row.get(fieldIndex).getConverter();
+            return m_row.getConverter(fieldIndex);
         }
 
         ParquetRandomAccessible getRow() {
@@ -132,7 +124,7 @@ abstract class AbstractParquetRandomAccessibleReadSupport extends ReadSupport<Pa
 
         @Override
         public void start() {
-            m_row.reset();
+            m_row.resetConverters();
         }
 
         @Override

@@ -103,13 +103,20 @@ public abstract class AbstractBigDataTableReaderNodeFactory
             EnumConfig.create(FilterMode.FILE, FilterMode.FILES_IN_FOLDERS), m_fileExtensions);
     }
 
+    /**
+     * @return {@code true} if reader has an option to ignore/skip or fail on unknown columns types
+     */
+    protected boolean hasFailOnUnknownColumnTypeOption() {
+        return false;
+    }
+
     @Override
     protected final AbstractTableReaderNodeDialog<FSPath, BigDataReaderConfig, KnimeType> createNodeDialogPane(
         final NodeCreationConfiguration creationConfig,
         final MultiTableReadFactory<FSPath, BigDataReaderConfig, KnimeType> readFactory,
         final ProductionPathProvider<KnimeType> defaultProductionPathFn) {
         return new BigDataTableReaderNodeDialog(createFCSettingsModel(creationConfig), createConfig(creationConfig),
-            readFactory, defaultProductionPathFn);
+            readFactory, defaultProductionPathFn, hasFailOnUnknownColumnTypeOption());
     }
 
     @Override

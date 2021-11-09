@@ -42,49 +42,68 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- *
- * History
- *   Sep 24, 2020 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.io.api.Converter;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.parquet.hadoop.api.InitContext;
+import org.apache.parquet.hadoop.api.ReadSupport;
+import org.apache.parquet.io.api.RecordMaterializer;
+import org.apache.parquet.schema.MessageType;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.cell.ParquetConverterProvider;
-import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.core.node.NodeLogger;
 
 /**
+ * {@link ReadSupport} for reading records from Parquet into a {@link ParquetRandomAccessible} using {@link ParquetTypeHelper}.
  *
- * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-final class ParquetRandomAccessible implements RandomAccessible<BigDataCell> {
+@SuppressWarnings("javadoc")
+final class ParquetRandomAccessibleReadSupport2 extends AbstractParquetRandomAccessibleReadSupport {
+    private final static NodeLogger LOGGER = NodeLogger.getLogger(ParquetRandomAccessibleReadSupport2.class);
 
-    private final ParquetConverterProvider[] m_converters;
-    private final BigDataCell[] m_cells;
+    private final boolean m_failOnUnsupportedColumnTypes;
 
-    ParquetRandomAccessible(final ParquetConverterProvider[] converter, final BigDataCell[] cells) {
-        m_converters = converter;
-        m_cells = cells;
+    ParquetRandomAccessibleReadSupport2(final boolean failOnUnsupportedColumnTypes) {
+        m_failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes;
     }
 
     @Override
-    public int size() {
-        return m_cells.length;
-    }
+    public ReadContext init(final InitContext context) {
+        final MessageType inputSchema = context.getFileSchema();
 
-    @Override
-    public BigDataCell get(final int idx) {
-        return m_cells[idx];
-    }
-
-    Converter getConverter(final int idx) {
-        return m_converters[idx].getConverter();
-    }
-
-    void resetConverters() {
-        for (ParquetConverterProvider converter : m_converters) {
-            converter.reset();
+        if (m_failOnUnsupportedColumnTypes) {
+            return new ReadContext(inputSchema);
+        } else {
+            final var filteredSchema = new MessageType(inputSchema.getName(), //
+                inputSchema.getFields().stream()//
+                    .filter(field -> !ParquetTypeHelper.getParquetColumn(field, false).skipColumn())//
+                    .collect(Collectors.toList()));
+            return new ReadContext(filteredSchema);
         }
     }
 
+    @Override
+    public RecordMaterializer<ParquetRandomAccessible> prepareForRead(final Configuration configuration,
+        final Map<String, String> keyValueMetaData, final MessageType fileSchema, final ReadContext readContext) {
+
+        final ArrayList<ParquetConverterProvider> converters = new ArrayList<>(fileSchema.getFieldCount());
+        final ArrayList<BigDataCell> cells = new ArrayList<>(fileSchema.getFieldCount());
+        for (final var field : fileSchema.getFields()) {
+            final var col = ParquetTypeHelper.getParquetColumn(field, m_failOnUnsupportedColumnTypes);
+            if (col.getErrorMessage() == null) {
+                col.addConverterProviders(converters);
+                col.addColumnCells(cells);
+            } else if (col.getErrorMessage() != null && !m_failOnUnsupportedColumnTypes) {
+                LOGGER.warn(col.getErrorMessage());
+            }
+        }
+
+        return createMaterializer(converters.toArray(ParquetConverterProvider[]::new), cells.toArray(BigDataCell[]::new));
+    }
 }

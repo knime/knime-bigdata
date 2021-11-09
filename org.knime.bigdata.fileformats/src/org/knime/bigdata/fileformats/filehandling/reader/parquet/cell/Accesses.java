@@ -214,8 +214,14 @@ final class Accesses {
         return ZonedDateTime.ofInstant(getInstantMicros(container), UTC);
     }
 
-    static String getZonedDateTimeStringMicros(final LongContainer container) {
-        return getZonedDateTimeMicros(container).toString();
+    static String getZonedDateTimeStringOfEpochMicros(final LongContainer container) {
+        return getZonedDateTimeOfEpochMicros(container).toString();
+    }
+
+    // ZonedDateTime from epoch nanoseconds
+
+    static ZonedDateTime getZonedDateTimeOfEpochNanos(final LongContainer container) {
+        return ZonedDateTime.ofInstant(getInstantNanos(container), UTC);
     }
 
     static String getZonedDateTimeStringOfEpochNanos(final LongContainer container) {
@@ -228,9 +234,40 @@ final class Accesses {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(container.getLong()), ZoneOffset.UTC);
     }
 
-    static LocalDateTime getLocalDateTimeMicros(final LongContainer container) {
-        final Instant instant = getInstantMicros(container);
-        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    static String getLocalDateTimeStringOfEpochMillis(final LongContainer container) {
+        return getLocalDateTimeOfEpochMillis(container).toString();
+    }
+
+    static LocalDate getLocalDateOfEpochMillis(final LongContainer container) {
+        return getLocalDateTimeOfEpochMillis(container).toLocalDate();
+    }
+
+    // LocalDate... from epoch microseconds
+
+    static LocalDateTime getLocalDateTimeOfEpochMicros(final LongContainer container) {
+        return LocalDateTime.ofInstant(getInstantMicros(container), ZoneOffset.UTC);
+    }
+
+    static String getLocalDateTimeStringOfEpochMicros(final LongContainer container) {
+        return getLocalDateTimeOfEpochMicros(container).toString();
+    }
+
+    static LocalDate getLocalDateOfEpochMicros(final LongContainer container) {
+        return getLocalDateTimeOfEpochMicros(container).toLocalDate();
+    }
+
+    // LocalDate... from epoch microseconds
+
+    static LocalDateTime getLocalDateTimeOfEpochNanos(final LongContainer container) {
+        return LocalDateTime.ofInstant(getInstantNanos(container), ZoneOffset.UTC);
+    }
+
+    static String getLocalDateTimeStringOfEpochNanos(final LongContainer container) {
+        return getLocalDateTimeOfEpochNanos(container).toString();
+    }
+
+    static LocalDate getLocalDateOfEpochNanos(final LongContainer container) {
+        return getLocalDateTimeOfEpochNanos(container).toLocalDate();
     }
 
     private static Instant getInstantMicros(final LongContainer container) {
@@ -240,8 +277,11 @@ final class Accesses {
         return Instant.ofEpochSecond(seconds, nanos);
     }
 
-    static LocalDate getLocalDateMicros(final LongContainer container) {
-        return getLocalDateTimeMicros(container).toLocalDate();
+    private static Instant getInstantNanos(final LongContainer container) {
+        final long value = container.getLong();
+        final long seconds = TimeUnit.SECONDS.convert(value, TimeUnit.NANOSECONDS);
+        final long nanos = (value % (1000 * 1000l * 1000l));
+        return Instant.ofEpochSecond(seconds, nanos);
     }
 
     // LocalTime from microseconds of day
@@ -250,8 +290,18 @@ final class Accesses {
         return LocalTime.ofNanoOfDay(TimeUnit.NANOSECONDS.convert(container.getLong(), TimeUnit.MICROSECONDS));
     }
 
-    static String getLocalTimeString(final LongContainer container) {
-        return getLocalTime(container).toString();
+    static String getLocalTimeStringOfMicrosDay(final LongContainer container) {
+        return getLocalTimeOfMicrosDay(container).toString();
+    }
+
+    // LocalTime from nanoseconds of day
+
+    static LocalTime getLocalTimeOfNanosDay(final LongContainer container) {
+        return LocalTime.ofNanoOfDay(container.getLong());
+    }
+
+    static String getLocalTimeStringOfNanosDay(final LongContainer container) {
+        return getLocalTimeOfNanosDay(container).toString();
     }
 
     static String getUnsignedLongString(final LongContainer container) {
@@ -282,6 +332,17 @@ final class Accesses {
 
     static String getString(final BinaryContainer container) {
         return container.getBinary().toStringUsingUTF8();
+    }
+
+    static String getUuidString(final BinaryContainer container) {
+        final byte[] bytes = container.getBinary().getBytes();
+        if (bytes.length == 16) {
+            return String.format("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x", //
+                bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7], //
+                bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]);
+        } else {
+            return "invalid-uuid";
+        }
     }
 
     static InputStream getInputStream(final BinaryContainer container) {
