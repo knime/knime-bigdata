@@ -82,6 +82,7 @@ public class KnoxHdfsFSDescriptorProvider extends BaseFSDescriptorProvider {
                 .withCanCheckAccessExecuteOnFiles(true) //
                 .withCanCheckAccessExecuteOnDirectories(true) //
                 .withCanGetPosixAttributes(true) //
+                .withCanSetPosixAttributes(true) //
                 .withConnectionFactory(KnoxHdfsFSConnection::new) //
                 .withURIExporterFactory(URIExporterIDs.DEFAULT, PathURIExporterFactory.getInstance()) //
                 .withURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP, PathURIExporterFactory.getInstance()) //

@@ -172,4 +172,22 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
     WebHDFSAPI getWrappedWebHDFsAPI() {
         return m_api;
     }
+
+    @Override
+    public Response setTimes(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op,
+        final long mtime, final long atime) throws IOException {
+        return invoke(() -> m_api.setTimes(path, op, mtime, atime));
+    }
+
+    @Override
+    public Response setOwner(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op,
+        final String user) throws IOException {
+        return invoke(() -> m_api.setOwner(path, op, user));
+    }
+
+    @Override
+    public Response setGroup(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op,
+        final String group) throws IOException {
+        return invoke(() -> m_api.setGroup(path, op, group));
+    }
 }

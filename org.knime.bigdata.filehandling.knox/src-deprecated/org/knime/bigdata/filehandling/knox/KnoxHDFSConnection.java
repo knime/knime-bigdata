@@ -164,9 +164,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     @Override
     public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
         try {
-            final int n = FsPermission.valueOf(unixSymbolicPermission).toShort();
-            final int octal = (n >>> 9 & 1) * 1000 + (n >>> 6 & 7) * 100 + (n >>> 3 & 7) * 10 + (n & 7);
-            m_client.setPermission(uri.getPath(), PutOpParam.Op.SETPERMISSION, (short)octal);
+            m_client.setPermission(uri.getPath(), FsPermission.valueOf(unixSymbolicPermission));
         } catch (Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e);
         }

@@ -59,6 +59,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.web.resources.DeleteOpParam;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam;
 import org.apache.hadoop.hdfs.web.resources.PostOpParam;
@@ -106,6 +107,12 @@ public interface WebHDFSAPI {
     void setPermission(@PathParam("path") String path, @QueryParam("op") PutOpParam.Op op,
         @QueryParam("permission") short permission) throws IOException;
 
+    default void setPermission(final String path, final FsPermission permission) throws IOException {
+        final int n = permission.toShort();
+        final int octal = ((n >>> 9) & 1) * 1000 + ((n >>> 6) & 7) * 100 + ((n >>> 3) & 7) * 10 + (n & 7);
+        setPermission(path, PutOpParam.Op.SETPERMISSION, (short)octal);
+    }
+
     @DELETE
     @Path("{path}")
     boolean delete(@PathParam("path") String path, @QueryParam("op") DeleteOpParam.Op op,
@@ -125,4 +132,20 @@ public interface WebHDFSAPI {
     @Path("{path}")
     Response append(@PathParam("path") String path, @QueryParam("op") PostOpParam.Op op,
         @QueryParam("buffersize") long buffersize);
+
+    @PUT
+    @Path("{path")
+    Response setTimes(@PathParam("path") String path, @QueryParam("op") PutOpParam.Op op,
+        @QueryParam("modificationtime") long mtime, @QueryParam("accesstime") long atime) throws IOException;
+
+    @PUT
+    @Path("{path")
+    Response setOwner(@PathParam("path") String path, @QueryParam("op") PutOpParam.Op op,
+        @QueryParam("owner") String user) throws IOException;
+
+    @PUT
+    @Path("{path")
+    Response setGroup(@PathParam("path") String path, @QueryParam("op") PutOpParam.Op op,
+        @QueryParam("group") String group) throws IOException;
+
 }

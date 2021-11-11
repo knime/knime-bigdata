@@ -54,12 +54,17 @@ import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.AttributeView;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Iterator;
@@ -308,6 +313,18 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
             getClient().delete(path.toString(), DeleteOpParam.Op.DELETE, recursive);
         } catch (final Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e, path, null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V extends FileAttributeView> V getFileAttributeViewInternal(final KnoxHdfsPath path, final Class<V> type,
+        final LinkOption... options) {
+
+        if (type == AttributeView.class || type == BasicFileAttributeView.class || type == PosixFileAttributeView.class) {
+            return (V)new KnoxHdfsFileAttributeView(path, options);
+        } else {
+            return null;
         }
     }
 }
