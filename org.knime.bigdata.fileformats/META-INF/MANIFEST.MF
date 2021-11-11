@@ -27,6 +27,7 @@ Require-Bundle: org.knime.workbench.core;bundle-version="[4.0.0,5.0.0)",
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.knime.bigdata.fileformats.node.writer,
+ org.knime.bigdata.fileformats.orc,
  org.knime.bigdata.fileformats.orc.datatype.mapping,
  org.knime.bigdata.fileformats.orc.writer,
  org.knime.bigdata.fileformats.parquet,
