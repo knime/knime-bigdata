@@ -50,6 +50,8 @@ package org.knime.bigdata.filehandling.knox.rest;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.ws.rs.core.Response;
 
@@ -85,25 +87,41 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
         }
     }
 
+    private static final String percentEncodePath(final String unencodedPath) {
+        try {
+            return new URI("dummy", "dummy", unencodedPath, null, null).getRawPath();
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
+    private static final String percentEncodeQueryValue(final String value) {
+        try {
+            return new URI("dummy", "dummy", "/", value, null).getRawQuery();
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
     @Override
     public FileStatus getFileStatus(final String path, final Op op) throws IOException {
-        return invoke(() -> m_api.getFileStatus(path, op));
+        return invoke(() -> m_api.getFileStatus(percentEncodePath(path), op));
     }
 
     @Override
     public FileStatuses listStatus(final String path, final Op op) throws IOException {
-        return invoke(() -> m_api.listStatus(path, op));
+        return invoke(() -> m_api.listStatus(percentEncodePath(path), op));
     }
 
     @Override
     public ContentSummary getContentSummary(final String path, final Op op) throws IOException {
-        return invoke(() -> m_api.getContentSummary(path, op));
+        return invoke(() -> m_api.getContentSummary(percentEncodePath(path), op));
     }
 
     @Override
     public void checkAccess(final String path, final Op op, final String action) throws IOException {
         invoke(() -> {
-            m_api.checkAccess(path, op, action);
+            m_api.checkAccess(percentEncodePath(path), op, action);
             return null;
         });
     }
@@ -116,20 +134,20 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
     @Override
     public boolean mkdirs(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op)
         throws IOException {
-        return invoke(() -> m_api.mkdirs(path, op));
+        return invoke(() -> m_api.mkdirs(percentEncodePath(path), op));
     }
 
     @Override
     public boolean rename(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op,
         final String destination) throws IOException {
-        return invoke(() -> m_api.rename(path, op, destination));
+        return invoke(() -> m_api.rename(percentEncodePath(path), op, percentEncodeQueryValue(destination)));
     }
 
     @Override
     public void setPermission(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op,
         final short permission) throws IOException {
         invoke(() -> {
-            m_api.setPermission(path, op, permission);
+            m_api.setPermission(percentEncodePath(path), op, permission);
             return null;
         });
     }
@@ -137,13 +155,13 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
     @Override
     public boolean delete(final String path, final org.apache.hadoop.hdfs.web.resources.DeleteOpParam.Op op,
         final boolean recursive) throws IOException {
-        return invoke(() -> m_api.delete(path, op, recursive));
+        return invoke(() -> m_api.delete(percentEncodePath(path), op, recursive));
     }
 
     @Override
     public Response open(final String path, final Op op, final long buffersize) {
         try {
-            return invoke(() -> m_api.open(path, op, buffersize));
+            return invoke(() -> m_api.open(percentEncodePath(path), op, buffersize));
         } catch (IOException ex) { // NOSONAR never happens
             return null;
         }
@@ -153,7 +171,7 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
     public Response create(final String path, final org.apache.hadoop.hdfs.web.resources.PutOpParam.Op op,
         final long buffersize, final boolean overwrite) {
         try {
-            return invoke(() -> m_api.create(path, op, buffersize, overwrite));
+            return invoke(() -> m_api.create(percentEncodePath(path), op, buffersize, overwrite));
         } catch (IOException ex) { // NOSONAR never happens
             return null;
         }
@@ -163,7 +181,7 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
     public Response append(final String path, final org.apache.hadoop.hdfs.web.resources.PostOpParam.Op op,
         final long buffersize) {
         try {
-            return invoke(() -> m_api.append(path, op, buffersize));
+            return invoke(() -> m_api.append(percentEncodePath(path), op, buffersize));
         } catch (IOException ex) { // NOSONAR never happens
             return null;
         }

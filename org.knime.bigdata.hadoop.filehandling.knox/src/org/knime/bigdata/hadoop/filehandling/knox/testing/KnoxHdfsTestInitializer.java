@@ -86,10 +86,11 @@ class KnoxHdfsTestInitializer extends DefaultFSTestInitializer<KnoxHdfsPath, Kno
 
     @Override
     public KnoxHdfsPath createFileWithContent(final String content, final String... pathComponents) throws IOException {
-        final KnoxHdfsPath path = makePath(pathComponents);
+        final var path = makePath(pathComponents);
+        final var absoluteNormalizedPath = (KnoxHdfsPath) path.toAbsolutePath().normalize();
         try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            m_client.mkdirs(((KnoxHdfsPath)path.getParent()).getURICompatiblePath(), PutOpParam.Op.MKDIRS);
-            try (final OutputStream stream = KnoxHDFSClient.createFile(m_client, m_uploadExecutor, path.toUri().getPath(), false)) {
+            m_client.mkdirs(((KnoxHdfsPath)absoluteNormalizedPath.getParent()).getURICompatiblePath(), PutOpParam.Op.MKDIRS);
+            try (final OutputStream stream = KnoxHDFSClient.createFile(m_client, m_uploadExecutor, path.getURICompatiblePath(), false)) {
                 stream.write(content.getBytes(StandardCharsets.UTF_8));
             }
         }
