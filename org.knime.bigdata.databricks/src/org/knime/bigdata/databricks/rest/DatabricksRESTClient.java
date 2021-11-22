@@ -111,9 +111,9 @@ public class DatabricksRESTClient extends AbstractRESTClient {
                 }
             }
 
-            if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
+            if ((response.getStatus() == 401 || response.getStatus() == 403) && !StringUtils.isBlank(message)) {
                 return new AccessDeniedException(message);
-            } else if (response.getStatus() == 403) {
+            } else if (response.getStatus() == 401 || response.getStatus() == 403) {
                 return new AccessDeniedException("Invalid or missing authentication data");
             } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
                 return new FileNotFoundException(message);
