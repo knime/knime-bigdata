@@ -169,21 +169,26 @@ public class BigDataLoaderNode2
             final DataTableSpec spec = rowInput.getDataTableSpec();
             final ConnectableCsvLoaderNodeSettings2 customSettings = parameters.getCustomSettings();
             final SettingsModelWriterFileChooser targetFolderModel = customSettings.getTargetFolderModel();
-            try (ParquetFileFormatWriter writer =
-                    createWriter(targetFile, spec, m_tempColumnLists.getTempTableColumns())) {
-                DataRow row;
-                while ((row = rowInput.poll()) != null) {
-                    writer.writeRow(row);
-                }
-                LOGGER.debug("Written file " + targetFile + " ");
-                exec.setProgress(0.25, "File written.");
-                exec.checkCanceled();
-            } finally {
-                rowInput.close();
-            }
             try (FSConnection connection = targetFolderModel.getConnection()) {
                 final NoConfigURIExporterFactory uriExporterFactory =
-                    (NoConfigURIExporterFactory) connection.getURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP);
+                        (NoConfigURIExporterFactory) connection.getURIExporterFactory(URIExporterIDs.DEFAULT_HADOOP);
+                if (uriExporterFactory == null) {
+                    LOGGER.debug(String.format("Connected file system '%s' does not provide a Hadoop URI exporter",
+                        connection.getFSType().getName()));
+                    throw new InvalidSettingsException("Connected file system is not supported");
+                }
+                try (ParquetFileFormatWriter writer =
+                        createWriter(targetFile, spec, m_tempColumnLists.getTempTableColumns())) {
+                    DataRow row;
+                    while ((row = rowInput.poll()) != null) {
+                        writer.writeRow(row);
+                    }
+                    LOGGER.debug("Written file " + targetFile + " ");
+                    exec.setProgress(0.25, "File written.");
+                    exec.checkCanceled();
+                } finally {
+                    rowInput.close();
+                }
                 final URIExporter uriExporter = uriExporterFactory.getExporter();
                 final String targetFileString = URIUtil.toUnencodedString(uriExporter.toUri(targetFile));
                 exec.setProgress("Loading data file into DB table...");
