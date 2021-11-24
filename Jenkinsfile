@@ -110,7 +110,10 @@ try {
                 testflowsDir: fhTestflowsDir,
                 dependencies: [
                     repositories: [
-                        'knime-bigdata'
+                        'knime-bigdata',
+                        'knime-database',
+                        'knime-streaming',
+                        'knime-bigdata-externals'
                     ]
                 ]
             )
