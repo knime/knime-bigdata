@@ -251,6 +251,7 @@ public final class BigDataTableReaderNodeDialog
 
     @Override
     public void onClose() {
+        super.onClose();
         m_fileChooser.onClose();
     }
 
