@@ -112,6 +112,8 @@ try {
                     repositories: [
                         'knime-bigdata',
                         'knime-database',
+                        'knime-datageneration',
+                        'knime-jep',
                         'knime-streaming',
                         'knime-bigdata-externals'
                     ]
