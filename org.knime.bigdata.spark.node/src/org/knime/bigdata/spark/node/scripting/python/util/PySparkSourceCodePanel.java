@@ -245,7 +245,7 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
      * {@inheritDoc}
      */
     @Override
-    protected void runExec(final String sourceCode) {
+    protected void runExec(final String sourceCode, final boolean checkOutputs) {
 
         final int outCount = getVariableNames().getOutputObjects().length;
         final PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
