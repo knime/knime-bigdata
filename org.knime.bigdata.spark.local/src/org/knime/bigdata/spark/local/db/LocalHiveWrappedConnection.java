@@ -57,7 +57,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.database.connection.wrappers.AbstractArrayWrapper;
@@ -114,22 +117,16 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
         }
 
         @Override
-        public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
+        public ResultSet getTables(final String catalog, final String schemaPattern, final String tableNamePattern, final String[] types)
             throws SQLException {
-            if (types != null && types[0].equals("TABLE") || tableNamePattern != null && types == null) {
-                final StringBuilder query = new StringBuilder("SHOW TABLES");
-                if (schemaPattern == null || schemaPattern.isEmpty()) {
-                    schemaPattern = getConnection().getSchema();
-                }
-                query.append(" IN ").append(schemaPattern);
-                if (tableNamePattern != null && !tableNamePattern.equals("%")) {
-                    query.append(" LIKE '").append(tableNamePattern).append('\'');
-                }
-                final Statement statement = getConnection().createStatement();
+            if ((types != null && Arrays.stream(types).anyMatch("TABLE"::equals)) || (tableNamePattern != null && types == null)) {
+                final var views = getViews(schemaPattern, tableNamePattern);
+                final var statement = getConnection().createStatement();
                 try {
-                    final ResultSet resultSet = statement.executeQuery(query.toString());
+                    final var query = createQuery("TABLES", schemaPattern, tableNamePattern);
+                    final var resultSet = statement.executeQuery(query);
                     try {
-                        return wrapTableQuerying(statement, resultSet);
+                        return wrapTableQuerying(statement, resultSet, views);
                     } catch (final Throwable throwable) {
                         try (ResultSet resultSetToClose = resultSet) {
                             throw throwable;
@@ -142,6 +139,30 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
                 }
             }
             return super.getTables(catalog, schemaPattern, tableNamePattern, types);
+        }
+
+        private String createQuery(final String type, String schemaPattern, final String tableNamePattern) throws SQLException {
+            final var query = new StringBuilder("SHOW ").append(type);
+            if (schemaPattern == null || schemaPattern.isEmpty()) {
+                schemaPattern = getConnection().getSchema();
+            }
+            query.append(" IN ").append(schemaPattern);
+            if (tableNamePattern != null && !tableNamePattern.equals("%")) {
+                query.append(" LIKE '").append(tableNamePattern).append('\'');
+            }
+            return query.toString();
+        }
+
+        private Set<String> getViews(final String schemaPattern, final String tableNamePattern) throws SQLException {
+            final HashSet<String> views = new HashSet<>();
+            final var query = createQuery("VIEWS", schemaPattern, tableNamePattern);
+            try (final var statement = getConnection().createStatement();
+                    final var resultSet = statement.executeQuery(query)) {
+                while (resultSet.next()) {
+                    views.add(resultSet.getString("viewName"));
+                }
+            }
+            return views;
         }
 
         @Override
@@ -278,13 +299,23 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
 
     private class LocalHiveTableQueryResultSetWrapper extends LocalHiveResultSetWrapper
         implements LocalHiveTableQueryWrapper {
-        LocalHiveTableQueryResultSetWrapper(final Statement statement, final ResultSet resultSet) throws SQLException {
+
+        private final Set<String> m_views;
+
+        LocalHiveTableQueryResultSetWrapper(final Statement statement, final ResultSet resultSet, final Set<String> views) throws SQLException {
             super(statement, resultSet);
+            m_views = views;
         }
 
         @Override
-        public String getString(String columnLabel) throws SQLException {
-            return super.getString("TABLE_NAME".equals(columnLabel) ? "tablename" : columnLabel);
+        public String getString(final String columnLabel) throws SQLException {
+            if ("TABLE_NAME".equals(columnLabel)) {
+                return super.getString("tableName");
+            } else if ("TABLE_TYPE".equals(columnLabel)) {
+                return m_views.contains(super.getString("tableName")) ? "VIEW" : "TABLE";
+            } else {
+                return super.getString(columnLabel);
+            }
         }
 
         @Override
@@ -359,8 +390,8 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
             : new LocalHiveDescriptionResultSetWrapper(statement == null ? null : wrap(statement), resultSet);
     }
 
-    private ResultSet wrapTableQuerying(final Statement statement, final ResultSet resultSet) throws SQLException {
+    private ResultSet wrapTableQuerying(final Statement statement, final ResultSet resultSet, final Set<String> views) throws SQLException {
         return isLocalHiveTableQueryWrapper(resultSet) ? resultSet
-            : new LocalHiveTableQueryResultSetWrapper(statement == null ? null : wrap(statement), resultSet);
+            : new LocalHiveTableQueryResultSetWrapper(statement == null ? null : wrap(statement), resultSet, views);
     }
 }
