@@ -364,7 +364,7 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
             return PySparkDocument.FLOW_VARIABLE_START + VariableNameUtil.escapeName(field)
                 + PySparkDocument.FLOW_VARIABLE_END;
         } else {
-            return String.format("%s.col('%s')", variable, field);
+            return String.format("%s['%s']", variable, field);
         }
     }
 
