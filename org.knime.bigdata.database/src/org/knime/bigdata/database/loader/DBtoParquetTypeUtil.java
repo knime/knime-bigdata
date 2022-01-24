@@ -138,6 +138,9 @@ public class DBtoParquetTypeUtil {
     public static JDBCType dbToJDBCType(final String type) {
         Objects.requireNonNull(type, "type");
         Integer typeInt = m_DBToJDBCMap.get(type.toUpperCase());
+        if (typeInt == null) {
+            throw new IllegalStateException("DB Loader does not support DB type: " + type);
+        }
         return JDBCType.valueOf(typeInt);
     }
 
