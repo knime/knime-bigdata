@@ -105,12 +105,12 @@ try {
         FileHandlingTests: {
             def baseBranch = "${BN == KNIMEConstants.NEXT_RELEASE_BRANCH ? 'master' : BN}".replaceAll('releases/', '')
             def fhTestflowsDir = "BigDataTests/${baseBranch}/File Handling v2"
-            
             workflowTests.runFilehandlingTests (
                 testflowsDir: fhTestflowsDir,
                 dependencies: [
                     repositories: [
                         'knime-bigdata',
+                        'knime-cloud',
                         'knime-database',
                         'knime-datageneration',
                         'knime-jep',
