@@ -101,6 +101,10 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
         }
     }
 
+    /**
+     * Local Hive connection using Spark Thrift Server returns empty results on get schemas/tables and we have to use a
+     * {@code SHOW SCHEMAS} and {@code SHOW TABLES} query instead.
+     */
     private class LocalHiveDatabaseMetaDataWrapper extends AbstractDatabaseMetaDataWrapper implements LocalHiveWrapper {
         LocalHiveDatabaseMetaDataWrapper(final DatabaseMetaData databaseMetaData) {
             super(LocalHiveWrappedConnection.this, databaseMetaData);
@@ -117,30 +121,35 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
         }
 
         @Override
+        public ResultSet getSchemas() throws SQLException {
+            return getSchemas(null, null);
+        }
+
+        @Override
+        @SuppressWarnings("resource") // do not close current connection
+        public ResultSet getSchemas(final String catalog, final String schemaPattern) throws SQLException {
+            final var query = new StringBuilder("SHOW SCHEMAS");
+            if (schemaPattern != null && !schemaPattern.isEmpty()) {
+                query.append(" LIKE '").append(schemaPattern).append('\'');
+            }
+            return LocalHiveSafeWrappedQuery.runQuery(getConnection(), query.toString(),
+                LocalHiveWrappedConnection.this::wrapSchemaQuerying);
+        }
+
+        @Override
+        @SuppressWarnings("resource") // do not close current connection
         public ResultSet getTables(final String catalog, final String schemaPattern, final String tableNamePattern, final String[] types)
             throws SQLException {
             if ((types != null && Arrays.stream(types).anyMatch("TABLE"::equals)) || (tableNamePattern != null && types == null)) {
                 final var views = getViews(schemaPattern, tableNamePattern);
-                final var statement = getConnection().createStatement();
-                try {
-                    final var query = createQuery("TABLES", schemaPattern, tableNamePattern);
-                    final var resultSet = statement.executeQuery(query);
-                    try {
-                        return wrapTableQuerying(statement, resultSet, views);
-                    } catch (final Throwable throwable) {
-                        try (ResultSet resultSetToClose = resultSet) {
-                            throw throwable;
-                        }
-                    }
-                } catch (final Throwable throwable) {
-                    try (Statement statementToClose = statement) {
-                        throw throwable;
-                    }
-                }
+                return LocalHiveSafeWrappedQuery.runQuery(getConnection(), //
+                    createQuery("TABLES", schemaPattern, tableNamePattern), //
+                    (statement, resultSet) -> wrapTableQuerying(statement, resultSet, views));
             }
             return super.getTables(catalog, schemaPattern, tableNamePattern, types);
         }
 
+        @SuppressWarnings("resource") // do not close current connection
         private String createQuery(final String type, String schemaPattern, final String tableNamePattern) throws SQLException {
             final var query = new StringBuilder("SHOW ").append(type);
             if (schemaPattern == null || schemaPattern.isEmpty()) {
@@ -153,6 +162,7 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
             return query.toString();
         }
 
+        @SuppressWarnings("resource") // do not close current connection
         private Set<String> getViews(final String schemaPattern, final String tableNamePattern) throws SQLException {
             final HashSet<String> views = new HashSet<>();
             final var query = createQuery("VIEWS", schemaPattern, tableNamePattern);
@@ -297,6 +307,32 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
         }
     }
 
+    private class LocalHiveSchemaQueryResultSetWrapper extends LocalHiveResultSetWrapper
+        implements LocalHiveTableQueryWrapper {
+
+        LocalHiveSchemaQueryResultSetWrapper(final Statement statement, final ResultSet resultSet) throws SQLException {
+            super(statement, resultSet);
+        }
+
+        @Override
+        public String getString(final String columnLabel) throws SQLException {
+            if ("TABLE_SCHEM".equals(columnLabel)) {
+                return super.getString("namespace");
+            } else if ("TABLE_CATALOG".equals(columnLabel)) {
+                return null;
+            } else {
+                throw new SQLException("Unknown column '" + columnLabel + "'.");
+            }
+        }
+
+        @Override
+        public void close() throws SQLException {
+            try (Statement statementToClose = getStatement()) {
+                super.close();
+            }
+        }
+    }
+
     private class LocalHiveTableQueryResultSetWrapper extends LocalHiveResultSetWrapper
         implements LocalHiveTableQueryWrapper {
 
@@ -332,6 +368,10 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
 
     private static boolean isLocalHiveDescriptionWrapper(final Object object) throws SQLException {
         return Wrappers.isWrapperFor(object, LocalHiveDescriptionWrapper.class);
+    }
+
+    private static boolean isLocalHiveSchemaQueryWrapper(final Object object) throws SQLException {
+        return Wrappers.isWrapperFor(object, LocalHiveSchemaQueryWrapper.class);
     }
 
     private static boolean isLocalHiveTableQueryWrapper(final Object object) throws SQLException {
@@ -388,6 +428,11 @@ public class LocalHiveWrappedConnection extends AbstractConnectionWrapper implem
     private ResultSet wrapDescribing(final Statement statement, final ResultSet resultSet) throws SQLException {
         return isLocalHiveDescriptionWrapper(resultSet) ? resultSet
             : new LocalHiveDescriptionResultSetWrapper(statement == null ? null : wrap(statement), resultSet);
+    }
+
+    private ResultSet wrapSchemaQuerying(final Statement statement, final ResultSet resultSet) throws SQLException {
+        return isLocalHiveSchemaQueryWrapper(resultSet) ? resultSet
+            : new LocalHiveSchemaQueryResultSetWrapper(statement == null ? null : wrap(statement), resultSet);
     }
 
     private ResultSet wrapTableQuerying(final Statement statement, final ResultSet resultSet, final Set<String> views) throws SQLException {
