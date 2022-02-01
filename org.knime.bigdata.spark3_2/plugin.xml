@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.knime.bigdata.spark.core.SparkJarProvider">
+      <SparkJarProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_JarProvider">
+      </SparkJarProvider>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.core.SparkSQLFunctionProvider">
+      <SparkSQLFunctionProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_SQLFunctionFactoryProvider">
+      </SparkSQLFunctionProvider>
+   </extension>
+   <extension point="org.knime.bigdata.spark.core.JobRunFactoryProvider">
+      <JobRunFactoryProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_JobRunFactoryProvider">
+      </JobRunFactoryProvider>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.core.ModelHelperProvider">
+      <ModelHelperProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_MLlibModelHelperProvider">
+      </ModelHelperProvider>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.core.IntermediateToSparkConverterProvider">
+      <IntermediateToSparkConverterProvider 
+      		ProviderClass="org.knime.bigdata.spark3_2.converter.type.DefaultSpark_3_2_IntermediateToSparkConverterProvider">
+      </IntermediateToSparkConverterProvider>
+   </extension>
+   <extension point="org.knime.bigdata.spark.core.BundleGroupSparkJarProvider">
+      <BundleGroupSparkJarProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_BundleGroupSparkJarProvider">
+      </BundleGroupSparkJarProvider>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.node.JavaSnippetHelper">
+      <JavaSnippetHelper
+            HelperClass="org.knime.bigdata.spark3_2.base.Spark_3_2_JavaSnippetHelper">
+      </JavaSnippetHelper>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.node.JavaDataFrameSnippetHelper">
+      <JavaDataFrameSnippetHelper
+            HelperClass="org.knime.bigdata.spark3_2.base.Spark_3_2_JavaDataFrameSnippetHelper">
+      </JavaDataFrameSnippetHelper>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.node.JavaSnippetTemplateRepository">
+      <JavaSnippetTemplateRepositoryProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_JavaSnippetTemplateRepositoryProvider">
+      </JavaSnippetTemplateRepositoryProvider>
+   </extension>
+   <extension point="org.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
+      <PMMLPortObjectFactoryProvider
+            ProviderClass="org.knime.bigdata.spark3_2.base.Spark_3_2_PMMLPortObjectFactoryProvider">
+      </PMMLPortObjectFactoryProvider>
+   </extension>
+   <extension
+         point="org.knime.bigdata.spark.node.PySparkHelper">
+         <PySparkHelper
+               HelperClass="org.knime.bigdata.spark3_2.base.Spark_3_2_PySparkHelper">
+         </PySparkHelper>
+   </extension>
+</plugin>
