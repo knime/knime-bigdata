@@ -53,6 +53,11 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
         protected ParquetConverter<T> createConverter() {
             return new ParquetListConverter<>(m_elementProducer.createConverter());
         }
+
+        @Override
+        public ParquetCellValueProducer<T> cloneProducer() {
+            return new ToCollectionProducer<>(m_elementProducer.cloneProducer());
+        }
     }
 
     @Override
@@ -117,8 +122,8 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
     }
 
     @Override
-    public ParquetListCellValueProducerFactory<T, E> clone() throws CloneNotSupportedException {
-        ParquetCellValueProducerFactory<E> clonedProducer = m_elementProducerFactory.clone();
+    public ParquetListCellValueProducerFactory<T, E> cloneFactory() {
+        ParquetCellValueProducerFactory<E> clonedProducer = m_elementProducerFactory.cloneFactory();
         return new ParquetListCellValueProducerFactory<T, E>(getSourceType(), getDestinationType(), clonedProducer);
     }
 }

@@ -48,6 +48,7 @@ package org.knime.bigdata.fileformats.parquet.reader;
 import org.apache.parquet.io.api.Converter;
 import org.apache.parquet.io.api.GroupConverter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetCellValueProducerFactory;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetOriginalTypeSource;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
@@ -83,7 +84,7 @@ final class DataRowConverter extends GroupConverter {
         m_paths = paths;
         m_externalToKnimeMapper = MappingFramework.createMapper(i -> fileStoreFactory, paths);
         m_parameters = params.clone();
-        m_source = new ParquetSource();
+        m_source = new ParquetOriginalTypeSource();
     }
 
     /**

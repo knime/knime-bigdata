@@ -26,8 +26,14 @@
    </node>
    <node
          category-path="/io/write"
-         deprecated="false"
+         deprecated="true"
          factory-class="org.knime.bigdata.fileformats.parquet.writer2.ParquetWriter2NodeFactory"
+         hidden="false">
+   </node>
+   <node
+         category-path="/io/write"
+         deprecated="false"
+         factory-class="org.knime.bigdata.fileformats.parquet.writer3.ParquetWriter3NodeFactory"
          hidden="false">
    </node>
    <node

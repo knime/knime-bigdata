@@ -59,7 +59,7 @@ import java.util.Map;
  *
  * @param <T> the type to produce
  */
-public abstract class ParquetCellValueProducer<T> implements Cloneable{
+public abstract class ParquetCellValueProducer<T> {
 
     protected Map<Integer, ParquetConverter<T>> m_converters = new HashMap<>();
 
@@ -88,9 +88,9 @@ public abstract class ParquetCellValueProducer<T> implements Cloneable{
         }
     }
 
-    @Override
-    public ParquetCellValueProducer<T> clone() throws CloneNotSupportedException{
-        throw new CloneNotSupportedException();
-    }
+    /**
+     * @return independent clone of this producer
+     */
+    public abstract ParquetCellValueProducer<T> cloneProducer();
 
 }

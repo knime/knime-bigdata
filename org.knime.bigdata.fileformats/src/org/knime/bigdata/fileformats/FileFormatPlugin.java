@@ -65,8 +65,10 @@ public class FileFormatPlugin extends Plugin {
     public void start(final BundleContext context) throws Exception {
         ORCRegistrationHelper.registerORCProducers();
         ORCRegistrationHelper.registerORCConsumers();
-        ParquetRegistrationHelper.registerParquetProducers();
-        ParquetRegistrationHelper.registerParquetConsumers();
+        ParquetOriginalTypeRegistrationHelper.registerParquetProducers();
+        ParquetOriginalTypeRegistrationHelper.registerParquetConsumers();
+        ParquetLogicalTypeRegistrationHelper.registerParquetProducers();
+        ParquetLogicalTypeRegistrationHelper.registerParquetConsumers();
     }
 
 }

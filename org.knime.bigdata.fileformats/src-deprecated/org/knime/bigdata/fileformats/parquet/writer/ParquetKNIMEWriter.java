@@ -123,23 +123,23 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
      */
     @SuppressWarnings("unchecked")
     public ParquetKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final String compression, final int rowGroupSize, 
-            DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration) 
+            final String compression, final int rowGroupSize,
+            final DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
                     throws IOException {
         super(file, rowGroupSize, spec);
         final CompressionCodecName codec = CompressionCodecName.fromConf(compression);
         m_mappingConfig = (DataTypeMappingConfiguration<Type>) inputputDataTypeMappingConfiguration;
         m_params = new ParquetParameter[spec.getNumColumns()];
         for (int i = 0; i < spec.getNumColumns(); i++) {
-            m_params[i] = new ParquetParameter(i);
+            m_params[i] = new ParquetParameter(spec.getColumnSpec(i).getName(), i);
         }
 
 
         try {
-
+            final boolean useLogicalTypes = false;
             m_writer = new DataRowParquetWriterBuilder(new File(file.getURI()),
-                    new DataRowWriteSupport(spec.getName(), spec, 
-                            m_mappingConfig.getConsumptionPathsFor(spec), m_params))
+                    new DataRowWriteSupport(spec.getName(), spec,
+                            m_mappingConfig.getConsumptionPathsFor(spec), m_params, useLogicalTypes))
                     .withCompressionCodec(codec)
                     .withDictionaryEncoding(true)
                     .withRowGroupSize(rowGroupSize).withWriteMode(Mode.OVERWRITE).build();

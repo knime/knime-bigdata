@@ -56,7 +56,7 @@ import org.knime.core.data.convert.map.Destination;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class ParquetDestination implements Destination<ParquetType> {
+public abstract class ParquetDestination implements Destination<ParquetType> {
 
     final RecordConsumer m_recordConsumer;
 
@@ -64,7 +64,7 @@ public class ParquetDestination implements Destination<ParquetType> {
      * Creates a destination for Parquet type mapping
      * @param recordConsumer the record consumer
      */
-    public ParquetDestination(RecordConsumer recordConsumer) {
+    ParquetDestination(final RecordConsumer recordConsumer) {
         m_recordConsumer = recordConsumer;
     }
 

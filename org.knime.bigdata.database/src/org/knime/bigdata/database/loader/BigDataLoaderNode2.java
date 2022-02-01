@@ -136,6 +136,8 @@ public class BigDataLoaderNode2
 
     private static final int ROW_GROUP_SIZE = ParquetWriter.DEFAULT_BLOCK_SIZE * TO_BYTE;
 
+    private static final boolean USE_LOGICAL_TYPES = false;
+
     private static final class DBLoaderFileWriterImplementation
         implements DBFileLoader<ConnectableCsvLoaderNodeSettings2, BigDataLoaderParameters2> {
         private final TempTableColumnListProvider m_tempColumnLists;
@@ -219,7 +221,7 @@ public class BigDataLoaderNode2
             final CompressionCodecName compression = CompressionCodecName.UNCOMPRESSED;
             final DataTableSpec newSpec = createRenamedSpec(spec, tempTableColumns);
             return new ParquetFileFormatWriter(file, Mode.OVERWRITE, newSpec, compression, FILE_SIZE, ROW_GROUP_SIZE,
-                getParquetTypesMapping(spec, tempTableColumns));
+                getParquetTypesMapping(spec, tempTableColumns), USE_LOGICAL_TYPES);
         }
 
         /**

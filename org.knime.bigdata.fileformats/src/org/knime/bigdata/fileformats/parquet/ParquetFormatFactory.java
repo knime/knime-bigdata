@@ -59,6 +59,7 @@ import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
 import org.knime.bigdata.fileformats.node.writer2.FileFormatWriter;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.SettingsModelParquetDataTypeMapping;
@@ -89,6 +90,28 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     private static final String NAME = "Parquet";
 
     private static final int TO_BYTE = 1024 * 1024;
+
+    private final boolean m_useLogicalTypes;
+
+    /**
+     * Default constructor.
+     *
+     * @param useLogicalTypes {@code true} if logical type annotations should be used, {@code false} if deprecated
+     *            original types should be used
+     */
+    public ParquetFormatFactory(final boolean useLogicalTypes) {
+        m_useLogicalTypes = useLogicalTypes;
+    }
+
+    /**
+     * Deprecated constructor using original Parquet types.
+     *
+     * @deprecated use {{@link #ParquetFormatFactory(boolean)} instead
+     */
+    @Deprecated
+    public ParquetFormatFactory() {
+        this(false);
+    }
 
     @Override
     public String getChunkUnit() {
@@ -152,7 +175,11 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
     @Override
     public DataTypeMappingService<ParquetType, ?, ?> getTypeMappingService() {
-        return ParquetTypeMappingService.getInstance();
+        if (m_useLogicalTypes) {
+            return ParquetLogicalTypeMappingService.getInstance();
+        } else {
+            return ParquetTypeMappingService.getInstance();
+        }
     }
 
     @Deprecated
@@ -170,7 +197,7 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
         final Mode writeMode = OVERWRITE == overwritePolicy ? Mode.OVERWRITE : Mode.CREATE;
         final CompressionCodecName compressionCodec = CompressionCodecName.fromConf(compression);
         return new ParquetFileFormatWriter(path, writeMode, spec, compressionCodec, fileSize * TO_BYTE,
-            chunkSize * TO_BYTE, typeMappingConf);
+            chunkSize * TO_BYTE, typeMappingConf, m_useLogicalTypes);
     }
 
 }

@@ -90,17 +90,19 @@ public final class ParquetFileFormatWriter implements FileFormatWriter {
      * @param fileSize the maximum file size in bytes
      * @param rowGroupSize the row group size in bytes
      * @param typeMappingConfiguration the DataTypeMappingConfiguration to use
+     * @param useLogicalTypes {@code true} if logical type annotations should be used, {@code false} if deprecated
+     *            original types should be used
      * @throws IOException if the parquet writer can not be initialized
      */
     public ParquetFileFormatWriter(final FSPath path, final Mode writeMode, final DataTableSpec spec,
         final CompressionCodecName codec, final long fileSize, final int rowGroupSize,
-        final DataTypeMappingConfiguration<?> typeMappingConfiguration)
+        final DataTypeMappingConfiguration<?> typeMappingConfiguration, final boolean useLogicalTypes)
         throws IOException {
         m_fileSize = fileSize;
         m_mappingConfig = typeMappingConfiguration;
         m_params = new ParquetParameter[spec.getNumColumns()];
         for (int i = 0; i < spec.getNumColumns(); i++) {
-            m_params[i] = new ParquetParameter(i);
+            m_params[i] = new ParquetParameter(spec.getColumnSpec(i).getName(), i);
         }
 
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
@@ -108,7 +110,7 @@ public final class ParquetFileFormatWriter implements FileFormatWriter {
         try {
             m_writer = new DataRowParquetWriterBuilder(hadoopPath,
                 new DataRowWriteSupport(spec.getName(), spec, m_mappingConfig.getConsumptionPathsFor(spec),
-                    m_params)).withCompressionCodec(codec).withDictionaryEncoding(true)
+                    m_params, useLogicalTypes)).withCompressionCodec(codec).withDictionaryEncoding(true)
                         .withRowGroupSize(rowGroupSize).withWriteMode(writeMode).build();
         } catch (final InvalidSettingsException e) {
             throw new BigDataFileFormatException(e);

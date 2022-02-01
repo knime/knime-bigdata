@@ -46,7 +46,7 @@ public class ParquetListCellValueConsumerFactory<T, E>
 
             RecordConsumer consumer = destination.getRecordConsumer();
             if (value != null) {
-                consumer.startField("listfield", consumerParams.getIndex());
+                consumer.startField(consumerParams.getField(), consumerParams.getIndex());
                 consumer.startGroup();
 
                 consumer.startField("list", 0);
@@ -70,7 +70,7 @@ public class ParquetListCellValueConsumerFactory<T, E>
                 consumer.endField("list", 0);
 
                 consumer.endGroup();
-                consumer.endField("listfield", consumerParams.getIndex());
+                consumer.endField(consumerParams.getField(), consumerParams.getIndex());
             }
         }
 

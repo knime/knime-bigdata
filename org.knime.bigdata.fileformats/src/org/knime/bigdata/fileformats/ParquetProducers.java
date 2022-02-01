@@ -95,7 +95,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public BooleanbooleanProducer clone() {
+        public BooleanbooleanProducer cloneProducer() {
             return new BooleanbooleanProducer();
         }
 
@@ -119,7 +119,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public StringStringProducer clone() {
+        public StringStringProducer cloneProducer() {
             return new StringStringProducer();
         }
     }
@@ -142,7 +142,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public BytesInputStreamProducer clone() {
+        public BytesInputStreamProducer cloneProducer() {
             return new BytesInputStreamProducer();
         }
 
@@ -166,7 +166,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public BytesBytArrayProducer clone() {
+        public BytesBytArrayProducer cloneProducer() {
             return new BytesBytArrayProducer();
         }
     }
@@ -189,7 +189,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public DoubleDoubleProducer clone() {
+        public DoubleDoubleProducer cloneProducer() {
             return new DoubleDoubleProducer();
         }
     }
@@ -212,7 +212,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public FloatDoubleProducer clone() {
+        public FloatDoubleProducer cloneProducer() {
             return new FloatDoubleProducer();
         }
     }
@@ -235,7 +235,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public LongLongProducer clone() {
+        public LongLongProducer cloneProducer() {
             return new LongLongProducer();
         }
     }
@@ -258,7 +258,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public IntMillisLocalTimeProducer clone() {
+        public IntMillisLocalTimeProducer cloneProducer() {
             return new IntMillisLocalTimeProducer();
         }
     }
@@ -281,8 +281,31 @@ public class ParquetProducers {
         }
 
         @Override
-        public LongMicrosLocalTimeProducer clone() {
+        public LongMicrosLocalTimeProducer cloneProducer() {
             return new LongMicrosLocalTimeProducer();
+        }
+    }
+
+    /**
+     * Producer for LocalTime from Long (Nanoseconds)
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public static class LongNanosLocalTimeProducer extends ParquetCellValueProducer<LocalTime> {
+        @Override
+        public ParquetPrimitiveConverter<LocalTime> createConverter() {
+            return new ParquetPrimitiveConverter<LocalTime>() {
+
+                @Override
+                public void addLong(final long value) {
+                    m_value = LocalTime.ofNanoOfDay(value);
+                }
+            };
+        }
+
+        @Override
+        public ParquetCellValueProducer<LocalTime> cloneProducer() {
+            return new LongNanosLocalTimeProducer();
         }
     }
 
@@ -305,7 +328,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public LongMillisZonedDateTimeProducer clone() {
+        public LongMillisZonedDateTimeProducer cloneProducer() {
             return new LongMillisZonedDateTimeProducer();
         }
     }
@@ -332,8 +355,35 @@ public class ParquetProducers {
         }
 
         @Override
-        public LongMicrosZonedDateTimeProducer clone() {
+        public LongMicrosZonedDateTimeProducer cloneProducer() {
             return new LongMicrosZonedDateTimeProducer();
+        }
+    }
+
+    /**
+     * Producer for Zoned Date Time from Long (Nanoseconds)
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public static class LongNanosZonedDateTimeProducer extends ParquetCellValueProducer<ZonedDateTime> {
+        @Override
+        public ParquetPrimitiveConverter<ZonedDateTime> createConverter() {
+            return new ParquetPrimitiveConverter<ZonedDateTime>() {
+
+                @Override
+                public void addLong(final long value) {
+                    final long seconds = TimeUnit.SECONDS.convert(value, TimeUnit.NANOSECONDS);
+                    final long nanos = (value % (1000*1000*1000l));
+                    final Instant instant = Instant.ofEpochSecond(seconds, nanos);
+                    m_value = ZonedDateTime.of(LocalDateTime.ofInstant(instant, ZoneOffset.UTC),
+                        ZoneId.of("Etc/UTC"));
+                }
+            };
+        }
+
+        @Override
+        public ParquetCellValueProducer<ZonedDateTime> cloneProducer() {
+            return new LongNanosZonedDateTimeProducer();
         }
     }
 
@@ -358,7 +408,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public Int96ZonedDateTimeProducer clone() {
+        public Int96ZonedDateTimeProducer cloneProducer() {
             return new Int96ZonedDateTimeProducer();
         }
     }
@@ -381,7 +431,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public IntegerIntegerProducer clone() {
+        public IntegerIntegerProducer cloneProducer() {
             return new IntegerIntegerProducer();
         }
     }
@@ -404,7 +454,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public IntegerLocalDateProducer clone() {
+        public IntegerLocalDateProducer cloneProducer() {
             return new IntegerLocalDateProducer();
         }
     }
@@ -429,7 +479,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public Int96LocalDateProducer clone() {
+        public Int96LocalDateProducer cloneProducer() {
             return new Int96LocalDateProducer();
         }
     }
@@ -452,7 +502,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public LongMillisLocalDateTimeProducer clone() {
+        public LongMillisLocalDateTimeProducer cloneProducer() {
             return new LongMillisLocalDateTimeProducer();
         }
     }
@@ -478,8 +528,34 @@ public class ParquetProducers {
         }
 
         @Override
-        public LongMicrosLocalDateTimeProducer clone() {
+        public LongMicrosLocalDateTimeProducer cloneProducer() {
             return new LongMicrosLocalDateTimeProducer();
+        }
+    }
+
+    /**
+     * Producer for Local Date Time from Long (Nanoseconds)
+     *
+     * @author Sascha Wolke, KNIME GmbH
+     */
+    public static class LongNanosLocalDateTimeProducer extends ParquetCellValueProducer<LocalDateTime> {
+        @Override
+        public ParquetPrimitiveConverter<LocalDateTime> createConverter() {
+            return new ParquetPrimitiveConverter<LocalDateTime>() {
+
+                @Override
+                public void addLong(final long value) {
+                    final long seconds = TimeUnit.SECONDS.convert(value, TimeUnit.NANOSECONDS);
+                    final long nanos = (value % (1000*1000*1000l));
+                    final Instant instant = Instant.ofEpochSecond(seconds, nanos);
+                    m_value = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+                }
+            };
+        }
+
+        @Override
+        public ParquetCellValueProducer<LocalDateTime> cloneProducer() {
+            return new LongNanosLocalDateTimeProducer();
         }
     }
 
@@ -504,7 +580,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public Int96LocalDateTimeProducer clone() {
+        public Int96LocalDateTimeProducer cloneProducer() {
             return new Int96LocalDateTimeProducer();
         }
     }
@@ -527,7 +603,7 @@ public class ParquetProducers {
         }
 
         @Override
-        public BinaryByteArrayProducer clone() {
+        public BinaryByteArrayProducer cloneProducer() {
             return new BinaryByteArrayProducer();
         }
     }

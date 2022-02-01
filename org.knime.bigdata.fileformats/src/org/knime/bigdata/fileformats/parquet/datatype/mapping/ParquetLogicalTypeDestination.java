@@ -42,65 +42,25 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- *
- * History
- *   09.10.2018 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
 
 package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.knime.core.data.convert.map.Destination;
-import org.knime.core.data.convert.map.Source;
+import org.apache.parquet.io.api.RecordConsumer;
 
 /**
- * Parameters for Parquet type mapping
+ * Parquet destination using logical type annotations.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
- *
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class ParquetParameter
-implements Destination.ConsumerParameters<ParquetDestination>, Source.ProducerParameters<ParquetSource> {
+public class ParquetLogicalTypeDestination extends ParquetDestination {
 
     /**
-     * Parquet field name
+     * Creates a destination for Parquet type mapping
+     * @param recordConsumer the record consumer
      */
-    private final String m_field;
-
-    /**
-     * Parquet field index
-     */
-    private final int m_index;
-
-    /**
-     * Constructs a {@link ParquetParameter}.
-     *
-     * @param field the name of the column to read from or write to
-     * @param index the index of the column to read from or write to
-     */
-    public ParquetParameter(final String field, final int index) {
-        if (index < 0) {
-            throw new IllegalArgumentException("Column index must be greater or equal to zero");
-        }
-        m_field = field;
-        m_index = index;
-    }
-
-    /**
-     * Gets the name of the column to read from or write to.
-     *
-     * @return field name
-     */
-    public String getField() {
-        return m_field;
-    }
-
-    /**
-     * Gets the index of the column to read from or write to.
-     *
-     * @return the columnIndex
-     */
-    public int getIndex() {
-        return m_index;
+    public ParquetLogicalTypeDestination(final RecordConsumer recordConsumer) {
+        super(recordConsumer);
     }
 
 }

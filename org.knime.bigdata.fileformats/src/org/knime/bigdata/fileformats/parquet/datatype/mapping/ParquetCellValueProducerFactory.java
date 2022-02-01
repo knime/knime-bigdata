@@ -60,7 +60,7 @@ import org.knime.core.data.convert.map.SimpleCellValueProducerFactory;
  * @param <T> the type to produce
  */
 public class ParquetCellValueProducerFactory<T>
-extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetParameter> implements Cloneable {
+    extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetParameter> {
 
     private final ParquetCellValueProducer<T> m_parquetProducer;
 
@@ -127,10 +127,11 @@ extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetPar
         return m_parquetProducer;
     }
 
-
-    @Override
-    public ParquetCellValueProducerFactory<T> clone() throws CloneNotSupportedException{
-        ParquetCellValueProducer<T> clonedProducer = m_parquetProducer.clone();
+    /**
+     * @return independent clone of this factory
+     */
+    public ParquetCellValueProducerFactory<T> cloneFactory() {
+        ParquetCellValueProducer<T> clonedProducer = m_parquetProducer.cloneProducer();
         return new ParquetCellValueProducerFactory<T>(getSourceType(), getDestinationType(), clonedProducer);
     }
 }

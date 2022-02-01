@@ -134,7 +134,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
         createDefault(final ExternalDataTableSpec<ParquetType> exTableSpec) {
         final ParquetParameter[] params = new ParquetParameter[exTableSpec.getColumns().size()];
         for (int i = 0; i < exTableSpec.getColumns().size(); i++) {
-            params[i] = new ParquetParameter(i);
+            params[i] = new ParquetParameter(exTableSpec.getColumns().get(i).getName(), i);
         }
         return params;
     }
@@ -244,14 +244,11 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
     private static ProductionPath[] clonePaths(final ProductionPath[] paths) throws CloneNotSupportedException {
 
         //We need to clone the producers to be able to read concurrently
-        return Stream.of(paths).map(prodPath -> {
-            try {
-                return new ProductionPath(((ParquetCellValueProducerFactory<?>)prodPath.getProducerFactory()).clone(),
-                    prodPath.getConverterFactory());
-            } catch (CloneNotSupportedException ex) {
-                throw new BigDataFileFormatException(ex.getMessage());
-            }
-        }).toArray(ProductionPath[]::new);
+        return Stream.of(paths)
+            .map(prodPath -> new ProductionPath(
+                ((ParquetCellValueProducerFactory<?>)prodPath.getProducerFactory()).cloneFactory(),
+                prodPath.getConverterFactory()))
+            .toArray(ProductionPath[]::new);
     }
 
     @SuppressWarnings("resource")

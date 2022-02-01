@@ -57,6 +57,8 @@ import org.apache.parquet.io.api.RecordConsumer;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Type;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetDestination;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeDestination;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetOriginalTypeDestination;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
@@ -89,6 +91,8 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
 
     private final KnimeToExternalMapper<ParquetDestination, ParquetParameter> m_knimeToExternalMapper;
 
+    private final boolean m_useLogicalTypes;
+
     /**
      * Write Support for KNIME DataRow
      *
@@ -96,9 +100,12 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
      * @param spec the table spec
      * @param consumptionPaths the type mapping consumption paths
      * @param params the parameters for writing
+     * @param useLogicalTypes {@code true} if logical type annotations should be used, {@code false} if deprecated
+     *            original types should be used
      */
     public DataRowWriteSupport(final String name, final DataTableSpec spec,
-            final ConsumptionPath[] consumptionPaths, final ParquetParameter[] params) {
+        final ConsumptionPath[] consumptionPaths, final ParquetParameter[] params, final boolean useLogicalTypes) {
+
         if (name != null) {
             m_name = name.replaceAll("\\W", "_");
         } else {
@@ -108,6 +115,7 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
         m_knimeToExternalMapper = MappingFramework.createMapper(consumptionPaths);
         m_spec = spec;
         m_params = params.clone();
+        m_useLogicalTypes = useLogicalTypes;
     }
 
     /**
@@ -135,7 +143,12 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
      */
     @Override
     public void prepareForWrite(final RecordConsumer recordConsumer) {
-        m_destination = new ParquetDestination(recordConsumer);
+        if (m_useLogicalTypes) {
+            m_destination = new ParquetLogicalTypeDestination(recordConsumer);
+        } else {
+            m_destination = new ParquetOriginalTypeDestination(recordConsumer);
+        }
+
         m_recordConsumer = recordConsumer;
     }
 

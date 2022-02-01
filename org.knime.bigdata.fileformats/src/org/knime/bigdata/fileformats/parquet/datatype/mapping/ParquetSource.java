@@ -4,13 +4,16 @@ import org.knime.core.data.convert.map.Source;
 
 /**
  * Source implementation for Parquet type mapping
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class ParquetSource implements Source<ParquetType> {
+public abstract class ParquetSource implements Source<ParquetType> {
 
     long m_rowIndex = 0;
+
+    ParquetSource() {
+    }
 
     /**
      * @return the current row index

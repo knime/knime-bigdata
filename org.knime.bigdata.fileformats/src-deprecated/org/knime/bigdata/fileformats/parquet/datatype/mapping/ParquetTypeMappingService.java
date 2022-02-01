@@ -93,7 +93,7 @@ import org.knime.datatype.mapping.DataTypeMappingDirection;
  *
  */
 public class ParquetTypeMappingService
-        extends AbstractDataTypeMappingService<ParquetType, ParquetSource, ParquetDestination> {
+        extends AbstractDataTypeMappingService<ParquetType, ParquetOriginalTypeSource, ParquetOriginalTypeDestination> {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(ParquetTypeMappingService.class);
 
@@ -110,12 +110,12 @@ public class ParquetTypeMappingService
      * Creates a Type Mapping Registry for Parquet
      */
     private ParquetTypeMappingService() {
-        final ConsumerRegistry<ParquetType, ParquetDestination> consumerRegistry = MappingFramework
-                .forDestinationType(ParquetDestination.class);
+        final ConsumerRegistry<ParquetType, ParquetOriginalTypeDestination> consumerRegistry = MappingFramework
+                .forDestinationType(ParquetOriginalTypeDestination.class);
         setConsumerRegistry(consumerRegistry);
 
-        final ProducerRegistry<ParquetType, ParquetSource> producerRegistry = MappingFramework
-                .forSourceType(ParquetSource.class);
+        final ProducerRegistry<ParquetType, ParquetOriginalTypeSource> producerRegistry = MappingFramework
+                .forSourceType(ParquetOriginalTypeSource.class);
         setProducerRegistry(producerRegistry);
         // External source types
         setExternalSourceTypes(producerRegistry.getAllSourceTypes());
@@ -214,7 +214,7 @@ public class ParquetTypeMappingService
     }
 
     @Override
-    protected void addConsumptionPath(final ConsumerRegistry<ParquetType, ParquetDestination> consumerRegistry,
+    protected void addConsumptionPath(final ConsumerRegistry<ParquetType, ParquetOriginalTypeDestination> consumerRegistry,
             final Map<Pair<DataType, ParquetType>, ConsumptionPath> defaultConsumptionPaths, final DataType knimeType,
             final ParquetType externalType) {
         final Optional<ConsumptionPath> path = findPath(consumerRegistry, knimeType, externalType);
@@ -237,7 +237,7 @@ public class ParquetTypeMappingService
     }
 
     @Override
-    protected void addProductionPath(final ProducerRegistry<ParquetType, ParquetSource> producerRegistry,
+    protected void addProductionPath(final ProducerRegistry<ParquetType, ParquetOriginalTypeSource> producerRegistry,
             final Map<Pair<ParquetType, DataType>, ProductionPath> defaultProductionPaths,
             final ParquetType externalType, final DataType knimeType) {
         final Optional<ProductionPath> path = findPath(producerRegistry, externalType, knimeType);
@@ -262,11 +262,11 @@ public class ParquetTypeMappingService
 
     @Override
     public String convertExternalTypeToString(final ParquetType externalType) {
-       return externalType.toString();
+       return externalType.toExternalOriginalTypeString();
     }
 
     @Override
     public ParquetType convertStringToExternalType(final String string) {
-        return ParquetType.fromString(string);
+        return ParquetType.fromExternalOriginalTypeString(string);
     }
 }

@@ -80,15 +80,16 @@ public class ParquetCellValueConsumerFactory<T>
         super(sourceType, externalType, (c, v, p) -> {
 
             final RecordConsumer recordConsumer = c.getRecordConsumer();
+            final String field = p.getField();
             final int index = p.getIndex();
 
             if (v != null) {
                 try {
-                    recordConsumer.startField(externalType.getName(), index);
+                    recordConsumer.startField(field, index);
 
                     consumer.writeNonNullValue(recordConsumer, v);
 
-                    recordConsumer.endField(externalType.getName(), index);
+                    recordConsumer.endField(field, index);
                 } catch (Exception e) {
                     throw new MappingException(e);
                 }
