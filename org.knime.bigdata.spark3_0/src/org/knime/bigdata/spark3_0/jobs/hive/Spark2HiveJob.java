@@ -65,13 +65,9 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         final String fileFormat = input.getFileFormat();
         final String compression = input.getCompression();
 
-        if (Hive2SparkJob.shouldUseHiveWarehouseConnector(sparkContext)) {
-            HiveWarehouseSessionUtil.writeToHive(sparkContext, dataset, input);
-        } else {
-            LOGGER.info(
-                String.format("Writing hive table using Hive session: %s stored as %s", hiveTableName, fileFormat));
-            writeUsingHiveSession(spark, dataset, hiveTableName, fileFormat, compression);
-        }
+        LOGGER.info(
+            String.format("Writing hive table using Hive session: %s stored as %s", hiveTableName, fileFormat));
+        writeUsingHiveSession(spark, dataset, hiveTableName, fileFormat, compression);
 
         LOGGER.info("Hive table: " + hiveTableName + " created");
     }

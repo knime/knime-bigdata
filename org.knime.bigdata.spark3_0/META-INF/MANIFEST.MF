@@ -3,8 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 3.0
 Bundle-SymbolicName: org.knime.bigdata.spark3_0;singleton:=true
 Bundle-Version: 4.6.0.qualifier
-Bundle-ClassPath: knime.jar,
-  lib/hive-warehouse-connector_2.11-1.0.0.3.1.2.0-4.jar
+Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.spark3_0.api,
  org.knime.bigdata.spark3_0.base

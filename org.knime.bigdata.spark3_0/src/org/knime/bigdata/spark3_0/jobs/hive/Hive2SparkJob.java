@@ -54,13 +54,7 @@ public class Hive2SparkJob implements SparkJob<Hive2SparkJobInput, Hive2SparkJob
     public Hive2SparkJobOutput runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException {
 
-        final Dataset<Row> dataFrame;
-
-        if (shouldUseHiveWarehouseConnector(sparkContext)) {
-            dataFrame = HiveWarehouseSessionUtil.queryHive(sparkContext, input);
-        } else {
-            dataFrame = runQueryInHiveSession(sparkContext, input);
-        }
+        final Dataset<Row> dataFrame = runQueryInHiveSession(sparkContext, input);
 
         for (final StructField field : dataFrame.schema().fields()) {
             LOGGER.debug("Field '" + field.name() + "' of type '" + field.dataType() + "'");
@@ -88,30 +82,4 @@ public class Hive2SparkJob implements SparkJob<Hive2SparkJobInput, Hive2SparkJob
         }
     }
 
-    /**
-     * Checks SparConf, whether Hortonwork's Hive Warehouse Connector shall be used for the Hive2Spark and Spark2Hive
-     * jobs.
-     *
-     * @param sparkContext The current Spark context.
-     * @return true, if Hive Warehouse Connector shall be used, false otherwise.
-     */
-    public static boolean shouldUseHiveWarehouseConnector(final SparkContext sparkContext) {
-        final String useHwc = sparkContext.conf().get(USE_HIVE_WAREHOUSE_CONNECTOR, "auto");
-
-        if (useHwc.equalsIgnoreCase("auto")) {
-            if (sparkContext.conf().contains("spark.datasource.hive.warehouse.metastoreUri")) {
-                return true;
-            } else {
-                return false;
-            }
-        } else if (useHwc.equalsIgnoreCase("true") || useHwc.equalsIgnoreCase("on") || useHwc.equalsIgnoreCase("yes")) {
-            return true;
-        } else if (useHwc.equalsIgnoreCase("false") || useHwc.equalsIgnoreCase("off")
-            || useHwc.equalsIgnoreCase("no")) {
-            return false;
-        } else {
-            LOGGER.warn(String.format("Invalid SparkConf setting %s=%s", USE_HIVE_WAREHOUSE_CONNECTOR, useHwc));
-            return false;
-        }
-    }
 }
