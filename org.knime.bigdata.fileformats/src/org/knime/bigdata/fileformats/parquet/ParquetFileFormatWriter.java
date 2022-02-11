@@ -90,6 +90,25 @@ public final class ParquetFileFormatWriter implements FileFormatWriter {
      * @param fileSize the maximum file size in bytes
      * @param rowGroupSize the row group size in bytes
      * @param typeMappingConfiguration the DataTypeMappingConfiguration to use
+     * @throws IOException if the parquet writer can not be initialized
+     * @see #ParquetFileFormatWriter(FSPath, Mode, DataTableSpec, CompressionCodecName, long, int,
+     *      DataTypeMappingConfiguration, boolean)
+     */
+    @Deprecated
+    public ParquetFileFormatWriter(final FSPath path, final Mode writeMode, final DataTableSpec spec,
+        final CompressionCodecName codec, final long fileSize, final int rowGroupSize,
+        final DataTypeMappingConfiguration<?> typeMappingConfiguration) throws IOException {
+        this(path, writeMode, spec, codec, fileSize, rowGroupSize, typeMappingConfiguration, false);
+    }
+
+    /**
+     * @param path the {@link FSPath} to write to
+     * @param writeMode the write {@link Mode}
+     * @param spec the {@link DataTableSpec} of the rows that will be written
+     * @param codec the {@link CompressionCodecName}
+     * @param fileSize the maximum file size in bytes
+     * @param rowGroupSize the row group size in bytes
+     * @param typeMappingConfiguration the DataTypeMappingConfiguration to use
      * @param useLogicalTypes {@code true} if logical type annotations should be used, {@code false} if deprecated
      *            original types should be used
      * @throws IOException if the parquet writer can not be initialized
