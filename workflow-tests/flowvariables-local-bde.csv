@@ -1,8 +1,8 @@
 varname,value
 spark.contextIdScheme,sparkLocal
 spark.settingsOverride,true
-spark.settingsCustom,spark.sql.session.timeZone: UTC
-spark.version,3.0
+spark.settingsCustom,spark.sql.session.timeZone: UTC\nspark.sql.parquet.datetimeRebaseModeInRead: CORRECTED\nspark.sql.parquet.datetimeRebaseModeInWrite: CORRECTED\nspark.sql.parquet.int96RebaseModeInRead: CORRECTED\nspark.sql.parquet.int96RebaseModeInWrite: CORRECTED
+spark.version,3.2
 spark.local.contextName,testflowContext
 spark.local.threads,2
 spark.local.sqlSupport,HIVEQL_WITH_JDBC
