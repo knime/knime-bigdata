@@ -96,7 +96,9 @@ public class FlowVariableReader {
                     final String value = (kv.length == 1) ? "" : kv[1];
                     flowVar.validateValue(value);
                     
-                    if (flowVar.isString() || flowVar.isBoolean()) {
+                    if (flowVar.isString()) {
+                        flowVariables.put(kv[0], new FlowVariable(kv[0], value.replace("\\n", "\n")));
+                    } else if (flowVar.isBoolean()) {
                         flowVariables.put(kv[0], new FlowVariable(kv[0], value));
                     } else if (flowVar.isInt()) {
                         flowVariables.put(kv[0], new FlowVariable(kv[0], Integer.parseInt(value)));
