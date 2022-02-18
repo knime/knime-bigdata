@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.node.scripting.python.util;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.core.node.InvalidSettingsException;
@@ -66,10 +67,10 @@ public interface PySparkHelper extends SparkProvider {
     void checkUDF(PySparkDocument doc, int outCount) throws InvalidSettingsException;
 
     /**
-     * Returns the path to the local PySpark libs
+     * Returns the path to the local PySpark libs if present
      * @return String with the path
      * @throws IOException if if an error occurs during the url conversion
      */
-    String getLocalPySparkPath() throws IOException;
+    Optional<String> getLocalPySparkPath() throws IOException;
 
 }

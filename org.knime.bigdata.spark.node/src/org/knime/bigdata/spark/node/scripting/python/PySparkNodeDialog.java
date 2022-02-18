@@ -50,6 +50,7 @@ package org.knime.bigdata.spark.node.scripting.python;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -173,7 +174,10 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
 
     private void setPySparkPath(final PySparkHelper helper) {
         try {
-            m_sourceCodePanel.setPySparkPath(helper.getLocalPySparkPath());
+            final Optional<String> localPySparkPath = helper.getLocalPySparkPath();
+            if (localPySparkPath.isPresent()) {
+                 m_sourceCodePanel.setPySparkPath(localPySparkPath.get());
+            }
         } catch (final IOException e) {
             LOGGER.error("Could not obtain PySpark path.", e);
         }
