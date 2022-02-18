@@ -22,6 +22,7 @@ package org.knime.bigdata.spark2_3.base;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.knime.bigdata.spark.node.scripting.python.util.DefaultPySparkHelper;
@@ -47,7 +48,7 @@ public class Spark_2_3_PySparkHelper extends DefaultPySparkHelper {
      * {@inheritDoc}
      */
     @Override
-    public String getLocalPySparkPath() throws IOException {
+    public Optional<String> getLocalPySparkPath() throws IOException {
         final File sparkJarDir = new File(FileLocator.getBundleFile(FrameworkUtil.getBundle(PySparkDataExchanger.class)),
                 "/lib");
         return createPySparkPath(sparkJarDir);

@@ -23,6 +23,7 @@ package org.knime.bigdata.spark.node.scripting.python.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.text.BadLocationException;
@@ -353,8 +354,8 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
      * {@inheritDoc}
      */
     @Override
-    public String getLocalPySparkPath() throws IOException {
-        return null;
+    public Optional<String> getLocalPySparkPath() throws IOException {
+        return Optional.empty();
     }
 
     /**
@@ -362,7 +363,7 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
      * @param sparkJarDir the directory to search in
      * @return the path of the PySpark zips
      */
-    protected String createPySparkPath(final File sparkJarDir) {
+    protected Optional<String> createPySparkPath(final File sparkJarDir) {
         StringBuilder sb = new StringBuilder();
         if(sparkJarDir.isDirectory()) {
             for(File file : sparkJarDir.listFiles()) {
@@ -374,9 +375,12 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
                     sb.append(path);
                 }
             }
-        }else {
-            throw new IllegalArgumentException("The given file is not a directory.");
         }
-        return sb.toString();
+
+        if (sb.length() > 0) {
+            return Optional.of(sb.toString());
+        } else {
+            return Optional.empty();
+        }
     }
 }
