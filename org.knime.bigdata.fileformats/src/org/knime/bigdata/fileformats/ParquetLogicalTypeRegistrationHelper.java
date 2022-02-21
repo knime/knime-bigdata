@@ -95,7 +95,6 @@ import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalType
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeSource;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
-import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.convert.map.ConsumerRegistry;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.data.convert.map.ProducerRegistry;
@@ -134,6 +133,12 @@ final class ParquetLogicalTypeRegistrationHelper {
             (c, v) -> c.addBinary(Binary.fromString(v)));
         primitiveConsumers.add(stringToBinaryUTF8Consumer);
 
+        final ParquetCellValueConsumerFactory<String> stringToBinaryUUIDConsumer =
+            new ParquetCellValueConsumerFactory<>(String.class,
+                new ParquetType(PrimitiveTypeName.FIXED_LEN_BYTE_ARRAY, LogicalTypeAnnotation.uuidType()),
+                new ParquetConsumers.UUIDasFixedLenByteArray());
+        primitiveConsumers.add(stringToBinaryUUIDConsumer);
+
         final ParquetCellValueConsumerFactory<Boolean> booleanConsumer = new ParquetCellValueConsumerFactory<>(
             Boolean.class, new ParquetType(PrimitiveTypeName.BOOLEAN), (c, v) -> c.addBoolean(v));
         primitiveConsumers.add(booleanConsumer);
@@ -146,47 +151,98 @@ final class ParquetLogicalTypeRegistrationHelper {
             new ParquetType(PrimitiveTypeName.FLOAT), (c, v) -> c.addFloat(v.floatValue()));
         primitiveConsumers.add(floatConsumer);
 
-        ////////////////////////////////// Long //////////////////////////////////
-        final ParquetCellValueConsumerFactory<Long> longToInt64Consumer = new ParquetCellValueConsumerFactory<>(
-            Long.class, new ParquetType(PrimitiveTypeName.INT64), (c, v) -> c.addLong(v));
-        primitiveConsumers.add(longToInt64Consumer);
-
-        final ParquetCellValueConsumerFactory<Long> longToInt64Int64Consumer = new ParquetCellValueConsumerFactory<>(
-            Long.class, new ParquetType(PrimitiveTypeName.INT64, LogicalTypeAnnotation.intType(64, true)), (c, v) -> c.addLong(v));
-        primitiveConsumers.add(longToInt64Int64Consumer);
-
-        ////////////////////////////////// Integer //////////////////////////////////
+        ////////////////////////////////// Integer (signed) //////////////////////////////////
         final ParquetCellValueConsumerFactory<Integer> integerConsumer = new ParquetCellValueConsumerFactory<>(
             Integer.class, new ParquetType(PrimitiveTypeName.INT32), (c, v) -> c.addInteger(v));
         primitiveConsumers.add(integerConsumer);
 
-        final ParquetCellValueConsumerFactory<Integer> integerToIn32Int8Consumer = new ParquetCellValueConsumerFactory<>(
-            Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(8, true)), (c, v) -> {
-                if (v < Byte.MIN_VALUE || v > Byte.MAX_VALUE) {
-                    throw new BigDataFileFormatException(
-                        String.format("Cannot write %d as INT_8, only values between %d and %d supported.",
-                            (int) v, Byte.MIN_VALUE, Byte.MAX_VALUE));
-                } else {
-                    c.addInteger(v);
-                }
-            });
-        primitiveConsumers.add(integerToIn32Int8Consumer);
+        final ParquetCellValueConsumerFactory<Integer> integerToIn32SignedInt8Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(8, true)),
+                new ParquetConsumers.IntToSignedIntConsumer(8, Byte.MIN_VALUE, Byte.MAX_VALUE));
+        primitiveConsumers.add(integerToIn32SignedInt8Consumer);
 
-        final ParquetCellValueConsumerFactory<Integer> integerToIn32Int16Consumer = new ParquetCellValueConsumerFactory<>(
-            Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(16, true)), (c, v) -> {
-                if (v < Short.MIN_VALUE || v > Short.MAX_VALUE) {
-                    throw new BigDataFileFormatException(
-                        String.format("Cannot write %d as INT_16, only values between %d and %d supported.",
-                            (int) v, Short.MIN_VALUE, Short.MAX_VALUE));
-                } else {
-                    c.addInteger(v);
-                }
-            });
-        primitiveConsumers.add(integerToIn32Int16Consumer);
+        final ParquetCellValueConsumerFactory<Integer> integerToIn32SignedInt16Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(16, true)),
+                new ParquetConsumers.IntToSignedIntConsumer(16, Short.MIN_VALUE, Short.MAX_VALUE));
+        primitiveConsumers.add(integerToIn32SignedInt16Consumer);
 
-        final ParquetCellValueConsumerFactory<Integer> integerToIn32Int32Consumer = new ParquetCellValueConsumerFactory<>(
-            Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(32, true)), (c, v) -> c.addInteger(v));
-        primitiveConsumers.add(integerToIn32Int32Consumer);
+        final ParquetCellValueConsumerFactory<Integer> integerToIn32SignedInt32Consumer =
+            new ParquetCellValueConsumerFactory<>(Integer.class,
+                new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(32, true)),
+                (c, v) -> c.addInteger(v));
+        primitiveConsumers.add(integerToIn32SignedInt32Consumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToIn64SignedInt64Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT64, LogicalTypeAnnotation.intType(64, true)),
+                (c, v) -> c.addLong(v));
+        primitiveConsumers.add(integerToIn64SignedInt64Consumer);
+
+        ////////////////////////////////// Long (signed) //////////////////////////////////
+        final ParquetCellValueConsumerFactory<Long> longToInt64Consumer = new ParquetCellValueConsumerFactory<>(
+            Long.class, new ParquetType(PrimitiveTypeName.INT64), (c, v) -> c.addLong(v));
+        primitiveConsumers.add(longToInt64Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToIn32SignedInt8Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(8, true)),
+                new ParquetConsumers.LongToSignedIntConsumer(8, Byte.MIN_VALUE, Byte.MAX_VALUE));
+        primitiveConsumers.add(longToIn32SignedInt8Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToIn32SignedInt16Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(16, true)),
+                new ParquetConsumers.LongToSignedIntConsumer(16, Short.MIN_VALUE, Short.MAX_VALUE));
+        primitiveConsumers.add(longToIn32SignedInt16Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToIn32SignedInt32Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(32, true)),
+                new ParquetConsumers.LongToSignedIntConsumer(32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+        primitiveConsumers.add(longToIn32SignedInt32Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToInt64Int64Consumer = new ParquetCellValueConsumerFactory<>(
+            Long.class, new ParquetType(PrimitiveTypeName.INT64, LogicalTypeAnnotation.intType(64, true)), //
+            (c, v) -> c.addLong(v));
+        primitiveConsumers.add(longToInt64Int64Consumer);
+
+        ////////////////////////////////// Integer (unsigned) //////////////////////////////////
+        final ParquetCellValueConsumerFactory<Integer> integerToInt32UnsignedInt8Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(8, false)),
+                new ParquetConsumers.IntToUnsignedIntOrLongConsumer(8, 2l*Byte.MAX_VALUE + 1));
+        primitiveConsumers.add(integerToInt32UnsignedInt8Consumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToInt32UnsignedInt16Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(16, false)),
+                new ParquetConsumers.IntToUnsignedIntOrLongConsumer(16, 2l*Short.MAX_VALUE + 1));
+        primitiveConsumers.add(integerToInt32UnsignedInt16Consumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToInt32UnsignedInt32Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(32, false)),
+                new ParquetConsumers.IntToUnsignedIntOrLongConsumer(32));
+        primitiveConsumers.add(integerToInt32UnsignedInt32Consumer);
+
+        final ParquetCellValueConsumerFactory<Integer> integerToInt32UnsignedInt64Consumer = new ParquetCellValueConsumerFactory<>(
+                Integer.class, new ParquetType(PrimitiveTypeName.INT64, LogicalTypeAnnotation.intType(64, false)),
+                new ParquetConsumers.IntToUnsignedIntOrLongConsumer(64));
+        primitiveConsumers.add(integerToInt32UnsignedInt64Consumer);
+
+        ////////////////////////////////// Long (unsigned) //////////////////////////////////
+        final ParquetCellValueConsumerFactory<Long> longToInt32UnsignedInt8Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(8, false)),
+                new ParquetConsumers.LongToUnsignedIntConsumer(8, 2l*Byte.MAX_VALUE + 1));
+        primitiveConsumers.add(longToInt32UnsignedInt8Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToInt32UnsignedInt16Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(16, false)),
+                new ParquetConsumers.LongToUnsignedIntConsumer(16, 2l*Short.MAX_VALUE + 1));
+        primitiveConsumers.add(longToInt32UnsignedInt16Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToInt32UnsignedInt32Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT32, LogicalTypeAnnotation.intType(32, false)),
+                new ParquetConsumers.LongToUnsignedIntConsumer(32, 2l*Integer.MAX_VALUE + 1));
+        primitiveConsumers.add(longToInt32UnsignedInt32Consumer);
+
+        final ParquetCellValueConsumerFactory<Long> longToInt64UnsignedInt64Consumer = new ParquetCellValueConsumerFactory<>(
+                Long.class, new ParquetType(PrimitiveTypeName.INT64, LogicalTypeAnnotation.intType(64, false)),
+                new ParquetConsumers.LongToUnsignedLongConsumer());
+        primitiveConsumers.add(longToInt64UnsignedInt64Consumer);
 
         ////////////////////////////////// LocalDate //////////////////////////////////
         final ParquetCellValueConsumerFactory<LocalDate> localDateConsumer = new ParquetCellValueConsumerFactory<>(

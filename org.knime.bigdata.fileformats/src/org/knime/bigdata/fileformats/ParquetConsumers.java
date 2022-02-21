@@ -54,6 +54,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.JulianFields;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.parquet.io.api.Binary;
@@ -69,6 +70,121 @@ import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 final class ParquetConsumers {
 
     private ParquetConsumers() {
+    }
+
+    ////////////////////////////////// Integer (signed) //////////////////////////////////
+    static class IntToSignedIntConsumer implements ParquetCellValueConsumer<Integer> {
+        private final int m_bits;
+        private final int m_min;
+        private final int m_max;
+
+        IntToSignedIntConsumer(final int bits, final int min, final int max) {
+            m_bits = bits;
+            m_min = min;
+            m_max = max;
+        }
+
+        @Override
+        public void writeNonNullValue(final RecordConsumer c, final Integer v) throws Exception {
+            if (v < m_min || v > m_max) {
+                throw new BigDataFileFormatException(String.format( //
+                    "Cannot write %d as signed %d bit integer, only values between %d and %d are supported.", //
+                    (int)v, m_bits, m_min, m_max));
+            } else {
+                c.addInteger(v);
+            }
+        }
+    }
+
+    static class LongToSignedIntConsumer implements ParquetCellValueConsumer<Long> {
+        private final int m_bits;
+        private final int m_min;
+        private final int m_max;
+
+        LongToSignedIntConsumer(final int bits, final int min, final int max) {
+            m_bits = bits;
+            m_min = min;
+            m_max = max;
+        }
+
+        @Override
+        public void writeNonNullValue(final RecordConsumer c, final Long v) throws Exception {
+            if (v < m_min || v > m_max) {
+                throw new BigDataFileFormatException(String.format( //
+                    "Cannot write %d as signed %d bit integer, only values between %d and %d are supported.", //
+                    (long)v, m_bits, m_min, m_max));
+            } else {
+                c.addInteger(Math.toIntExact(v));
+            }
+        }
+    }
+
+    ////////////////////////////////// Integer (unsigned) //////////////////////////////////
+    static class IntToUnsignedIntOrLongConsumer implements ParquetCellValueConsumer<Integer> {
+        private final int m_bits;
+        private final long m_max;
+
+        IntToUnsignedIntOrLongConsumer(final int bits, final long max) {
+            m_bits = bits;
+            m_max = max;
+        }
+
+        IntToUnsignedIntOrLongConsumer(final int bits) {
+            m_bits = bits;
+            m_max = -1;
+        }
+
+        @Override
+        public void writeNonNullValue(final RecordConsumer c, final Integer v) throws Exception {
+            if (v < 0 && m_max == -1) {
+                throw new BigDataFileFormatException(String.format( //
+                    "Cannot write %d as unsigned %d bit integer, only values >= 0 are supported.", //
+                    (int)v, m_bits));
+            } else if (v < 0 || (m_max != -1 && v > m_max)) {
+                throw new BigDataFileFormatException(String.format( //
+                    "Cannot write %d as unsigned %d bit integer, only values between 0 and %d are supported.", //
+                    (int)v, m_bits, m_max));
+            } else if (m_bits <= 32) {
+                c.addInteger((int)Integer.toUnsignedLong(v));
+            } else {
+                c.addLong(Integer.toUnsignedLong(v));
+            }
+        }
+    }
+
+    static class LongToUnsignedIntConsumer implements ParquetCellValueConsumer<Long> {
+        private final int m_bits;
+        private final long m_max;
+
+        LongToUnsignedIntConsumer(final int bits, final long max) {
+            m_bits = bits;
+            m_max = max;
+        }
+
+        @Override
+        public void writeNonNullValue(final RecordConsumer c, final Long v) throws Exception {
+            if (v < 0 || v > m_max) {
+                throw new BigDataFileFormatException(String.format( //
+                    "Cannot write %d as unsigned %d bit integer, only values between 0 and %d are supported.", //
+                    (long)v, m_bits, m_max));
+            } else {
+                c.addInteger((int)(long)(v));
+            }
+        }
+    }
+
+    static class LongToUnsignedLongConsumer implements ParquetCellValueConsumer<Long> {
+
+        @Override
+        public void writeNonNullValue(final RecordConsumer c, final Long v) throws Exception {
+            if (v < 0) {
+                throw new BigDataFileFormatException(String.format( //
+                    "Cannot write %d as unsigned %d bit integer, only values >= 0 are supported.", //
+                    (long)v, 64));
+            } else {
+                c.addLong(v);
+            }
+        }
     }
 
     ////////////////////////////////// LocalDateTime //////////////////////////////////
@@ -212,4 +328,20 @@ final class ParquetConsumers {
         }
     }
 
+    ////////////////////////////////// UUID //////////////////////////////////
+    static class UUIDasFixedLenByteArray implements ParquetCellValueConsumer<String> {
+        @Override
+        public void writeNonNullValue(final RecordConsumer c, final String v) throws Exception {
+            try {
+                final var uuid = UUID.fromString(v);
+                final var bb = ByteBuffer.allocate(2 * Long.BYTES);
+                bb.putLong(uuid.getMostSignificantBits());
+                bb.putLong(uuid.getLeastSignificantBits());
+                c.addBinary(Binary.fromConstantByteArray(bb.array()));
+            } catch (final IllegalArgumentException e) {
+                throw new BigDataFileFormatException(
+                    String.format("Cannot write '%s' as FIXED_LEN_BYTE_ARRAY based UUID: %s", v, e.getMessage()), e);
+            }
+        }
+    }
 }

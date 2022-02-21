@@ -253,6 +253,8 @@ public class ParquetType {
         if (m_listElementType != null) {
             var element = m_listElementType.constructParquetType("element");
             return Types.optionalList().element(element).named(name);
+        } else if (m_logical instanceof UUIDLogicalTypeAnnotation) {
+            return Types.optional(m_primitive).as(m_logical).length(UUIDLogicalTypeAnnotation.BYTES).named(name);
         } else if (m_logical != null) {
             return Types.optional(m_primitive).as(m_logical).named(name);
         } else if (m_original != null) {
