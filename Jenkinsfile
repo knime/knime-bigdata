@@ -8,7 +8,7 @@ properties([
         upstream("knime-bigdata-externals/${env.BRANCH_NAME.replaceAll('/', '%2F')}" +
             ", knime-database/${env.BRANCH_NAME.replaceAll('/', '%2F')}" +
             ", knime-pmml-compilation/${env.BRANCH_NAME.replaceAll('/', '%2F')}" +
-            ", knime-python/${env.BRANCH_NAME.replaceAll('/', '%2F')}")
+            ", knime-python-legacy/${env.BRANCH_NAME.replaceAll('/', '%2F')}")
     ]),
 	parameters(workflowTests.getConfigurationsAsParameters() + fsTests.getFSConfigurationsAsParameters()),
     buildDiscarder(logRotator(numToKeepStr: '5')),
@@ -45,6 +45,7 @@ try {
                             'knime-bigdata-externals',
                             'knime-bigdata', 
                             'knime-cloud',
+                            'knime-conda',
                             'knime-database',
                             'knime-database-proprietary',
                             'knime-datageneration',
@@ -63,7 +64,7 @@ try {
                             'knime-perl',
                             'knime-pmml-translation',
                             'knime-pmml',
-                            'knime-python',
+                            'knime-python-legacy',
                             'knime-rest',
                             'knime-reporting',
                             'knime-sparkling-water',
