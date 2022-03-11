@@ -1834,32 +1834,4 @@
   "setting" : "spark.yarn.shuffle.service.metrics.namespace",
   "default" : "sparkShuffleService",
   "description" : "The namespace to use when emitting shuffle service metrics into Hadoop metrics2 system of the NodeManager."
-}, {
-  "setting" : "spark.knime.useHiveWarehouseConnector",
-  "default" : "auto",
-  "description" : "Whether KNIME's Hive to Spark/Spark to Hive nodes should Hive Warehouse Connector (HWC) to access to Spark, instead of Spark's SQLContext. Valid values are auto/on/off. When set to 'auto', then HWC will be used when spark.datasource.hive.warehouse.metastoreUri is set."
-}, {
-  "setting" : "spark.hadoop.hive.llap.daemon.service.hosts",
-  "default" : null,
-  "description" : "Hive Warehouse Connector: Must be set to the application name of the Hive LLAP service, e.g. @llap0."
-}, {
-  "setting" : "spark.sql.hive.hiveserver2.jdbc.url",
-  "default" : null,
-  "description" : "Hive Warehouse Connector: Must be set to the HiveServer2 Interactive JDBC URL."
-}, {
-  "setting" : "spark.sql.hive.hiveserver2.jdbc.url.principal",
-  "default" : null,
-  "description" : "Hive Warehouse Connector: Specifies the Hive principal, e.g. hive/_HOST@HADOOP. In client deploy mode (YARN), this can be optionally set to  unless spark.sql.hive.hiveserver2.jdbc.url already contains the principal. In cluster deploy mode, this should always be set and spark.sql.hive.hiveserver2.jdbc.url should not already contain the principal." 
-}, {
-  "setting" : "spark.datasource.hive.warehouse.load.staging.dir",
-  "default" : null,
-  "description" : "Hive Warehouse Connector: Must specify a suitable staging directory in HDFS, e.g. /tmp"
-}, {
-  "setting" : "spark.datasource.hive.warehouse.metastoreUri",
-  "default" : null,
-  "description" : "Hive Warehouse Connector: Must specify the Hive Metastore URI, e.g. thrift://localhost:9083"
-}, {
-  "setting" : "spark.security.credentials.hiveserver2.enabled",
-  "default" : null,
-  "description" : "Hive Warehouse Connector: Optional setting. Set false for client deploy mode (YARN), and false for cluster deploy mode."
 }]
