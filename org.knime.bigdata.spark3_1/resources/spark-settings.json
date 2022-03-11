@@ -1,0 +1,1709 @@
+[ {
+  "setting" : "spark.app.name",
+  "default" : null,
+  "description" : "The name of your application. This will appear in the UI and in log data."
+}, {
+  "setting" : "spark.driver.cores",
+  "default" : "1",
+  "description" : "Number of cores to use for the driver process, only in cluster mode."
+}, {
+  "setting" : "spark.driver.maxResultSize",
+  "default" : "1g",
+  "description" : "Limit of total size of serialized results of all partitions for each Spark action (e.g. collect) in bytes. Should be at least 1M, or 0 for unlimited. Jobs will be aborted if the total size is above this limit. Having a high limit may cause out-of-memory errors in driver (depends on spark.driver.memory and memory overhead of objects in JVM). Setting a proper limit can protect the driver from out-of-memory errors."
+}, {
+  "setting" : "spark.driver.memory",
+  "default" : "1g",
+  "description" : "Amount of memory to use for the driver process, i.e. where SparkContext is initialized, in the same format as JVM memory strings with a size unit suffix (\"k\", \"m\", \"g\" or \"t\") (e.g. 512m, 2g). Note: In client mode, this config must not be set through the SparkConf directly in your application, because the driver JVM has already started at that point. Instead, please set this through the --driver-memory command line option or in your default properties file."
+}, {
+  "setting" : "spark.driver.memoryOverhead",
+  "default" : null,
+  "description" : "Amount of non-heap memory to be allocated per driver process in cluster mode, in MiB unless otherwise specified. This is memory that accounts for things like VM overheads, interned strings, other native overheads, etc. This tends to grow with the container size (typically 6-10%). This option is currently supported on YARN, Mesos and Kubernetes. Note: Non-heap memory includes off-heap memory (when spark.memory.offHeap.enabled=true) and memory used by other driver processes (e.g. python process that goes with a PySpark driver) and memory used by other non-driver processes running in the same container. The maximum memory size of container to running driver is determined by the sum of spark.driver.memoryOverhead and spark.driver.memory."
+}, {
+  "setting" : "spark.resources.discoveryPlugin",
+  "default" : "org.apache.spark.resource.ResourceDiscoveryScriptPlugin",
+  "description" : "Comma-separated list of class names implementing org.apache.spark.api.resource.ResourceDiscoveryPlugin to load into the application. This is for advanced users to replace the resource discovery class with a custom implementation. Spark will try each class specified until one of them returns the resource information for that resource. It tries the discovery script last if none of the plugins return information for that resource."
+}, {
+  "setting" : "spark.executor.memory",
+  "default" : "1g",
+  "description" : "Amount of memory to use per executor process, in the same format as JVM memory strings with a size unit suffix (\"k\", \"m\", \"g\" or \"t\") (e.g. 512m, 2g)."
+}, {
+  "setting" : "spark.executor.pyspark.memory",
+  "default" : null,
+  "description" : "The amount of memory to be allocated to PySpark in each executor, in MiB unless otherwise specified. If set, PySpark memory for an executor will be limited to this amount. If not set, Spark will not limit Python's memory use and it is up to the application to avoid exceeding the overhead memory space shared with other non-JVM processes. When PySpark is run in YARN or Kubernetes, this memory is added to executor resource requests. Note: This feature is dependent on Python's `resource` module; therefore, the behaviors and limitations are inherited. For instance, Windows does not support resource limiting and actual resource is not limited on MacOS."
+}, {
+  "setting" : "spark.executor.memoryOverhead",
+  "default" : null,
+  "description" : "Amount of additional memory to be allocated per executor process, in MiB unless otherwise specified. This is memory that accounts for things like VM overheads, interned strings, other native overheads, etc. This tends to grow with the executor size (typically 6-10%). This option is currently supported on YARN and Kubernetes. Note: Additional memory includes PySpark executor memory (when spark.executor.pyspark.memory is not configured) and memory used by other non-executor processes running in the same container. The maximum memory size of container to running executor is determined by the sum of spark.executor.memoryOverhead, spark.executor.memory, spark.memory.offHeap.size and spark.executor.pyspark.memory."
+}, {
+  "setting" : "spark.extraListeners",
+  "default" : null,
+  "description" : "A comma-separated list of classes that implement SparkListener; when initializing SparkContext, instances of these classes will be created and registered with Spark's listener bus. If a class has a single-argument constructor that accepts a SparkConf, that constructor will be called; otherwise, a zero-argument constructor will be called. If no valid constructor can be found, the SparkContext creation will fail with an exception."
+}, {
+  "setting" : "spark.local.dir",
+  "default" : "/tmp",
+  "description" : "Directory to use for \"scratch\" space in Spark, including map output files and RDDs that get stored on disk. This should be on a fast, local disk in your system. It can also be a comma-separated list of multiple directories on different disks. Note: This will be overridden by SPARK_LOCAL_DIRS (Standalone), MESOS_SANDBOX (Mesos) or LOCAL_DIRS (YARN) environment variables set by the cluster manager."
+}, {
+  "setting" : "spark.logConf",
+  "default" : "false",
+  "description" : "Logs the effective SparkConf as INFO when a SparkContext is started."
+}, {
+  "setting" : "spark.master",
+  "default" : null,
+  "description" : "The cluster manager to connect to. See the list of allowed master URL's."
+}, {
+  "setting" : "spark.submit.deployMode",
+  "default" : null,
+  "description" : "The deploy mode of Spark driver program, either \"client\" or \"cluster\", Which means to launch driver program locally (\"client\") or remotely (\"cluster\") on one of the nodes inside the cluster."
+}, {
+  "setting" : "spark.log.callerContext",
+  "default" : null,
+  "description" : "Application information that will be written into Yarn RM log/HDFS audit log when running on Yarn/HDFS. Its length depends on the Hadoop configuration hadoop.caller.context.max.size. It should be concise, and typically can have up to 50 characters."
+}, {
+  "setting" : "spark.driver.supervise",
+  "default" : "false",
+  "description" : "If true, restarts the driver automatically if it fails with a non-zero exit status. Only has effect in Spark standalone mode or Mesos cluster deploy mode."
+}, {
+  "setting" : "spark.driver.log.dfsDir",
+  "default" : null,
+  "description" : "Base directory in which Spark driver logs are synced, if spark.driver.log.persistToDfs.enabled is true. Within this base directory, each application logs the driver logs to an application specific file. Users may want to set this to a unified location like an HDFS directory so driver log files can be persisted for later usage. This directory should allow any Spark user to read/write files and the Spark History Server user to delete files. Additionally, older logs from this directory are cleaned by the Spark History Server if spark.history.fs.driverlog.cleaner.enabled is true and, if they are older than max age configured by setting spark.history.fs.driverlog.cleaner.maxAge."
+}, {
+  "setting" : "spark.driver.log.persistToDfs.enabled",
+  "default" : "false",
+  "description" : "If true, spark application running in client mode will write driver logs to a persistent storage, configured in spark.driver.log.dfsDir. If spark.driver.log.dfsDir is not configured, driver logs will not be persisted. Additionally, enable the cleaner by setting spark.history.fs.driverlog.cleaner.enabled to true in Spark History Server."
+}, {
+  "setting" : "spark.driver.log.layout",
+  "default" : "%d{yy/MM/dd HH:mm:ss.SSS} %t %p %c{1}: %m%n",
+  "description" : "The layout for the driver logs that are synced to spark.driver.log.dfsDir. If this is not configured, it uses the layout for the first appender defined in log4j.properties. If that is also not configured, driver logs use the default layout."
+}, {
+  "setting" : "spark.driver.log.allowErasureCoding",
+  "default" : "false",
+  "description" : "Whether to allow driver logs to use erasure coding. On HDFS, erasure coded files will not update as quickly as regular replicated files, so they make take longer to reflect changes written by the application. Note that even if this is true, Spark will still not force the file to use erasure coding, it will simply use file system defaults."
+}, {
+  "setting" : "spark.driver.extraClassPath",
+  "default" : null,
+  "description" : "Extra classpath entries to prepend to the classpath of the driver. Note: In client mode, this config must not be set through the SparkConf directly in your application, because the driver JVM has already started at that point. Instead, please set this through the --driver-class-path command line option or in your default properties file."
+}, {
+  "setting" : "spark.driver.defaultJavaOptions",
+  "default" : null,
+  "description" : "A string of default JVM options to prepend to spark.driver.extraJavaOptions. This is intended to be set by administrators. For instance, GC settings or other logging. Note that it is illegal to set maximum heap size (-Xmx) settings with this option. Maximum heap size settings can be set with spark.driver.memory in the cluster mode and through the --driver-memory command line option in the client mode. Note: In client mode, this config must not be set through the SparkConf directly in your application, because the driver JVM has already started at that point. Instead, please set this through the --driver-java-options command line option or in your default properties file."
+}, {
+  "setting" : "spark.driver.extraJavaOptions",
+  "default" : null,
+  "description" : "A string of extra JVM options to pass to the driver. This is intended to be set by users. For instance, GC settings or other logging. Note that it is illegal to set maximum heap size (-Xmx) settings with this option. Maximum heap size settings can be set with spark.driver.memory in the cluster mode and through the --driver-memory command line option in the client mode. Note: In client mode, this config must not be set through the SparkConf directly in your application, because the driver JVM has already started at that point. Instead, please set this through the --driver-java-options command line option or in your default properties file. spark.driver.defaultJavaOptions will be prepended to this configuration."
+}, {
+  "setting" : "spark.driver.extraLibraryPath",
+  "default" : null,
+  "description" : "Set a special library path to use when launching the driver JVM. Note: In client mode, this config must not be set through the SparkConf directly in your application, because the driver JVM has already started at that point. Instead, please set this through the --driver-library-path command line option or in your default properties file."
+}, {
+  "setting" : "spark.driver.userClassPathFirst",
+  "default" : "false",
+  "description" : "(Experimental) Whether to give user-added jars precedence over Spark's own jars when loading classes in the driver. This feature can be used to mitigate conflicts between Spark's dependencies and user dependencies. It is currently an experimental feature. This is used in cluster mode only."
+}, {
+  "setting" : "spark.executor.extraClassPath",
+  "default" : null,
+  "description" : "Extra classpath entries to prepend to the classpath of executors. This exists primarily for backwards-compatibility with older versions of Spark. Users typically should not need to set this option."
+}, {
+  "setting" : "spark.executor.defaultJavaOptions",
+  "default" : null,
+  "description" : "A string of default JVM options to prepend to spark.executor.extraJavaOptions. This is intended to be set by administrators. For instance, GC settings or other logging. Note that it is illegal to set Spark properties or maximum heap size (-Xmx) settings with this option. Spark properties should be set using a SparkConf object or the spark-defaults.conf file used with the spark-submit script. Maximum heap size settings can be set with spark.executor.memory. The following symbols, if present will be interpolated: will be replaced by application ID and will be replaced by executor ID. For example, to enable verbose gc logging to a file named for the executor ID of the app in /tmp, pass a 'value' of: -verbose:gc -Xloggc:/tmp/-.gc"
+}, {
+  "setting" : "spark.executor.extraJavaOptions",
+  "default" : null,
+  "description" : "A string of extra JVM options to pass to executors. This is intended to be set by users. For instance, GC settings or other logging. Note that it is illegal to set Spark properties or maximum heap size (-Xmx) settings with this option. Spark properties should be set using a SparkConf object or the spark-defaults.conf file used with the spark-submit script. Maximum heap size settings can be set with spark.executor.memory. The following symbols, if present will be interpolated: will be replaced by application ID and will be replaced by executor ID. For example, to enable verbose gc logging to a file named for the executor ID of the app in /tmp, pass a 'value' of: -verbose:gc -Xloggc:/tmp/-.gcspark.executor.defaultJavaOptions will be prepended to this configuration."
+}, {
+  "setting" : "spark.executor.extraLibraryPath",
+  "default" : null,
+  "description" : "Set a special library path to use when launching executor JVM's."
+}, {
+  "setting" : "spark.executor.logs.rolling.maxRetainedFiles",
+  "default" : null,
+  "description" : "Sets the number of latest rolling log files that are going to be retained by the system. Older log files will be deleted. Disabled by default."
+}, {
+  "setting" : "spark.executor.logs.rolling.enableCompression",
+  "default" : "false",
+  "description" : "Enable executor log compression. If it is enabled, the rolled executor logs will be compressed. Disabled by default."
+}, {
+  "setting" : "spark.executor.logs.rolling.maxSize",
+  "default" : null,
+  "description" : "Set the max size of the file in bytes by which the executor logs will be rolled over. Rolling is disabled by default. See spark.executor.logs.rolling.maxRetainedFiles for automatic cleaning of old logs."
+}, {
+  "setting" : "spark.executor.logs.rolling.strategy",
+  "default" : null,
+  "description" : "Set the strategy of rolling of executor logs. By default it is disabled. It can be set to \"time\" (time-based rolling) or \"size\" (size-based rolling). For \"time\", use spark.executor.logs.rolling.time.interval to set the rolling interval. For \"size\", use spark.executor.logs.rolling.maxSize to set the maximum file size for rolling."
+}, {
+  "setting" : "spark.executor.logs.rolling.time.interval",
+  "default" : "daily",
+  "description" : "Set the time interval by which the executor logs will be rolled over. Rolling is disabled by default. Valid values are daily, hourly, minutely or any interval in seconds. See spark.executor.logs.rolling.maxRetainedFiles for automatic cleaning of old logs."
+}, {
+  "setting" : "spark.executor.userClassPathFirst",
+  "default" : "false",
+  "description" : "(Experimental) Same functionality as spark.driver.userClassPathFirst, but applied to executor instances."
+}, {
+  "setting" : "spark.executorEnv.[EnvironmentVariableName]",
+  "default" : null,
+  "description" : "Add the environment variable specified by EnvironmentVariableName to the Executor process. The user can specify multiple of these to set multiple environment variables."
+}, {
+  "setting" : "spark.redaction.regex",
+  "default" : "(?i)secret|password|token",
+  "description" : "Regex to decide which Spark configuration properties and environment variables in driver and executor environments contain sensitive information. When this regex matches a property key or value, the value is redacted from the environment UI and various logs like YARN and event logs."
+}, {
+  "setting" : "spark.python.profile",
+  "default" : "false",
+  "description" : "Enable profiling in Python worker, the profile result will show up by sc.show_profiles(), or it will be displayed before the driver exits. It also can be dumped into disk by sc.dump_profiles(path). If some of the profile results had been displayed manually, they will not be displayed automatically before driver exiting. By default the pyspark.profiler.BasicProfiler will be used, but this can be overridden by passing a profiler class in as a parameter to the SparkContext constructor."
+}, {
+  "setting" : "spark.python.profile.dump",
+  "default" : null,
+  "description" : "The directory which is used to dump the profile result before driver exiting. The results will be dumped as separated file for each RDD. They can be loaded by pstats.Stats(). If this is specified, the profile result will not be displayed automatically."
+}, {
+  "setting" : "spark.python.worker.memory",
+  "default" : "512m",
+  "description" : "Amount of memory to use per python worker process during aggregation, in the same format as JVM memory strings with a size unit suffix (\"k\", \"m\", \"g\" or \"t\") (e.g. 512m, 2g). If the memory used during aggregation goes above this amount, it will spill the data into disks."
+}, {
+  "setting" : "spark.python.worker.reuse",
+  "default" : "true",
+  "description" : "Reuse Python worker or not. If yes, it will use a fixed number of Python workers, does not need to fork() a Python process for every task. It will be very useful if there is a large broadcast, then the broadcast will not need to be transferred from JVM to Python worker for every task."
+}, {
+  "setting" : "spark.files",
+  "default" : null,
+  "description" : "Comma-separated list of files to be placed in the working directory of each executor. Globs are allowed."
+}, {
+  "setting" : "spark.submit.pyFiles",
+  "default" : null,
+  "description" : "Comma-separated list of .zip, .egg, or .py files to place on the PYTHONPATH for Python apps. Globs are allowed."
+}, {
+  "setting" : "spark.jars",
+  "default" : null,
+  "description" : "Comma-separated list of jars to include on the driver and executor classpaths. Globs are allowed."
+}, {
+  "setting" : "spark.jars.packages",
+  "default" : null,
+  "description" : "Comma-separated list of Maven coordinates of jars to include on the driver and executor classpaths. The coordinates should be groupId:artifactId:version. If spark.jars.ivySettings is given artifacts will be resolved according to the configuration in the file, otherwise artifacts will be searched for in the local maven repo, then maven central and finally any additional remote repositories given by the command-line option --repositories. For more details, see Advanced Dependency Management."
+}, {
+  "setting" : "spark.jars.excludes",
+  "default" : null,
+  "description" : "Comma-separated list of groupId:artifactId, to exclude while resolving the dependencies provided in spark.jars.packages to avoid dependency conflicts."
+}, {
+  "setting" : "spark.jars.ivy",
+  "default" : null,
+  "description" : "Path to specify the Ivy user directory, used for the local Ivy cache and package files from spark.jars.packages. This will override the Ivy property ivy.default.ivy.user.dir which defaults to ~/.ivy2."
+}, {
+  "setting" : "spark.jars.ivySettings",
+  "default" : null,
+  "description" : "Path to an Ivy settings file to customize resolution of jars specified using spark.jars.packages instead of the built-in defaults, such as maven central. Additional repositories given by the command-line option --repositories or spark.jars.repositories will also be included. Useful for allowing Spark to resolve artifacts from behind a firewall e.g. via an in-house artifact server like Artifactory. Details on the settings file format can be found at Settings Files"
+}, {
+  "setting" : "spark.jars.repositories",
+  "default" : null,
+  "description" : "Comma-separated list of additional remote repositories to search for the maven coordinates given with --packages or spark.jars.packages."
+}, {
+  "setting" : "spark.archives",
+  "default" : null,
+  "description" : "Comma-separated list of archives to be extracted into the working directory of each executor. .jar, .tar.gz, .tgz and .zip are supported. You can specify the directory name to unpack via adding # after the file name to unpack, for example, file.zip#directory. This configuration is experimental."
+}, {
+  "setting" : "spark.pyspark.driver.python",
+  "default" : null,
+  "description" : "Python binary executable to use for PySpark in driver. (default is spark.pyspark.python)"
+}, {
+  "setting" : "spark.pyspark.python",
+  "default" : null,
+  "description" : "Python binary executable to use for PySpark in both driver and executors."
+}, {
+  "setting" : "spark.reducer.maxSizeInFlight",
+  "default" : "48m",
+  "description" : "Maximum size of map outputs to fetch simultaneously from each reduce task, in MiB unless otherwise specified. Since each output requires us to create a buffer to receive it, this represents a fixed memory overhead per reduce task, so keep it small unless you have a large amount of memory."
+}, {
+  "setting" : "spark.reducer.maxReqsInFlight",
+  "default" : "2147483647",
+  "description" : "This configuration limits the number of remote requests to fetch blocks at any given point. When the number of hosts in the cluster increase, it might lead to very large number of inbound connections to one or more nodes, causing the workers to fail under load. By allowing it to limit the number of fetch requests, this scenario can be mitigated."
+}, {
+  "setting" : "spark.reducer.maxBlocksInFlightPerAddress",
+  "default" : "2147483647",
+  "description" : "This configuration limits the number of remote blocks being fetched per reduce task from a given host port. When a large number of blocks are being requested from a given address in a single fetch or simultaneously, this could crash the serving executor or Node Manager. This is especially useful to reduce the load on the Node Manager when external shuffle is enabled. You can mitigate this issue by setting it to a lower value."
+}, {
+  "setting" : "spark.shuffle.compress",
+  "default" : "true",
+  "description" : "Whether to compress map output files. Generally a good idea. Compression will use spark.io.compression.codec."
+}, {
+  "setting" : "spark.shuffle.file.buffer",
+  "default" : "32k",
+  "description" : "Size of the in-memory buffer for each shuffle file output stream, in KiB unless otherwise specified. These buffers reduce the number of disk seeks and system calls made in creating intermediate shuffle files."
+}, {
+  "setting" : "spark.shuffle.io.maxRetries",
+  "default" : "3",
+  "description" : "(Netty only) Fetches that fail due to IO-related exceptions are automatically retried if this is set to a non-zero value. This retry logic helps stabilize large shuffles in the face of long GC pauses or transient network connectivity issues."
+}, {
+  "setting" : "spark.shuffle.io.numConnectionsPerPeer",
+  "default" : "1",
+  "description" : "(Netty only) Connections between hosts are reused in order to reduce connection buildup for large clusters. For clusters with many hard disks and few hosts, this may result in insufficient concurrency to saturate all disks, and so users may consider increasing this value."
+}, {
+  "setting" : "spark.shuffle.io.preferDirectBufs",
+  "default" : "true",
+  "description" : "(Netty only) Off-heap buffers are used to reduce garbage collection during shuffle and cache block transfer. For environments where off-heap memory is tightly limited, users may wish to turn this off to force all allocations from Netty to be on-heap."
+}, {
+  "setting" : "spark.shuffle.io.retryWait",
+  "default" : "5s",
+  "description" : "(Netty only) How long to wait between retries of fetches. The maximum delay caused by retrying is 15 seconds by default, calculated as maxRetries * retryWait."
+}, {
+  "setting" : "spark.shuffle.io.backLog",
+  "default" : "-1",
+  "description" : "Length of the accept queue for the shuffle service. For large applications, this value may need to be increased, so that incoming connections are not dropped if the service cannot keep up with a large number of connections arriving in a short period of time. This needs to be configured wherever the shuffle service itself is running, which may be outside of the application (see spark.shuffle.service.enabled option below). If set below 1, will fallback to OS default defined by Netty's io.netty.util.NetUtil#SOMAXCONN."
+}, {
+  "setting" : "spark.shuffle.service.enabled",
+  "default" : "false",
+  "description" : "Enables the external shuffle service. This service preserves the shuffle files written by executors so the executors can be safely removed. The external shuffle service must be set up in order to enable it. See dynamic allocation configuration and setup documentation for more information."
+}, {
+  "setting" : "spark.shuffle.service.port",
+  "default" : "7337",
+  "description" : "Port on which the external shuffle service will run."
+}, {
+  "setting" : "spark.shuffle.service.index.cache.size",
+  "default" : "100m",
+  "description" : "Cache entries limited to the specified memory footprint, in bytes unless otherwise specified."
+}, {
+  "setting" : "spark.shuffle.maxChunksBeingTransferred",
+  "default" : "9223372036854775807",
+  "description" : "The max number of chunks allowed to be transferred at the same time on shuffle service. Note that new incoming connections will be closed when the max number is hit. The client will retry according to the shuffle retry configs (see spark.shuffle.io.maxRetries and spark.shuffle.io.retryWait), if those limits are reached the task will fail with fetch failure."
+}, {
+  "setting" : "spark.shuffle.sort.bypassMergeThreshold",
+  "default" : "200",
+  "description" : "(Advanced) In the sort-based shuffle manager, avoid merge-sorting data if there is no map-side aggregation and there are at most this many reduce partitions."
+}, {
+  "setting" : "spark.shuffle.spill.compress",
+  "default" : "true",
+  "description" : "Whether to compress data spilled during shuffles. Compression will use spark.io.compression.codec."
+}, {
+  "setting" : "spark.shuffle.accurateBlockThreshold",
+  "default" : null,
+  "description" : "Threshold in bytes above which the size of shuffle blocks in HighlyCompressedMapStatus is accurately recorded. This helps to prevent OOM by avoiding underestimating shuffle block size when fetch shuffle blocks."
+}, {
+  "setting" : "spark.shuffle.registration.timeout",
+  "default" : "5000",
+  "description" : "Timeout in milliseconds for registration to the external shuffle service."
+}, {
+  "setting" : "spark.shuffle.registration.maxAttempts",
+  "default" : "3",
+  "description" : "When we fail to register to the external shuffle service, we will retry for maxAttempts times."
+}, {
+  "setting" : "spark.eventLog.logBlockUpdates.enabled",
+  "default" : "false",
+  "description" : "Whether to log events for every block update, if spark.eventLog.enabled is true. *Warning*: This will increase the size of the event log considerably."
+}, {
+  "setting" : "spark.eventLog.longForm.enabled",
+  "default" : "false",
+  "description" : "If true, use the long form of call sites in the event log. Otherwise use the short form."
+}, {
+  "setting" : "spark.eventLog.compress",
+  "default" : "false",
+  "description" : "Whether to compress logged events, if spark.eventLog.enabled is true."
+}, {
+  "setting" : "spark.eventLog.compression.codec",
+  "default" : null,
+  "description" : "The codec to compress logged events. If this is not given, spark.io.compression.codec will be used."
+}, {
+  "setting" : "spark.eventLog.erasureCoding.enabled",
+  "default" : "false",
+  "description" : "Whether to allow event logs to use erasure coding, or turn erasure coding off, regardless of filesystem defaults. On HDFS, erasure coded files will not update as quickly as regular replicated files, so the application updates will take longer to appear in the History Server. Note that even if this is true, Spark will still not force the file to use erasure coding, it will simply use filesystem defaults."
+}, {
+  "setting" : "spark.eventLog.dir",
+  "default" : "file:///tmp/spark-events",
+  "description" : "Base directory in which Spark events are logged, if spark.eventLog.enabled is true. Within this base directory, Spark creates a sub-directory for each application, and logs the events specific to the application in this directory. Users may want to set this to a unified location like an HDFS directory so history files can be read by the history server."
+}, {
+  "setting" : "spark.eventLog.enabled",
+  "default" : "false",
+  "description" : "Whether to log Spark events, useful for reconstructing the Web UI after the application has finished."
+}, {
+  "setting" : "spark.eventLog.overwrite",
+  "default" : "false",
+  "description" : "Whether to overwrite any existing files."
+}, {
+  "setting" : "spark.eventLog.buffer.kb",
+  "default" : "100k",
+  "description" : "Buffer size to use when writing to output streams, in KiB unless otherwise specified."
+}, {
+  "setting" : "spark.eventLog.rolling.enabled",
+  "default" : "false",
+  "description" : "Whether rolling over event log files is enabled. If set to true, it cuts down each event log file to the configured size."
+}, {
+  "setting" : "spark.eventLog.rolling.maxFileSize",
+  "default" : "128m",
+  "description" : "When spark.eventLog.rolling.enabled=true, specifies the max size of event log file before it's rolled over."
+}, {
+  "setting" : "spark.ui.dagGraph.retainedRootRDDs",
+  "default" : "2147483647",
+  "description" : "How many DAG graph nodes the Spark UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.ui.enabled",
+  "default" : "true",
+  "description" : "Whether to run the web UI for the Spark application."
+}, {
+  "setting" : "spark.ui.killEnabled",
+  "default" : "true",
+  "description" : "Allows jobs and stages to be killed from the web UI."
+}, {
+  "setting" : "spark.ui.liveUpdate.period",
+  "default" : "100ms",
+  "description" : "How often to update live entities. -1 means \"never update\" when replaying applications, meaning only the last write will happen. For live applications, this avoids a few operations that we can live without when rapidly processing incoming task events."
+}, {
+  "setting" : "spark.ui.liveUpdate.minFlushPeriod",
+  "default" : "1s",
+  "description" : "Minimum time elapsed before stale UI data is flushed. This avoids UI staleness when incoming task events are not fired frequently."
+}, {
+  "setting" : "spark.ui.port",
+  "default" : "4040",
+  "description" : "Port for your application's dashboard, which shows memory and workload data."
+}, {
+  "setting" : "spark.ui.retainedJobs",
+  "default" : "1000",
+  "description" : "How many jobs the Spark UI and status APIs remember before garbage collecting. This is a target maximum, and fewer elements may be retained in some circumstances."
+}, {
+  "setting" : "spark.ui.retainedStages",
+  "default" : "1000",
+  "description" : "How many stages the Spark UI and status APIs remember before garbage collecting. This is a target maximum, and fewer elements may be retained in some circumstances."
+}, {
+  "setting" : "spark.ui.retainedTasks",
+  "default" : "100000",
+  "description" : "How many tasks in one stage the Spark UI and status APIs remember before garbage collecting. This is a target maximum, and fewer elements may be retained in some circumstances."
+}, {
+  "setting" : "spark.ui.reverseProxy",
+  "default" : "false",
+  "description" : "Enable running Spark Master as reverse proxy for worker and application UIs. In this mode, Spark master will reverse proxy the worker and application UIs to enable access without requiring direct access to their hosts. Use it with caution, as worker and application UI will not be accessible directly, you will only be able to access them through spark master/proxy public URL. This setting affects all the workers and application UIs running in the cluster and must be set on all the workers, drivers and masters."
+}, {
+  "setting" : "spark.ui.reverseProxyUrl",
+  "default" : null,
+  "description" : "If the Spark UI should be served through another front-end reverse proxy, this is the URL for accessing the Spark master UI through that reverse proxy. This is useful when running proxy for authentication e.g. an OAuth proxy. The URL may contain a path prefix, like http://mydomain.com/path/to/spark/, allowing you to serve the UI for multiple Spark clusters and other web applications through the same virtual host and port. Normally, this should be an absolute URL including scheme (http/https), host and port. It is possible to specify a relative URL starting with \"/\" here. In this case, all URLs generated by the Spark UI and Spark REST APIs will be server-relative links -- this will still work, as the entire Spark UI is served through the same host and port. The setting affects link generation in the Spark UI, but the front-end reverse proxy is responsible for stripping a path prefix before forwarding the request,rewriting redirects which point directly to the Spark master,redirecting access from http://mydomain.com/path/to/spark to http://mydomain.com/path/to/spark/ (trailing slash after path prefix); otherwise relative links on the master page do not work correctly. This setting affects all the workers and application UIs running in the cluster and must be set identically on all the workers, drivers and masters. In is only effective when spark.ui.reverseProxy is turned on. This setting is not needed when the Spark master web UI is directly reachable."
+}, {
+  "setting" : "spark.ui.proxyRedirectUri",
+  "default" : null,
+  "description" : "Where to address redirects when Spark is running behind a proxy. This will make Spark modify redirect responses so they point to the proxy server, instead of the Spark UI's own address. This should be only the address of the server, without any prefix paths for the application; the prefix should be set either by the proxy server itself (by adding the X-Forwarded-Context request header), or by setting the proxy base in the Spark app's configuration."
+}, {
+  "setting" : "spark.ui.showConsoleProgress",
+  "default" : "false",
+  "description" : "Show the progress bar in the console. The progress bar shows the progress of stages that run for longer than 500ms. If multiple stages run at the same time, multiple progress bars will be displayed on the same line. Note: In shell environment, the default value of spark.ui.showConsoleProgress is true."
+}, {
+  "setting" : "spark.ui.custom.executor.log.url",
+  "default" : null,
+  "description" : "Specifies custom spark executor log URL for supporting external log service instead of using cluster managers' application log URLs in Spark UI. Spark will support some path variables via patterns which can vary on cluster manager. Please check the documentation for your cluster manager to see which patterns are supported, if any. Please note that this configuration also replaces original log urls in event log, which will be also effective when accessing the application on history server. The new log urls must be permanent, otherwise you might have dead link for executor log urls. For now, only YARN mode supports this configuration"
+}, {
+  "setting" : "spark.worker.ui.retainedExecutors",
+  "default" : "1000",
+  "description" : "How many finished executors the Spark UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.worker.ui.retainedDrivers",
+  "default" : "1000",
+  "description" : "How many finished drivers the Spark UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.sql.ui.retainedExecutions",
+  "default" : "1000",
+  "description" : "How many finished executions the Spark UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.streaming.ui.retainedBatches",
+  "default" : "1000",
+  "description" : "How many finished batches the Spark UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.ui.retainedDeadExecutors",
+  "default" : "100",
+  "description" : "How many dead executors the Spark UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.ui.filters",
+  "default" : null,
+  "description" : "Comma separated list of filter class names to apply to the Spark Web UI. The filter should be a standard javax servlet Filter. Filter parameters can also be specified in the configuration, by setting config entries of the form spark.<class name of filter>.param.<param name>=<value>For example: spark.ui.filters=com.test.filter1spark.com.test.filter1.param.name1=foospark.com.test.filter1.param.name2=bar"
+}, {
+  "setting" : "spark.ui.requestHeaderSize",
+  "default" : "8k",
+  "description" : "The maximum allowed size for a HTTP request header, in bytes unless otherwise specified. This setting applies for the Spark History Server too."
+}, {
+  "setting" : "spark.broadcast.compress",
+  "default" : "true",
+  "description" : "Whether to compress broadcast variables before sending them. Generally a good idea. Compression will use spark.io.compression.codec."
+}, {
+  "setting" : "spark.checkpoint.compress",
+  "default" : "false",
+  "description" : "Whether to compress RDD checkpoints. Generally a good idea. Compression will use spark.io.compression.codec."
+}, {
+  "setting" : "spark.io.compression.codec",
+  "default" : "lz4",
+  "description" : "The codec used to compress internal data such as RDD partitions, event log, broadcast variables and shuffle outputs. By default, Spark provides four codecs: lz4, lzf, snappy, and zstd. You can also use fully qualified class names to specify the codec, e.g. org.apache.spark.io.LZ4CompressionCodec, org.apache.spark.io.LZFCompressionCodec, org.apache.spark.io.SnappyCompressionCodec, and org.apache.spark.io.ZStdCompressionCodec."
+}, {
+  "setting" : "spark.io.compression.lz4.blockSize",
+  "default" : "32k",
+  "description" : "Block size used in LZ4 compression, in the case when LZ4 compression codec is used. Lowering this block size will also lower shuffle memory usage when LZ4 is used. Default unit is bytes, unless otherwise specified."
+}, {
+  "setting" : "spark.io.compression.snappy.blockSize",
+  "default" : "32k",
+  "description" : "Block size in Snappy compression, in the case when Snappy compression codec is used. Lowering this block size will also lower shuffle memory usage when Snappy is used. Default unit is bytes, unless otherwise specified."
+}, {
+  "setting" : "spark.io.compression.zstd.level",
+  "default" : "1",
+  "description" : "Compression level for Zstd compression codec. Increasing the compression level will result in better compression at the expense of more CPU and memory."
+}, {
+  "setting" : "spark.io.compression.zstd.bufferSize",
+  "default" : "32k",
+  "description" : "Buffer size in bytes used in Zstd compression, in the case when Zstd compression codec is used. Lowering this size will lower the shuffle memory usage when Zstd is used, but it might increase the compression cost because of excessive JNI call overhead."
+}, {
+  "setting" : "spark.kryo.classesToRegister",
+  "default" : null,
+  "description" : "If you use Kryo serialization, give a comma-separated list of custom class names to register with Kryo. See the tuning guide for more details."
+}, {
+  "setting" : "spark.kryo.referenceTracking",
+  "default" : "true",
+  "description" : "Whether to track references to the same object when serializing data with Kryo, which is necessary if your object graphs have loops and useful for efficiency if they contain multiple copies of the same object. Can be disabled to improve performance if you know this is not the case."
+}, {
+  "setting" : "spark.kryo.registrationRequired",
+  "default" : "false",
+  "description" : "Whether to require registration with Kryo. If set to 'true', Kryo will throw an exception if an unregistered class is serialized. If set to false (the default), Kryo will write unregistered class names along with each object. Writing class names can cause significant performance overhead, so enabling this option can enforce strictly that a user has not omitted classes from registration."
+}, {
+  "setting" : "spark.kryo.registrator",
+  "default" : null,
+  "description" : "If you use Kryo serialization, give a comma-separated list of classes that register your custom classes with Kryo. This property is useful if you need to register your classes in a custom way, e.g. to specify a custom field serializer. Otherwise spark.kryo.classesToRegister is simpler. It should be set to classes that extend KryoRegistrator. See the tuning guide for more details."
+}, {
+  "setting" : "spark.kryo.unsafe",
+  "default" : "false",
+  "description" : "Whether to use unsafe based Kryo serializer. Can be substantially faster by using Unsafe Based IO."
+}, {
+  "setting" : "spark.kryoserializer.buffer.max",
+  "default" : "64m",
+  "description" : "Maximum allowable size of Kryo serialization buffer, in MiB unless otherwise specified. This must be larger than any object you attempt to serialize and must be less than 2048m. Increase this if you get a \"buffer limit exceeded\" exception inside Kryo."
+}, {
+  "setting" : "spark.kryoserializer.buffer",
+  "default" : "64k",
+  "description" : "Initial size of Kryo's serialization buffer, in KiB unless otherwise specified. Note that there will be one buffer per core on each worker. This buffer will grow up to spark.kryoserializer.buffer.max if needed."
+}, {
+  "setting" : "spark.rdd.compress",
+  "default" : "false",
+  "description" : "Whether to compress serialized RDD partitions (e.g. for StorageLevel.MEMORY_ONLY_SER in Java and Scala or StorageLevel.MEMORY_ONLY in Python). Can save substantial space at the cost of some extra CPU time. Compression will use spark.io.compression.codec."
+}, {
+  "setting" : "spark.serializer",
+  "default" : "org.apache.spark.serializer.JavaSerializer",
+  "description" : "Class to use for serializing objects that will be sent over the network or need to be cached in serialized form. The default of Java serialization works with any Serializable Java object but is quite slow, so we recommend using org.apache.spark.serializer.KryoSerializer and configuring Kryo serialization when speed is necessary. Can be any subclass of org.apache.spark.Serializer."
+}, {
+  "setting" : "spark.serializer.objectStreamReset",
+  "default" : "100",
+  "description" : "When serializing using org.apache.spark.serializer.JavaSerializer, the serializer caches objects to prevent writing redundant data, however that stops garbage collection of those objects. By calling 'reset' you flush that info from the serializer, and allow old objects to be collected. To turn off this periodic reset set it to -1. By default it will reset the serializer every 100 objects."
+}, {
+  "setting" : "spark.memory.fraction",
+  "default" : "0.6",
+  "description" : "Fraction of (heap space - 300MB) used for execution and storage. The lower this is, the more frequently spills and cached data eviction occur. The purpose of this config is to set aside memory for internal metadata, user data structures, and imprecise size estimation in the case of sparse, unusually large records. Leaving this at the default value is recommended. For more detail, including important information about correctly tuning JVM garbage collection when increasing this value, see this description."
+}, {
+  "setting" : "spark.memory.storageFraction",
+  "default" : "0.5",
+  "description" : "Amount of storage memory immune to eviction, expressed as a fraction of the size of the region set aside by spark.memory.fraction. The higher this is, the less working memory may be available to execution and tasks may spill to disk more often. Leaving this at the default value is recommended. For more detail, see this description."
+}, {
+  "setting" : "spark.memory.offHeap.enabled",
+  "default" : "false",
+  "description" : "If true, Spark will attempt to use off-heap memory for certain operations. If off-heap memory use is enabled, then spark.memory.offHeap.size must be positive."
+}, {
+  "setting" : "spark.memory.offHeap.size",
+  "default" : "0",
+  "description" : "The absolute amount of memory which can be used for off-heap allocation, in bytes unless otherwise specified. This setting has no impact on heap memory usage, so if your executors' total memory consumption must fit within some hard limit then be sure to shrink your JVM heap size accordingly. This must be set to a positive value when spark.memory.offHeap.enabled=true."
+}, {
+  "setting" : "spark.storage.replication.proactive",
+  "default" : "false",
+  "description" : "Enables proactive block replication for RDD blocks. Cached RDD block replicas lost due to executor failures are replenished if there are any existing available replicas. This tries to get the replication level of the block to the initial number."
+}, {
+  "setting" : "spark.cleaner.periodicGC.interval",
+  "default" : "30min",
+  "description" : "Controls how often to trigger a garbage collection. This context cleaner triggers cleanups only when weak references are garbage collected. In long-running applications with large driver JVMs, where there is little memory pressure on the driver, this may happen very occasionally or not at all. Not cleaning at all may lead to executors running out of disk space after a while."
+}, {
+  "setting" : "spark.cleaner.referenceTracking",
+  "default" : "true",
+  "description" : "Enables or disables context cleaning."
+}, {
+  "setting" : "spark.cleaner.referenceTracking.blocking",
+  "default" : "true",
+  "description" : "Controls whether the cleaning thread should block on cleanup tasks (other than shuffle, which is controlled by spark.cleaner.referenceTracking.blocking.shuffle Spark property)."
+}, {
+  "setting" : "spark.cleaner.referenceTracking.blocking.shuffle",
+  "default" : "false",
+  "description" : "Controls whether the cleaning thread should block on shuffle cleanup tasks."
+}, {
+  "setting" : "spark.cleaner.referenceTracking.cleanCheckpoints",
+  "default" : "false",
+  "description" : "Controls whether to clean checkpoint files if the reference is out of scope."
+}, {
+  "setting" : "spark.broadcast.blockSize",
+  "default" : "4m",
+  "description" : "Size of each piece of a block for TorrentBroadcastFactory, in KiB unless otherwise specified. Too large a value decreases parallelism during broadcast (makes it slower); however, if it is too small, BlockManager might take a performance hit."
+}, {
+  "setting" : "spark.broadcast.checksum",
+  "default" : "true",
+  "description" : "Whether to enable checksum for broadcast. If enabled, broadcasts will include a checksum, which can help detect corrupted blocks, at the cost of computing and sending a little more data. It's possible to disable it if the network has other mechanisms to guarantee data won't be corrupted during broadcast."
+}, {
+  "setting" : "spark.executor.cores",
+  "default" : null,
+  "description" : "The number of cores to use on each executor. In standalone and Mesos coarse-grained modes, for more detail, see this description."
+}, {
+  "setting" : "spark.default.parallelism",
+  "default" : null,
+  "description" : "Default number of partitions in RDDs returned by transformations like join, reduceByKey, and parallelize when not set by user."
+}, {
+  "setting" : "spark.executor.heartbeatInterval",
+  "default" : "10s",
+  "description" : "Interval between each executor's heartbeats to the driver. Heartbeats let the driver know that the executor is still alive and update it with metrics for in-progress tasks. spark.executor.heartbeatInterval should be significantly less than spark.network.timeout"
+}, {
+  "setting" : "spark.files.fetchTimeout",
+  "default" : "60s",
+  "description" : "Communication timeout to use when fetching files added through SparkContext.addFile() from the driver."
+}, {
+  "setting" : "spark.files.useFetchCache",
+  "default" : "true",
+  "description" : "If set to true (default), file fetching will use a local cache that is shared by executors that belong to the same application, which can improve task launching performance when running many executors on the same host. If set to false, these caching optimizations will be disabled and all executors will fetch their own copies of files. This optimization may be disabled in order to use Spark local directories that reside on NFS filesystems (see SPARK-6313 for more details)."
+}, {
+  "setting" : "spark.files.overwrite",
+  "default" : "false",
+  "description" : "Whether to overwrite files added through SparkContext.addFile() when the target file exists and its contents do not match those of the source."
+}, {
+  "setting" : "spark.files.maxPartitionBytes",
+  "default" : null,
+  "description" : "The maximum number of bytes to pack into a single partition when reading files."
+}, {
+  "setting" : "spark.files.openCostInBytes",
+  "default" : null,
+  "description" : "The estimated cost to open a file, measured by the number of bytes could be scanned at the same time. This is used when putting multiple files into a partition. It is better to overestimate, then the partitions with small files will be faster than partitions with bigger files."
+}, {
+  "setting" : "spark.hadoop.cloneConf",
+  "default" : "false",
+  "description" : "If set to true, clones a new Hadoop Configuration object for each task. This option should be enabled to work around Configuration thread-safety issues (see SPARK-2546 for more details). This is disabled by default in order to avoid unexpected performance regressions for jobs that are not affected by these issues."
+}, {
+  "setting" : "spark.hadoop.validateOutputSpecs",
+  "default" : "true",
+  "description" : "If set to true, validates the output specification (e.g. checking if the output directory already exists) used in saveAsHadoopFile and other variants. This can be disabled to silence exceptions due to pre-existing output directories. We recommend that users do not disable this except if trying to achieve compatibility with previous versions of Spark. Simply use Hadoop's FileSystem API to delete output directories by hand. This setting is ignored for jobs generated through Spark Streaming's StreamingContext, since data may need to be rewritten to pre-existing output directories during checkpoint recovery."
+}, {
+  "setting" : "spark.storage.memoryMapThreshold",
+  "default" : "2m",
+  "description" : "Size of a block above which Spark memory maps when reading a block from disk. Default unit is bytes, unless specified otherwise. This prevents Spark from memory mapping very small blocks. In general, memory mapping has high overhead for blocks close to or below the page size of the operating system."
+}, {
+  "setting" : "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version",
+  "default" : "1",
+  "description" : "The file output committer algorithm version, valid algorithm version number: 1 or 2. Note that 2 may cause a correctness issue like MAPREDUCE-7282."
+}, {
+  "setting" : "spark.eventLog.logStageExecutorMetrics",
+  "default" : "false",
+  "description" : "Whether to write per-stage peaks of executor metrics (for each executor) to the event log. Note: The metrics are polled (collected) and sent in the executor heartbeat, and this is always done; this configuration is only to determine if aggregated metric peaks are written to the event log."
+}, {
+  "setting" : "spark.executor.processTreeMetrics.enabled",
+  "default" : "false",
+  "description" : "Whether to collect process tree metrics (from the /proc filesystem) when collecting executor metrics. Note: The process tree metrics are collected only if the /proc filesystem exists."
+}, {
+  "setting" : "spark.executor.metrics.pollingInterval",
+  "default" : "0",
+  "description" : "How often to collect executor metrics (in milliseconds). If 0, the polling is done on executor heartbeats (thus at the heartbeat interval, specified by spark.executor.heartbeatInterval). If positive, the polling is done at this interval."
+}, {
+  "setting" : "spark.rpc.message.maxSize",
+  "default" : "128",
+  "description" : "Maximum message size (in MiB) to allow in \"control plane\" communication; generally only applies to map output size information sent between executors and the driver. Increase this if you are running jobs with many thousands of map and reduce tasks and see messages about the RPC message size."
+}, {
+  "setting" : "spark.blockManager.port",
+  "default" : null,
+  "description" : "Port for all block managers to listen on. These exist on both the driver and the executors."
+}, {
+  "setting" : "spark.driver.blockManager.port",
+  "default" : null,
+  "description" : "Driver-specific port for the block manager to listen on, for cases where it cannot use the same configuration as executors."
+}, {
+  "setting" : "spark.driver.bindAddress",
+  "default" : null,
+  "description" : "Hostname or IP address where to bind listening sockets. This config overrides the SPARK_LOCAL_IP environment variable (see below). It also allows a different address from the local one to be advertised to executors or external systems. This is useful, for example, when running containers with bridged networking. For this to properly work, the different ports used by the driver (RPC, block manager and UI) need to be forwarded from the container's host."
+}, {
+  "setting" : "spark.driver.host",
+  "default" : null,
+  "description" : "Hostname or IP address for the driver. This is used for communicating with the executors and the standalone Master."
+}, {
+  "setting" : "spark.driver.port",
+  "default" : null,
+  "description" : "Port for the driver to listen on. This is used for communicating with the executors and the standalone Master."
+}, {
+  "setting" : "spark.rpc.io.backLog",
+  "default" : "64",
+  "description" : "Length of the accept queue for the RPC server. For large applications, this value may need to be increased, so that incoming connections are not dropped when a large number of connections arrives in a short period of time."
+}, {
+  "setting" : "spark.network.timeout",
+  "default" : "120s",
+  "description" : "Default timeout for all network interactions. This config will be used in place of spark.storage.blockManagerHeartbeatTimeoutMs, spark.shuffle.io.connectionTimeout, spark.rpc.askTimeout or spark.rpc.lookupTimeout if they are not configured."
+}, {
+  "setting" : "spark.network.io.preferDirectBufs",
+  "default" : "true",
+  "description" : "If enabled then off-heap buffer allocations are preferred by the shared allocators. Off-heap buffers are used to reduce garbage collection during shuffle and cache block transfer. For environments where off-heap memory is tightly limited, users may wish to turn this off to force all allocations to be on-heap."
+}, {
+  "setting" : "spark.port.maxRetries",
+  "default" : "16",
+  "description" : "Maximum number of retries when binding to a port before giving up. When a port is given a specific value (non 0), each subsequent retry will increment the port used in the previous attempt by 1 before retrying. This essentially allows it to try a range of ports from the start port specified to port + maxRetries."
+}, {
+  "setting" : "spark.rpc.numRetries",
+  "default" : "3",
+  "description" : "Number of times to retry before an RPC task gives up. An RPC task will run at most times of this number."
+}, {
+  "setting" : "spark.rpc.retry.wait",
+  "default" : "3s",
+  "description" : "Duration for an RPC ask operation to wait before retrying."
+}, {
+  "setting" : "spark.rpc.askTimeout",
+  "default" : null,
+  "description" : "Duration for an RPC ask operation to wait before timing out."
+}, {
+  "setting" : "spark.rpc.lookupTimeout",
+  "default" : "120s",
+  "description" : "Duration for an RPC remote endpoint lookup operation to wait before timing out."
+}, {
+  "setting" : "spark.network.maxRemoteBlockSizeFetchToMem",
+  "default" : "200m",
+  "description" : "Remote block will be fetched to disk when size of the block is above this threshold in bytes. This is to avoid a giant request takes too much memory. Note this configuration will affect both shuffle fetch and block manager remote block fetch. For users who enabled external shuffle service, this feature can only work when external shuffle service is at least 2.3.0."
+}, {
+  "setting" : "spark.cores.max",
+  "default" : null,
+  "description" : "When running on a standalone deploy cluster or a Mesos cluster in \"coarse-grained\" sharing mode, the maximum amount of CPU cores to request for the application from across the cluster (not from each machine). If not set, the default will be spark.deploy.defaultCores on Spark's standalone cluster manager, or infinite (all available cores) on Mesos."
+}, {
+  "setting" : "spark.locality.wait",
+  "default" : "3s",
+  "description" : "How long to wait to launch a data-local task before giving up and launching it on a less-local node. The same wait will be used to step through multiple locality levels (process-local, node-local, rack-local and then any). It is also possible to customize the waiting time for each level by setting spark.locality.wait.node, etc. You should increase this setting if your tasks are long and see poor locality, but the default usually works well."
+}, {
+  "setting" : "spark.locality.wait.node",
+  "default" : null,
+  "description" : "Customize the locality wait for node locality. For example, you can set this to 0 to skip node locality and search immediately for rack locality (if your cluster has rack information)."
+}, {
+  "setting" : "spark.locality.wait.process",
+  "default" : null,
+  "description" : "Customize the locality wait for process locality. This affects tasks that attempt to access cached data in a particular executor process."
+}, {
+  "setting" : "spark.locality.wait.rack",
+  "default" : null,
+  "description" : "Customize the locality wait for rack locality."
+}, {
+  "setting" : "spark.scheduler.maxRegisteredResourcesWaitingTime",
+  "default" : "30s",
+  "description" : "Maximum amount of time to wait for resources to register before scheduling begins."
+}, {
+  "setting" : "spark.scheduler.minRegisteredResourcesRatio",
+  "default" : null,
+  "description" : "The minimum ratio of registered resources (registered resources / total expected resources) (resources are executors in yarn mode and Kubernetes mode, CPU cores in standalone mode and Mesos coarse-grained mode ['spark.cores.max' value is total expected resources for Mesos coarse-grained mode] ) to wait for before scheduling begins. Specified as a double between 0.0 and 1.0. Regardless of whether the minimum ratio of resources has been reached, the maximum amount of time it will wait before scheduling begins is controlled by config spark.scheduler.maxRegisteredResourcesWaitingTime."
+}, {
+  "setting" : "spark.scheduler.mode",
+  "default" : "FIFO",
+  "description" : "The scheduling mode between jobs submitted to the same SparkContext. Can be set to FAIR to use fair sharing instead of queueing jobs one after another. Useful for multi-user services."
+}, {
+  "setting" : "spark.scheduler.revive.interval",
+  "default" : "1s",
+  "description" : "The interval length for the scheduler to revive the worker resource offers to run tasks."
+}, {
+  "setting" : "spark.scheduler.listenerbus.eventqueue.capacity",
+  "default" : "10000",
+  "description" : "The default capacity for event queues. Spark will try to initialize an event queue using capacity specified by `spark.scheduler.listenerbus.eventqueue.queueName.capacity` first. If it's not configured, Spark will use the default capacity specified by this config. Note that capacity must be greater than 0. Consider increasing value (e.g. 20000) if listener events are dropped. Increasing this value may result in the driver using more memory."
+}, {
+  "setting" : "spark.scheduler.listenerbus.eventqueue.shared.capacity",
+  "default" : null,
+  "description" : "Capacity for shared event queue in Spark listener bus, which hold events for external listener(s) that register to the listener bus. Consider increasing value, if the listener events corresponding to shared queue are dropped. Increasing this value may result in the driver using more memory."
+}, {
+  "setting" : "spark.scheduler.listenerbus.eventqueue.appStatus.capacity",
+  "default" : null,
+  "description" : "Capacity for appStatus event queue, which hold events for internal application status listeners. Consider increasing value, if the listener events corresponding to appStatus queue are dropped. Increasing this value may result in the driver using more memory."
+}, {
+  "setting" : "spark.scheduler.listenerbus.eventqueue.executorManagement.capacity",
+  "default" : null,
+  "description" : "Capacity for executorManagement event queue in Spark listener bus, which hold events for internal executor management listeners. Consider increasing value if the listener events corresponding to executorManagement queue are dropped. Increasing this value may result in the driver using more memory."
+}, {
+  "setting" : "spark.scheduler.listenerbus.eventqueue.eventLog.capacity",
+  "default" : null,
+  "description" : "Capacity for eventLog queue in Spark listener bus, which hold events for Event logging listeners that write events to eventLogs. Consider increasing value if the listener events corresponding to eventLog queue are dropped. Increasing this value may result in the driver using more memory."
+}, {
+  "setting" : "spark.scheduler.listenerbus.eventqueue.streams.capacity",
+  "default" : null,
+  "description" : "Capacity for streams queue in Spark listener bus, which hold events for internal streaming listener. Consider increasing value if the listener events corresponding to streams queue are dropped. Increasing this value may result in the driver using more memory."
+}, {
+  "setting" : "spark.scheduler.resource.profileMergeConflicts",
+  "default" : "false",
+  "description" : "If set to \"true\", Spark will merge ResourceProfiles when different profiles are specified in RDDs that get combined into a single stage. When they are merged, Spark chooses the maximum of each resource and creates a new ResourceProfile. The default of false results in Spark throwing an exception if multiple different ResourceProfiles are found in RDDs going into the same stage."
+}, {
+  "setting" : "spark.scheduler.excludeOnFailure.unschedulableTaskSetTimeout",
+  "default" : "120s",
+  "description" : "The timeout in seconds to wait to acquire a new executor and schedule a task before aborting a TaskSet which is unschedulable because all executors are excluded due to task failures."
+}, {
+  "setting" : "spark.excludeOnFailure.enabled",
+  "default" : "false",
+  "description" : "If set to \"true\", prevent Spark from scheduling tasks on executors that have been excluded due to too many task failures. The algorithm used to exclude executors and nodes can be further controlled by the other \"spark.excludeOnFailure\" configuration options."
+}, {
+  "setting" : "spark.excludeOnFailure.timeout",
+  "default" : "1h",
+  "description" : "(Experimental) How long a node or executor is excluded for the entire application, before it is unconditionally removed from the excludelist to attempt running new tasks."
+}, {
+  "setting" : "spark.excludeOnFailure.task.maxTaskAttemptsPerExecutor",
+  "default" : "1",
+  "description" : "(Experimental) For a given task, how many times it can be retried on one executor before the executor is excluded for that task."
+}, {
+  "setting" : "spark.excludeOnFailure.task.maxTaskAttemptsPerNode",
+  "default" : "2",
+  "description" : "(Experimental) For a given task, how many times it can be retried on one node, before the entire node is excluded for that task."
+}, {
+  "setting" : "spark.excludeOnFailure.stage.maxFailedTasksPerExecutor",
+  "default" : "2",
+  "description" : "(Experimental) How many different tasks must fail on one executor, within one stage, before the executor is excluded for that stage."
+}, {
+  "setting" : "spark.excludeOnFailure.stage.maxFailedExecutorsPerNode",
+  "default" : "2",
+  "description" : "(Experimental) How many different executors are marked as excluded for a given stage, before the entire node is marked as failed for the stage."
+}, {
+  "setting" : "spark.excludeOnFailure.application.maxFailedTasksPerExecutor",
+  "default" : "2",
+  "description" : "(Experimental) How many different tasks must fail on one executor, in successful task sets, before the executor is excluded for the entire application. Excluded executors will be automatically added back to the pool of available resources after the timeout specified by spark.excludeOnFailure.timeout. Note that with dynamic allocation, though, the executors may get marked as idle and be reclaimed by the cluster manager."
+}, {
+  "setting" : "spark.excludeOnFailure.application.maxFailedExecutorsPerNode",
+  "default" : "2",
+  "description" : "(Experimental) How many different executors must be excluded for the entire application, before the node is excluded for the entire application. Excluded nodes will be automatically added back to the pool of available resources after the timeout specified by spark.excludeOnFailure.timeout. Note that with dynamic allocation, though, the executors on the node may get marked as idle and be reclaimed by the cluster manager."
+}, {
+  "setting" : "spark.excludeOnFailure.killExcludedExecutors",
+  "default" : "false",
+  "description" : "(Experimental) If set to \"true\", allow Spark to automatically kill the executors when they are excluded on fetch failure or excluded for the entire application, as controlled by spark.killExcludedExecutors.application.*. Note that, when an entire node is added excluded, all of the executors on that node will be killed."
+}, {
+  "setting" : "spark.excludeOnFailure.application.fetchFailure.enabled",
+  "default" : "false",
+  "description" : "(Experimental) If set to \"true\", Spark will exclude the executor immediately when a fetch failure happens. If external shuffle service is enabled, then the whole node will be excluded."
+}, {
+  "setting" : "spark.speculation",
+  "default" : "false",
+  "description" : "If set to \"true\", performs speculative execution of tasks. This means if one or more tasks are running slowly in a stage, they will be re-launched."
+}, {
+  "setting" : "spark.speculation.interval",
+  "default" : "100ms",
+  "description" : "How often Spark will check for tasks to speculate."
+}, {
+  "setting" : "spark.speculation.multiplier",
+  "default" : "1.5",
+  "description" : "How many times slower a task is than the median to be considered for speculation."
+}, {
+  "setting" : "spark.speculation.quantile",
+  "default" : "0.75",
+  "description" : "Fraction of tasks which must be complete before speculation is enabled for a particular stage."
+}, {
+  "setting" : "spark.speculation.task.duration.threshold",
+  "default" : null,
+  "description" : "Task duration after which scheduler would try to speculative run the task. If provided, tasks would be speculatively run if current stage contains less tasks than or equal to the number of slots on a single executor and the task is taking longer time than the threshold. This config helps speculate stage with very few tasks. Regular speculation configs may also apply if the executor slots are large enough. E.g. tasks might be re-launched if there are enough successful runs even though the threshold hasn't been reached. The number of slots is computed based on the conf values of spark.executor.cores and spark.task.cpus minimum 1. Default unit is bytes, unless otherwise specified."
+}, {
+  "setting" : "spark.task.cpus",
+  "default" : "1",
+  "description" : "Number of cores to allocate for each task."
+}, {
+  "setting" : "spark.task.maxFailures",
+  "default" : "4",
+  "description" : "Number of failures of any particular task before giving up on the job. The total number of failures spread across different tasks will not cause the job to fail; a particular task has to fail this number of attempts. Should be greater than or equal to 1. Number of allowed retries = this value - 1."
+}, {
+  "setting" : "spark.task.reaper.enabled",
+  "default" : "false",
+  "description" : "Enables monitoring of killed / interrupted tasks. When set to true, any task which is killed will be monitored by the executor until that task actually finishes executing. See the other spark.task.reaper.* configurations for details on how to control the exact behavior of this monitoring. When set to false (the default), task killing will use an older code path which lacks such monitoring."
+}, {
+  "setting" : "spark.task.reaper.pollingInterval",
+  "default" : "10s",
+  "description" : "When spark.task.reaper.enabled = true, this setting controls the frequency at which executors will poll the status of killed tasks. If a killed task is still running when polled then a warning will be logged and, by default, a thread-dump of the task will be logged (this thread dump can be disabled via the spark.task.reaper.threadDump setting, which is documented below)."
+}, {
+  "setting" : "spark.task.reaper.threadDump",
+  "default" : "true",
+  "description" : "When spark.task.reaper.enabled = true, this setting controls whether task thread dumps are logged during periodic polling of killed tasks. Set this to false to disable collection of thread dumps."
+}, {
+  "setting" : "spark.task.reaper.killTimeout",
+  "default" : "-1",
+  "description" : "When spark.task.reaper.enabled = true, this setting specifies a timeout after which the executor JVM will kill itself if a killed task has not stopped running. The default value, -1, disables this mechanism and prevents the executor from self-destructing. The purpose of this setting is to act as a safety-net to prevent runaway noncancellable tasks from rendering an executor unusable."
+}, {
+  "setting" : "spark.stage.maxConsecutiveAttempts",
+  "default" : "4",
+  "description" : "Number of consecutive stage attempts allowed before a stage is aborted."
+}, {
+  "setting" : "spark.barrier.sync.timeout",
+  "default" : "365d",
+  "description" : "The timeout in seconds for each barrier() call from a barrier task. If the coordinator didn't receive all the sync messages from barrier tasks within the configured time, throw a SparkException to fail all the tasks. The default value is set to 31536000(3600 * 24 * 365) so the barrier() call shall wait for one year."
+}, {
+  "setting" : "spark.scheduler.barrier.maxConcurrentTasksCheck.interval",
+  "default" : "15s",
+  "description" : "Time in seconds to wait between a max concurrent tasks check failure and the next check. A max concurrent tasks check ensures the cluster can launch more concurrent tasks than required by a barrier stage on job submitted. The check can fail in case a cluster has just started and not enough executors have registered, so we wait for a little while and try to perform the check again. If the check fails more than a configured max failure times for a job then fail current job submission. Note this config only applies to jobs that contain one or more barrier stages, we won't perform the check on non-barrier jobs."
+}, {
+  "setting" : "spark.scheduler.barrier.maxConcurrentTasksCheck.maxFailures",
+  "default" : "40",
+  "description" : "Number of max concurrent tasks check failures allowed before fail a job submission. A max concurrent tasks check ensures the cluster can launch more concurrent tasks than required by a barrier stage on job submitted. The check can fail in case a cluster has just started and not enough executors have registered, so we wait for a little while and try to perform the check again. If the check fails more than a configured max failure times for a job then fail current job submission. Note this config only applies to jobs that contain one or more barrier stages, we won't perform the check on non-barrier jobs."
+}, {
+  "setting" : "spark.dynamicAllocation.enabled",
+  "default" : "false",
+  "description" : "Whether to use dynamic resource allocation, which scales the number of executors registered with this application up and down based on the workload. For more detail, see the description here. This requires spark.shuffle.service.enabled or spark.dynamicAllocation.shuffleTracking.enabled to be set. The following configurations are also relevant: spark.dynamicAllocation.minExecutors, spark.dynamicAllocation.maxExecutors, and spark.dynamicAllocation.initialExecutorsspark.dynamicAllocation.executorAllocationRatio"
+}, {
+  "setting" : "spark.dynamicAllocation.executorIdleTimeout",
+  "default" : "60s",
+  "description" : "If dynamic allocation is enabled and an executor has been idle for more than this duration, the executor will be removed. For more detail, see this description."
+}, {
+  "setting" : "spark.dynamicAllocation.cachedExecutorIdleTimeout",
+  "default" : null,
+  "description" : "If dynamic allocation is enabled and an executor which has cached data blocks has been idle for more than this duration, the executor will be removed. For more details, see this description."
+}, {
+  "setting" : "spark.dynamicAllocation.initialExecutors",
+  "default" : null,
+  "description" : "Initial number of executors to run if dynamic allocation is enabled. If `--num-executors` (or `spark.executor.instances`) is set and larger than this value, it will be used as the initial number of executors."
+}, {
+  "setting" : "spark.dynamicAllocation.maxExecutors",
+  "default" : null,
+  "description" : "Upper bound for the number of executors if dynamic allocation is enabled."
+}, {
+  "setting" : "spark.dynamicAllocation.minExecutors",
+  "default" : "0",
+  "description" : "Lower bound for the number of executors if dynamic allocation is enabled."
+}, {
+  "setting" : "spark.dynamicAllocation.executorAllocationRatio",
+  "default" : "1",
+  "description" : "By default, the dynamic allocation will request enough executors to maximize the parallelism according to the number of tasks to process. While this minimizes the latency of the job, with small tasks this setting can waste a lot of resources due to executor allocation overhead, as some executor might not even do any work. This setting allows to set a ratio that will be used to reduce the number of executors w.r.t. full parallelism. Defaults to 1.0 to give maximum parallelism. 0.5 will divide the target number of executors by 2 The target number of executors computed by the dynamicAllocation can still be overridden by the spark.dynamicAllocation.minExecutors and spark.dynamicAllocation.maxExecutors settings"
+}, {
+  "setting" : "spark.dynamicAllocation.schedulerBacklogTimeout",
+  "default" : "1s",
+  "description" : "If dynamic allocation is enabled and there have been pending tasks backlogged for more than this duration, new executors will be requested. For more detail, see this description."
+}, {
+  "setting" : "spark.dynamicAllocation.sustainedSchedulerBacklogTimeout",
+  "default" : null,
+  "description" : "Same as spark.dynamicAllocation.schedulerBacklogTimeout, but used only for subsequent executor requests. For more detail, see this description."
+}, {
+  "setting" : "spark.dynamicAllocation.shuffleTracking.enabled",
+  "default" : "false",
+  "description" : "Experimental. Enables shuffle file tracking for executors, which allows dynamic allocation without the need for an external shuffle service. This option will try to keep alive executors that are storing shuffle data for active jobs."
+}, {
+  "setting" : "spark.dynamicAllocation.shuffleTracking.timeout",
+  "default" : null,
+  "description" : "When shuffle tracking is enabled, controls the timeout for executors that are holding shuffle data. The default value means that Spark will rely on the shuffles being garbage collected to be able to release executors. If for some reason garbage collection is not cleaning up shuffles quickly enough, this option can be used to control when to time out executors even when they are storing shuffle data."
+}, {
+  "setting" : "spark.sql.adaptive.advisoryPartitionSizeInBytes",
+  "default" : null,
+  "description" : "The advisory size in bytes of the shuffle partition during adaptive optimization (when spark.sql.adaptive.enabled is true). It takes effect when Spark coalesces small shuffle partitions or splits skewed shuffle partition."
+}, {
+  "setting" : "spark.sql.adaptive.coalescePartitions.enabled",
+  "default" : "true",
+  "description" : "When true and 'spark.sql.adaptive.enabled' is true, Spark will coalesce contiguous shuffle partitions according to the target size (specified by 'spark.sql.adaptive.advisoryPartitionSizeInBytes'), to avoid too many small tasks."
+}, {
+  "setting" : "spark.sql.adaptive.coalescePartitions.initialPartitionNum",
+  "default" : null,
+  "description" : "The initial number of shuffle partitions before coalescing. If not set, it equals to spark.sql.shuffle.partitions. This configuration only has an effect when 'spark.sql.adaptive.enabled' and 'spark.sql.adaptive.coalescePartitions.enabled' are both true."
+}, {
+  "setting" : "spark.sql.adaptive.coalescePartitions.minPartitionNum",
+  "default" : null,
+  "description" : "The suggested (not guaranteed) minimum number of shuffle partitions after coalescing. If not set, the default value is the default parallelism of the Spark cluster. This configuration only has an effect when 'spark.sql.adaptive.enabled' and 'spark.sql.adaptive.coalescePartitions.enabled' are both true."
+}, {
+  "setting" : "spark.sql.adaptive.enabled",
+  "default" : "false",
+  "description" : "When true, enable adaptive query execution, which re-optimizes the query plan in the middle of query execution, based on accurate runtime statistics."
+}, {
+  "setting" : "spark.sql.adaptive.localShuffleReader.enabled",
+  "default" : "true",
+  "description" : "When true and 'spark.sql.adaptive.enabled' is true, Spark tries to use local shuffle reader to read the shuffle data when the shuffle partitioning is not needed, for example, after converting sort-merge join to broadcast-hash join."
+}, {
+  "setting" : "spark.sql.adaptive.optimizer.excludedRules",
+  "default" : null,
+  "description" : "Configures a list of rules to be disabled in the adaptive optimizer, in which the rules are specified by their rule names and separated by comma. The optimizer will log the rules that have indeed been excluded."
+}, {
+  "setting" : "spark.sql.adaptive.skewJoin.enabled",
+  "default" : "true",
+  "description" : "When true and 'spark.sql.adaptive.enabled' is true, Spark dynamically handles skew in sort-merge join by splitting (and replicating if needed) skewed partitions."
+}, {
+  "setting" : "spark.sql.adaptive.skewJoin.skewedPartitionFactor",
+  "default" : "5",
+  "description" : "A partition is considered as skewed if its size is larger than this factor multiplying the median partition size and also larger than 'spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes'"
+}, {
+  "setting" : "spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes",
+  "default" : "256MB",
+  "description" : "A partition is considered as skewed if its size in bytes is larger than this threshold and also larger than 'spark.sql.adaptive.skewJoin.skewedPartitionFactor' multiplying the median partition size. Ideally this config should be set larger than 'spark.sql.adaptive.advisoryPartitionSizeInBytes'."
+}, {
+  "setting" : "spark.sql.ansi.enabled",
+  "default" : "false",
+  "description" : "When true, Spark SQL uses an ANSI compliant dialect instead of being Hive compliant. For example, Spark will throw an exception at runtime instead of returning null results when the inputs to a SQL operator/function are invalid.For full details of this dialect, you can find them in the section \"ANSI Compliance\" of Spark's documentation. Some ANSI dialect features may be not from the ANSI SQL standard directly, but their behaviors align with ANSI SQL's style"
+}, {
+  "setting" : "spark.sql.autoBroadcastJoinThreshold",
+  "default" : "10MB",
+  "description" : "Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join. By setting this value to -1 broadcasting can be disabled. Note that currently statistics are only supported for Hive Metastore tables where the command ANALYZE TABLE <tableName> COMPUTE STATISTICS noscan has been run, and file-based data source tables where the statistics are computed directly on the files of data."
+}, {
+  "setting" : "spark.sql.avro.compression.codec",
+  "default" : "snappy",
+  "description" : "Compression codec used in writing of AVRO files. Supported codecs: uncompressed, deflate, snappy, bzip2 and xz. Default codec is snappy."
+}, {
+  "setting" : "spark.sql.avro.deflate.level",
+  "default" : "-1",
+  "description" : "Compression level for the deflate codec used in writing of AVRO files. Valid value must be in the range of from 1 to 9 inclusive or -1. The default value is -1 which corresponds to 6 level in the current implementation."
+}, {
+  "setting" : "spark.sql.avro.filterPushdown.enabled",
+  "default" : "true",
+  "description" : "When true, enable filter pushdown to Avro datasource."
+}, {
+  "setting" : "spark.sql.broadcastTimeout",
+  "default" : "300",
+  "description" : "Timeout in seconds for the broadcast wait time in broadcast joins."
+}, {
+  "setting" : "spark.sql.bucketing.coalesceBucketsInJoin.enabled",
+  "default" : "false",
+  "description" : "When true, if two bucketed tables with the different number of buckets are joined, the side with a bigger number of buckets will be coalesced to have the same number of buckets as the other side. Bigger number of buckets is divisible by the smaller number of buckets. Bucket coalescing is applied to sort-merge joins and shuffled hash join. Note: Coalescing bucketed table can avoid unnecessary shuffling in join, but it also reduces parallelism and could possibly cause OOM for shuffled hash join."
+}, {
+  "setting" : "spark.sql.bucketing.coalesceBucketsInJoin.maxBucketRatio",
+  "default" : "4",
+  "description" : "The ratio of the number of two buckets being coalesced should be less than or equal to this value for bucket coalescing to be applied. This configuration only has an effect when 'spark.sql.bucketing.coalesceBucketsInJoin.enabled' is set to true."
+}, {
+  "setting" : "spark.sql.catalog.spark_catalog",
+  "default" : null,
+  "description" : "A catalog implementation that will be used as the v2 interface to Spark's built-in v1 catalog: spark_catalog. This catalog shares its identifier namespace with the spark_catalog and must be consistent with it; for example, if a table can be loaded by the spark_catalog, this catalog must also return the table metadata. To delegate operations to the spark_catalog, implementations can extend 'CatalogExtension'."
+}, {
+  "setting" : "spark.sql.cbo.enabled",
+  "default" : "false",
+  "description" : "Enables CBO for estimation of plan statistics when set true."
+}, {
+  "setting" : "spark.sql.cbo.joinReorder.dp.star.filter",
+  "default" : "false",
+  "description" : "Applies star-join filter heuristics to cost based join enumeration."
+}, {
+  "setting" : "spark.sql.cbo.joinReorder.dp.threshold",
+  "default" : "12",
+  "description" : "The maximum number of joined nodes allowed in the dynamic programming algorithm."
+}, {
+  "setting" : "spark.sql.cbo.joinReorder.enabled",
+  "default" : "false",
+  "description" : "Enables join reorder in CBO."
+}, {
+  "setting" : "spark.sql.cbo.planStats.enabled",
+  "default" : "false",
+  "description" : "When true, the logical plan will fetch row counts and column statistics from catalog."
+}, {
+  "setting" : "spark.sql.cbo.starSchemaDetection",
+  "default" : "false",
+  "description" : "When true, it enables join reordering based on star schema detection."
+}, {
+  "setting" : "spark.sql.columnNameOfCorruptRecord",
+  "default" : "_corrupt_record",
+  "description" : "The name of internal column for storing raw/un-parsed JSON and CSV records that fail to parse."
+}, {
+  "setting" : "spark.sql.csv.filterPushdown.enabled",
+  "default" : "true",
+  "description" : "When true, enable filter pushdown to CSV datasource."
+}, {
+  "setting" : "spark.sql.datetime.java8API.enabled",
+  "default" : "false",
+  "description" : "If the configuration property is set to true, java.time.Instant and java.time.LocalDate classes of Java 8 API are used as external types for Catalyst's TimestampType and DateType. If it is set to false, java.sql.Timestamp and java.sql.Date are used for the same purpose."
+}, {
+  "setting" : "spark.sql.debug.maxToStringFields",
+  "default" : "25",
+  "description" : "Maximum number of fields of sequence-like entries can be converted to strings in debug output. Any elements beyond the limit will be dropped and replaced by a \"... N more fields\" placeholder."
+}, {
+  "setting" : "spark.sql.defaultCatalog",
+  "default" : "spark_catalog",
+  "description" : "Name of the default catalog. This will be the current catalog if users have not explicitly set the current catalog yet."
+}, {
+  "setting" : "spark.sql.execution.arrow.enabled",
+  "default" : "false",
+  "description" : "(Deprecated since Spark 3.0, please set 'spark.sql.execution.arrow.pyspark.enabled'.)"
+}, {
+  "setting" : "spark.sql.execution.arrow.fallback.enabled",
+  "default" : "true",
+  "description" : "(Deprecated since Spark 3.0, please set 'spark.sql.execution.arrow.pyspark.fallback.enabled'.)"
+}, {
+  "setting" : "spark.sql.execution.arrow.maxRecordsPerBatch",
+  "default" : "10000",
+  "description" : "When using Apache Arrow, limit the maximum number of records that can be written to a single ArrowRecordBatch in memory. If set to zero or negative there is no limit."
+}, {
+  "setting" : "spark.sql.execution.arrow.pyspark.enabled",
+  "default" : null,
+  "description" : "When true, make use of Apache Arrow for columnar data transfers in PySpark. This optimization applies to: 1. pyspark.sql.DataFrame.toPandas 2. pyspark.sql.SparkSession.createDataFrame when its input is a Pandas DataFrame The following data types are unsupported: ArrayType of TimestampType, and nested StructType."
+}, {
+  "setting" : "spark.sql.execution.arrow.pyspark.fallback.enabled",
+  "default" : null,
+  "description" : "When true, optimizations enabled by 'spark.sql.execution.arrow.pyspark.enabled' will fallback automatically to non-optimized implementations if an error occurs."
+}, {
+  "setting" : "spark.sql.execution.arrow.sparkr.enabled",
+  "default" : "false",
+  "description" : "When true, make use of Apache Arrow for columnar data transfers in SparkR. This optimization applies to: 1. createDataFrame when its input is an R DataFrame 2. collect 3. dapply 4. gapply The following data types are unsupported: FloatType, BinaryType, ArrayType, StructType and MapType."
+}, {
+  "setting" : "spark.sql.execution.pandas.udf.buffer.size",
+  "default" : null,
+  "description" : "Same as spark.buffer.size but only applies to Pandas UDF executions. If it is not set, the fallback is spark.buffer.size. Note that Pandas execution requires more than 4 bytes. Lowering this value could make small Pandas UDF batch iterated and pipelined; however, it might degrade performance. See SPARK-27870."
+}, {
+  "setting" : "spark.sql.execution.pyspark.udf.simplifiedTraceback.enabled",
+  "default" : "false",
+  "description" : "When true, the traceback from Python UDFs is simplified. It hides the Python worker, (de)serialization, etc from PySpark in tracebacks, and only shows the exception messages from UDFs. Note that this works only with CPython 3.7+."
+}, {
+  "setting" : "spark.sql.files.ignoreCorruptFiles",
+  "default" : "false",
+  "description" : "Whether to ignore corrupt files. If true, the Spark jobs will continue to run when encountering corrupted files and the contents that have been read will still be returned. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+}, {
+  "setting" : "spark.sql.files.ignoreMissingFiles",
+  "default" : "false",
+  "description" : "Whether to ignore missing files. If true, the Spark jobs will continue to run when encountering missing files and the contents that have been read will still be returned. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+}, {
+  "setting" : "spark.sql.files.maxPartitionBytes",
+  "default" : "128MB",
+  "description" : "The maximum number of bytes to pack into a single partition when reading files. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+}, {
+  "setting" : "spark.sql.files.maxRecordsPerFile",
+  "default" : "0",
+  "description" : "Maximum number of records to write out to a single file. If this value is zero or negative, there is no limit."
+}, {
+  "setting" : "spark.sql.files.minPartitionNum",
+  "default" : null,
+  "description" : "The suggested (not guaranteed) minimum number of split file partitions. If not set, the default value is spark.default.parallelism. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+}, {
+  "setting" : "spark.sql.function.concatBinaryAsString",
+  "default" : "false",
+  "description" : "When this option is set to false and all inputs are binary, functions.concat returns an output as binary. Otherwise, it returns as a string."
+}, {
+  "setting" : "spark.sql.function.eltOutputAsString",
+  "default" : "false",
+  "description" : "When this option is set to false and all inputs are binary, elt returns an output as binary. Otherwise, it returns as a string."
+}, {
+  "setting" : "spark.sql.groupByAliases",
+  "default" : "true",
+  "description" : "When true, aliases in a select list can be used in group by clauses. When false, an analysis exception is thrown in the case."
+}, {
+  "setting" : "spark.sql.groupByOrdinal",
+  "default" : "true",
+  "description" : "When true, the ordinal numbers in group by clauses are treated as the position in the select list. When false, the ordinal numbers are ignored."
+}, {
+  "setting" : "spark.sql.hive.convertInsertingPartitionedTable",
+  "default" : "true",
+  "description" : "When set to true, and spark.sql.hive.convertMetastoreParquet or spark.sql.hive.convertMetastoreOrc is true, the built-in ORC/Parquet writer is usedto process inserting into partitioned ORC/Parquet tables created by using the HiveSQL syntax."
+}, {
+  "setting" : "spark.sql.hive.convertMetastoreCtas",
+  "default" : "true",
+  "description" : "When set to true, Spark will try to use built-in data source writer instead of Hive serde in CTAS. This flag is effective only if spark.sql.hive.convertMetastoreParquet or spark.sql.hive.convertMetastoreOrc is enabled respectively for Parquet and ORC formats"
+}, {
+  "setting" : "spark.sql.hive.convertMetastoreOrc",
+  "default" : "true",
+  "description" : "When set to true, the built-in ORC reader and writer are used to process ORC tables created by using the HiveQL syntax, instead of Hive serde."
+}, {
+  "setting" : "spark.sql.hive.convertMetastoreParquet",
+  "default" : "true",
+  "description" : "When set to true, the built-in Parquet reader and writer are used to process parquet tables created by using the HiveQL syntax, instead of Hive serde."
+}, {
+  "setting" : "spark.sql.hive.convertMetastoreParquet.mergeSchema",
+  "default" : "false",
+  "description" : "When true, also tries to merge possibly different but compatible Parquet schemas in different Parquet data files. This configuration is only effective when \"spark.sql.hive.convertMetastoreParquet\" is true."
+}, {
+  "setting" : "spark.sql.hive.filesourcePartitionFileCacheSize",
+  "default" : "262144000",
+  "description" : "When nonzero, enable caching of partition file metadata in memory. All tables share a cache that can use up to specified num bytes for file metadata. This conf only has an effect when hive filesource partition management is enabled."
+}, {
+  "setting" : "spark.sql.hive.manageFilesourcePartitions",
+  "default" : "true",
+  "description" : "When true, enable metastore partition management for file source tables as well. This includes both datasource and converted Hive tables. When partition management is enabled, datasource tables store partition in the Hive metastore, and use the metastore to prune partitions during query planning."
+}, {
+  "setting" : "spark.sql.hive.metastorePartitionPruning",
+  "default" : "true",
+  "description" : "When true, some predicates will be pushed down into the Hive metastore so that unmatching partitions can be eliminated earlier. This only affects Hive tables not converted to filesource relations (see HiveUtils.CONVERT_METASTORE_PARQUET and HiveUtils.CONVERT_METASTORE_ORC for more information)."
+}, {
+  "setting" : "spark.sql.hive.thriftServer.async",
+  "default" : "true",
+  "description" : "When set to true, Hive Thrift server executes SQL queries in an asynchronous way."
+}, {
+  "setting" : "spark.sql.hive.verifyPartitionPath",
+  "default" : "false",
+  "description" : "When true, check all the partition paths under the table's root directory when reading data stored in HDFS. This configuration will be deprecated in the future releases and replaced by spark.files.ignoreMissingFiles."
+}, {
+  "setting" : "spark.sql.hive.version",
+  "default" : null,
+  "description" : "deprecated, please use spark.sql.hive.metastore.version to get the Hive version in Spark."
+}, {
+  "setting" : "spark.sql.inMemoryColumnarStorage.batchSize",
+  "default" : "10000",
+  "description" : "Controls the size of batches for columnar caching. Larger batch sizes can improve memory utilization and compression, but risk OOMs when caching data."
+}, {
+  "setting" : "spark.sql.inMemoryColumnarStorage.compressed",
+  "default" : "true",
+  "description" : "When set to true Spark SQL will automatically select a compression codec for each column based on statistics of the data."
+}, {
+  "setting" : "spark.sql.inMemoryColumnarStorage.enableVectorizedReader",
+  "default" : "true",
+  "description" : "Enables vectorized reader for columnar caching."
+}, {
+  "setting" : "spark.sql.json.filterPushdown.enabled",
+  "default" : "true",
+  "description" : "When true, enable filter pushdown to JSON datasource."
+}, {
+  "setting" : "spark.sql.jsonGenerator.ignoreNullFields",
+  "default" : "true",
+  "description" : "Whether to ignore null fields when generating JSON objects in JSON data source and JSON functions such as to_json. If false, it generates null for null fields in JSON objects."
+}, {
+  "setting" : "spark.sql.legacy.allowHashOnMapType",
+  "default" : "false",
+  "description" : "When set to true, hash expressions can be applied on elements of MapType. Otherwise, an analysis exception will be thrown."
+}, {
+  "setting" : "spark.sql.mapKeyDedupPolicy",
+  "default" : "EXCEPTION",
+  "description" : "The policy to deduplicate map keys in builtin function: CreateMap, MapFromArrays, MapFromEntries, StringToMap, MapConcat and TransformKeys. When EXCEPTION, the query fails if duplicated map keys are detected. When LAST_WIN, the map key that is inserted at last takes precedence."
+}, {
+  "setting" : "spark.sql.maven.additionalRemoteRepositories",
+  "default" : "https://maven-central.storage-download.googleapis.com/maven2/",
+  "description" : "A comma-delimited string config of the optional additional remote Maven mirror repositories. This is only used for downloading Hive jars in IsolatedClientLoader if the default Maven Central repo is unreachable."
+}, {
+  "setting" : "spark.sql.maxMetadataStringLength",
+  "default" : "100",
+  "description" : "Maximum number of characters to output for a metadata string. e.g. file location in DataSourceScanExec, every value will be abbreviated if exceed length."
+}, {
+  "setting" : "spark.sql.maxPlanStringLength",
+  "default" : "2147483632",
+  "description" : "Maximum number of characters to output for a plan string. If the plan is longer, further output will be truncated. The default setting always generates a full plan. Set this to a lower value such as 8k if plan strings are taking up too much memory or are causing OutOfMemory errors in the driver or UI processes."
+}, {
+  "setting" : "spark.sql.optimizer.dynamicPartitionPruning.enabled",
+  "default" : "true",
+  "description" : "When true, we will generate predicate for partition column when it's used as join key"
+}, {
+  "setting" : "spark.sql.optimizer.enableJsonExpressionOptimization",
+  "default" : "true",
+  "description" : "Whether to optimize JSON expressions in SQL optimizer. It includes pruning unnecessary columns from from_json, simplifing from_json + to_json, to_json + named_struct(from_json.col1, from_json.col2, ....)."
+}, {
+  "setting" : "spark.sql.optimizer.excludedRules",
+  "default" : null,
+  "description" : "Configures a list of rules to be disabled in the optimizer, in which the rules are specified by their rule names and separated by comma. It is not guaranteed that all the rules in this configuration will eventually be excluded, as some rules are necessary for correctness. The optimizer will log the rules that have indeed been excluded."
+}, {
+  "setting" : "spark.sql.orc.columnarReaderBatchSize",
+  "default" : "4096",
+  "description" : "The number of rows to include in a orc vectorized reader batch. The number should be carefully chosen to minimize overhead and avoid OOMs in reading data."
+}, {
+  "setting" : "spark.sql.orc.compression.codec",
+  "default" : "snappy",
+  "description" : "Sets the compression codec used when writing ORC files. If either compression or orc.compress is specified in the table-specific options/properties, the precedence would be compression, orc.compress, spark.sql.orc.compression.codec.Acceptable values include: none, uncompressed, snappy, zlib, lzo."
+}, {
+  "setting" : "spark.sql.orc.enableVectorizedReader",
+  "default" : "true",
+  "description" : "Enables vectorized orc decoding."
+}, {
+  "setting" : "spark.sql.orc.filterPushdown",
+  "default" : "true",
+  "description" : "When true, enable filter pushdown for ORC files."
+}, {
+  "setting" : "spark.sql.orc.mergeSchema",
+  "default" : "false",
+  "description" : "When true, the Orc data source merges schemas collected from all data files, otherwise the schema is picked from a random data file."
+}, {
+  "setting" : "spark.sql.orderByOrdinal",
+  "default" : "true",
+  "description" : "When true, the ordinal numbers are treated as the position in the select list. When false, the ordinal numbers in order/sort by clause are ignored."
+}, {
+  "setting" : "spark.sql.parquet.binaryAsString",
+  "default" : "false",
+  "description" : "Some other Parquet-producing systems, in particular Impala and older versions of Spark SQL, do not differentiate between binary data and strings when writing out the Parquet schema. This flag tells Spark SQL to interpret binary data as a string to provide compatibility with these systems."
+}, {
+  "setting" : "spark.sql.parquet.columnarReaderBatchSize",
+  "default" : "4096",
+  "description" : "The number of rows to include in a parquet vectorized reader batch. The number should be carefully chosen to minimize overhead and avoid OOMs in reading data."
+}, {
+  "setting" : "spark.sql.parquet.compression.codec",
+  "default" : "snappy",
+  "description" : "Sets the compression codec used when writing Parquet files. If either compression or parquet.compression is specified in the table-specific options/properties, the precedence would be compression, parquet.compression, spark.sql.parquet.compression.codec. Acceptable values include: none, uncompressed, snappy, gzip, lzo, brotli, lz4, zstd."
+}, {
+  "setting" : "spark.sql.parquet.enableVectorizedReader",
+  "default" : "true",
+  "description" : "Enables vectorized parquet decoding."
+}, {
+  "setting" : "spark.sql.parquet.filterPushdown",
+  "default" : "true",
+  "description" : "Enables Parquet filter push-down optimization when set to true."
+}, {
+  "setting" : "spark.sql.parquet.int96AsTimestamp",
+  "default" : "true",
+  "description" : "Some Parquet-producing systems, in particular Impala, store Timestamp into INT96. Spark would also store Timestamp as INT96 because we need to avoid precision lost of the nanoseconds field. This flag tells Spark SQL to interpret INT96 data as a timestamp to provide compatibility with these systems."
+}, {
+  "setting" : "spark.sql.parquet.int96TimestampConversion",
+  "default" : "false",
+  "description" : "This controls whether timestamp adjustments should be applied to INT96 data when converting to timestamps, for data written by Impala. This is necessary because Impala stores INT96 data with a different timezone offset than Hive & Spark."
+}, {
+  "setting" : "spark.sql.parquet.mergeSchema",
+  "default" : "false",
+  "description" : "When true, the Parquet data source merges schemas collected from all data files, otherwise the schema is picked from the summary file or a random data file if no summary file is available."
+}, {
+  "setting" : "spark.sql.parquet.outputTimestampType",
+  "default" : "INT96",
+  "description" : "Sets which Parquet timestamp type to use when Spark writes data to Parquet files. INT96 is a non-standard but commonly used timestamp type in Parquet. TIMESTAMP_MICROS is a standard timestamp type in Parquet, which stores number of microseconds from the Unix epoch. TIMESTAMP_MILLIS is also standard, but with millisecond precision, which means Spark has to truncate the microsecond portion of its timestamp value."
+}, {
+  "setting" : "spark.sql.parquet.recordLevelFilter.enabled",
+  "default" : "false",
+  "description" : "If true, enables Parquet's native record-level filtering using the pushed down filters. This configuration only has an effect when 'spark.sql.parquet.filterPushdown' is enabled and the vectorized reader is not used. You can ensure the vectorized reader is not used by setting 'spark.sql.parquet.enableVectorizedReader' to false."
+}, {
+  "setting" : "spark.sql.parquet.respectSummaryFiles",
+  "default" : "false",
+  "description" : "When true, we make assumption that all part-files of Parquet are consistent with summary files and we will ignore them when merging schema. Otherwise, if this is false, which is the default, we will merge all part-files. This should be considered as expert-only option, and shouldn't be enabled before knowing what it means exactly."
+}, {
+  "setting" : "spark.sql.parquet.writeLegacyFormat",
+  "default" : "false",
+  "description" : "If true, data will be written in a way of Spark 1.4 and earlier. For example, decimal values will be written in Apache Parquet's fixed-length byte array format, which other systems such as Apache Hive and Apache Impala use. If false, the newer format in Parquet will be used. For example, decimals will be written in int-based format. If Parquet output is intended for use with systems that do not support this newer format, set to true."
+}, {
+  "setting" : "spark.sql.parser.quotedRegexColumnNames",
+  "default" : "false",
+  "description" : "When true, quoted Identifiers (using backticks) in SELECT statement are interpreted as regular expressions."
+}, {
+  "setting" : "spark.sql.pivotMaxValues",
+  "default" : "10000",
+  "description" : "When doing a pivot without specifying values for the pivot column this is the maximum number of (distinct) values that will be collected without error."
+}, {
+  "setting" : "spark.sql.pyspark.jvmStacktrace.enabled",
+  "default" : "false",
+  "description" : "When true, it shows the JVM stacktrace in the user-facing PySpark exception together with Python stacktrace. By default, it is disabled and hides JVM stacktrace and shows a Python-friendly exception only."
+}, {
+  "setting" : "spark.sql.redaction.options.regex",
+  "default" : "(?i)url",
+  "description" : "Regex to decide which keys in a Spark SQL command's options map contain sensitive information. The values of options whose names that match this regex will be redacted in the explain output. This redaction is applied on top of the global redaction configuration defined by spark.redaction.regex."
+}, {
+  "setting" : "spark.sql.redaction.string.regex",
+  "default" : null,
+  "description" : "Regex to decide which parts of strings produced by Spark contain sensitive information. When this regex matches a string part, that string part is replaced by a dummy value. This is currently used to redact the output of SQL explain commands. When this conf is not set, the value from spark.redaction.string.regex is used."
+}, {
+  "setting" : "spark.sql.repl.eagerEval.enabled",
+  "default" : "false",
+  "description" : "Enables eager evaluation or not. When true, the top K rows of Dataset will be displayed if and only if the REPL supports the eager evaluation. Currently, the eager evaluation is supported in PySpark and SparkR. In PySpark, for the notebooks like Jupyter, the HTML table (generated by repr_html) will be returned. For plain Python REPL, the returned outputs are formatted like dataframe.show(). In SparkR, the returned outputs are showed similar to R data.frame would."
+}, {
+  "setting" : "spark.sql.repl.eagerEval.maxNumRows",
+  "default" : "20",
+  "description" : "The max number of rows that are returned by eager evaluation. This only takes effect when spark.sql.repl.eagerEval.enabled is set to true. The valid range of this config is from 0 to (Int.MaxValue - 1), so the invalid config like negative and greater than (Int.MaxValue - 1) will be normalized to 0 and (Int.MaxValue - 1)."
+}, {
+  "setting" : "spark.sql.repl.eagerEval.truncate",
+  "default" : "20",
+  "description" : "The max number of characters for each cell that is returned by eager evaluation. This only takes effect when spark.sql.repl.eagerEval.enabled is set to true."
+}, {
+  "setting" : "spark.sql.session.timeZone",
+  "default" : null,
+  "description" : "The ID of session local timezone in the format of either region-based zone IDs or zone offsets. Region IDs must have the form 'area/city', such as 'America/Los_Angeles'. Zone offsets must be in the format '(+|-)HH', '(+|-)HH:mm' or '(+|-)HH:mm:ss', e.g '-08', '+01:00' or '-13:33:33'. Also 'UTC' and 'Z' are supported as aliases of '+00:00'. Other short names are not recommended to use because they can be ambiguous."
+}, {
+  "setting" : "spark.sql.shuffle.partitions",
+  "default" : "200",
+  "description" : "The default number of partitions to use when shuffling data for joins or aggregations. Note: For structured streaming, this configuration cannot be changed between query restarts from the same checkpoint location."
+}, {
+  "setting" : "spark.sql.sources.bucketing.autoBucketedScan.enabled",
+  "default" : "true",
+  "description" : "When true, decide whether to do bucketed scan on input tables based on query plan automatically. Do not use bucketed scan if 1. query does not have operators to utilize bucketing (e.g. join, group-by, etc), or 2. there's an exchange operator between these operators and table scan. Note when 'spark.sql.sources.bucketing.enabled' is set to false, this configuration does not take any effect."
+}, {
+  "setting" : "spark.sql.sources.bucketing.enabled",
+  "default" : "true",
+  "description" : "When false, we will treat bucketed table as normal table"
+}, {
+  "setting" : "spark.sql.sources.bucketing.maxBuckets",
+  "default" : "100000",
+  "description" : "The maximum number of buckets allowed."
+}, {
+  "setting" : "spark.sql.sources.default",
+  "default" : "parquet",
+  "description" : "The default data source to use in input/output."
+}, {
+  "setting" : "spark.sql.sources.parallelPartitionDiscovery.threshold",
+  "default" : "32",
+  "description" : "The maximum number of paths allowed for listing files at driver side. If the number of detected paths exceeds this value during partition discovery, it tries to list the files with another Spark distributed job. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+}, {
+  "setting" : "spark.sql.sources.partitionColumnTypeInference.enabled",
+  "default" : "true",
+  "description" : "When true, automatically infer the data types for partitioned columns."
+}, {
+  "setting" : "spark.sql.sources.partitionOverwriteMode",
+  "default" : "STATIC",
+  "description" : "When INSERT OVERWRITE a partitioned data source table, we currently support 2 modes: static and dynamic. In static mode, Spark deletes all the partitions that match the partition specification(e.g. PARTITION(a=1,b)) in the INSERT statement, before overwriting. In dynamic mode, Spark doesn't delete partitions ahead, and only overwrite those partitions that have data written into it at runtime. By default we use static mode to keep the same behavior of Spark prior to 2.3. Note that this config doesn't affect Hive serde tables, as they are always overwritten with dynamic mode. This can also be set as an output option for a data source using key partitionOverwriteMode (which takes precedence over this setting), e.g. dataframe.write.option(\"partitionOverwriteMode\", \"dynamic\").save(path)."
+}, {
+  "setting" : "spark.sql.statistics.fallBackToHdfs",
+  "default" : "false",
+  "description" : "When true, it will fall back to HDFS if the table statistics are not available from table metadata. This is useful in determining if a table is small enough to use broadcast joins. This flag is effective only for non-partitioned Hive tables. For non-partitioned data source tables, it will be automatically recalculated if table statistics are not available. For partitioned data source and partitioned Hive tables, It is 'spark.sql.defaultSizeInBytes' if table statistics are not available."
+}, {
+  "setting" : "spark.sql.statistics.histogram.enabled",
+  "default" : "false",
+  "description" : "Generates histograms when computing column statistics if enabled. Histograms can provide better estimation accuracy. Currently, Spark only supports equi-height histogram. Note that collecting histograms takes extra cost. For example, collecting column statistics usually takes only one table scan, but generating equi-height histogram will cause an extra table scan."
+}, {
+  "setting" : "spark.sql.statistics.size.autoUpdate.enabled",
+  "default" : "false",
+  "description" : "Enables automatic update for table size once table's data is changed. Note that if the total number of files of the table is very large, this can be expensive and slow down data change commands."
+}, {
+  "setting" : "spark.sql.storeAssignmentPolicy",
+  "default" : "ANSI",
+  "description" : "When inserting a value into a column with different data type, Spark will perform type coercion. Currently, we support 3 policies for the type coercion rules: ANSI, legacy and strict. With ANSI policy, Spark performs the type coercion as per ANSI SQL. In practice, the behavior is mostly the same as PostgreSQL. It disallows certain unreasonable type conversions such as converting string to int or double to boolean. With legacy policy, Spark allows the type coercion as long as it is a valid Cast, which is very loose. e.g. converting string to int or double to boolean is allowed. It is also the only behavior in Spark 2.x and it is compatible with Hive. With strict policy, Spark doesn't allow any possible precision loss or data truncation in type coercion, e.g. converting double to int or decimal to double is not allowed."
+}, {
+  "setting" : "spark.sql.streaming.checkpointLocation",
+  "default" : null,
+  "description" : "The default location for storing checkpoint data for streaming queries."
+}, {
+  "setting" : "spark.sql.streaming.continuous.epochBacklogQueueSize",
+  "default" : "10000",
+  "description" : "The max number of entries to be stored in queue to wait for late epochs. If this parameter is exceeded by the size of the queue, stream will stop with an error."
+}, {
+  "setting" : "spark.sql.streaming.disabledV2Writers",
+  "default" : null,
+  "description" : "A comma-separated list of fully qualified data source register class names for which StreamWriteSupport is disabled. Writes to these sources will fall back to the V1 Sinks."
+}, {
+  "setting" : "spark.sql.streaming.fileSource.cleaner.numThreads",
+  "default" : "1",
+  "description" : "Number of threads used in the file source completed file cleaner."
+}, {
+  "setting" : "spark.sql.streaming.forceDeleteTempCheckpointLocation",
+  "default" : "false",
+  "description" : "When true, enable temporary checkpoint locations force delete."
+}, {
+  "setting" : "spark.sql.streaming.metricsEnabled",
+  "default" : "false",
+  "description" : "Whether Dropwizard/Codahale metrics will be reported for active streaming queries."
+}, {
+  "setting" : "spark.sql.streaming.multipleWatermarkPolicy",
+  "default" : "min",
+  "description" : "Policy to calculate the global watermark value when there are multiple watermark operators in a streaming query. The default value is 'min' which chooses the minimum watermark reported across multiple operators. Other alternative value is 'max' which chooses the maximum across multiple operators. Note: This configuration cannot be changed between query restarts from the same checkpoint location."
+}, {
+  "setting" : "spark.sql.streaming.noDataMicroBatches.enabled",
+  "default" : "true",
+  "description" : "Whether streaming micro-batch engine will execute batches without data for eager state management for stateful streaming queries."
+}, {
+  "setting" : "spark.sql.streaming.numRecentProgressUpdates",
+  "default" : "100",
+  "description" : "The number of progress updates to retain for a streaming query"
+}, {
+  "setting" : "spark.sql.streaming.stateStore.stateSchemaCheck",
+  "default" : "true",
+  "description" : "When true, Spark will validate the state schema against schema on existing state and fail query if it's incompatible."
+}, {
+  "setting" : "spark.sql.streaming.stopActiveRunOnRestart",
+  "default" : "true",
+  "description" : "Running multiple runs of the same streaming query concurrently is not supported. If we find a concurrent active run for a streaming query (in the same or different SparkSessions on the same cluster) and this flag is true, we will stop the old streaming query run to start the new one."
+}, {
+  "setting" : "spark.sql.streaming.stopTimeout",
+  "default" : "0",
+  "description" : "How long to wait in milliseconds for the streaming execution thread to stop when calling the streaming query's stop() method. 0 or negative values wait indefinitely."
+}, {
+  "setting" : "spark.sql.thriftServer.queryTimeout",
+  "default" : "0ms",
+  "description" : "Set a query duration timeout in seconds in Thrift Server. If the timeout is set to a positive value, a running query will be cancelled automatically when the timeout is exceeded, otherwise the query continues to run till completion. If timeout values are set for each statement via java.sql.Statement.setQueryTimeout and they are smaller than this configuration value, they take precedence."
+}, {
+  "setting" : "spark.sql.thriftserver.scheduler.pool",
+  "default" : null,
+  "description" : "Set a Fair Scheduler pool for a JDBC client session."
+}, {
+  "setting" : "spark.sql.thriftserver.ui.retainedSessions",
+  "default" : "200",
+  "description" : "The number of SQL client sessions kept in the JDBC/ODBC web UI history."
+}, {
+  "setting" : "spark.sql.thriftserver.ui.retainedStatements",
+  "default" : "200",
+  "description" : "The number of SQL statements kept in the JDBC/ODBC web UI history."
+}, {
+  "setting" : "spark.sql.ui.explainMode",
+  "default" : "formatted",
+  "description" : "Configures the query explain mode used in the Spark SQL UI. The value can be 'simple', 'extended', 'codegen', 'cost', or 'formatted'. The default value is 'formatted'."
+}, {
+  "setting" : "spark.sql.variable.substitute",
+  "default" : "true",
+  "description" : "This enables substitution using syntax like ${var}, ${system:var}, and ${env:var}."
+}, {
+  "setting" : "spark.sql.cache.serializer",
+  "default" : "org.apache.spark.sql.execution.columnar.DefaultCachedBatchSerializer",
+  "description" : "The name of a class that implements org.apache.spark.sql.columnar.CachedBatchSerializer. It will be used to translate SQL data into a format that can more efficiently be cached. The underlying API is subject to change so use with caution. Multiple classes cannot be specified. The class must have a no-arg constructor."
+}, {
+  "setting" : "spark.sql.event.truncate.length",
+  "default" : "2147483647",
+  "description" : "Threshold of SQL length beyond which it will be truncated before adding to event. Defaults to no truncation. If set to 0, callsite will be logged instead."
+}, {
+  "setting" : "spark.sql.extensions",
+  "default" : null,
+  "description" : "A comma-separated list of classes that implement Function1[SparkSessionExtensions, Unit] used to configure Spark Session extensions. The classes must have a no-args constructor. If multiple extensions are specified, they are applied in the specified order. For the case of rules and planner strategies, they are applied in the specified order. For the case of parsers, the last parser is used and each parser can delegate to its predecessor. For the case of function name conflicts, the last registered function name is used."
+}, {
+  "setting" : "spark.sql.hive.metastore.barrierPrefixes",
+  "default" : null,
+  "description" : "A comma separated list of class prefixes that should explicitly be reloaded for each version of Hive that Spark SQL is communicating with. For example, Hive UDFs that are declared in a prefix that typically would be shared (i.e. org.apache.spark.*)."
+}, {
+  "setting" : "spark.sql.hive.metastore.jars",
+  "default" : "builtin",
+  "description" : "Location of the jars that should be used to instantiate the HiveMetastoreClient.This property can be one of four options:1. \"builtin\" Use Hive 2.3.7, which is bundled with the Spark assembly when -Phive is enabled. When this option is chosen, spark.sql.hive.metastore.version must be either 2.3.7 or not defined.2. \"maven\" Use Hive jars of specified version downloaded from Maven repositories.3. \"path\" Use Hive jars configured by spark.sql.hive.metastore.jars.path in comma separated format. Support both local or remote paths.The provided jars should be the same version as ConfigEntry(key=spark.sql.hive.metastore.version, defaultValue=2.3.7, doc=Version of the Hive metastore. Available options are 0.12.0 through 2.3.7 and 3.0.0 through 3.1.2., public=true, version=1.4.0).4. A classpath in the standard format for both Hive and Hadoop. The provided jars should be the same version as ConfigEntry(key=spark.sql.hive.metastore.version, defaultValue=2.3.7, doc=Version of the Hive metastore. Available options are 0.12.0 through 2.3.7 and 3.0.0 through 3.1.2., public=true, version=1.4.0)."
+}, {
+  "setting" : "spark.sql.hive.metastore.jars.path",
+  "default" : null,
+  "description" : "Comma-separated paths of the jars that used to instantiate the HiveMetastoreClient.This configuration is useful only when {ConfigEntry(key=spark.sql.hive.metastore.jars, defaultValue=builtin, doc=Location of the jars that should be used to instantiate the HiveMetastoreClient.This property can be one of four options:1. \"builtin\" Use Hive 2.3.7, which is bundled with the Spark assembly when <code>-Phive</code> is enabled. When this option is chosen, <code>spark.sql.hive.metastore.version</code> must be either <code>2.3.7</code> or not defined.2. \"maven\" Use Hive jars of specified version downloaded from Maven repositories.3. \"path\" Use Hive jars configured byspark.sql.hive.metastore.jars.pathin comma separated format. Support both local or remote paths.The provided jars should be the same version as ConfigEntry(key=spark.sql.hive.metastore.version, defaultValue=2.3.7, doc=Version of the Hive metastore. Available options are <code>0.12.0</code> through <code>2.3.7</code> and <code>3.0.0</code> through <code>3.1.2</code>., public=true, version=1.4.0).4. A classpath in the standard format for both Hive and Hadoop. The provided jars should be the same version as ConfigEntry(key=spark.sql.hive.metastore.version, defaultValue=2.3.7, doc=Version of the Hive metastore. Available options are <code>0.12.0</code> through <code>2.3.7</code> and <code>3.0.0</code> through <code>3.1.2</code>., public=true, version=1.4.0). , public=true, version=1.4.0).key} is set as path.The paths can be any of the following format:1. file://path/to/jar/foo.jar2. hdfs://nameservice/path/to/jar/foo.jar3. /path/to/jar/ (path without URI scheme follow conf fs.defaultFS's URI schema)4. [http/https/ftp]://path/to/jar/foo.jarNote that 1, 2, and 3 support wildcard. For example:1. file://path/to/jar/,file://path2/to/jar//.jar2. hdfs://nameservice/path/to/jar/,hdfs://nameservice2/path/to/jar//.jar"
+}, {
+  "setting" : "spark.sql.hive.metastore.sharedPrefixes",
+  "default" : "com.mysql.jdbc,org.postgresql,com.microsoft.sqlserver,oracle.jdbc",
+  "description" : "A comma separated list of class prefixes that should be loaded using the classloader that is shared between Spark SQL and a specific version of Hive. An example of classes that should be shared is JDBC drivers that are needed to talk to the metastore. Other classes that need to be shared are those that interact with classes that are already shared. For example, custom appenders that are used by log4j."
+}, {
+  "setting" : "spark.sql.hive.metastore.version",
+  "default" : "2.3.7",
+  "description" : "Version of the Hive metastore. Available options are 0.12.0 through 2.3.7 and 3.0.0 through 3.1.2."
+}, {
+  "setting" : "spark.sql.hive.thriftServer.singleSession",
+  "default" : "false",
+  "description" : "When set to true, Hive Thrift server is running in a single session mode. All the JDBC/ODBC connections share the temporary views, function registries, SQL configuration and the current database."
+}, {
+  "setting" : "spark.sql.legacy.sessionInitWithConfigDefaults",
+  "default" : "false",
+  "description" : "Flag to revert to legacy behavior where a cloned SparkSession receives SparkConf defaults, dropping any overrides in its parent SparkSession."
+}, {
+  "setting" : "spark.sql.metadataCacheTTLSeconds",
+  "default" : "-1000ms",
+  "description" : "Time-to-live (TTL) value for the metadata caches: partition file metadata cache and session catalog cache. This configuration only has an effect when this value having a positive value (> 0). It also requires setting 'spark.sql.catalogImplementation' to hive, setting 'spark.sql.hive.filesourcePartitionFileCacheSize' > 0 and setting 'spark.sql.hive.manageFilesourcePartitions' to true to be applied to the partition file metadata cache."
+}, {
+  "setting" : "spark.sql.queryExecutionListeners",
+  "default" : null,
+  "description" : "List of class names implementing QueryExecutionListener that will be automatically added to newly created sessions. The classes should have either a no-arg constructor, or a constructor that expects a SparkConf argument."
+}, {
+  "setting" : "spark.sql.streaming.streamingQueryListeners",
+  "default" : null,
+  "description" : "List of class names implementing StreamingQueryListener that will be automatically added to newly created sessions. The classes should have either a no-arg constructor, or a constructor that expects a SparkConf argument."
+}, {
+  "setting" : "spark.sql.streaming.ui.enabled",
+  "default" : "true",
+  "description" : "Whether to run the Structured Streaming Web UI for the Spark application when the Spark Web UI is enabled."
+}, {
+  "setting" : "spark.sql.streaming.ui.retainedProgressUpdates",
+  "default" : "100",
+  "description" : "The number of progress updates to retain for a streaming query for Structured Streaming UI."
+}, {
+  "setting" : "spark.sql.streaming.ui.retainedQueries",
+  "default" : "100",
+  "description" : "The number of inactive queries to retain for Structured Streaming UI."
+}, {
+  "setting" : "spark.sql.ui.retainedExecutions",
+  "default" : "1000",
+  "description" : "Number of executions to retain in the Spark UI."
+}, {
+  "setting" : "spark.sql.warehouse.dir",
+  "default" : null,
+  "description" : "The default location for managed databases and tables."
+}, {
+  "setting" : "spark.streaming.backpressure.enabled",
+  "default" : "false",
+  "description" : "Enables or disables Spark Streaming's internal backpressure mechanism (since 1.5). This enables the Spark Streaming to control the receiving rate based on the current batch scheduling delays and processing times so that the system receives only as fast as the system can process. Internally, this dynamically sets the maximum receiving rate of receivers. This rate is upper bounded by the values spark.streaming.receiver.maxRate and spark.streaming.kafka.maxRatePerPartition if they are set (see below)."
+}, {
+  "setting" : "spark.streaming.backpressure.initialRate",
+  "default" : null,
+  "description" : "This is the initial maximum receiving rate at which each receiver will receive data for the first batch when the backpressure mechanism is enabled."
+}, {
+  "setting" : "spark.streaming.blockInterval",
+  "default" : "200ms",
+  "description" : "Interval at which data received by Spark Streaming receivers is chunked into blocks of data before storing them in Spark. Minimum recommended - 50 ms. See the performance tuning section in the Spark Streaming programming guide for more details."
+}, {
+  "setting" : "spark.streaming.receiver.maxRate",
+  "default" : null,
+  "description" : "Maximum rate (number of records per second) at which each receiver will receive data. Effectively, each stream will consume at most this number of records per second. Setting this configuration to 0 or a negative number will put no limit on the rate. See the deployment guide in the Spark Streaming programming guide for mode details."
+}, {
+  "setting" : "spark.streaming.receiver.writeAheadLog.enable",
+  "default" : "false",
+  "description" : "Enable write-ahead logs for receivers. All the input data received through receivers will be saved to write-ahead logs that will allow it to be recovered after driver failures. See the deployment guide in the Spark Streaming programming guide for more details."
+}, {
+  "setting" : "spark.streaming.unpersist",
+  "default" : "true",
+  "description" : "Force RDDs generated and persisted by Spark Streaming to be automatically unpersisted from Spark's memory. The raw input data received by Spark Streaming is also automatically cleared. Setting this to false will allow the raw data and persisted RDDs to be accessible outside the streaming application as they will not be cleared automatically. But it comes at the cost of higher memory usage in Spark."
+}, {
+  "setting" : "spark.streaming.stopGracefullyOnShutdown",
+  "default" : "false",
+  "description" : "If true, Spark shuts down the StreamingContext gracefully on JVM shutdown rather than immediately."
+}, {
+  "setting" : "spark.streaming.kafka.maxRatePerPartition",
+  "default" : null,
+  "description" : "Maximum rate (number of records per second) at which data will be read from each Kafka partition when using the new Kafka direct stream API. See the Kafka Integration guide for more details."
+}, {
+  "setting" : "spark.streaming.kafka.minRatePerPartition",
+  "default" : "1",
+  "description" : "Minimum rate (number of records per second) at which data will be read from each Kafka partition when using the new Kafka direct stream API."
+}, {
+  "setting" : "spark.streaming.ui.retainedBatches",
+  "default" : "1000",
+  "description" : "How many batches the Spark Streaming UI and status APIs remember before garbage collecting."
+}, {
+  "setting" : "spark.streaming.driver.writeAheadLog.closeFileAfterWrite",
+  "default" : "false",
+  "description" : "Whether to close the file after writing a write-ahead log record on the driver. Set this to 'true' when you want to use S3 (or any file system that does not support flushing) for the metadata WAL on the driver."
+}, {
+  "setting" : "spark.streaming.receiver.writeAheadLog.closeFileAfterWrite",
+  "default" : "false",
+  "description" : "Whether to close the file after writing a write-ahead log record on the receivers. Set this to 'true' when you want to use S3 (or any file system that does not support flushing) for the data WAL on the receivers."
+}, {
+  "setting" : "spark.r.numRBackendThreads",
+  "default" : "2",
+  "description" : "Number of threads used by RBackend to handle RPC calls from SparkR package."
+}, {
+  "setting" : "spark.r.command",
+  "default" : "Rscript",
+  "description" : "Executable for executing R scripts in cluster modes for both driver and workers."
+}, {
+  "setting" : "spark.r.driver.command",
+  "default" : null,
+  "description" : "Executable for executing R scripts in client modes for driver. Ignored in cluster modes."
+}, {
+  "setting" : "spark.r.shell.command",
+  "default" : "R",
+  "description" : "Executable for executing sparkR shell in client modes for driver. Ignored in cluster modes. It is the same as environment variable SPARKR_DRIVER_R, but take precedence over it. spark.r.shell.command is used for sparkR shell while spark.r.driver.command is used for running R script."
+}, {
+  "setting" : "spark.r.backendConnectionTimeout",
+  "default" : "6000",
+  "description" : "Connection timeout set by R process on its connection to RBackend in seconds."
+}, {
+  "setting" : "spark.r.heartBeatInterval",
+  "default" : "100",
+  "description" : "Interval for heartbeats sent from SparkR backend to R process to prevent connection timeout."
+}, {
+  "setting" : "spark.graphx.pregel.checkpointInterval",
+  "default" : "-1",
+  "description" : "Checkpoint interval for graph and message in Pregel. It used to avoid stackOverflowError due to long lineage chains after lots of iterations. The checkpoint is disabled by default."
+}, {
+  "setting" : "spark.deploy.recoveryMode",
+  "default" : "NONE",
+  "description" : "The recovery mode setting to recover submitted Spark jobs with cluster mode when it failed and relaunches. This is only applicable for cluster mode when running with Standalone or Mesos."
+}, {
+  "setting" : "spark.deploy.zookeeper.url",
+  "default" : null,
+  "description" : "When `spark.deploy.recoveryMode` is set to ZOOKEEPER, this configuration is used to set the zookeeper URL to connect to."
+}, {
+  "setting" : "spark.deploy.zookeeper.dir",
+  "default" : null,
+  "description" : "When `spark.deploy.recoveryMode` is set to ZOOKEEPER, this configuration is used to set the zookeeper directory to store recovery state."
+}, {
+  "setting" : "spark.yarn.am.memory",
+  "default" : "512m",
+  "description" : "Amount of memory to use for the YARN Application Master in client mode, in the same format as JVM memory strings (e.g. 512m, 2g). In cluster mode, use spark.driver.memory instead. Use lower-case suffixes, e.g. k, m, g, t, and p, for kibi-, mebi-, gibi-, tebi-, and pebibytes, respectively."
+}, {
+  "setting" : "spark.yarn.applicationType",
+  "default" : "SPARK",
+  "description" : "Defines more specific application types, e.g. SPARK, SPARK-SQL, SPARK-STREAMING, SPARK-MLLIB and SPARK-GRAPH. Please be careful not to exceed 20 characters."
+}, {
+  "setting" : "spark.yarn.am.cores",
+  "default" : "1",
+  "description" : "Number of cores to use for the YARN Application Master in client mode. In cluster mode, use spark.driver.cores instead."
+}, {
+  "setting" : "spark.yarn.am.waitTime",
+  "default" : "100s",
+  "description" : "Only used in cluster mode. Time for the YARN Application Master to wait for the SparkContext to be initialized."
+}, {
+  "setting" : "spark.yarn.submit.file.replication",
+  "default" : null,
+  "description" : "HDFS replication level for the files uploaded into HDFS for the application. These include things like the Spark jar, the app jar, and any distributed cache files/archives."
+}, {
+  "setting" : "spark.yarn.stagingDir",
+  "default" : null,
+  "description" : "Staging directory used while submitting applications."
+}, {
+  "setting" : "spark.yarn.preserve.staging.files",
+  "default" : "false",
+  "description" : "Set to true to preserve the staged files (Spark jar, app jar, distributed cache files) at the end of the job rather than delete them."
+}, {
+  "setting" : "spark.yarn.scheduler.heartbeat.interval-ms",
+  "default" : "3000",
+  "description" : "The interval in ms in which the Spark application master heartbeats into the YARN ResourceManager. The value is capped at half the value of YARN's configuration for the expiry interval, i.e. yarn.am.liveness-monitor.expiry-interval-ms."
+}, {
+  "setting" : "spark.yarn.scheduler.initial-allocation.interval",
+  "default" : "200ms",
+  "description" : "The initial interval in which the Spark application master eagerly heartbeats to the YARN ResourceManager when there are pending container allocation requests. It should be no larger than spark.yarn.scheduler.heartbeat.interval-ms. The allocation interval will doubled on successive eager heartbeats if pending containers still exist, until spark.yarn.scheduler.heartbeat.interval-ms is reached."
+}, {
+  "setting" : "spark.yarn.max.executor.failures",
+  "default" : null,
+  "description" : "The maximum number of executor failures before failing the application."
+}, {
+  "setting" : "spark.yarn.historyServer.address",
+  "default" : null,
+  "description" : "The address of the Spark history server, e.g. host.com:18080. The address should not contain a scheme (http://). Defaults to not being set since the history server is an optional service. This address is given to the YARN ResourceManager when the Spark application finishes to link the application from the ResourceManager UI to the Spark history server UI. For this property, YARN properties can be used as variables, and these are substituted by Spark at runtime. For example, if the Spark history server runs on the same node as the YARN ResourceManager, it can be set to ${hadoopconf-yarn.resourcemanager.hostname}:18080."
+}, {
+  "setting" : "spark.yarn.dist.archives",
+  "default" : null,
+  "description" : "Comma separated list of archives to be extracted into the working directory of each executor."
+}, {
+  "setting" : "spark.yarn.dist.files",
+  "default" : null,
+  "description" : "Comma-separated list of files to be placed in the working directory of each executor."
+}, {
+  "setting" : "spark.yarn.dist.jars",
+  "default" : null,
+  "description" : "Comma-separated list of jars to be placed in the working directory of each executor."
+}, {
+  "setting" : "spark.yarn.dist.forceDownloadSchemes",
+  "default" : null,
+  "description" : "Comma-separated list of schemes for which resources will be downloaded to the local disk prior to being added to YARN's distributed cache. For use in cases where the YARN service does not support schemes that are supported by Spark, like http, https and ftp, or jars required to be in the local YARN client's classpath. Wildcard '*' is denoted to download resources for all the schemes."
+}, {
+  "setting" : "spark.executor.instances",
+  "default" : "2",
+  "description" : "The number of executors for static allocation. With spark.dynamicAllocation.enabled, the initial set of executors will be at least this large."
+}, {
+  "setting" : "spark.yarn.am.memoryOverhead",
+  "default" : null,
+  "description" : "Same as spark.driver.memoryOverhead, but for the YARN Application Master in client mode."
+}, {
+  "setting" : "spark.yarn.queue",
+  "default" : "default",
+  "description" : "The name of the YARN queue to which the application is submitted."
+}, {
+  "setting" : "spark.yarn.jars",
+  "default" : null,
+  "description" : "List of libraries containing Spark code to distribute to YARN containers. By default, Spark on YARN will use Spark jars installed locally, but the Spark jars can also be in a world-readable location on HDFS. This allows YARN to cache it on nodes so that it doesn't need to be distributed each time an application runs. To point to jars on HDFS, for example, set this configuration to hdfs:///some/path. Globs are allowed."
+}, {
+  "setting" : "spark.yarn.archive",
+  "default" : null,
+  "description" : "An archive containing needed Spark jars for distribution to the YARN cache. If set, this configuration replaces spark.yarn.jars and the archive is used in all the application's containers. The archive should contain jar files in its root directory. Like with the previous option, the archive can also be hosted on HDFS to speed up file distribution."
+}, {
+  "setting" : "spark.yarn.appMasterEnv.[EnvironmentVariableName]",
+  "default" : null,
+  "description" : "Add the environment variable specified by EnvironmentVariableName to the Application Master process launched on YARN. The user can specify multiple of these and to set multiple environment variables. In cluster mode this controls the environment of the Spark driver and in client mode it only controls the environment of the executor launcher."
+}, {
+  "setting" : "spark.yarn.containerLauncherMaxThreads",
+  "default" : "25",
+  "description" : "The maximum number of threads to use in the YARN Application Master for launching executor containers."
+}, {
+  "setting" : "spark.yarn.am.extraJavaOptions",
+  "default" : null,
+  "description" : "A string of extra JVM options to pass to the YARN Application Master in client mode. In cluster mode, use spark.driver.extraJavaOptions instead. Note that it is illegal to set maximum heap size (-Xmx) settings with this option. Maximum heap size settings can be set with spark.yarn.am.memory"
+}, {
+  "setting" : "spark.yarn.am.extraLibraryPath",
+  "default" : null,
+  "description" : "Set a special library path to use when launching the YARN Application Master in client mode."
+}, {
+  "setting" : "spark.yarn.populateHadoopClasspath",
+  "default" : null,
+  "description" : "Whether to populate Hadoop classpath from yarn.application.classpath and mapreduce.application.classpath Note that if this is set to false, it requires a with-Hadoop Spark distribution that bundles Hadoop runtime or user has to provide a Hadoop installation separately."
+}, {
+  "setting" : "spark.yarn.maxAppAttempts",
+  "default" : null,
+  "description" : "The maximum number of attempts that will be made to submit the application. It should be no larger than the global number of max attempts in the YARN configuration."
+}, {
+  "setting" : "spark.yarn.am.attemptFailuresValidityInterval",
+  "default" : null,
+  "description" : "Defines the validity interval for AM failure tracking. If the AM has been running for at least the defined interval, the AM failure count will be reset. This feature is not enabled if not configured."
+}, {
+  "setting" : "spark.yarn.executor.failuresValidityInterval",
+  "default" : null,
+  "description" : "Defines the validity interval for executor failure tracking. Executor failures which are older than the validity interval will be ignored."
+}, {
+  "setting" : "spark.yarn.submit.waitAppCompletion",
+  "default" : "true",
+  "description" : "In YARN cluster mode, controls whether the client waits to exit until the application completes. If set to true, the client process will stay alive reporting the application's status. Otherwise, the client process will exit after submission."
+}, {
+  "setting" : "spark.yarn.am.nodeLabelExpression",
+  "default" : null,
+  "description" : "A YARN node label expression that restricts the set of nodes AM will be scheduled on. Only versions of YARN greater than or equal to 2.6 support node label expressions, so when running against earlier versions, this property will be ignored."
+}, {
+  "setting" : "spark.yarn.executor.nodeLabelExpression",
+  "default" : null,
+  "description" : "A YARN node label expression that restricts the set of nodes executors will be scheduled on. Only versions of YARN greater than or equal to 2.6 support node label expressions, so when running against earlier versions, this property will be ignored."
+}, {
+  "setting" : "spark.yarn.tags",
+  "default" : null,
+  "description" : "Comma-separated list of strings to pass through as YARN application tags appearing in YARN ApplicationReports, which can be used for filtering when querying YARN apps."
+}, {
+  "setting" : "spark.yarn.priority",
+  "default" : null,
+  "description" : "Application priority for YARN to define pending applications ordering policy, those with higher integer value have a better opportunity to be activated. Currently, YARN only supports application priority when using FIFO ordering policy."
+}, {
+  "setting" : "spark.yarn.config.gatewayPath",
+  "default" : null,
+  "description" : "A path that is valid on the gateway host (the host where a Spark application is started) but may differ for paths for the same resource in other nodes in the cluster. Coupled with spark.yarn.config.replacementPath, this is used to support clusters with heterogeneous configurations, so that Spark can correctly launch remote processes. The replacement path normally will contain a reference to some environment variable exported by YARN (and, thus, visible to Spark containers). For example, if the gateway node has Hadoop libraries installed on /disk1/hadoop, and the location of the Hadoop install is exported by YARN as the HADOOP_HOME environment variable, setting this value to /disk1/hadoop and the replacement path to $HADOOP_HOME will make sure that paths used to launch remote processes properly reference the local YARN configuration."
+}, {
+  "setting" : "spark.yarn.config.replacementPath",
+  "default" : null,
+  "description" : "See spark.yarn.config.gatewayPath."
+}, {
+  "setting" : "spark.yarn.rolledLog.includePattern",
+  "default" : null,
+  "description" : "Java Regex to filter the log files which match the defined include pattern and those log files will be aggregated in a rolling fashion. This will be used with YARN's rolling log aggregation, to enable this feature in YARN side yarn.nodemanager.log-aggregation.roll-monitoring-interval-seconds should be configured in yarn-site.xml. The Spark log4j appender needs be changed to use FileAppender or another appender that can handle the files being removed while it is running. Based on the file name configured in the log4j configuration (like spark.log), the user should set the regex (spark*) to include all the log files that need to be aggregated."
+}, {
+  "setting" : "spark.yarn.rolledLog.excludePattern",
+  "default" : null,
+  "description" : "Java Regex to filter the log files which match the defined exclude pattern and those log files will not be aggregated in a rolling fashion. If the log file name matches both the include and the exclude pattern, this file will be excluded eventually."
+}, {
+  "setting" : "spark.yarn.executor.launch.excludeOnFailure.enabled",
+  "default" : "false",
+  "description" : "Flag to enable exclusion of nodes having YARN resource allocation problems. The error limit for excluding can be configured by spark.excludeOnFailure.application.maxFailedExecutorsPerNode."
+}, {
+  "setting" : "spark.yarn.exclude.nodes",
+  "default" : null,
+  "description" : "Comma-separated list of YARN node names which are excluded from resource allocation."
+}, {
+  "setting" : "spark.yarn.metrics.namespace",
+  "default" : null,
+  "description" : "The root namespace for AM metrics reporting. If it is not set then the YARN application ID is used."
+}, {
+  "setting" : "spark.kerberos.keytab",
+  "default" : null,
+  "description" : "The full path to the file that contains the keytab for the principal specified above. This keytab will be copied to the node running the YARN Application Master via the YARN Distributed Cache, and will be used for renewing the login tickets and the delegation tokens periodically. Equivalent to the --keytab command line argument. (Works also with the \"local\" master.)"
+}, {
+  "setting" : "spark.kerberos.principal",
+  "default" : null,
+  "description" : "Principal to be used to login to KDC, while running on secure clusters. Equivalent to the --principal command line argument. (Works also with the \"local\" master.)"
+}, {
+  "setting" : "spark.yarn.kerberos.relogin.period",
+  "default" : "1m",
+  "description" : "How often to check whether the kerberos TGT should be renewed. This should be set to a value that is shorter than the TGT renewal period (or the TGT lifetime if TGT renewal is not enabled). The default value should be enough for most deployments."
+}, {
+  "setting" : "spark.yarn.shuffle.stopOnFailure",
+  "default" : "false",
+  "description" : "Whether to stop the NodeManager when there's a failure in the Spark Shuffle Service's initialization. This prevents application failures caused by running containers on NodeManagers where the Spark Shuffle Service is not running."
+} ]
