@@ -70,9 +70,14 @@ public class SparkVersion extends Version {
     /** Spark version 3.0.0. */
     public static final SparkVersion V_3_0 = new SparkVersion(3, 0);
 
+    /** Spark version 3.1.0. */
+    public static final SparkVersion V_3_1 = new SparkVersion(3, 1);
+
     /** All {@link SparkVersion}s. */
-    public static final SparkVersion[] ALL =
-        new SparkVersion[]{V_1_2, V_1_3, V_1_5, V_1_6, V_1_6_CDH_5_9, V_2_0, V_2_1, V_2_2, V_2_3, V_2_4, V_3_0};
+    public static final SparkVersion[] ALL = new SparkVersion[]{ //
+        V_1_2, V_1_3, V_1_5, V_1_6, V_1_6_CDH_5_9, //
+        V_2_0, V_2_1, V_2_2, V_2_3, V_2_4, //
+        V_3_0, V_3_1};
 
     /**
      * Label for display purposes in GUI.
