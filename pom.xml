@@ -55,6 +55,7 @@
 		<module>org.knime.bigdata.spark2_3</module>
 		<module>org.knime.bigdata.spark2_4</module>
 		<module>org.knime.bigdata.spark3_0</module>
+		<module>org.knime.bigdata.spark3_1</module>
 		<module>org.knime.bigdata.spark3_2</module>
 		<module>org.knime.bigdata.testing</module>
 		<module>org.knime.features.bigdata.connectors</module>
