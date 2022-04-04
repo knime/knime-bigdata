@@ -17,15 +17,6 @@
       </initializer>
    </extension>
    <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            category="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            class="org.knime.bigdata.spark.core.preferences.SparkPreferencePage"
-            id="org.knime.bigdata.spark.preferences.SparkPreferencePage"
-            name="Spark">
-      </page>
-   </extension>
-   <extension
          point="org.knime.core.PortType">
       <portType
             hidden="false"
