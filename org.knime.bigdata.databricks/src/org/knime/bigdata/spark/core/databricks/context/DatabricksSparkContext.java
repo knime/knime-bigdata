@@ -105,6 +105,8 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
         String sparkWebUI;
 
         Map<String, String> sparkConf;
+
+        boolean adaptiveExecutionEnabled;
     }
 
     /**
@@ -262,6 +264,7 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
             m_contextAttributes = new ContextAttributes();
             m_contextAttributes.sparkWebUI = output.getSparkWebUI();
             m_contextAttributes.sparkConf = output.getSparkConf();
+            m_contextAttributes.adaptiveExecutionEnabled = output.adaptiveExecutionEnabled();
 
             exec.setProgress(0.9, "Testing file download on file system connection");
             downloadStagingTestfile(output.getTestfileName());
@@ -376,6 +379,8 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
         reps.put("context_state", getStatus().toString());
         reps.put("spark_web_ui", m_contextAttributes != null ? m_contextAttributes.sparkWebUI : "unavailable");
         reps.put("spark_properties", mkSparkPropertiesHTMLRows());
+        reps.put("adaptiveExecutionEnabled",
+            m_contextAttributes != null ? Boolean.toString(m_contextAttributes.adaptiveExecutionEnabled) : null);
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
@@ -430,5 +435,10 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
     @Override
     public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
         return KNIMEToIntermediateConverterParameter.DEFAULT;
+    }
+
+    @Override
+    public boolean adaptiveExecutionEnabled() {
+        return m_contextAttributes != null && m_contextAttributes.adaptiveExecutionEnabled;
     }
 }

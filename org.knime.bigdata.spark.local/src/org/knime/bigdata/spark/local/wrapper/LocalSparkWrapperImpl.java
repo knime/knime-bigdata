@@ -74,7 +74,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	private final Map<String, Object> m_namedObjects = new HashMap<>();
 
 	private SparkSession m_sparkSession;
-	
+
+	private boolean m_adaptiveQueryExecution;
+
 	/**
 	 * Parent directory for temporary data.
 	 */
@@ -130,7 +132,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				toReturn = WrapperJobOutput.success();
 			}
 
-            addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, this);
+			if (!m_adaptiveQueryExecution) {
+			    addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, this);
+			}
 
 		} catch (InterruptedException e) {
 		    // catch and rethrow to prevent the InterruptedExceptions from being wrapped
@@ -323,6 +327,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.config("spark.executorEnv.PYTHONPATH", pythonPath.replace(',', File.pathSeparatorChar))
 				.config(sparkConf)
 				.getOrCreate();
+            m_adaptiveQueryExecution = m_sparkSession.sqlContext().conf().adaptiveExecutionEnabled();
 
 			if (startThriftserver) {
 				try {
@@ -547,7 +552,12 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	@Override
-	public <T> void add(String key, T obj) {
+	public boolean adaptiveExecutionEnabled() {
+	    return m_adaptiveQueryExecution;
+	}
+
+	@Override
+	public <T> void add(String key, final T obj) {
 		synchronized (m_namedObjects) {
 			m_namedObjects.put(key, obj);
 		}

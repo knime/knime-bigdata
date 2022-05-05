@@ -79,6 +79,11 @@ public interface LocalSparkWrapper {
 	int getHiveserverPort();
 
 	/**
+	 * @return {@code true} if adaptive query execution is enabled on context
+	 */
+	boolean adaptiveExecutionEnabled();
+
+	/**
 	 * Cancels the job group with the given ID.
 	 * 
 	 * @param jobGroupId The ID of the job group to cancel, which is expected to have been passed as part of {@link #runJob(Map, String)}

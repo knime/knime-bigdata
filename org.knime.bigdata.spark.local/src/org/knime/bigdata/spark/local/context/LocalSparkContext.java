@@ -318,6 +318,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
         reps.put("context_state", getStatus().toString());
         reps.put("time_shift",
             m_converterParameter != null ? m_converterParameter.getTimeShiftDescription() : "unavailable");
+        reps.put("adaptiveExecutionEnabled", Boolean.toString(m_wrapper.adaptiveExecutionEnabled()));
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
@@ -340,6 +341,11 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 	@Override
 	protected NamedObjectsController getNamedObjectsController() {
 		return m_namedObjectsController;
+	}
+
+	@Override
+	public boolean adaptiveExecutionEnabled() {
+	    return m_wrapper != null && m_wrapper.adaptiveExecutionEnabled();
 	}
 
     /**

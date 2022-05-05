@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.node.util.repartition;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -69,6 +70,8 @@ public class SparkRepartitionNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark 2.0.");
         }
 
+        validateCalculationMode(sparkPortSpec.getContextID());
+
         return inSpecs;
     }
 
@@ -78,6 +81,7 @@ public class SparkRepartitionNodeModel extends SparkNodeModel {
         final SparkContextID contextID = inputPort.getContextID();
         final String namedInputObject = inputPort.getTableName();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
+
 
         final RepartitionJobInput jobInput = getJobInput(namedInputObject, namedOutputObject);
         final RepartitionJobOutput jobOutput = SparkContextUtil
@@ -92,6 +96,15 @@ public class SparkRepartitionNodeModel extends SparkNodeModel {
         }
 
         return new PortObject[] { createSparkPortObject(inputPort, namedOutputObject) };
+    }
+
+    /**
+     * Validate if calculation mode works on given context.
+     */
+    private void validateCalculationMode(final SparkContextID contextID) throws InvalidSettingsException {
+        final boolean adaptiveExecutionEnabled =
+            SparkContextManager.getOrCreateSparkContext(contextID).adaptiveExecutionEnabled();
+        m_settings.validateCalculationMode(adaptiveExecutionEnabled);
     }
 
     private RepartitionJobInput getJobInput(final String input, final String output) throws InvalidSettingsException {

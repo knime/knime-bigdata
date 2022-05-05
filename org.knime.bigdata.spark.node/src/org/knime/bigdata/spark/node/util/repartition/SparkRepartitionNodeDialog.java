@@ -27,17 +27,19 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.node.util.repartition.RepartitionJobInput.CalculationMode;
 import org.knime.core.node.DataAwareNodeDialogPane;
@@ -45,6 +47,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.defaultnodesettings.DialogComponent;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -70,14 +74,16 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
     private final CardLayout m_prevCardLayout;
     private final JPanel m_prevCardPanel;
     private SparkDataPortObject m_inputPort;
+    private boolean m_adaptiveQueryExecution;
     private final JLabel m_prevCurrentPartitions;
     private final JLabel m_prevNewPartitions;
     private final JPanel m_prev;
+    private final JPanel m_prevAdaptiveExecution;
     private final JPanel m_prevNotAvailable;
     private final JPanel m_prevPredNotExecuted;
     private final JPanel m_prevExecutorCalculation;
 
-    private final JCheckBox m_useCoalesce;
+    private final List<DialogComponent> m_components = new ArrayList<>();
 
     SparkRepartitionNodeDialog() {
 
@@ -109,6 +115,9 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
         m_prevNewPartitions.setFont(m_prevNewPartitions.getFont().deriveFont(Font.PLAIN));
         m_prev = createPreviewPanel(m_prevCurrentPartitions, m_prevNewPartitions);
         m_prevCardPanel.add(m_prev, "prev");
+        m_prevAdaptiveExecution =
+            createPreviewErrorPanel("Partition count not available (Spark Context uses adaptive query execution)");
+        m_prevCardPanel.add(m_prevAdaptiveExecution, "prevAdaptiveExecution");
         m_prevNotAvailable =
             createPreviewErrorPanel("Not available (Spark Context does not exist anymore or DataFrame is missing)");
         m_prevCardPanel.add(m_prevNotAvailable, "prevNotAvailable");
@@ -125,8 +134,9 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
 
         ////////////////// Advanced panel //////////////////
         final JPanel advancedPanel = new JPanel();
-        m_useCoalesce = new JCheckBox("avoid shuffling when decreasing partition count (use coalesce)");
-        advancedPanel.add(m_useCoalesce);
+        final DialogComponentBoolean useCoalesceComponent = new DialogComponentBoolean(m_settings.getUseCoalesceModel(), "avoid shuffling when decreasing partition count (use coalesce)");
+        m_components.add(useCoalesceComponent);
+        advancedPanel.add(useCoalesceComponent.getComponentPanel());
         addTab("Advanced", advancedPanel);
     }
 
@@ -139,6 +149,7 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
 
         final DialogComponentNumber component = new DialogComponentNumber(model, null, stepSize, 8);
         model.addChangeListener(this);
+        m_components.add(component);
 
         final Box linePanel = Box.createHorizontalBox();
         linePanel.add(button);
@@ -232,12 +243,25 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
                 m_settings.getDividePartitionFactorModel().setEnabled(false);
                 m_settings.getMultiplyCoresFactorModel().setEnabled(true);
         }
+
+        if (m_adaptiveQueryExecution) {
+            // disable multiply and divide by partition count buttons and inputs
+            m_multiplyByPartButton.setEnabled(false);
+            m_settings.getMultiplyPartitionFactorModel().setEnabled(false);
+            m_divideByPartButton.setEnabled(false);
+            m_settings.getDividePartitionFactorModel().setEnabled(false);
+        } else {
+            m_multiplyByPartButton.setEnabled(true);
+            m_divideByPartButton.setEnabled(true);
+        }
     }
 
     private void updatePreview() {
         final CalculationMode mode = m_settings.getCalculationMode();
 
-        if (mode == CalculationMode.MULTIPLY_EXECUTOR_CORES) {
+        if (m_adaptiveQueryExecution) {
+            m_prevCardLayout.show(m_prevCardPanel, "prevAdaptiveExecution");
+        } else if (mode == CalculationMode.MULTIPLY_EXECUTOR_CORES) {
             m_prevCardLayout.show(m_prevCardPanel, "prevExecutorCalculation");
         } else if (m_inputPort == null) {
             m_prevCardLayout.show(m_prevCardPanel, "prevPredNotExecuted");
@@ -265,9 +289,13 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
 
         if (input != null && input.length > 0) {
             m_inputPort = (SparkDataPortObject)input[0];
+            m_adaptiveQueryExecution =
+                SparkContextManager.getOrCreateSparkContext(m_inputPort.getContextID()).adaptiveExecutionEnabled();
         } else {
             m_inputPort = null;
+            m_adaptiveQueryExecution = false;
         }
+
         loadSettingsFrom(settings);
     }
 
@@ -281,8 +309,7 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
 
     private void loadSettingsFrom(final NodeSettingsRO settings) throws NotConfigurableException {
         try {
-            m_settings.loadSettingsFrom(settings);
-
+            m_settings.getCalculationModeModel().loadSettingsFrom(settings);
             switch (m_settings.getCalculationMode()) {
                 case FIXED_VALUE:
                     m_fixedValueButton.setSelected(true);
@@ -296,6 +323,10 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
                 default:
                     m_multiplyByCoresButton.setSelected(true);
                     break;
+            }
+
+            for (final DialogComponent c : m_components) {
+                c.loadSettingsFrom(settings, null);
             }
 
             updateInputEnabled();

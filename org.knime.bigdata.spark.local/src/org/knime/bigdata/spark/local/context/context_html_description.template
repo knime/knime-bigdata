@@ -17,6 +17,8 @@
 <br/>
 <strong>Delete DataFrames/RDDs on dispose:</strong>&nbsp;&nbsp;<tt>${delete_data_on_dispose}</tt>
 <br/>
+<strong>Adaptive Query Execution:</strong>&nbsp;&nbsp;<tt>${adaptiveExecutionEnabled}</tt>
+<br/>
 <strong>Override Spark settings:</strong>&nbsp;&nbsp;<tt>${override_settings}</tt>
 <br/>
 <strong>Custom Spark settings:</strong>

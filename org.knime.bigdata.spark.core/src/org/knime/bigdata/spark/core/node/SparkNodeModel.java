@@ -242,13 +242,18 @@ public abstract class SparkNodeModel extends NodeModel {
             if (portObjects != null && portObjects.length > 0) {
                 for (final PortObject portObject : portObjects) {
                     if (portObject instanceof SparkDataPortObject) {
-                        final SparkData sparkData = ((SparkDataPortObject)portObject).getData();
+                        final SparkDataPortObject sparkPort = (SparkDataPortObject)portObject;
+                        final SparkData sparkData = sparkPort.getData();
 
                         if (m_automaticHandling) {
                             addSparkDataObject(sparkData);
                         }
-                        assert sparkData
-                            .getStatistics() != null : "Missing named object statistics for Spark data object found";
+
+                        final SparkContext<?> sparkContext =
+                                SparkContextManager.getOrCreateSparkContext(sparkPort.getContextID());
+                        assert sparkContext.adaptiveExecutionEnabled() //
+                            || sparkData.getStatistics() != null //
+                                : "Missing named object statistics for Spark data object found";
                     }
                 }
             }

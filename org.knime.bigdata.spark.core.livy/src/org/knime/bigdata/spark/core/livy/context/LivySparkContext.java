@@ -97,6 +97,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         Map<String, String> sparkConf;
 
         Map<String, String> systemProperties;
+
+        boolean adaptiveExecutionEnabled;
     }
 
     private KNIMEToIntermediateConverterParameter m_converterParameter;
@@ -374,6 +376,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         m_contextAttributes.sparkWebUI = output.getSparkWebUI();
         m_contextAttributes.sparkConf = output.getSparkConf();
         m_contextAttributes.systemProperties = output.getSystemProperties();
+        m_contextAttributes.adaptiveExecutionEnabled = output.adaptiveExecutionEnabled();
 
         m_converterParameter = getConfiguration().getConverterParameter(m_contextAttributes.sparkConf,
             m_contextAttributes.systemProperties);
@@ -562,6 +565,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             mkPropertiesHTMLRows(m_contextAttributes != null ? m_contextAttributes.sparkConf : null));
         reps.put("sys_properties",
             mkPropertiesHTMLRows(m_contextAttributes != null ? m_contextAttributes.systemProperties : null));
+        reps.put("adaptiveExecutionEnabled",
+            m_contextAttributes != null ? Boolean.toString(m_contextAttributes.adaptiveExecutionEnabled) : null);
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
@@ -645,5 +650,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     @Override
     public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
         return m_converterParameter;
+    }
+
+    @Override
+    public boolean adaptiveExecutionEnabled() {
+        return m_contextAttributes != null && m_contextAttributes.adaptiveExecutionEnabled;
     }
 }

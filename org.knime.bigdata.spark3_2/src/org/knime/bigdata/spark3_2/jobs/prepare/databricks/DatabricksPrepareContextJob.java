@@ -36,6 +36,7 @@ import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark3_2.api.DistributedFileUtils;
 import org.knime.bigdata.spark3_2.api.NamedObjects;
+import org.knime.bigdata.spark3_2.api.SparkConfigUtil;
 import org.knime.bigdata.spark3_2.api.SparkJob;
 import org.knime.bigdata.spark3_2.api.TypeConverters;
 import org.knime.bigdata.spark3_2.base.Spark_3_2_CustomUDFProvider;
@@ -80,7 +81,8 @@ public class DatabricksPrepareContextJob implements SparkJob<DatabricksPrepareCo
         final String sparkWebUI = sparkContext.uiWebUrl().getOrElse(null);
         final Map<String, String> sparkConf =
             Arrays.stream(sparkContext.conf().getAll()).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-        return new DatabricksPrepareContextJobOutput(sparkWebUI, sparkConf, testfileName);
+        return new DatabricksPrepareContextJobOutput(sparkWebUI, sparkConf, testfileName,
+            SparkConfigUtil.adaptiveExecutionEnabled(sparkContext));
     }
 
     private static String validateStagingAreaAccess(final String testfileName) throws KNIMESparkException {

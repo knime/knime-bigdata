@@ -40,6 +40,7 @@ import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils;
 import org.knime.bigdata.spark.core.livy.jobapi.SparkSideStagingArea;
 import org.knime.bigdata.spark3_0.api.NamedObjects;
 import org.knime.bigdata.spark3_0.api.SimpleSparkJob;
+import org.knime.bigdata.spark3_0.api.SparkConfigUtil;
 import org.knime.bigdata.spark3_0.api.SparkJob;
 import org.knime.bigdata.spark3_0.api.SparkJobWithFiles;
 
@@ -98,7 +99,9 @@ public class LivySparkJob implements Job<WrapperJobOutput> {
                 toReturn = WrapperJobOutput.success();
             }
 
-            addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, NamedObjectsImpl.SINGLETON_INSTANCE);
+            if (!SparkConfigUtil.adaptiveExecutionEnabled(sc)) {
+                addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, NamedObjectsImpl.SINGLETON_INSTANCE);
+            }
 
         } catch (KNIMESparkException e) {
             toReturn = WrapperJobOutput.failure(e);

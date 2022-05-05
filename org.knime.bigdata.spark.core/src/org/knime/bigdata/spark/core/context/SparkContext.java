@@ -500,6 +500,11 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
     }
 
     /**
+     * @return {@code true} if adaptive query execution is enabled on context
+     */
+    public abstract boolean adaptiveExecutionEnabled();
+
+    /**
      * Opens the Spark context, creating a a new remote context if necessary and createRemoteContext is true.
      * Implementations can assume that the context is {@link SparkContextStatus#CONFIGURED} when this method is invoked
      * and that the method is invoked in a thread-safe manner.

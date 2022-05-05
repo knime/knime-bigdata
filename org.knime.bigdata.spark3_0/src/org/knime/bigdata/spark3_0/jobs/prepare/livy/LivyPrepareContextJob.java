@@ -44,6 +44,7 @@ import org.knime.bigdata.spark.core.livy.jobapi.SparkSideStagingArea;
 import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaTester;
 import org.knime.bigdata.spark3_0.api.DistributedFileUtils;
 import org.knime.bigdata.spark3_0.api.NamedObjects;
+import org.knime.bigdata.spark3_0.api.SparkConfigUtil;
 import org.knime.bigdata.spark3_0.api.SparkJob;
 import org.knime.bigdata.spark3_0.api.TypeConverters;
 import org.knime.bigdata.spark3_0.base.Spark_3_0_CustomUDFProvider;
@@ -107,7 +108,8 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
             }
         }
 
-        return new LivyPrepareContextJobOutput(sparkWebUI, sparkConf, sysProps, testfileName);
+        return new LivyPrepareContextJobOutput(sparkWebUI, sparkConf, sysProps, testfileName,
+            SparkConfigUtil.adaptiveExecutionEnabled(sparkContext));
     }
 
     private static String validateStagingAreaAccess(final String testfileName) throws KNIMESparkException {

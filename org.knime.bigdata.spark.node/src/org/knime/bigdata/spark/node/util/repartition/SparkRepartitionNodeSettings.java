@@ -172,6 +172,20 @@ public class SparkRepartitionNodeSettings {
     }
 
     /**
+     * Validate if calculation mode works on given context.
+     *
+     * @param adaptiveExecutionEnabled {@code true} if adaptive query execution is enabled
+     */
+    void validateCalculationMode(final boolean adaptiveExecutionEnabled) throws InvalidSettingsException {
+        if (adaptiveExecutionEnabled && //
+            (getCalculationMode() == CalculationMode.MULTIPLY_PART_COUNT
+                || getCalculationMode() == CalculationMode.DIVIDE_PART_COUNT)) {
+
+            throw new InvalidSettingsException("Unable to calculate new partion count with adaptive query execution enabled in Spark.");
+        }
+    }
+
+    /**
      * @param settings the NodeSettingsRO to read from.
      * @throws InvalidSettingsException
      */

@@ -387,4 +387,9 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
     public synchronized KNIMEToIntermediateConverterParameter getConverterPrameter() {
         return KNIMEToIntermediateConverterParameter.DEFAULT;
     }
+
+    @Override
+    public boolean adaptiveExecutionEnabled() {
+        return false; // never supported in Spark below 3.0
+    }
 }

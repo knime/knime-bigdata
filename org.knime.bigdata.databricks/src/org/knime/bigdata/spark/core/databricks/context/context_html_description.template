@@ -21,6 +21,8 @@
 <br/>
 <strong>Context settings</strong>
 <hr/>
+<strong>Adaptive Query Execution:</strong>&nbsp;&nbsp;<tt>${adaptiveExecutionEnabled}</tt>
+<hr/>
 <strong>Spark Properties: </strong>
 <table align="left" width="80%">
   <tr>

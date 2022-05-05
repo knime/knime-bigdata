@@ -36,6 +36,7 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark3_1.api.NamedObjects;
 import org.knime.bigdata.spark3_1.api.SimpleSparkJob;
+import org.knime.bigdata.spark3_1.api.SparkConfigUtil;
 import org.knime.bigdata.spark3_1.api.SparkJob;
 import org.knime.bigdata.spark3_1.api.SparkJobWithFiles;
 
@@ -107,7 +108,9 @@ public class DatabricksSparkJob {
                 toReturn = WrapperJobOutput.success();
             }
 
-            addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, NamedObjectsImpl.SINGLETON_INSTANCE);
+            if (!SparkConfigUtil.adaptiveExecutionEnabled(sc)) {
+                addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, NamedObjectsImpl.SINGLETON_INSTANCE);
+            }
 
         } catch (KNIMESparkException e) {
             toReturn = WrapperJobOutput.failure(e);
