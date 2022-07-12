@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark3_1.jobs.preproc.filter.column;
 
+import static org.knime.bigdata.spark3_1.api.SparkUtil.quoteColumnName;
+
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Column;
@@ -52,7 +54,7 @@ public class ColumnFilterJob implements SimpleSparkJob<ColumnsJobInput> {
         final Column selectedColumns[] = new Column[selectedColumnNames.length];
 
         for (int i = 0; i < selectedColumnNames.length; i++) {
-            selectedColumns[i] = inputDataset.col(selectedColumnNames[i]);
+            selectedColumns[i] = inputDataset.col(quoteColumnName(selectedColumnNames[i]));
         }
 
         final Dataset<Row> result = inputDataset.select(selectedColumns);
