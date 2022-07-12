@@ -17,6 +17,8 @@
  */
 package org.knime.bigdata.spark3_0.jobs.preproc.sorter;
 
+import static org.knime.bigdata.spark3_0.api.SparkUtil.quoteColumnName;
+
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Column;
@@ -53,13 +55,13 @@ public class SortJob implements SimpleSparkJob<SortJobInput> {
         for (int i = 0; i < colIndex.length; i++) {
             final String name = colNames[colIndex[i]];
             if (sortOrders[i] && missingToEnd) {
-                sortColumns[i] = inputDataset.col(name).asc_nulls_last();
+                sortColumns[i] = inputDataset.col(quoteColumnName(name)).asc_nulls_last();
             } else if (sortOrders[i]) {
-                sortColumns[i] = inputDataset.col(name).asc();
+                sortColumns[i] = inputDataset.col(quoteColumnName(name)).asc();
             } else if (missingToEnd) {
-                sortColumns[i] = inputDataset.col(name).desc_nulls_last();
+                sortColumns[i] = inputDataset.col(quoteColumnName(name)).desc_nulls_last();
             } else {
-                sortColumns[i] = inputDataset.col(name).desc();
+                sortColumns[i] = inputDataset.col(quoteColumnName(name)).desc();
             }
         }
 
