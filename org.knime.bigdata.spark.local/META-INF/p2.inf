@@ -1,0 +1,5 @@
+instructions.install=\
+org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:--add-opens=java.base/sun.util.calendar=ALL-UNNAMED);\
+
+instructions.uninstall=\
+org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:--add-opens=java.base/sun.util.calendar=ALL-UNNAMED);\
