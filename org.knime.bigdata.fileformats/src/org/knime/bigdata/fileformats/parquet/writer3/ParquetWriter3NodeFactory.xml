@@ -164,7 +164,7 @@
             </option>
             <option name="Within file row group size (MB)">
                 Defines the maximum size of a row group within a file in megabyte. For more details see the
-                <a href="https://parquet.apache.org/documentation/latest/">Parquet documentation</a>.
+                <a href="https://parquet.apache.org/docs/">Parquet documentation</a>.
             </option>
 		</tab>
 		<tab name="Type Mapping">
