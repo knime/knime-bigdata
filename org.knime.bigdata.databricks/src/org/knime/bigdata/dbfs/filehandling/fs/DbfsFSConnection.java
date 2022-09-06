@@ -50,17 +50,16 @@ package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.IOException;
 
-import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.filehandling.core.connections.base.BaseFSConnection;
 
 /**
  * Databricks DBFS implementation of the {@link FSConnection} interface.
  *
  * @author Alexander Bondaletov
  */
-public class DbfsFSConnection implements FSConnection {
+public class DbfsFSConnection extends BaseFSConnection {
 
     private static final long CACHE_TTL = 6000;
 
@@ -80,10 +79,4 @@ public class DbfsFSConnection implements FSConnection {
     public FSFileSystem<?> getFileSystem() {
         return m_filesystem;
     }
-
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
-    }
-
 }

@@ -48,16 +48,15 @@ package org.knime.bigdata.hadoop.filehandling.fs;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FileSystem;
-import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.filehandling.core.connections.base.BaseFSConnection;
 
 /**
  * HDFS implementation of {@link FSConnection} interface.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class HdfsFSConnection implements FSConnection {
+public class HdfsFSConnection extends BaseFSConnection {
 
     private static final long CACHE_TTL_MILLIS = 60000;
 
@@ -91,10 +90,4 @@ public class HdfsFSConnection implements FSConnection {
     public HdfsFileSystem getFileSystem() {
         return m_filesystem;
     }
-
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
-    }
-
 }

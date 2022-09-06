@@ -46,16 +46,15 @@
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
-import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.filehandling.core.connections.base.BaseFSConnection;
 
 /**
  * WebHDFS via KNOX implementation of {@link FSConnection} interface.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class KnoxHdfsFSConnection implements FSConnection {
+public class KnoxHdfsFSConnection extends BaseFSConnection {
 
     private static final long CACHE_TTL_MILLIS = 6000;
 
@@ -75,16 +74,10 @@ public class KnoxHdfsFSConnection implements FSConnection {
         return m_filesystem;
     }
 
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
-    }
-
     /**
      * @return REST client
      */
     public WebHDFSAPI getRestClient() {
         return m_filesystem.getClient();
     }
-
 }
