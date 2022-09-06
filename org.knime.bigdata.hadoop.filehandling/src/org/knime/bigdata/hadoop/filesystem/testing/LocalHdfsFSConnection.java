@@ -56,10 +56,9 @@ import org.knime.bigdata.hadoop.filehandling.fs.HdfsFSConnection;
 import org.knime.bigdata.hadoop.filehandling.fs.HdfsFileSystem;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystem;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
-import org.knime.core.node.util.FileSystemBrowser;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
-import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
+import org.knime.filehandling.core.connections.base.BaseFSConnection;
 
 /**
  * Provides a {@link HdfsFileSystem}, that wraps a {@link NioFileSystem}, that wraps a {@link LocalFileSystem}. This
@@ -67,7 +66,7 @@ import org.knime.filehandling.core.filechooser.NioFileSystemBrowser;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class LocalHdfsFSConnection implements FSConnection {
+class LocalHdfsFSConnection extends BaseFSConnection {
 
     private final HdfsFileSystem m_hdfsFileSystem;
     private final NioFileSystem m_hadoopFileSystem;
@@ -86,10 +85,5 @@ class LocalHdfsFSConnection implements FSConnection {
     @Override
     public HdfsFileSystem getFileSystem() {
         return m_hdfsFileSystem;
-    }
-
-    @Override
-    public FileSystemBrowser getFileSystemBrowser() {
-        return new NioFileSystemBrowser(this);
     }
 }
