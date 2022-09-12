@@ -63,6 +63,8 @@ import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
 @SuppressWarnings("restriction")
 public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
 
+    private final SparkVersion m_sparkVersion;
+
     private SnippetType m_snippetType;
 
     private final AbstractJavaSnippetHelperRegistry m_helperRegistry;
@@ -111,6 +113,7 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     public SparkJSnippet(final SparkVersion sparkVersion, final SnippetType snippetType,
         final JavaSnippetSettings settings, final AbstractJavaSnippetHelperRegistry helperRegistry) {
 
+        m_sparkVersion = sparkVersion;
         m_snippetType = snippetType;
         m_helperRegistry = helperRegistry;
         m_helper = helperRegistry.getHelper(sparkVersion);
@@ -140,6 +143,13 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
 
         m_parser = new JSnippetParser(this);
         m_snippetFileDirty = true;
+    }
+
+    /**
+     * @return Spark version used in the snippet
+     */
+    public SparkVersion getSparkVersion() {
+        return m_sparkVersion;
     }
 
     /**

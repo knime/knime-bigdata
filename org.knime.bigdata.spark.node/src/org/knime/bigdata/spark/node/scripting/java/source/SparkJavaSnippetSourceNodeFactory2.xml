@@ -24,6 +24,8 @@
             <p>You can define reusable templates with the "Create templates..." 
             button. Templates are stored in the users workspace by default and can be accessed via the "Templates"
             tab. For details see the "Templates" tab description below.</p>
+
+            <p>For Spark 2.2 and above, this node compiles the snippet code with Java 8 support, otherwise it uses Java 7.</p>
         </intro>
         <tab name="Java Snippet">
             <option name="Flow Variable List">

@@ -276,7 +276,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
 
             final SourceCompiler compiler = new SourceCompiler(helper.getSnippetClassName(m_snippetType, classHash),
                 docClone.getText(0, docClone.getLength()),
-                m_sparkJavaSnippet.getClassPath());
+                m_sparkJavaSnippet.getClassPath(), sparkVersion);
             m_compilationCache.updateCache(classHash, compiler.getClassName(), createSnippetJarFile(compiler));
         }
 

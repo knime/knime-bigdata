@@ -32,9 +32,11 @@ import java.util.Map;
 import javax.tools.JavaFileObject.Kind;
 
 import org.eclipse.jdt.internal.compiler.tool.EclipseFileObject;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.util.FileUtil;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
+import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler.JavaVersion;
 
 /**
  * Simple compiler to translate in-memory Java code into compiled byte code.
@@ -52,21 +54,31 @@ public class SourceCompiler {
 
     private final File[] m_classpath;
 
+    private final JavaVersion m_javaVersion;
+
     /**
      * Creates a new CompiledModelPortObject from java code.
      *
      * @param aClassName The name of the class to compile
      * @param javaCode the code
      * @param classpath the class path entries
+     * @param sparkVersion target Spark versions, used to select the target Java version
      * @throws CompilationFailedException when the code cannot be compiled
      * @throws ClassNotFoundException when the code has dependencies that cannot be resolved
      */
-    public SourceCompiler(final String aClassName, final String javaCode, final File[] classpath)
-        throws CompilationFailedException, ClassNotFoundException {
+    public SourceCompiler(final String aClassName, final String javaCode, final File[] classpath,
+        final SparkVersion sparkVersion) throws CompilationFailedException, ClassNotFoundException {
 
         m_className = aClassName;
         m_javaCode = javaCode;
         m_classpath = classpath;
+
+        if (SparkVersion.V_2_2.compareTo(sparkVersion) <= 0) {
+            m_javaVersion = JavaCodeCompiler.JavaVersion.JAVA_8;
+        } else {
+            m_javaVersion = JavaCodeCompiler.JavaVersion.JAVA_7;
+        }
+
         m_bytecode = compile();
     }
 
@@ -95,7 +107,7 @@ public class SourceCompiler {
                 Kind.SOURCE,
                 StandardCharsets.UTF_8);
 
-            final JavaCodeCompiler compiler = new JavaCodeCompiler(JavaCodeCompiler.JavaVersion.JAVA_7, classDirectory);
+            final JavaCodeCompiler compiler = new JavaCodeCompiler(m_javaVersion, classDirectory);
             compiler.setSources(snippetFile);
             compiler.setClasspaths(m_classpath);
             compiler.compile();
