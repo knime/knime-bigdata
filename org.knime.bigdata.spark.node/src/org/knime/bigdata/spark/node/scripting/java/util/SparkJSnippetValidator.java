@@ -66,7 +66,7 @@ public class SparkJSnippetValidator {
             // validate that snippet compiles
             final Document doc = snippet.getDocument();
             new SourceCompiler(snippet.getSnippetClassName(), doc.getText(0, doc.getLength()),
-                snippet.getClassPath());
+                snippet.getClassPath(), snippet.getSparkVersion());
         } catch (Exception e) {
             errors.add("Compilation error(s): " + e.getMessage());
         }
