@@ -28,7 +28,7 @@ try {
 
     
             def testPrefix = "BigDataTests/${BN == KNIMEConstants.NEXT_RELEASE_BRANCH ? 'master' : BN}".replaceAll('releases/', '')
-            def testRegex = "^/${testPrefix}/${local_bd_tests}"
+            def testRegex = "/${testPrefix}/${local_bd_tests}"
 
             echo "${testRegex}"
 
