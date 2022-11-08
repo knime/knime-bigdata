@@ -10,7 +10,7 @@ Export-Package: org.knime.bigdata.filehandling.local,
   org.knime.bigdata.filehandling.testing,
   org.knime.bigdata.filehandling.util,
   org.knime.bigdata.hdfs.filehandler
-Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
+Require-Bundle: org.knime.core;bundle-version="[4.7.0,5.0.0)",
  org.knime.base;bundle-version="[4.0.0,5.0.0)",
  org.knime.base.filehandling;bundle-version="[4.0.0,5.0.0)",
  org.knime.workbench.repository;bundle-version="[4.0.0,5.0.0)",
