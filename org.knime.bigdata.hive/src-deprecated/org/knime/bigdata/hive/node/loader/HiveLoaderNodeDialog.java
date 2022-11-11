@@ -57,6 +57,7 @@ import org.knime.core.node.workflow.FlowVariable;
  *
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 class HiveLoaderNodeDialog extends NodeDialogPane {
     private final LoaderSettings m_settings = new LoaderSettings();
 

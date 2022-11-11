@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Source"
+    icon="db_hive_connector.png" deprecated="true">
+    <name>Hive Connector</name>
+    <shortDescription>Create a database connection to Hive.</shortDescription>
+    <fullDescription>
+        <intro>
+            <p>
+            This node is part of the deprecated database framework.
+            For more information on how to migrate to the new database framework see the
+            <a href="https://docs.knime.com/latest/db_extension_guide/index.html#migration">migration section</a> of the 
+            <a href="https://docs.knime.com/latest/db_extension_guide/index.html">database documentation</a>.
+            </p>
+            <p>
+            This node creates a connection to a HiveServer2 via its JDBC driver. You need to provide the server's
+            hostname
+            (or IP address), the port, and a database name. Login credentials can
+            either be provided directly in
+            the configuration or via credentials set on the workflow.
+            </p>
+            <p>
+            The node supports the usage of the Cloudera JDBC drivers which are available for download from the 
+            <a href="http://www.cloudera.com/downloads/connectors/hive/jdbc.html">Cloudera homepage</a>.
+            To register the driver follow the instructions on the 
+            <a href="https://tech.knime.org/database-documentation">database documentation</a>.
+            </p>
+        </intro>
+
+        <option name="Hostname">
+            The hostname (or IP address) of a HiveServer2.
+        </option>
+        <option name="Port">
+            The port on which the hive server is listening. The default port is 10,000.
+        </option>
+        <option name="Database name">
+            The name of the database you want to connect to.
+        </option>
+        <option name="Parameter">
+            Optional connection parameter such as ssl or authentication options. 
+            See <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-ConnectionURLs">HiveServer2 Client documentation</a> for details. 
+            <p>
+            For Cloudera driver specific settings see the 
+            <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf">Cloudera JDBC Driver for Apache Hive Install Guide</a>.
+            </p>
+        </option>
+        <option name="Use credentials">
+            Selection this option if you want to provide authentication data via workflow credentials.
+            Then select the desired credential name in the list below.
+        </option>
+        <option name="Use username &amp; password">
+            Provide a username and a password for authentication. The password may be optional if the
+            server is configured accordingly.
+        </option>
+        <option name="Use Kerberos">
+            Uses an existing Kerberos ticket for authentication. When connecting to HiveServer2 the principal of the 
+            HiveServer2 user needs to be added in the Parameter field e.g. principal=hive/hive2_host@YOUR-REALM.COM
+            The principal must be the same user principal you used when starting the HiveServer2. For details see the 
+            <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-JDBCClientSetupforaSecureCluster">Hive documentation</a>
+            or the <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf">Cloudera JDBC Driver for Apache Hive Install Guide</a>. 
+        </option>
+        <option name="Timezone correction">
+            Select the TimeZone to convert the date, time or timestamp field into. The current implementation can't
+            represent time zones. In order to support persisting those fields into a database, the time values can be
+            changed according to the selected time zone, which is used as the offset (including the daylight saving
+            time)
+            for the original values:
+
+            <ul>
+                <li>
+                    <i>No correction (use UTC)</i>
+                    is used for workflows (created before 2.8) and doesn't apply any correction,
+                </li>
+                <li>
+                    <i>Use local timezone</i>
+                    uses the local time zone offset to correct the date field before reading or writing, and
+                </li>
+                <li>
+                    <i>Use selected timezone</i>
+                    allows selecting the time zone to covert the date values into.
+                </li>
+            </ul>
+        </option>
+        <option name="Validate connection on close">
+            Check this option if you want to validate the connection when closing the dialog.
+        </option>
+        <option name="Retrieve metadata in configure">
+            This option controls subsequent nodes. Usually when a database node is configured it retrieves the metadata of the
+            current table or query from the database for usage in subsequent nodes. If metadata retrieval takes quite
+            some time it will slow down workflow configuration and execution noticeably, especially since metadata is
+            retrieved in both configure and execute. In such cases it's better to switch this option off and
+            only retrieve metadata during execute.
+        </option>        
+    </fullDescription>
+
+    <ports>
+        <outPort index="0" name="Database JDBC Connection">A database JDBC connection</outPort>
+    </ports>
+</knimeNode>

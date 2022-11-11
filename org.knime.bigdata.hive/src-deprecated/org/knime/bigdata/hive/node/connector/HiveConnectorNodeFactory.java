@@ -16,27 +16,28 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 09.05.2014 by thor
+ *   Created on 06.05.2014 by thor
  */
-package org.knime.bigdata.hive.node.loader;
+package org.knime.bigdata.hive.node.connector;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * Factory for the Hive Loader node.
+ * Factory for the Hive connector node.
  *
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
 @Deprecated
-public class HiveLoaderNodeFactory extends NodeFactory<HiveLoaderNodeModel> {
+public class HiveConnectorNodeFactory extends NodeFactory<HiveConnectorNodeModel> {
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public HiveLoaderNodeModel createNodeModel() {
-        return new HiveLoaderNodeModel();
+    public HiveConnectorNodeModel createNodeModel() {
+        return new HiveConnectorNodeModel();
     }
 
     /**
@@ -51,7 +52,7 @@ public class HiveLoaderNodeFactory extends NodeFactory<HiveLoaderNodeModel> {
      * {@inheritDoc}
      */
     @Override
-    public NodeView<HiveLoaderNodeModel> createNodeView(final int viewIndex, final HiveLoaderNodeModel nodeModel) {
+    public NodeView<HiveConnectorNodeModel> createNodeView(final int viewIndex, final HiveConnectorNodeModel nodeModel) {
         return null;
     }
 
@@ -68,6 +69,6 @@ public class HiveLoaderNodeFactory extends NodeFactory<HiveLoaderNodeModel> {
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new HiveLoaderNodeDialog();
+        return new HiveConnectorNodeDialog();
     }
 }

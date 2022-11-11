@@ -32,6 +32,7 @@ import org.knime.core.node.port.database.DatabaseConnectionSettings;
  *
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 class HiveLoaderNodeModel extends AbstractLoaderNodeModel {
 
     HiveLoaderNodeModel() {

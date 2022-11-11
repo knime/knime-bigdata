@@ -3,13 +3,8 @@
 <plugin>
      <extension
          point="org.knime.workbench.repository.nodes">
-      <node
-            factory-class="org.knime.bigdata.impala.node.connector.ImpalaConnectorNodeFactory"
-            category-path="/db/database_legacy/database-connector"/>
-      <node
-            category-path="/db/database_legacy/database-io"
-            deprecated="true"
-            factory-class="org.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory">
+      <node deprecated="true" factory-class="org.knime.bigdata.impala.node.connector.ImpalaConnectorNodeFactory"/>
+      <node deprecated="true" factory-class="org.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory">
       </node>
     </extension>
      <extension
