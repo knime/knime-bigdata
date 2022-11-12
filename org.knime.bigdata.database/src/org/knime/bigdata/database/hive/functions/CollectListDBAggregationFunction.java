@@ -30,6 +30,7 @@ import org.knime.database.function.aggregation.impl.SimpleDBAggregationFunction;
  * Supported as of Hive 0.13.0.
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public final class CollectListDBAggregationFunction extends SimpleDBAggregationFunction {
     private static final String ID = "COLLECT_LIST";
 
