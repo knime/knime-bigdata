@@ -87,6 +87,7 @@ import org.knime.python.kernel.SQLEditorObjectWriter;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 
 	private PythonScriptHiveNodeConfig m_config = new PythonScriptHiveNodeConfig();

@@ -80,6 +80,7 @@ import org.knime.python.kernel.SQLEditorObjectWriter;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 class PythonScriptHiveNodeDialog extends NodeDialogPane {
 
 	private final PythonSourceCodePanel m_sourceCodePanel;
