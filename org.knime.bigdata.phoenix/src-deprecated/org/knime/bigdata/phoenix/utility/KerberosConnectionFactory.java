@@ -36,6 +36,7 @@ import org.knime.core.node.port.database.connection.DBDriverFactory;
  *
  * @author Tobias Koetter, KNIME.com
  */
+@Deprecated
 public class KerberosConnectionFactory extends CachedConnectionFactory {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(KerberosConnectionFactory.class);

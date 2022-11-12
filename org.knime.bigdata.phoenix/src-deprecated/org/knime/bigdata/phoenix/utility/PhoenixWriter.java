@@ -44,6 +44,7 @@ import org.knime.core.node.port.database.writer.DBWriterImpl;
  *
  * @author Tobias Koetter, KNIME.com
  */
+@Deprecated
 public class PhoenixWriter extends DBWriterImpl {
 
     /**

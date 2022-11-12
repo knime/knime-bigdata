@@ -57,6 +57,7 @@ import org.knime.core.node.port.database.writer.DBWriter;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class PhoenixUtility extends DatabaseUtility {
     /**The unique database identifier.*/
     public static final String DATABASE_IDENTIFIER = "phoenix";

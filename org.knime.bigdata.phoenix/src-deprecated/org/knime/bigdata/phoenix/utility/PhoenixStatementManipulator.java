@@ -26,6 +26,7 @@ import org.knime.core.node.port.database.StatementManipulator;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class PhoenixStatementManipulator extends StatementManipulator {
     /**
      * {@inheritDoc}

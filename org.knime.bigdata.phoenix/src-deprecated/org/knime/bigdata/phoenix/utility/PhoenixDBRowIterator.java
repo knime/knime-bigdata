@@ -48,6 +48,7 @@ import org.knime.core.node.port.database.reader.DBRowIteratorImpl;
  *
  * @author Tobias Koetter, KNIME.com
  */
+@Deprecated
 public class PhoenixDBRowIterator extends DBRowIteratorImpl {
 
     /**

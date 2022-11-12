@@ -3,10 +3,7 @@
 <plugin>
      <extension
          point="org.knime.workbench.repository.nodes">
-        <node
-              category-path="/db/database_legacy/database-connector"
-              factory-class="org.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
-        </node>
+        <node deprecated="true" factory-class="org.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory"/>
     </extension>
      <extension
            point="org.knime.core.DatabaseUtility">

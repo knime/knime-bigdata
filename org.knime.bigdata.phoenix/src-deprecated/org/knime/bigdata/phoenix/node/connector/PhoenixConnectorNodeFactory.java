@@ -30,6 +30,7 @@ import org.knime.core.node.NodeView;
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class PhoenixConnectorNodeFactory extends NodeFactory<PhoenixConnectorNodeModel> {
 
     /**

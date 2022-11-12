@@ -27,6 +27,7 @@ import org.knime.core.node.port.database.tablecreator.DBTableCreatorIfNotExistsI
  *
  * @author Tobias Koetter, KNIME.com
  */
+@Deprecated
 public class PhoenixTableCreator extends DBTableCreatorIfNotExistsImpl {
 
     /**

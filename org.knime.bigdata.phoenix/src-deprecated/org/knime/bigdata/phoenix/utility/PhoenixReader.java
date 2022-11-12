@@ -45,6 +45,7 @@ import org.knime.core.node.port.database.reader.DBReaderImpl;
  *
  * @author Tobias Koetter, KNIME.com
  */
+@Deprecated
 public class PhoenixReader extends DBReaderImpl {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(PhoenixReader.class);
