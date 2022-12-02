@@ -51,6 +51,7 @@ package org.knime.bigdata.dbfs.filehandling.node;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
@@ -72,6 +73,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
+import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryRelativizationPanel;
 
 /**
  * Node dialog for the DBFS Connector node.
@@ -156,6 +158,7 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
         c.weighty = 0;
         c.gridx = 0;
         c.gridy = 0;
+        c.insets = new Insets(0, 5, 0, 0);
         panel.add(new JLabel("Connection timeout (seconds): "), c);
 
         c.gridy = 1;
@@ -190,6 +193,8 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
         gbc.weightx = 1;
         advancedTabPanel.add(createTimeoutPanel(), gbc);
         gbc.gridy++;
+        advancedTabPanel.add(new WorkingDirectoryRelativizationPanel(m_settings.getBrowserPathRelativeModel()), gbc);
+        gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weighty = 1;
         advancedTabPanel.add(new JLabel(), gbc);
@@ -197,7 +202,9 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
     }
 
     private FSConnection createFSConnection() throws IOException {
-        return new DbfsFSConnection(m_settings.toFSConnectionConfig(getCredentialsProvider()));
+        DbfsConnectorNodeSettings settings = m_settings.createClone();
+        settings.getBrowserPathRelativeModel().setBooleanValue(false);
+        return new DbfsFSConnection(settings.toFSConnectionConfig(getCredentialsProvider()));
     }
 
     @Override

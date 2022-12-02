@@ -76,8 +76,9 @@ public final class KnoxHdfsFSConnectionConfig extends BaseFSConnectionConfig {
     /**
      * Private constructor, use {@link #builder()} instead.
      */
-    private KnoxHdfsFSConnectionConfig(final String workingDirectory) {
-        super(workingDirectory, true);
+    private KnoxHdfsFSConnectionConfig(final String workingDirectory,
+        final BrowserRelativizationBehavior relativizationBehavior) {
+        super(workingDirectory, true, relativizationBehavior);
     }
 
     String getEndpointUrl() {
@@ -129,6 +130,8 @@ public final class KnoxHdfsFSConnectionConfig extends BaseFSConnectionConfig {
         private Duration m_connectionTimeout;
 
         private Duration m_receiveTimeout;
+
+        private BrowserRelativizationBehavior m_relativizationBehavior = BrowserRelativizationBehavior.ABSOLUTE;
 
         Builder() {
         }
@@ -191,6 +194,15 @@ public final class KnoxHdfsFSConnectionConfig extends BaseFSConnectionConfig {
         }
 
         /**
+         * @param relativizationBehavior the browser relativization behavior
+         * @return current builder instance
+         */
+        public Builder withRelativizationBehavior(final BrowserRelativizationBehavior relativizationBehavior) {
+            m_relativizationBehavior = relativizationBehavior;
+            return this;
+        }
+
+        /**
          * Build the configuration.
          *
          * @return configuration instance
@@ -203,7 +215,8 @@ public final class KnoxHdfsFSConnectionConfig extends BaseFSConnectionConfig {
             CheckUtils.checkArgumentNotNull(m_connectionTimeout, "Connection timeout required.");
             CheckUtils.checkArgumentNotNull(m_receiveTimeout, "Read timeout required.");
 
-            final KnoxHdfsFSConnectionConfig config = new KnoxHdfsFSConnectionConfig(m_workingDirectory);
+            final KnoxHdfsFSConnectionConfig config =
+                new KnoxHdfsFSConnectionConfig(m_workingDirectory, m_relativizationBehavior);
             config.m_endpointUrl = m_endpointUrl;
             config.m_username = m_username;
             config.m_password = m_password;

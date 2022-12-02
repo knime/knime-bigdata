@@ -84,8 +84,9 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
     /**
      * Private constructor, use {@link #builder()} instead.
      */
-    private DbfsFSConnectionConfig(final String workingDirectory) {
-        super(workingDirectory, true);
+    private DbfsFSConnectionConfig(final String workingDirectory,
+        final BrowserRelativizationBehavior relativizationBehavior) {
+        super(workingDirectory, true, relativizationBehavior);
     }
 
     String getDeploymentUrl() {
@@ -152,6 +153,8 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
         private Duration m_connectionTimeout;
 
         private Duration m_readTimeout;
+
+        private BrowserRelativizationBehavior m_relativizationBehavior = BrowserRelativizationBehavior.ABSOLUTE;
 
         Builder() {
         }
@@ -227,6 +230,18 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
         }
 
         /**
+         * Set the browser relativization behavior.
+         *
+         * @param relativizationBehavior relativization behavior to use
+         *
+         * @return current builder instance
+         */
+        public Builder withRelativizationBehavior(final BrowserRelativizationBehavior relativizationBehavior) {
+            m_relativizationBehavior = relativizationBehavior;
+            return this;
+        }
+
+        /**
          * Build the configuration.
          *
          * @return configuration instance
@@ -237,7 +252,8 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
             CheckUtils.checkArgumentNotNull(m_connectionTimeout, "Connection timeout required.");
             CheckUtils.checkArgumentNotNull(m_readTimeout, "Read timeout required.");
 
-            final DbfsFSConnectionConfig config = new DbfsFSConnectionConfig(m_workingDirectory);
+            final DbfsFSConnectionConfig config =
+                new DbfsFSConnectionConfig(m_workingDirectory, m_relativizationBehavior);
             config.m_deploymentUrl = m_deploymentUrl;
             config.m_connectionTimeout = m_connectionTimeout;
             config.m_readTimeout = m_readTimeout;

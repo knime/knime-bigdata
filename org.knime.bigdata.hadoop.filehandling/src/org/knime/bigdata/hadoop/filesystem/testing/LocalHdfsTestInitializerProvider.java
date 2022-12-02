@@ -59,6 +59,7 @@ import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.connections.meta.base.BaseFSConnectionConfig.BrowserRelativizationBehavior;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializerProvider;
 import org.knime.filehandling.core.testing.FSTestInitializerProvider;
 
@@ -76,7 +77,7 @@ public class LocalHdfsTestInitializerProvider extends DefaultFSTestInitializerPr
     public LocalHdfsTestInitializer setup(final Map<String, String> configuration) throws IOException {
         final Path workingDir = Files.createTempDirectory("knime-hdfs-nio-wrapper-local-test");
         final FSConnection localFsConnection =
-            DefaultFSConnectionFactory.createLocalFSConnection(workingDir.toString());
+            DefaultFSConnectionFactory.createLocalFSConnection(workingDir.toString(), BrowserRelativizationBehavior.ABSOLUTE);
         return new LocalHdfsTestInitializer(new LocalHdfsFSConnection(localFsConnection));
     }
 

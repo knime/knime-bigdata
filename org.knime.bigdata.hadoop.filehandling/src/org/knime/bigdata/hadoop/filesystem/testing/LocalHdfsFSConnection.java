@@ -59,6 +59,7 @@ import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSFileSystem;
 import org.knime.filehandling.core.connections.base.BaseFSConnection;
+import org.knime.filehandling.core.connections.config.LocalFSConnectionConfig;
 
 /**
  * Provides a {@link HdfsFileSystem}, that wraps a {@link NioFileSystem}, that wraps a {@link LocalFileSystem}. This
@@ -74,6 +75,7 @@ class LocalHdfsFSConnection extends BaseFSConnection {
 
     @SuppressWarnings("resource")
     LocalHdfsFSConnection(final FSConnection localFsConnection) throws IOException {
+        super(new LocalFSConnectionConfig(true));
         m_localFileSystem = localFsConnection.getFileSystem();
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
         m_hadoopFileSystem = (NioFileSystem)NioFileSystemUtil //

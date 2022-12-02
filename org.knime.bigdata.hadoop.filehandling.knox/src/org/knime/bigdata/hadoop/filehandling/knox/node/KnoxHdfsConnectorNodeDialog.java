@@ -51,6 +51,7 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -75,6 +76,7 @@ import org.knime.filehandling.core.connections.base.auth.AuthSettings;
 import org.knime.filehandling.core.connections.base.auth.StandardAuthTypes;
 import org.knime.filehandling.core.connections.base.auth.UserPasswordAuthProviderPanel;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
+import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryRelativizationPanel;
 
 /**
  * WebHDFS via KNOX Connection node dialog.
@@ -171,6 +173,31 @@ class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+
+        panel.add(createTimeoutsPanel(), gbc);
+
+        gbc.gridy++;
+        panel.add(new WorkingDirectoryRelativizationPanel(m_settings.getBrowserPathRelativeModel()), gbc);
+
+        // fill bottom side
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 0;
+        gbc.weighty = 1;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        panel.add(new JLabel(), gbc);
+
+        return panel;
+    }
+
+    private JComponent createTimeoutsPanel() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
         gbc.gridx = gbc.gridy = 0;
         gbc.weightx = gbc.weighty = 0;
@@ -182,20 +209,7 @@ class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
         addLine(panel, gbc, "Connection timeout (seconds):", m_connectionTimeout.getComponentPanel());
         addLine(panel, gbc, "Receive timeout (seconds):", m_receiveTimeout.getComponentPanel());
 
-        // fill right side
-        gbc.gridx++;
-        gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(new JLabel(), gbc);
-
-        // fill bottom side
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        panel.add(new JLabel(), gbc);
-
+        panel.setBorder(BorderFactory.createTitledBorder("Connection settings"));
         return panel;
     }
 
@@ -251,6 +265,7 @@ class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
 
     private FSConnection createFSConnection() throws IOException {
         KnoxHdfsConnectorNodeSettings clonedSettings = new KnoxHdfsConnectorNodeSettings(m_settings);
+        clonedSettings.getBrowserPathRelativeModel().setBooleanValue(false);
         return new KnoxHdfsFSConnection(clonedSettings.toFSConnectionConfig(getCredentialsProvider()));
     }
 

@@ -69,6 +69,7 @@ public class HdfsFSConnection extends BaseFSConnection {
      * @throws IOException
      */
     public HdfsFSConnection(final HdfsFSConnectionConfig config) throws IOException {
+        super(config);
         m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, config);
     }
 
@@ -78,11 +79,19 @@ public class HdfsFSConnection extends BaseFSConnection {
      * @param hadoopFileSystem already initialized and open Hadoop file system to use
      */
     public HdfsFSConnection(final FileSystem hadoopFileSystem) {
+        this(hadoopFileSystem, createConfig(hadoopFileSystem));
+    }
+
+    private static HdfsFSConnectionConfig createConfig(final FileSystem hadoopFileSystem) {
         final String workingDirectory = hadoopFileSystem.getWorkingDirectory().toUri().getPath();
-        final HdfsFSConnectionConfig config = HdfsFSConnectionConfig.builder() //
+        return HdfsFSConnectionConfig.builder() //
                 .withEndpoint("hdfs", "localhost", 1234) // never used
                 .withWorkingDirectory(workingDirectory) //
                 .build();
+    }
+
+    private HdfsFSConnection(final FileSystem hadoopFileSystem, final HdfsFSConnectionConfig config) {
+        super(config);
         m_filesystem = new HdfsFileSystem(CACHE_TTL_MILLIS, config, hadoopFileSystem);
     }
 

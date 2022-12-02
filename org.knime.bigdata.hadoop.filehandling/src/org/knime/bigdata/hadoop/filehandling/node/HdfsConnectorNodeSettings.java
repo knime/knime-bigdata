@@ -60,6 +60,7 @@ import org.knime.filehandling.core.connections.base.auth.AuthSettings;
 import org.knime.filehandling.core.connections.base.auth.AuthType;
 import org.knime.filehandling.core.connections.base.auth.EmptyAuthProviderSettings;
 import org.knime.filehandling.core.connections.base.auth.UserAuthProviderSettings;
+import org.knime.filehandling.core.connections.meta.base.BaseFSConnectionConfig.BrowserRelativizationBehavior;
 
 /**
  * Settings for HDFS Connector node.
@@ -67,6 +68,8 @@ import org.knime.filehandling.core.connections.base.auth.UserAuthProviderSetting
  * @author Sascha Wolke, KNIME GmbH
  */
 class HdfsConnectorNodeSettings {
+
+    private static final String KEY_BROWSER_PATH_RELATIVE = "browserPathRelativize";
 
     private static final HdfsProtocol DEFAULT_PROTOCOL = HdfsProtocol.HDFS;
 
@@ -87,6 +90,8 @@ class HdfsConnectorNodeSettings {
     private final SettingsModelString m_workingDirectory =
         new SettingsModelString("workingDirectory", DEFAULT_WORKING_DIR);
 
+    private final SettingsModelBoolean m_browserPathRelative;
+
     /**
      * Default constructor.
      */
@@ -94,10 +99,12 @@ class HdfsConnectorNodeSettings {
         m_customPort.setEnabled(m_useCustomPort.getBooleanValue());
 
         m_auth = new AuthSettings.Builder() //
-                .add(new UserAuthProviderSettings(HdfsAuth.SIMPLE)) //
-                .add(new EmptyAuthProviderSettings(HdfsAuth.KERBEROS)) //
-                .defaultType(HdfsAuth.SIMPLE) //
-                .build();
+            .add(new UserAuthProviderSettings(HdfsAuth.SIMPLE)) //
+            .add(new EmptyAuthProviderSettings(HdfsAuth.KERBEROS)) //
+            .defaultType(HdfsAuth.SIMPLE) //
+            .build();
+
+        m_browserPathRelative = new SettingsModelBoolean(KEY_BROWSER_PATH_RELATIVE, false);
     }
 
     /**
@@ -150,6 +157,7 @@ class HdfsConnectorNodeSettings {
         m_customPort.saveSettingsTo(settings);
         m_auth.saveSettingsForModel(settings.addNodeSettings(AuthSettings.KEY_AUTH));
         m_workingDirectory.saveSettingsTo(settings);
+        m_browserPathRelative.saveSettingsTo(settings);
     }
 
     /**
@@ -163,6 +171,12 @@ class HdfsConnectorNodeSettings {
         m_customPort.setEnabled(m_useCustomPort.getBooleanValue());
         m_auth.loadSettingsForModel(settings.getNodeSettings(AuthSettings.KEY_AUTH));
         m_workingDirectory.loadSettingsFrom(settings);
+
+        if (settings.containsKey(KEY_BROWSER_PATH_RELATIVE)) {
+            m_browserPathRelative.loadSettingsFrom(settings);
+        } else {
+            m_browserPathRelative.setBooleanValue(false);
+        }
     }
 
     /**
@@ -175,6 +189,10 @@ class HdfsConnectorNodeSettings {
         m_customPort.validateSettings(settings);
         m_auth.validateSettings(settings.getNodeSettings(AuthSettings.KEY_AUTH));
         m_workingDirectory.validateSettings(settings);
+
+        if (settings.containsKey(KEY_BROWSER_PATH_RELATIVE)) {
+            m_browserPathRelative.validateSettings(settings);
+        }
     }
 
     /**
@@ -308,8 +326,26 @@ class HdfsConnectorNodeSettings {
      * @return the user
      */
     public String getUser() {
-        return m_auth.<UserAuthProviderSettings>getSettingsForAuthType(HdfsAuth.SIMPLE) //
-                .getUser();
+        return m_auth.<UserAuthProviderSettings> getSettingsForAuthType(HdfsAuth.SIMPLE) //
+            .getUser();
+    }
+
+    /**
+     * @return the browserPathRelative model
+     */
+    public SettingsModelBoolean getBrowserPathRelativeModel() {
+        return m_browserPathRelative;
+    }
+
+    /**
+     * @return the browser relativization behavior
+     */
+    public BrowserRelativizationBehavior getBrowserRelativizationBehavior() {
+        if (m_browserPathRelative.getBooleanValue()) {
+            return BrowserRelativizationBehavior.RELATIVE;
+        } else {
+            return BrowserRelativizationBehavior.ABSOLUTE;
+        }
     }
 
     /**
@@ -320,7 +356,8 @@ class HdfsConnectorNodeSettings {
     public HdfsFSConnectionConfig toFSConnectionConfig() {
         final HdfsFSConnectionConfig.Builder builder = HdfsFSConnectionConfig.builder() //
             .withEndpoint(getProtocol().getHadoopScheme(), getHost(), getPort()) //
-            .withWorkingDirectory(getWorkingDirectory());
+            .withWorkingDirectory(getWorkingDirectory()) //
+            .withRelativizationBehavior(getBrowserRelativizationBehavior());
 
         if (useKerberos()) {
             builder.withKerberosAuthentication();

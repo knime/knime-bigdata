@@ -71,6 +71,7 @@ import org.knime.filehandling.core.connections.FSFiles;
 import org.knime.filehandling.core.connections.FSLocationSpec;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.connections.meta.FSType;
+import org.knime.filehandling.core.connections.meta.base.BaseFSConnectionConfig.BrowserRelativizationBehavior;
 import org.knime.filehandling.core.data.location.variable.FSLocationVariableType;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
@@ -167,7 +168,7 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
         switch (sparkScheme) {
             case SPARK_LOCAL:
                 final String workingDir = Platform.getLocation().toString();
-                return DefaultFSConnectionFactory.createLocalFSConnection(workingDir);
+                return DefaultFSConnectionFactory.createLocalFSConnection(workingDir, BrowserRelativizationBehavior.ABSOLUTE);
             case SPARK_JOBSERVER:
             case SPARK_LIVY:
                 return TestingHdfsConnectionFactory.createConnection(flowVars);

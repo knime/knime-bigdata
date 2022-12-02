@@ -72,6 +72,7 @@ public class DbfsFSConnection extends BaseFSConnection {
      * @throws IOException
      */
     public DbfsFSConnection(final DbfsFSConnectionConfig config) throws IOException {
+        super(config);
         m_filesystem = new DbfsFileSystem(CACHE_TTL, config);
     }
 

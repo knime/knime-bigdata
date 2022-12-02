@@ -58,6 +58,7 @@ import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
@@ -65,6 +66,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.filehandling.core.connections.base.auth.AuthSettings;
 import org.knime.filehandling.core.connections.base.auth.StandardAuthTypes;
 import org.knime.filehandling.core.connections.base.auth.UserPasswordAuthProviderSettings;
+import org.knime.filehandling.core.connections.meta.base.BaseFSConnectionConfig.BrowserRelativizationBehavior;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
@@ -73,6 +75,8 @@ import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
  * @author Sascha Wolke, KNIME GmbH
  */
 class KnoxHdfsConnectorNodeSettings {
+
+    private static final String KEY_BROWSER_PATH_RELATIVE = "browserPathRelativize";
 
     private static final String DEFAULT_URL = "https://server:8443/gateway/default";
 
@@ -95,13 +99,17 @@ class KnoxHdfsConnectorNodeSettings {
     private final SettingsModelIntegerBounded m_receiveTimeout =
         new SettingsModelIntegerBounded("receiveTimeout", DEFAULT_TIMEOUT, 0, Integer.MAX_VALUE);
 
+    private final SettingsModelBoolean m_browserPathRelative;
+
     /**
      * Default constructor.
      */
     public KnoxHdfsConnectorNodeSettings() {
         m_authSettings = new AuthSettings.Builder() //
-                .add(new UserPasswordAuthProviderSettings(StandardAuthTypes.USER_PASSWORD, true)) //
-                .build();
+            .add(new UserPasswordAuthProviderSettings(StandardAuthTypes.USER_PASSWORD, true)) //
+            .build();
+
+        m_browserPathRelative = new SettingsModelBoolean(KEY_BROWSER_PATH_RELATIVE, false);
     }
 
     /**
@@ -150,6 +158,7 @@ class KnoxHdfsConnectorNodeSettings {
         m_workingDirectory.saveSettingsTo(settings);
         m_connectionTimeout.saveSettingsTo(settings);
         m_receiveTimeout.saveSettingsTo(settings);
+        m_browserPathRelative.saveSettingsTo(settings);
     }
 
     /**
@@ -173,6 +182,12 @@ class KnoxHdfsConnectorNodeSettings {
         m_workingDirectory.loadSettingsFrom(settings);
         m_connectionTimeout.loadSettingsFrom(settings);
         m_receiveTimeout.loadSettingsFrom(settings);
+
+        if (settings.containsKey(KEY_BROWSER_PATH_RELATIVE)) {
+            m_browserPathRelative.loadSettingsFrom(settings);
+        } else {
+            m_browserPathRelative.setBooleanValue(false);
+        }
     }
 
     /**
@@ -200,6 +215,10 @@ class KnoxHdfsConnectorNodeSettings {
         m_authSettings.validateSettings(settings.getNodeSettings(AuthSettings.KEY_AUTH));
         m_connectionTimeout.validateSettings(settings);
         m_receiveTimeout.validateSettings(settings);
+
+        if (settings.containsKey(KEY_BROWSER_PATH_RELATIVE)) {
+            m_browserPathRelative.validateSettings(settings);
+        }
     }
 
     /**
@@ -329,6 +348,24 @@ class KnoxHdfsConnectorNodeSettings {
     }
 
     /**
+     * @return the browserPathRelative model
+     */
+    public SettingsModelBoolean getBrowserPathRelativeModel() {
+        return m_browserPathRelative;
+    }
+
+    /**
+     * @return the browser relativization behavior
+     */
+    public BrowserRelativizationBehavior getBrowserRelativizationBehavior() {
+        if (m_browserPathRelative.getBooleanValue()) {
+            return BrowserRelativizationBehavior.RELATIVE;
+        } else {
+            return BrowserRelativizationBehavior.ABSOLUTE;
+        }
+    }
+
+    /**
      * Convert this settings to a {@link KnoxHdfsFSConnectionConfig} instance.
      *
      * @param credentialsProvider provider of credential variables
@@ -340,6 +377,8 @@ class KnoxHdfsConnectorNodeSettings {
             .withWorkingDirectory(getWorkingDirectory()) //
             .withUserAndPassword(getUser(credentialsProvider), getPassword(credentialsProvider)) //
             .withConnectionTimeout(getConnectionTimeout()) //
-            .withReceiveTimeout(getReceiveTimeout()).build();
+            .withReceiveTimeout(getReceiveTimeout()) //
+            .withRelativizationBehavior(getBrowserRelativizationBehavior()) //
+            .build();
     }
 }

@@ -66,6 +66,7 @@ public class KnoxHdfsFSConnection extends BaseFSConnection {
      * @param config Connection configuration to use.
      */
     public KnoxHdfsFSConnection(final KnoxHdfsFSConnectionConfig config) {
+        super(config);
         m_filesystem = new KnoxHdfsFileSystem(CACHE_TTL_MILLIS, config);
     }
 

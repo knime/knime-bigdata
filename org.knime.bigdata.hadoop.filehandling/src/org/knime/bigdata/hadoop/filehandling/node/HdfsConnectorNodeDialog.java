@@ -84,6 +84,7 @@ import org.knime.filehandling.core.connections.base.auth.AuthSettings;
 import org.knime.filehandling.core.connections.base.auth.EmptyAuthProviderPanel;
 import org.knime.filehandling.core.connections.base.auth.UserAuthProviderPanel;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
+import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryRelativizationPanel;
 
 /**
  * HDFS Connection node dialog.
@@ -181,6 +182,7 @@ class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionListener {
         panel.add(createConnectionSettingsPanel());
         panel.add(createAuthenticationSettingsPanel());
         panel.add(createFileSystemSettingsPanel());
+        panel.add(new WorkingDirectoryRelativizationPanel(m_settings.getBrowserPathRelativeModel()));
 
         return panel;
     }
@@ -329,6 +331,7 @@ class HdfsConnectorNodeDialog extends NodeDialogPane implements ActionListener {
 
     private FSConnection createFSConnection() throws IOException {
         HdfsConnectorNodeSettings clonedSettings = new HdfsConnectorNodeSettings(m_settings);
+        clonedSettings.getBrowserPathRelativeModel().setBooleanValue(false);
         return new HdfsFSConnection(clonedSettings.toFSConnectionConfig());
     }
 

@@ -82,8 +82,8 @@ public final class HdfsFSConnectionConfig extends BaseFSConnectionConfig {
     /**
      * Private constructor, use {@link #builder()} instead.
      */
-    private HdfsFSConnectionConfig(final String workingDirectory) {
-        super(workingDirectory, true);
+    private HdfsFSConnectionConfig(final String workingDirectory, final BrowserRelativizationBehavior relativizationBehavior) {
+        super(workingDirectory, true, relativizationBehavior);
     }
 
     String getHadoopScheme() {
@@ -147,6 +147,8 @@ public final class HdfsFSConnectionConfig extends BaseFSConnectionConfig {
 
         private String m_username;
 
+        private BrowserRelativizationBehavior m_relativizationBehavior = BrowserRelativizationBehavior.ABSOLUTE;
+
         Builder() {
         }
 
@@ -197,6 +199,15 @@ public final class HdfsFSConnectionConfig extends BaseFSConnectionConfig {
         }
 
         /**
+         * @param relativizationBehavior The browser relativization behavior.
+         * @return current builder instance.
+         */
+        public Builder withRelativizationBehavior(final BrowserRelativizationBehavior relativizationBehavior) {
+            m_relativizationBehavior = relativizationBehavior;
+            return this;
+        }
+
+        /**
          * Build the configuration.
          *
          * @return configuration instance
@@ -207,7 +218,7 @@ public final class HdfsFSConnectionConfig extends BaseFSConnectionConfig {
             CheckUtils.checkArgument(m_port > 0, "Port must be a postive number");
             CheckUtils.checkArgument(StringUtils.isNotBlank(m_workingDirectory), "Working directory must not be blank");
 
-            final HdfsFSConnectionConfig config = new HdfsFSConnectionConfig(m_workingDirectory);
+            final HdfsFSConnectionConfig config = new HdfsFSConnectionConfig(m_workingDirectory, m_relativizationBehavior);
             config.m_hadoopScheme = m_hadoopScheme;
             config.m_host = m_host;
             config.m_port = m_port;
