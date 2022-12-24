@@ -90,7 +90,8 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
     public DbfsConnectorNodeDialog() {
         m_settings = new DbfsConnectorNodeSettings();
 
-        m_authPanel = new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this);
+        m_authPanel =
+            new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this::getCredentialsProvider);
         m_workingDirChooser = new WorkingDirectoryChooser("dbfs.workingDir", this::createFSConnection);
 
         addTab("Settings", createSettingsTab());
