@@ -54,7 +54,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.swing.Box;
@@ -66,17 +65,15 @@ import javax.swing.JRadioButton;
 
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentFlowVariableNameSelection2;
 import org.knime.core.node.defaultnodesettings.DialogComponentPasswordField;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.workflow.FlowVariable;
-import org.knime.core.node.workflow.VariableType.CredentialsType;
+import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.filehandling.core.connections.base.auth.DialogComponentCredentialSelection;
 
 /**
  * Authentication settings dialog panel.
@@ -100,29 +97,29 @@ public class DbfsAuthenticationDialog extends JPanel {
 
     private DialogComponentBoolean m_userPassUseCredentials; // NOSONAR not using serialization
 
-    private DialogComponentFlowVariableNameSelection2 m_userPassCredentialsFlowVarChooser; // NOSONAR not using serialization
+    private DialogComponentCredentialSelection m_userPassCredentialsSelector; // NOSONAR not using serialization
     private DialogComponentString m_username; // NOSONAR not using serialization
     private DialogComponentPasswordField m_password; // NOSONAR not using serialization
 
     private DialogComponentBoolean m_tokenUseCredentials; // NOSONAR not using serialization
-    private DialogComponentFlowVariableNameSelection2 m_tokenCredentialsFlowVarChooser; // NOSONAR not using serialization
+
+    private DialogComponentCredentialSelection m_tokenCredentialsSelector; // NOSONAR not using serialization
     private DialogComponentPasswordField m_token; // NOSONAR not using serialization
 
-    private final Supplier<Map<String, FlowVariable>> m_flowVariablesSupplier; // NOSONAR not using serialization
+    private final Supplier<CredentialsProvider> m_credentialsSupplier; // NOSONAR not using serialization
 
     /**
      * Constructor.
      *
-     * @param settings
-     *            SSH authentication settings.
-     * @param parentDialog
-     *            The parent dialog pane (required by flow variable dialog component
-     *            to list all flow variables).
+     * @param settings SSH authentication settings.
+     * @param credentialsSupplier The supplier of {@link CredentialsProvider} (required by flow variable dialog
+     *            component to list all credentials flow variables).
      */
-    public DbfsAuthenticationDialog(final DbfsAuthenticationNodeSettings settings, final NodeDialogPane parentDialog) {
+    public DbfsAuthenticationDialog(final DbfsAuthenticationNodeSettings settings,
+        final Supplier<CredentialsProvider> credentialsSupplier) {
         super(new BorderLayout());
         m_settings = settings;
-        m_flowVariablesSupplier = () -> parentDialog.getAvailableFlowVariables(CredentialsType.INSTANCE);
+        m_credentialsSupplier = credentialsSupplier;
 
         initFields();
         wireEvents();
@@ -151,17 +148,17 @@ public class DbfsAuthenticationDialog extends JPanel {
     private void initFields() {
         m_userPassUseCredentials =
             new DialogComponentBoolean(m_settings.getUserPassUseCredentialsModel(), "Use credentials:");
-        m_userPassCredentialsFlowVarChooser =
-            new DialogComponentFlowVariableNameSelection2(m_settings.getUserPassCredentialsNameModel(),
-                "",
-                m_flowVariablesSupplier);
+        m_userPassCredentialsSelector = new DialogComponentCredentialSelection(//
+            m_settings.getUserPassCredentialsNameModel(), //
+            "", m_credentialsSupplier);
         m_username = new DialogComponentString(m_settings.getUserModel(), "", false, 45);
         m_password = new DialogComponentPasswordField(m_settings.getPasswordModel(), "", 45);
 
         m_tokenUseCredentials =
             new DialogComponentBoolean(m_settings.getTokenUseCredentialsModel(), "Use credentials:");
-        m_tokenCredentialsFlowVarChooser = new DialogComponentFlowVariableNameSelection2(
-            m_settings.getTokenCredentialsNameModel(), "", m_flowVariablesSupplier);
+        m_tokenCredentialsSelector = new DialogComponentCredentialSelection(//
+            m_settings.getTokenCredentialsNameModel(), //
+            "", m_credentialsSupplier);
         m_token = new DialogComponentPasswordField(m_settings.getTokenModel(), "", 45);
 
         m_typeUserPwd = createAuthTypeButton(AuthType.USER_PWD, m_authTypeGroup);
@@ -236,7 +233,7 @@ public class DbfsAuthenticationDialog extends JPanel {
 
         gbc.gridx++;
         gbc.insets = new Insets(0, 0, 0, 5);
-        panel.add(m_userPassCredentialsFlowVarChooser.getComponentPanel(), gbc);
+        panel.add(m_userPassCredentialsSelector.getComponentPanel(), gbc);
 
         gbc.gridx++;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -284,7 +281,7 @@ public class DbfsAuthenticationDialog extends JPanel {
 
         gbc.gridx++;
         gbc.insets = new Insets(0, 0, 0, 5);
-        panel.add(m_tokenCredentialsFlowVarChooser.getComponentPanel(), gbc);
+        panel.add(m_tokenCredentialsSelector.getComponentPanel(), gbc);
 
         gbc.gridx++;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -302,7 +299,7 @@ public class DbfsAuthenticationDialog extends JPanel {
 
         m_tokenLabel.setEnabled(authType == AuthType.TOKEN && !m_settings.useTokenCredentials());
 
-        if (m_flowVariablesSupplier.get().isEmpty()) {
+        if (m_credentialsSupplier.get().listNames().isEmpty()) {
             m_settings.getUserPassUseCredentialsModel().setBooleanValue(false);
             m_userPassUseCredentials.setEnabled(false);
 
@@ -339,8 +336,8 @@ public class DbfsAuthenticationDialog extends JPanel {
      */
     public void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
-        m_userPassCredentialsFlowVarChooser.loadSettingsFrom(settings, specs);
-        m_tokenCredentialsFlowVarChooser.loadSettingsFrom(settings, specs);
+        m_userPassCredentialsSelector.loadSettingsFrom(settings, specs);
+        m_tokenCredentialsSelector.loadSettingsFrom(settings, specs);
 
         try {
             m_settings.loadSettingsForDialog(settings);
@@ -362,7 +359,7 @@ public class DbfsAuthenticationDialog extends JPanel {
      */
     public void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.saveSettingsForDialog(settings);
-        m_userPassCredentialsFlowVarChooser.saveSettingsTo(settings);
-        m_tokenCredentialsFlowVarChooser.saveSettingsTo(settings);
+        m_userPassCredentialsSelector.saveSettingsTo(settings);
+        m_tokenCredentialsSelector.saveSettingsTo(settings);
     }
 }

@@ -250,7 +250,8 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
      * Constructor.
      */
     DatabricksSparkContextCreatorNodeDialog2() {
-        m_authPanel = new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this);
+        m_authPanel =
+            new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this::getCredentialsProvider);
 
         addTab("Settings", createSettingsTab());
         addTab("Advanced", createAdvancedTab());

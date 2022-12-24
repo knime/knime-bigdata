@@ -112,7 +112,7 @@ class KnoxHdfsConnectorNodeDialog extends NodeDialogPane {
         final AuthSettings authSettings = m_settings.getAuthSettings();
         m_authPanel = new AuthPanel(authSettings, //
                 Arrays.asList( //
-                        new UserPasswordAuthProviderPanel(authSettings.getSettingsForAuthType(StandardAuthTypes.USER_PASSWORD), this)));
+                        new UserPasswordAuthProviderPanel(authSettings.getSettingsForAuthType(StandardAuthTypes.USER_PASSWORD), this::getCredentialsProvider)));
 
         addTab("Settings", createSettingsTab());
         addTab("Advanced", createAdvancedTab());
