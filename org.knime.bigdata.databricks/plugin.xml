@@ -43,7 +43,7 @@
     		urlTemplateValidator="org.knime.bigdata.database.databricks.DatabricksDBUrlTemplateValidator"
     		defaultAttributeDefinitionSupplier="org.knime.bigdata.database.databricks.DatabricksDefaultAttributeSupplier">
     	<UrlTemplateExamples>
-	        <UrlTemplateExample title="Databricks/Simba Driver" template="jdbc:spark://&lt;host&gt;:&lt;port&gt;/default" />
+	        <UrlTemplateExample title="Databricks/Simba Driver" template="jdbc:databricks://&lt;host&gt;:&lt;port&gt;/default" />
 	        <UrlTemplateExample title="Apache Hive Driver" template="jdbc:hive2://&lt;host&gt;:&lt;port&gt;/default" />
     	</UrlTemplateExamples>
 	</DBType>
