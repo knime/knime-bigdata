@@ -131,8 +131,10 @@ public final class DatabricksDBUrlTemplateValidator extends AbstractUrlTemplateV
     @Override
     public Optional<String> validate(final CharSequence urlTemplate) {
         final String template = urlTemplate.toString().toLowerCase();
-        if (!template.startsWith("jdbc:spark:") && !template.startsWith("jdbc:hive2:")) {
-            return Optional.of("Template must start with 'jdbc:spark:' or 'jdbc:hive2:'.");
+        if (!template.startsWith("jdbc:databricks:") && !template.startsWith("jdbc:spark:")
+            && !template.startsWith("jdbc:hive2:")) {
+
+            return Optional.of("Template must start with 'jdbc:databricks:', 'jdbc:spark:' or 'jdbc:hive2:'.");
         }
 
         try {

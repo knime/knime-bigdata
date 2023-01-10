@@ -123,6 +123,6 @@ public class DatabricksDBDriverLocator extends HiveDriverLocator {
      * @return {@code true} if JDBC URL starts with jdbc:spark
      */
     public static boolean isSimbaConnection(final String jdbcUrl) {
-        return jdbcUrl.toLowerCase().startsWith("jdbc:spark:");
+        return jdbcUrl.toLowerCase().startsWith("jdbc:databricks:") || jdbcUrl.toLowerCase().startsWith("jdbc:spark:");
     }
 }
