@@ -166,6 +166,36 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
+                    <!-- Update bin.includes list of build.properties -->
+                    <execution>
+                        <id>generate-build-properties-bin-includes</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target name="generate-build-properties-bin-includes">
+                                <fileset dir=".." id="files.libs">
+                                    <include name="*.jar"/>
+                                    <include name="*.zip"/>
+                                </fileset>
+                                <pathconvert pathsep="," property="files.libs" refid="files.libs">
+                                    <chainedmapper>
+                                        <flattenmapper/>
+                                        <globmapper from="*" to="libs/*"/>
+                                    </chainedmapper>
+                                </pathconvert>
+                                <copy file="../../build.properties" tofile="build-tmp.properties" overwrite="true"/>
+                                <copy file="build-tmp.properties" tofile="../../build.properties" overwrite="true">
+                                    <filterchain>
+                                        <replaceregex pattern="^bin.includes.*" byline="true"
+                                            replace="bin.includes = META-INF/,knime.jar,plugin.xml,LICENSE.TXT,CHANGELOG.md,${files.libs}" />
+                                    </filterchain>
+                                </copy>
+                                <delete file="build-tmp.properties"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
