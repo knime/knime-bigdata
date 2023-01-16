@@ -40,6 +40,7 @@ try {
                 workflowTests.runTests(
                     testflowsDir: testPrefix,
                     testflowsRegex: testRegex,
+                    extraNodeLabel: 'large',
                     dependencies: [
                         repositories: [
                             'knime-bigdata-externals',
