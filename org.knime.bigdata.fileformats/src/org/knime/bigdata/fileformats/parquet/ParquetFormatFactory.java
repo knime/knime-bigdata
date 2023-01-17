@@ -49,7 +49,6 @@ import static org.knime.filehandling.core.defaultnodesettings.filechooser.writer
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.apache.parquet.hadoop.ParquetFileWriter.Mode;
 import org.apache.parquet.hadoop.ParquetWriter;
@@ -90,6 +89,13 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     private static final String NAME = "Parquet";
 
     private static final int TO_BYTE = 1024 * 1024;
+
+    private static final String[] COMPRESSION_LIST = new String[] {
+        CompressionCodecName.UNCOMPRESSED.name(),
+        CompressionCodecName.SNAPPY.name(),
+        CompressionCodecName.GZIP.name(),
+        CompressionCodecName.ZSTD.name()
+    };
 
     private final boolean m_useLogicalTypes;
 
@@ -138,8 +144,7 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
     @Override
     public String[] getCompressionList() {
-        return Stream.of(CompressionCodecName.values()).filter(i -> i != CompressionCodecName.LZO).map(Enum::name)
-            .toArray(String[]::new);
+        return COMPRESSION_LIST;
     }
 
     @Override
