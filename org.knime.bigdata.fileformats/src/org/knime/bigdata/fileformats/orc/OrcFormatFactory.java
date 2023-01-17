@@ -82,6 +82,14 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
 
     private static final String NAME = "ORC";
 
+    private static final String[] COMPRESSION_LIST = new String[]{ //
+        CompressionKind.NONE.name(), //
+        CompressionKind.ZLIB.name(), //
+        CompressionKind.SNAPPY.name(), //
+        CompressionKind.LZO.name(), //
+        CompressionKind.LZ4.name() //
+    };
+
     /**
      * {@inheritDoc}
      */
@@ -110,7 +118,7 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
 
     @Override
     public String[] getCompressionList() {
-        return Stream.of(CompressionKind.values()).map(Enum::name).toArray(String[]::new);
+        return COMPRESSION_LIST;
     }
 
     @Override
