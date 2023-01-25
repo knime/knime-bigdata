@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.knime.features.bigdata.commons.windows</name>
+	<name>org.knime.features.bigdata.commons</name>
 	<comment></comment>
 	<projects>
 	</projects>
