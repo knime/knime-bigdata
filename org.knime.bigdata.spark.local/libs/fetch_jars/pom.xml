@@ -6,20 +6,20 @@
     <parent>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-parent_2.12</artifactId>
-        <version>3.2.1</version>
+        <version>3.3.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knime.bigdata</groupId>
     <artifactId>spark-local-fetch-jars</artifactId>
-    <version>3.2.1</version>
+    <version>3.3.1</version>
     <packaging>pom</packaging>
 
     <name>Jar fetcher for local Spark</name>
     <description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
     <properties>
-        <spark.version>3.2.1</spark.version>
+        <spark.version>3.3.1</spark.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
     </properties>
@@ -133,7 +133,7 @@
                         <configuration>
                             <includeScope>runtime</includeScope>
                             <outputDirectory>../</outputDirectory>
-                            <excludeGroupIds>org.apache.hadoop,org.scala-lang,org.scala-lang.modules,log4j</excludeGroupIds>
+                            <excludeGroupIds>org.apache.hadoop,org.scala-lang,org.scala-lang.modules,log4j,org.apache.logging.log4j</excludeGroupIds>
                         </configuration>
                         <phase>package</phase>
                         <goals>

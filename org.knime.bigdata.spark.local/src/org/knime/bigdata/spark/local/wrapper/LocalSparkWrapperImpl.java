@@ -41,10 +41,10 @@ import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
-import org.knime.bigdata.spark3_2.api.NamedObjects;
-import org.knime.bigdata.spark3_2.api.SimpleSparkJob;
-import org.knime.bigdata.spark3_2.api.SparkJob;
-import org.knime.bigdata.spark3_2.api.SparkJobWithFiles;
+import org.knime.bigdata.spark3_3.api.NamedObjects;
+import org.knime.bigdata.spark3_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark3_3.api.SparkJob;
+import org.knime.bigdata.spark3_3.api.SparkJobWithFiles;
 
 import scala.Option;
 
@@ -438,13 +438,6 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			throw new IOException("Could not create Hive warehouse directory at " + warehouseDir.getAbsolutePath());
 		}
 
-		final File hiveOperationLogsDir = new File(hiveParentDir, "hive_operation_logs");
-		if (hiveOperationLogsDir.exists()) {
-			ensureWritableDirectory(hiveOperationLogsDir, "Hiveserver operations log");
-		} else if (!hiveOperationLogsDir.mkdir()) {
-			throw new IOException("Could not create directory for Hiveserver operations log at " + hiveOperationLogsDir.getAbsolutePath());
-		}
-		
 		final File hiveScratchDir = new File(m_sparkTmpDir, "hive_scratch");
 		final File hiveLocalScratchDir = new File(m_sparkTmpDir, "hive_local_scratch");
 		final File hiveDownloadResDir = new File(m_sparkTmpDir, "hive_download_res");
@@ -457,8 +450,10 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			LocalFileSystemHiveTempWrapper.class.getName());
 		sparkConf.set("hive.exec.scratchdir", getDummyPermissionFileSystemUri(hiveScratchDir));
 		sparkConf.set("spark.sql.warehouse.dir", getDummyPermissionFileSystemUri(warehouseDir));
-		sparkConf.set("hive.server2.logging.operation.log.location",
-			getDummyPermissionFileSystemUri(hiveOperationLogsDir));
+
+		// the operation log implementation of Spark 3.3.1 requires a log4j2 core logger,
+		// and does not work with log4j2-to-slf4j -> disable the operation log
+		sparkConf.set("hive.server2.logging.operation.enabled", "false");
 
 		// directories that must be in the local FS an can not be wrapped
 		sparkConf.set("hive.exec.local.scratchdir", hiveLocalScratchDir.getCanonicalPath());

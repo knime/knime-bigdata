@@ -74,7 +74,10 @@ public class LocalSparkWrapperFactory {
 
 	    // scala-xml
 	    bundles.add(FrameworkUtil.getBundle(scala.xml.Document.class));
-		
+
+	    // log4j2
+	    bundles.add(FrameworkUtil.getBundle(org.apache.logging.log4j.core.Logger.class));
+
 		// knosp.node (KNIME-on-Spark, aka KNIME Workflow Executor for Apache Spark)
 	    final Bundle knospNodeBundle = Platform.getBundle(KNOSP_NODE_PLUGIN);
 	    if (knospNodeBundle != null) {

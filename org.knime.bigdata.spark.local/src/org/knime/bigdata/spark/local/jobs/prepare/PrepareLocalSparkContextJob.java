@@ -25,10 +25,10 @@ import org.apache.spark.sql.types.DataType;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark3_2.api.NamedObjects;
-import org.knime.bigdata.spark3_2.api.SimpleSparkJob;
-import org.knime.bigdata.spark3_2.api.TypeConverters;
-import org.knime.bigdata.spark3_2.base.Spark_3_2_CustomUDFProvider;
+import org.knime.bigdata.spark3_3.api.NamedObjects;
+import org.knime.bigdata.spark3_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark3_3.api.TypeConverters;
+import org.knime.bigdata.spark3_3.base.Spark_3_3_CustomUDFProvider;
 
 /**
  * Spark job to prepare a newly-created local Spark context.
@@ -48,6 +48,6 @@ public class PrepareLocalSparkContextJob implements SimpleSparkJob<PrepareContex
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         TypeConverters.ensureConvertersInitialized(input.<DataType>getTypeConverters());
-        Spark_3_2_CustomUDFProvider.registerCustomUDFs(sparkContext);
+        Spark_3_3_CustomUDFProvider.registerCustomUDFs(sparkContext);
     }
 }

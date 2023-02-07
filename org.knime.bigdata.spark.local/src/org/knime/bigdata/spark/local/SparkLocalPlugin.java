@@ -24,7 +24,6 @@ import java.io.File;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
@@ -73,7 +72,6 @@ public class SparkLocalPlugin extends AbstractUIPlugin {
 	}
 
 	private static void configureLoggerForLocalSparkLog(final Appender sparkLogAppender, final Logger logger) {
-		logger.setLevel(Level.INFO);
 		logger.setAdditivity(false);
 		logger.removeAllAppenders();
 		logger.addAppender(sparkLogAppender);
