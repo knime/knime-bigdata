@@ -130,7 +130,7 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
 
         if (!validPMML) {
             setWarningMessage(
-                "The current settings use missing value handling methods that cannot be represented in PMML 4.2");
+                "The current settings use missing value handling methods that cannot be represented in PMML 4.2.");
         }
 
         final SparkDataPortObject sparkOutputPort;
