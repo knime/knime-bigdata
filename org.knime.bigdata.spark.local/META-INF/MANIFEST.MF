@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.knime.bigdata.spark.local;singleton:=true
 Bundle-Version: 5.0.0.qualifier
 Bundle-ClassPath: knime.jar,
  libs/spark-hive-thriftserver_2.12-3.3.1.jar
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Bundle-Activator: org.knime.bigdata.spark.local.SparkLocalPlugin
 Export-Package: org.knime.bigdata.spark.local.db,
  org.knime.bigdata.spark.local.testing

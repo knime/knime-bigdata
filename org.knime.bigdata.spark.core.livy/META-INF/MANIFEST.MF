@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.knime.bigdata.spark.core.livy;singleton:=true
 Bundle-Version: 5.0.0.qualifier
 Bundle-ClassPath: knime.jar,
   conf/
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Bundle-Activator: org.knime.bigdata.spark.core.livy.LivyPlugin
 Export-Package: org.knime.bigdata.spark.core.livy.jobapi
 Require-Bundle: org.knime.bigdata.commons;bundle-version="3.6.0",

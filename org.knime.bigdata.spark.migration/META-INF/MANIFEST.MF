@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Spark Migration Rules
 Bundle-SymbolicName: org.knime.bigdata.spark.migration;singleton:=true
 Bundle-Version: 5.0.0.qualifier
-Bundle-Vendor: KNIME AG
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Require-Bundle: org.knime.core;bundle-version="[5.0.0,6.0.0)",
  org.knime.workflow.migration;bundle-version="[5.0.0,6.0.0)",
  org.knime.bigdata.spark.node;bundle-version="[5.0.0,6.0.0)",
