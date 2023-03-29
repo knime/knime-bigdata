@@ -43,9 +43,9 @@ try {
                     extraNodeLabel: 'large',
                     dependencies: [
                         repositories: [
+                            'knime-aws',
                             'knime-bigdata-externals',
                             'knime-bigdata', 
-                            'knime-cloud',
                             'knime-conda',
                             'knime-database',
                             'knime-database-proprietary',
@@ -111,8 +111,8 @@ try {
                 testflowsDir: fhTestflowsDir,
                 dependencies: [
                     repositories: [
+                        'knime-aws',
                         'knime-bigdata',
-                        'knime-cloud',
                         'knime-database',
                         'knime-datageneration',
                         'knime-jep',
