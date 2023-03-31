@@ -729,6 +729,7 @@ propagated with or for interoperation with KNIME.
    
    <requires>
       <import feature="org.knime.features.python2" version="0.0.0"/>
+      <import feature="org.knime.features.cloud.core.deprecated"/>
    </requires>
 
    <includes
