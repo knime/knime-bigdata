@@ -12,7 +12,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knime.bigdata</groupId>
     <artifactId>spark-local-fetch-jars</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.1</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
     <packaging>pom</packaging>
 
     <name>Jar fetcher for local Spark</name>
@@ -152,7 +152,9 @@
                         <phase>package</phase>
                         <configuration>
                             <target name="download">
-                                <get src="https://archive.apache.org/dist/spark/spark-${spark.version}/pyspark-${spark.version}.tar.gz" dest="target/tmp" />
+                                <get src="https://artifactory.knime.com:443/artifactory/generic-downloads/pyspark/pyspark-${spark.version}.tar.gz" dest="target/tmp" />
+                                <!-- To not hammer the servers of apache, we mirror pyspark to our artifactory, this is the download url where to find the upstream version.-->
+                                <!-- https://archive.apache.org/dist/spark/spark-${spark.version}/pyspark-${spark.version}.tar.gz" -->
                                 <echo message="unpack zips" />
                                 <untar src="target/tmp/pyspark-${spark.version}.tar.gz" dest="../" compression="gzip">
                                     <patternset>
