@@ -22,8 +22,6 @@ package org.knime.bigdata.spark.core.sparkjobserver.request;
 
 import java.nio.file.Path;
 
-import javax.json.JsonObject;
-import javax.json.JsonValue;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -33,6 +31,9 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.core.node.NodeLogger;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  *

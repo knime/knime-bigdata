@@ -20,8 +20,8 @@
  */
 package org.knime.bigdata.spark.core.sparkjobserver.request;
 
-import javax.json.JsonStructure;
-import javax.json.JsonValue.ValueType;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * Value class to hold the result of parsing a jobserver response. Instances of this class should be created using

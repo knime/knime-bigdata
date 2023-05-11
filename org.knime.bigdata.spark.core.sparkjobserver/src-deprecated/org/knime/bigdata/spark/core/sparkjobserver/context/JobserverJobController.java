@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.json.JsonObject;
-
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
@@ -42,6 +40,8 @@ import org.knime.core.node.NodeLogger;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * handles the client side of the job-server in all requests related to jobs

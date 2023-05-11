@@ -28,18 +28,18 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.sparkjobserver.request.ParsedResponse.FailureReason;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.util.JsonUtil;
 import org.knime.core.util.Pair;
+
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * The Spark jobserver reports errors quite inconsistently (different ways of indicating failure cause, in some failure
@@ -207,7 +207,7 @@ public class JobserverResponseParser {
         return null;
     }
 
-    private static final HashMap<String, FailureReason> ERROR_STATUS_TO_REASON = new HashMap<String, FailureReason>();
+    private static final HashMap<String, FailureReason> ERROR_STATUS_TO_REASON = new HashMap<>();
 
     static {
         ERROR_STATUS_TO_REASON.put("CONTEXT INIT ERROR", FailureReason.CONTEXT_INIT_FAILED);
@@ -233,7 +233,7 @@ public class JobserverResponseParser {
 
     private static JsonStructure tryToParseAsJson(final String stringResponse) {
         try {
-            return Json.createReader(new StringReader(stringResponse)).read();
+            return JsonUtil.getProvider().createReader(new StringReader(stringResponse)).read();
         } catch (JsonException e) {
             return null;
         }
@@ -265,7 +265,7 @@ public class JobserverResponseParser {
         // try to reconstruct stack trace from json
         Pattern traceLinePattern = Pattern.compile("^(.+)\\.([^(]+)\\(([^:]+)\\:(\\d+)\\)$");
 
-        List<StackTraceElement> stackElems = new ArrayList<StackTraceElement>();
+        List<StackTraceElement> stackElems = new ArrayList<>();
 
         for (JsonValue stackElem : resultObject.getJsonArray("stack")) {
             Matcher m = traceLinePattern.matcher(((JsonString)stackElem).getString());
