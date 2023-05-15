@@ -68,6 +68,7 @@ import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.cloud.aws.s3.filehandler.S3RemoteFileHandler;
+import org.knime.cloud.aws.sdkv2.util.AWSCredentialHelper;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.cloud.core.util.port.CloudConnectionInformation;
 import org.knime.core.data.DataCell;
@@ -76,10 +77,9 @@ import org.knime.core.data.RowIterator;
 import org.knime.core.data.filestore.FileStoreFactory;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.util.FileUtil;
-import org.knime.core.util.KnimeEncryption;
 import org.knime.datatype.mapping.ExternalDataTableSpec;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 
 /**
  * Abstract class for readers of BigData file formats
@@ -158,14 +158,15 @@ public abstract class AbstractFileFormatReader {
 
                 final String accessID;
                 final String secretKey;
-                if (cloudConInfo.useKeyChain()) {
-                    final DefaultAWSCredentialsProviderChain chain = new DefaultAWSCredentialsProviderChain();
-                    chain.getCredentials().getAWSSecretKey();
-                    accessID = chain.getCredentials().getAWSAccessKeyId();
-                    secretKey = chain.getCredentials().getAWSSecretKey();
+
+                var awsProvider = AWSCredentialHelper.getCredentialProvider(cloudConInfo, "KNIME_S3_Connection");
+                var awsCredentials = awsProvider.resolveCredentials();
+
+                if (awsCredentials instanceof AwsBasicCredentials) {
+                    accessID = awsCredentials.accessKeyId();
+                    secretKey = awsCredentials.secretAccessKey();
                 } else {
-                    accessID = remotefile.getConnectionInformation().getUser();
-                    secretKey = KnimeEncryption.decrypt(remotefile.getConnectionInformation().getPassword());
+                    throw new IOException("This node only supports access key & secret for AWS authentication.");
                 }
 
                 toReturn.set("fs.s3n.awsAccessKeyId", accessID);

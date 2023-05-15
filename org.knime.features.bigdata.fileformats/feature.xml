@@ -729,7 +729,7 @@ propagated with or for interoperation with KNIME.
    </license>
 
    <requires>
-      <import feature="org.knime.features.cloud.core.deprecated"/>
+      <import feature="org.knime.features.cloud.aws"/>
    </requires>
 
    <includes

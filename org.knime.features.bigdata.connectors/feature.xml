@@ -727,12 +727,12 @@ license terms applicable to such Node, including when such Node is
 propagated with or for interoperation with KNIME.
    </license>
    
-   <requires>
-      <import feature="org.knime.features.cloud.core.deprecated"/>
-   </requires>
-
    <includes
          id="org.knime.features.bigdata.commons"
+         version="0.0.0"/>
+         
+   <includes
+         id="org.knime.features.bigdata.fileformats"
          version="0.0.0"/>
 
    <plugin
