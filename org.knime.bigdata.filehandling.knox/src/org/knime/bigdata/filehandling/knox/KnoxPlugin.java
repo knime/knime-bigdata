@@ -48,11 +48,10 @@ package org.knime.bigdata.filehandling.knox;
 import java.io.File;
 import java.net.URL;
 
-import javax.ws.rs.ext.RuntimeDelegate;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.knime.cxf.CXFUtil;
 import org.knime.kerberos.api.KerberosProvider;
 import org.osgi.framework.BundleContext;
 
@@ -91,7 +90,7 @@ public class KnoxPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
-        initializeJaxRSRuntime();
+        CXFUtil.initializeJAXRSRuntime(getClass());
 
         // ensure Kerberos debug logging is properly initialized
         KerberosProvider.ensureInitialized();
@@ -107,22 +106,6 @@ public class KnoxPlugin extends AbstractUIPlugin {
     public void stop(final BundleContext context) throws Exception {
         plugin = null;
         super.stop(context);
-    }
-
-    private void initializeJaxRSRuntime() {
-        // The JAX-RS interface is in a different plug-in than the CXF
-        // implementation. Therefore the interface classes
-        // won't find the implementation via the default ContextFinder
-        // classloader. We set the current classes's
-        // classloader as context classloader and then it will find the service
-        // definition from this plug-in.
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            RuntimeDelegate.getInstance();
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
     }
 
     /**

@@ -52,16 +52,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.filehandling.knox.rest.KnoxAuthenticationException;
 import org.knime.bigdata.filehandling.knox.rest.RemoteException;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
+
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Utlility class to map exceptions thrown by {@link WebHDFSAPI} client to {@link IOException}s.

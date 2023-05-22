@@ -53,11 +53,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam.Op;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * Wrapper class for {@link WebHDFSAPI} that suppresses authentication popups.

@@ -20,8 +20,6 @@
  */
 package org.knime.bigdata.spark.core.sparkjobserver.request;
 
-import javax.ws.rs.core.Response;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
@@ -30,6 +28,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.core.node.NodeLogger;
 
 import jakarta.json.JsonArray;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Query server for existing context so that we can re-use it if there is one.

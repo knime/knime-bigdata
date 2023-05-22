@@ -24,16 +24,16 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.sparkjobserver.context.JobserverConstants;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.core.node.NodeLogger;
+
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Request to create a new Spark context. The return value of {@link #send()} is true if the context was created
@@ -97,7 +97,7 @@ public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
     private String[] getCustomSettings() {
         if (m_config.useCustomSparkSettings() && !m_config.getCustomSparkSettings().isEmpty()) {
 
-            ArrayList<String> elements = new ArrayList<String>();
+            ArrayList<String> elements = new ArrayList<>();
             for (Entry<String, String> entry : m_config.getCustomSparkSettings().entrySet()) {
                 elements.add(entry.getKey());
                 elements.add(entry.getValue());

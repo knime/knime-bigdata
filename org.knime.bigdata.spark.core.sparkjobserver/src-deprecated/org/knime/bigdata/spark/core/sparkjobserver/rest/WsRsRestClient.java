@@ -10,13 +10,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 
 import org.apache.cxf.common.util.Base64Utility;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
@@ -26,6 +19,14 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
+
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 /**
  * creates and handles REST requests
