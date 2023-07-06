@@ -66,6 +66,7 @@ import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.ResponseExceptionMapper;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
+import org.apache.cxf.transport.http.asyncclient.AsyncHTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
@@ -167,6 +168,10 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             config.getInInterceptors().add(new LoggingInInterceptor());
             config.getOutInterceptors().add(new LoggingOutInterceptor());
         }
+
+        // This forces usage of the Apache HTTP client over the JDK built-in HTTP client,
+        // that does not work well with the strange configured Databricks HTTP/2 endpoint, see BD-1242.
+        config.getRequestContext().put(AsyncHTTPConduit.USE_ASYNC, Boolean.TRUE);
 
         return proxyImpl;
     }
