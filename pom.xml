@@ -93,11 +93,6 @@
 			<url>${knime.core.columnar.p2}</url>
 		</repository>
 		<repository>
-			<id>p2-knime-core-arrow</id>
-			<layout>p2</layout>
-			<url>${knime.core.arrow.p2}</url>
-		</repository>
-		<repository>
 			<id>p2-knime-database</id>
 			<layout>p2</layout>
 			<url>${knime.database.p2}</url>
