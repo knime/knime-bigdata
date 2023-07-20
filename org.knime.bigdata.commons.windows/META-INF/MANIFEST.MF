@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Commons (Windows)
 Bundle-SymbolicName: org.knime.bigdata.commons.windows;singleton:=true
-Bundle-Version: 5.1.0.qualifier
+Bundle-Version: 5.2.0.qualifier
 Bundle-ClassPath: knime.jar
 Fragment-Host: org.knime.bigdata.commons;bundle-version="[5.0.0,6.0.0)"
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
