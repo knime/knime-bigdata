@@ -306,21 +306,6 @@ public class HiveSQLDialect extends SQL92DBSQLDialect {
     }
 
     @Override
-    public SQLCommand createDeleteStatement(final DBSchemaObject schemaObject, final String... whereColumns) {
-        throw new UnsupportedOperationException("DELETE is not supported by "+ getName() + ".");
-    }
-
-    @Override
-    public SQLCommand createInsertStatement(final DBSchemaObject schemaObject, final String... columnNames) {
-        throw new UnsupportedOperationException("INSERT is not supported by " + getName() + ".");
-    }
-
-    @Override
-    public SQLCommand createUpdateStatement(final DBSchemaObject schemaObject, final String[] setColumns, final String[] whereColumns) {
-        throw new UnsupportedOperationException("UPDATE is not supported by " + getName() + ".");
-    }
-
-    @Override
     public SQLQuery createLimitQuery(final SQLQuery query, final long count) {
         return new SQLQuery(selectAll().getPart() + "FROM (" + query.getQuery() + "\n) " + getTempTableName()
         + " LIMIT " + count);
