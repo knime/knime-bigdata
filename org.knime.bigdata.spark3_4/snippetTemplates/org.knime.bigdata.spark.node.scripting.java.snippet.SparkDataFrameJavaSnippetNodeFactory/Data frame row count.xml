@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Row count.xml">
+<entry key="Meta category" type="xstring" value="org.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSnippetNodeFactory"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Data frame row count"/>
+<entry key="Description" type="xstring" value="Returns the number of rows of the first data frame as new data frame."/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010import java.util.List;%%00010import java.util.Arrays;%%00010"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00010%%00009// Variant 1: Aggregate the row count via map and reduce%%00010%%00009final long count = dataFrame1.map(new MapFunction&lt;Row, Long&gt;() {%%00010%%00009%%00009public static final long serialVersionUID = 1L;%%00010%%00009%%00009%%00010%%00009%%00009@Override%%00010%%00009%%00009public Long call(Row row) throws Exception {%%00010%%00009%%00009%%00009return 1L;%%00010%%00009%%00009}%%00010%%00009}, Encoders.LONG()).reduce(new ReduceFunction&lt;Long&gt;() {%%00010%%00009%%00009public static final long serialVersionUID = 1L;%%00010%%00010%%00009%%00009public Long call(final Long a, final Long b) throws Exception {%%00010%%00009%%00009%%00009return a + b;%%00010%%00009%%00009}%%00010%%00009});%%00010%%00010%%00009// Variant 2: Use Spark count version%%00010%%00009// final long count = dataFrame1.count();%%00010%%00010%%00009// Variant 1+2: Wrap result into a new data frame%%00010%%00009final StructField fields[] = new StructField[] {%%00010%%00009%%00009DataTypes.createStructField(&quot;count&quot;, DataTypes.LongType, false)%%00010%%00009};%%00010%%00009final StructType schema = DataTypes.createStructType(fields);%%00010%%00009final List&lt;Row&gt; rows = Arrays.asList(RowFactory.create(count));%%00010%%00009return spark.createDataFrame(rows, schema);%%00010%%00010%%00009// Variant 3: Use Sparks agg method%%00010%%00009// final HashMap&lt;String,String&gt; expr = new HashMap&lt;&gt;();%%00010%%00009// expr.put(&quot;*&quot;, &quot;count&quot;);%%00010%%00009// return dataFrame1.agg(expr);%%00010"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<entry key="version" type="xstring" value="version 1.x"/>
+<entry key="templateUUID" type="xstring" value="f54fb353-2b49-4eea-8be2-cda37990e5f1"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Read text file from HDFS.xml">
+<entry key="Meta category" type="xstring" value="org.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory2"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Read text file from HDFS"/>
+<entry key="Description" type="xstring" value="Reads a text file from hdfs. The result is a Spark RDD that contains a String row for each file row."/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010import org.apache.spark.api.java.function.Function;"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00009//**********************************************************************%%00010%%00009//Change the hdfsPath variable to the path of the HDFS file to read from%%00010%%00009//**********************************************************************%%00010%%00009final String hdfsPath = &quot;hdfs://&lt;yourPath&gt;&quot;;%%00010%%00010%%00010%%00010%%00009//Reads the text file into a RDD of strings%%00010   %%00009final JavaRDD&lt;String&gt; textRDD = sc.textFile(hdfsPath);%%00010   %%00009//Converts the RDD of strings into a RDD of Rows by converting each %%00010   %%00009//String into a row%%00010   %%00009final JavaRDD&lt;Row&gt; result = textRDD.map(new Function&lt;String, Row&gt;(){%%00010   %%00009private static final long serialVersionUID = 1L;%%00010     %%00009@Override%%00010     %%00009public Row call(String s) throws Exception {%%00010     %%00009%%00009//Create a new row for each input line from the file%%00010        %%00009%%00009return RowFactory.create(s);%%00010     %%00009}});%%00010%%00009return result;%%00010"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<entry key="version" type="xstring" isnull="true" value=""/>
+<entry key="templateUUID" type="xstring" value="590e7a6e-6b80-45b2-a5ba-d3751f51c8c8"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>
