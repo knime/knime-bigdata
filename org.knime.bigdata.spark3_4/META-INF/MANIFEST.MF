@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 3.4
 Bundle-SymbolicName: org.knime.bigdata.spark3_4;singleton:=true
-Bundle-Version: 4.7.4.qualifier
+Bundle-Version: 4.7.7.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.spark3_4.api,
@@ -10,7 +10,7 @@ Export-Package: org.knime.bigdata.spark3_4.api,
 Require-Bundle: org.knime.core;bundle-version="[4.7.0,5.0.0)",
   org.knime.base;bundle-version="[4.7.0,5.0.0)",
   org.knime.bigdata.databricks;bundle-version="[4.7.0,5.0.0)",
-  org.knime.bigdata.spark.core;bundle-version="[4.7.0,5.0.0)",
+  org.knime.bigdata.spark.core;bundle-version="[4.7.7,5.0.0)",
   org.knime.bigdata.spark.node;bundle-version="[4.7.0,5.0.0)",
   org.knime.bigdata.spark.core.livy;bundle-version="[4.7.0,5.0.0)",
   org.apache.livy.api;bundle-version="[0.4.0,0.5.0)",
