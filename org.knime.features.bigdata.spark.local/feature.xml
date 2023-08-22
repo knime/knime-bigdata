@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.spark.local"
       label="KNIME Extension for Local Big Data Environments"
-      version="5.1.0.qualifier"
+      version="5.1.1.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
