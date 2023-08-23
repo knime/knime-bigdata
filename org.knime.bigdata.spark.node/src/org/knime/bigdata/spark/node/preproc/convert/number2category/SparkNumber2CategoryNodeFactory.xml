@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Manipulator" icon="icon.png">
-	<name>Spark Number To Category (Apply)</name>
+	<name>Spark Number to Category (Apply)</name>
     
     <shortDescription>
         Reverts the actions of Spark Category To Number by mapping the numbers back to categories.
