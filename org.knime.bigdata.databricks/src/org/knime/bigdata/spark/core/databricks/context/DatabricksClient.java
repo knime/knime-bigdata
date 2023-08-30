@@ -93,7 +93,7 @@ import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 public class DatabricksClient {
     private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksClient.class);
 
-    private static final long START_CLUSTER_TIMEOUT = 300 * 1000L; // = 5 minutes
+    private static final long START_CLUSTER_TIMEOUT = 900 * 1000L; // = 15 minutes
     private static final long INSTALL_JOB_JAR_TIMEOUT = 300 * 1000L; // = 5 minutes
     private static final String INIT_DATABRICKS_CONTEXT = "def dsc = %s.createContext(sc, \"%s\", %b)";
     private static final String RUN_ON_DATABRICKS_CONTEXT = "dsc.run(\"%s\")";
