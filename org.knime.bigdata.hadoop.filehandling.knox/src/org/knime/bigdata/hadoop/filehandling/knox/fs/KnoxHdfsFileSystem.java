@@ -142,5 +142,6 @@ public class KnoxHdfsFileSystem extends BaseFileSystem<KnoxHdfsPath> {
     @Override
     protected void prepareClose() throws IOException {
         m_uploadExecutor.shutdownNow();
+        KnoxHDFSClient.close(m_client);
     }
 }

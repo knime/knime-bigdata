@@ -199,6 +199,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     @Override
     public synchronized void close() throws Exception {
         m_uploadExecutor.shutdownNow();
+        KnoxHDFSClient.close(m_client);
         m_client = null;
     }
 }
