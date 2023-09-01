@@ -29,7 +29,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.cxf.CXFUtil;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -82,7 +81,6 @@ public class JobserverPlugin extends AbstractUIPlugin {
 		final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
 		final File tmpFile = new File(pluginURL.getPath());
 		m_pluginRootPath = tmpFile.getAbsolutePath();
-		CXFUtil.initializeJAXRSRuntime(getClass());
 	}
 
 	/**
