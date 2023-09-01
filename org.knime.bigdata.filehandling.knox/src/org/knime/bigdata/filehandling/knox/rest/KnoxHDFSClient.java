@@ -304,4 +304,17 @@ public class KnoxHDFSClient extends AbstractRESTClient {
                     resp.getStatusInfo().getReasonPhrase()));
         }
     }
+
+    /**
+     * Release the internal state and configuration associated with this service proxy.
+     *
+     * @param proxy Client proxy implementation
+     */
+    public static void close(final WebHDFSAPI proxy) {
+        WebHDFSAPI toClose = proxy;
+        if (proxy instanceof WebHDFSAPIWrapper) {
+            toClose = ((WebHDFSAPIWrapper)proxy).getWrappedApiClient();
+        }
+        WebClient.client(toClose).close();
+    }
 }

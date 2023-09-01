@@ -208,4 +208,9 @@ public class WebHDFSAPIWrapper implements WebHDFSAPI {
         final String group) throws IOException {
         return invoke(() -> m_api.setGroup(path, op, group));
     }
+
+    WebHDFSAPI getWrappedApiClient() {
+        return m_api;
+    }
+
 }
