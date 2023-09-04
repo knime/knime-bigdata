@@ -44,32 +44,34 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Aug 13, 2019 by Sascha Wolke, KNIME GmbH
+ *   Nov 25, 2019 (Sascha Wolke, KNIME GmbH): created
  */
-package org.knime.bigdata.databricks.rest;
+package org.knime.bigdata.database.databricks;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.IOException;
 
 /**
- * Error response from Databricks API.
+ * Exception that describes a rate limit error.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class GenericErrorResponse {
+public class DatabricksRateLimitException extends IOException {
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Error code constant.
+     * Constructor with default error message.
      */
-    public String error_code;
+    public DatabricksRateLimitException() {
+        super("Maximum number of requests per seconds has been exceeded, please try again later.");
+    }
 
     /**
-     * Human readable error message in REST 2.0 API.
+     * Constructor with error message from API response.
+     *
+     * @param message error message from API response
      */
-    public String message;
+    public DatabricksRateLimitException(final String message) {
+        super(message);
+    }
 
-    /**
-     * Human readable error message in REST 1.2 API.
-     */
-    public String error;
 }

@@ -69,6 +69,7 @@ import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
 import org.apache.cxf.transport.http.asyncclient.AsyncHTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
+import org.knime.bigdata.database.databricks.DatabricksRateLimitException;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
 import org.knime.core.node.NodeLogger;
@@ -89,15 +90,23 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     private DatabricksRESTClient() {}
 
     /**
-     * Map response HTTP status codes to {@link IOException}s with error message from JSON response if possible.
+     * Map response HTTP status codes to {@link IOException}s with error message from response if possible.
+     *
+     * The API response might have:
+     * <ul>
+     * <li>Content-type application/json and a message field in the JSON content body</li>
+     * <li>Content-type text/plain and an error message in content body</li>
+     * <li>No content-type header, no content, but a x-thriftserver-error-message header with some message</li>
+     * </ul>
      */
     static class DatabricksResponseExceptionMapper implements ResponseExceptionMapper<IOException> {
         @Override
         public IOException fromResponse(final Response response) {
+            final MediaType mediaType = response.getMediaType();
             String message = "";
 
             // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
-            if (response.getMediaType().getSubtype().toLowerCase().contains("json")) {
+            if (mediaType != null && mediaType.getSubtype().toLowerCase().contains("json")) {
                 try {
                     final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
                     if (!StringUtils.isBlank(resp.message)) {
@@ -110,6 +119,9 @@ public class DatabricksRESTClient extends AbstractRESTClient {
                 } catch (Exception e) {
                     message = e.getMessage();
                 }
+
+            } else if (!StringUtils.isBlank(response.getHeaderString("x-thriftserver-error-message"))) {
+                message = response.getHeaderString("x-thriftserver-error-message");
             }
 
             if ((response.getStatus() == 401 || response.getStatus() == 403) && !StringUtils.isBlank(message)) {
@@ -120,6 +132,10 @@ public class DatabricksRESTClient extends AbstractRESTClient {
                 return new FileNotFoundException(message);
             } else if (response.getStatus() == 404) {
                 return new FileNotFoundException("Resource not found");
+            } else if (response.getStatus() == 429 && !StringUtils.isBlank(message)) {
+                return new DatabricksRateLimitException(message);
+            } else if (response.getStatus() == 429) {
+                return new DatabricksRateLimitException();
             } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
                 return new FileNotFoundException("Context not found");
             } else if (!StringUtils.isBlank(message)) {
