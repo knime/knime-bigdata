@@ -406,8 +406,16 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 		sparkConf.set(SPARK_LOCAL_DIR, sparkLocalDir.getAbsolutePath());
 	}
-	
-	private void configureHiveSupport(SparkConf sparkConf, String hiveDataFolder) throws IOException {
+
+    private void configureHiveSupport(final SparkConf sparkConf, final String hiveDataFolder)
+        throws KNIMESparkException, IOException {
+
+	    // ensure derby JDBC driver is registered
+	    try {
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        } catch (ClassNotFoundException ex) {
+            throw new KNIMESparkException("Unable to load Apache Derby JDBC driver.", ex);
+        }
 
 		final File hiveParentDir;
 		if (hiveDataFolder != null) {
