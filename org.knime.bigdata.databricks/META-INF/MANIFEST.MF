@@ -35,11 +35,11 @@ Require-Bundle: org.knime.base;bundle-version="[5.0.0,6.0.0)",
  org.apache.commons.lang3;bundle-version="[3.3.1,4.0.0)",
  org.xerial.snappy.snappy-java;bundle-version="[1.1.7,2.0.0)",
  jakarta.ws.rs-api;bundle-version="[3.1.0,4.0.0)",
- org.apache.cxf.cxf-core;bundle-version="[4.0.0,5.0.0)",
- org.apache.cxf.cxf-rt-frontend-jaxrs;bundle-version="[4.0.0,5.0.0)",
- org.apache.cxf.cxf-rt-rs-client;bundle-version="[4.0.0,5.0.0)",
- org.apache.cxf.cxf-rt-transports-http;bundle-version="[4.0.0,5.0.0)",
- org.apache.cxf.cxf-rt-transports-http-hc;bundle-version="[4.0.0,5.0.0)",
+ org.apache.cxf.cxf-core;bundle-version="[4.0.3,5.0.0)",
+ org.apache.cxf.cxf-rt-frontend-jaxrs;bundle-version="[4.0.3,5.0.0)",
+ org.apache.cxf.cxf-rt-rs-client;bundle-version="[4.0.3,5.0.0)",
+ org.apache.cxf.cxf-rt-transports-http;bundle-version="[4.0.3,5.0.0)",
+ org.apache.cxf.cxf-rt-transports-http-hc;bundle-version="[4.0.3,5.0.0)",
  org.knime.filehandling.core;bundle-version="[5.0.0,6.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
