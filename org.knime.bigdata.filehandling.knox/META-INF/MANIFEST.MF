@@ -7,9 +7,9 @@ Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.filehandling.knox.KnoxPlugin
 Export-Package: org.knime.bigdata.filehandling.knox.rest
 Require-Bundle: org.knime.base;bundle-version="[5.2.0,6.0.0)",
- org.knime.bigdata.commons;bundle-version="4.1.0",
- org.knime.bigdata.database;bundle-version="4.1.0",
- org.knime.bigdata.filehandling;bundle-version="4.1.0",
+ org.knime.bigdata.commons;bundle-version="[5.2.0,6.0.0)",
+ org.knime.bigdata.database;bundle-version="[5.2.0,6.0.0)",
+ org.knime.bigdata.filehandling;bundle-version="[5.2.0,6.0.0)",
  org.knime.core;bundle-version="[5.2.0,6.0.0)",
  org.knime.kerberos;bundle-version="[5.2.0,6.0.0)",
  org.apache.log4j;bundle-version="1.2.15",
