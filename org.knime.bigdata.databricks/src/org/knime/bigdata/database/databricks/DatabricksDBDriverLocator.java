@@ -73,6 +73,8 @@ public class DatabricksDBDriverLocator extends HiveDriverLocator {
 
     private static final String SIMBA_DRIVER_CLASS_PREFIX = "com.simba.spark.";
 
+    private static final String DATABRCIKS_DRIVER_CLASS_PREFIX = "com.databricks.";
+
     @Override
     public String getDriverId() {
         return DRIVER_ID;
@@ -80,7 +82,7 @@ public class DatabricksDBDriverLocator extends HiveDriverLocator {
 
     @Override
     public String getDriverName() {
-        return "Apache Hive JDBC Driver (for Databricks)";
+        return "Legacy Hive JDBC Driver (for Databricks)";
     }
 
     @Override
@@ -94,11 +96,11 @@ public class DatabricksDBDriverLocator extends HiveDriverLocator {
     }
 
     /**
-     * @return latest Simba or Hive driver ID or {@code null}
+     * @return latest Databricks, Simba or Hive driver ID or {@code null}
      */
     public static String getLatestSimbaOrHiveDriverID() {
-        return getLatestDriverID(SIMBA_DRIVER_CLASS_PREFIX)
-            .orElse(getLatestDriverID(HIVE_DRIVER_CLASS_PREFIX).orElse(null));
+        return getLatestDriverID(DATABRCIKS_DRIVER_CLASS_PREFIX).orElse(getLatestDriverID(SIMBA_DRIVER_CLASS_PREFIX)
+            .orElse(getLatestDriverID(HIVE_DRIVER_CLASS_PREFIX).orElse(null)));
     }
 
     private static Optional<String> getLatestDriverID(final String driverClassPrefix) {

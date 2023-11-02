@@ -61,17 +61,21 @@
   <extension point="org.knime.database.Agent">
       <Agent
             dbTypes="databricks"
-            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            factory="org.knime.bigdata.database.databricks.DatabricksAgentFactory"
+            interface="org.knime.database.agent.metadata.DBMetadataReader"/>
+      <Agent
+            dbTypes="databricks"
+            factory="org.knime.bigdata.database.databricks.DatabricksAgentFactory"
             interface="org.knime.database.agent.sampling.DBSampling">
       </Agent>
       <Agent
             dbTypes="databricks"
-            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            factory="org.knime.bigdata.database.databricks.DatabricksAgentFactory"
             interface="org.knime.database.agent.binning.DBBinner">
       </Agent>
       <Agent
             dbTypes="databricks"
-            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            factory="org.knime.bigdata.database.databricks.DatabricksAgentFactory"
             interface="org.knime.database.agent.loader.DBLoader">
       </Agent>
    </extension>

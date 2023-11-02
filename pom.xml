@@ -28,8 +28,10 @@
 
 		<module>org.knime.bigdata.commons</module>
 		<module>org.knime.bigdata.commons.windows</module>
-		<module>org.knime.bigdata.database</module>
+		<module>org.knime.bigdata.database</module>		
 		<module>org.knime.bigdata.databricks</module>
+        <module>org.knime.bigdata.databricks.driver/lib/fetch_jars</module>
+        <module>org.knime.bigdata.databricks.driver</module>
 		<module>org.knime.bigdata.fileformats</module>
 		<module>org.knime.bigdata.filehandling</module>
 		<module>org.knime.bigdata.filehandling.knox</module>

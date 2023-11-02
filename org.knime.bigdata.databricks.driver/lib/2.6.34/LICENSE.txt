@@ -1,0 +1,22 @@
+JDBC ODBC driver license
+Driver Download Terms and Conditions
+
+1. By downloading this Databricks ODBC and/or JDBC driver (together, the “DBC Drivers”), you agree to be bound by these Terms and Conditions (the “Terms”) (which are in addition to, and not in place of, any terms you have agreed to with Databricks regarding the Databricks services). If you do not agree to these Terms, do not download or use the DBC Drivers. If you are downloading and using the DBC Drivers on behalf of a company (such as your employer) or other legal entity, you represent and warrant that you have the authority to bind that company or other legal entity to these Terms. In that case, “you” and “your” will refer to that company or other legal entity.
+
+2. Supported environment: The DBC Drivers can be used on 32-bit and 64-bit Windows, Mac OSX and Linux operating environments.
+
+3. Scope of use: You may use, on a standalone or embedded basis, the DBC Drivers to connect third party applications to Databricks using the ODBC and/or JDBC protocols.
+
+4. Redistribution and Sublicensing: You may redistribute and sublicense the DBC drivers on a standalone or embedded basis so long as all use is within compliance with these terms.
+
+5. DISCLAIMER; LIMITATION OF LIABILITY. THE DBC DRIVERS ARE PROVIDED “AS-IS” AND WITH ALL FAULTS. DATABRICKS, ON BEHALF OF ITSELF AND ITS LICENSORS, SPECIFICALLY DISCLAIMS ALL WARRANTIES RELATING TO THE DBC DRIVERS, EXPRESS AND IMPLIED,INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES, CONDITIONS AND OTHER TERMS OF MERCHANTABILITY, SATISFACTORY QUALITY OR FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMNENT. DATABRICKS AND ITS LICENSORS TOTAL AGGREGATE LIABILITY RELATING TO OR ARISING OUT OF YOUR USE OF OR DATABRICKS’ PROVISIONING OF THE DBC DRIVERS SHALL BE LIMITED TO ONE THOUSAND ($1,000) DOLLARS.
+
+6. Contact Information: For any other usage, or if you have any questions about these terms, please contact Databricks.
+
+See documentation for the driver:
+
+Databricks on AWS: https://docs.databricks.com/user-guide/bi/jdbc-odbc-bi.html
+
+Azure Databricks: https://docs.microsoft.com/azure/databricks/integrations/bi/jdbc-odbc-bi
+
+Databricks on GCP: https://docs.gcp.databricks.com/integrations/bi/jdbc-odbc-bi.html

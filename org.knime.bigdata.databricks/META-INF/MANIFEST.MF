@@ -6,10 +6,11 @@ Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.databricks.DatabricksPlugin
-Export-Package: org.knime.bigdata.database.databricks.testing,
-  org.knime.bigdata.dbfs.filehandling.testing,
-  org.knime.bigdata.dbfs.testing,
-  org.knime.bigdata.spark.core.databricks.jobapi
+Export-Package: org.knime.bigdata.database.databricks,
+ org.knime.bigdata.database.databricks.testing,
+ org.knime.bigdata.dbfs.filehandling.testing,
+ org.knime.bigdata.dbfs.testing,
+ org.knime.bigdata.spark.core.databricks.jobapi
 Require-Bundle: org.knime.base;bundle-version="[5.2.0,6.0.0)",
  org.knime.bigdata.commons;bundle-version="[5.2.0,6.0.0)",
  org.knime.bigdata.database;bundle-version="[5.2.0,6.0.0)",
