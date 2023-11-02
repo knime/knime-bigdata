@@ -9,10 +9,10 @@ Export-Package: org.knime.bigdata.impala.utility
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
   org.knime.core;bundle-version="[5.2.0,6.0.0)",
   org.knime.base;bundle-version="[5.2.0,6.0.0)",
-  org.knime.bigdata.filehandling;bundle-version="3.5.0",
+  org.knime.bigdata.filehandling;bundle-version="[5.2.0,6.0.0)",
   org.knime.base.filehandling;bundle-version="[5.2.0,6.0.0)",
-  org.knime.bigdata.commons;bundle-version="3.5.0",
-  org.knime.bigdata.hive;bundle-version="3.6.0",
+  org.knime.bigdata.commons;bundle-version="[5.2.0,6.0.0)",
+  org.knime.bigdata.hive;bundle-version="[5.2.0,6.0.0)",
   org.apache.hive.jdbc;bundle-version="[1.1.0,2.0.0)",
   org.apache.log4j;bundle-version="[1.0.0,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11

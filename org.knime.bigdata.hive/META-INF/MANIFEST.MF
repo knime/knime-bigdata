@@ -13,12 +13,12 @@ Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
   org.knime.core;bundle-version="[5.2.0,6.0.0)",
   org.knime.base;bundle-version="[5.2.0,6.0.0)",
   org.knime.base.filehandling;bundle-version="[5.2.0,6.0.0)",
-  org.knime.bigdata.filehandling;bundle-version="3.5.0",
+  org.knime.bigdata.filehandling;bundle-version="[5.2.0,6.0.0)",
   org.eclipse.ui.workbench,
   org.knime.bigdata.commons;bundle-version="3.6.0",
   org.apache.hive.jdbc;bundle-version="[1.1.0.cdh5_13_0-knimebd-20180816,2.0.0)",
   org.apache.log4j;bundle-version="[1.0.0,2.0.0)",
-  org.knime.cloud.core;bundle-version="[5.0.0,6.0.0)",
+  org.knime.cloud.core;bundle-version="[5.2.0,6.0.0)",
   org.apache.hadoop.client;bundle-version="[2.7.6,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
