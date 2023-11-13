@@ -112,18 +112,26 @@
                 Choose the registered database dialect here.
             </option>
             <option name="Driver Name">
-                Choose the registered database driver here.
-            	The node includes the Apache Hive driver. Proprietary drivers are also supported,
-            	but need to be <a href="https://databricks.com/spark/odbc-driver-download">downloaded</a>
-            	and registered in the KNIME preferences under "KNIME -> Databases" with Database type Databricks.
-            	<br/>
-            	The node uses the proprietary driver as default if registered and the Apache Hive driver otherwise.
+                Choose the registered database driver here. The node includes the Databricks JDBC Driver which can 
+                be downloaded <a href="https://www.databricks.com/spark/jdbc-drivers-download">here.</a>
+                <br/>
+                If you need to use a different version of the driver you can manually register a new driver 
+                via the KNIME preferences under "KNIME -> Databases" with Database type Databricks.
             </option>
         </tab>
         <tab name="DB Port: JDBC Parameters">
              <description>
                 This tab allows you to define JDBC driver connection parameter. The value of a parameter can be a 
                 constant, variable, credential user, credential password or KNIME URL.
+                <br/>
+                The <i>UserAgentEntry</i> parameter is added as default to all Databricks connections to track the usage 
+                of KNIME Analytics Platform as Databricks client. If you are not comfortable sharing this information 
+                with Databricks you can remove the parameter. However, if you want to promote KNIME as a client 
+                with Databricks leave the parameter as is.
+                <br/>
+                For more information about the JDBC driver and the <i>UserAgentEntry,</i> refer to the installation 
+                and configuration guide which you can find in the <i>docs</i> directory of the 
+                <a href="https://www.databricks.com/spark/jdbc-drivers-download">driver package.</a>
              </description>
              <option name=""></option>
         </tab>

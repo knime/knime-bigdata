@@ -70,6 +70,7 @@ import org.apache.cxf.transport.http.asyncclient.AsyncHTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.database.databricks.DatabricksRateLimitException;
+import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
 import org.knime.core.node.NodeLogger;
@@ -171,7 +172,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         WebClient.client(proxyImpl)
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .type(MediaType.APPLICATION_JSON_TYPE)
-            .header("User-Agent", getUserAgent());
+            .header("User-Agent", DatabricksPlugin.getUserAgent());
         final ClientConfiguration config = WebClient.getConfig(proxyImpl);
         config.getInInterceptors().add(new GZIPInInterceptor());
         // Note: Databricks use GZIP to encode downloads, but does not support GZIP encoded uploads!

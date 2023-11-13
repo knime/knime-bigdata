@@ -46,10 +46,15 @@ package org.knime.bigdata.database.databricks;
 
 import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED;
 
+import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.database.DBType.DefaultAttributeSupplier;
 import org.knime.database.DBType.NonTransactionalDefaultAttributeSupplier;
+import org.knime.database.attribute.Attribute;
 import org.knime.database.attribute.AttributeCollection;
 import org.knime.database.attribute.AttributeCollection.Accessibility;
+import org.knime.database.connection.DBConnectionManagerAttributes;
+import org.knime.database.util.DerivableProperties;
+import org.knime.database.util.DerivableProperties.ValueType;
 
 /**
  * Supplier of all the default database attribute definitions for Databricks.
@@ -59,11 +64,20 @@ import org.knime.database.attribute.AttributeCollection.Accessibility;
 public class DatabricksDefaultAttributeSupplier extends DefaultAttributeSupplier {
 
     private static final AttributeCollection ATTRIBUTES_CONNECTION;
+    /**
+     * Attribute that contains the JDBC properties.
+     */
+    public static final Attribute<DerivableProperties> ATTRIBUTE_JDBC_PROPERTIES;
 
     static {
         final AttributeCollection.Builder builder = AttributeCollection
             .builder(NonTransactionalDefaultAttributeSupplier.getInstance().getConnectionAttributes());
         builder.add(Accessibility.EDITABLE, ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED, false);
+        //Used to set the user agent entry for all user registered drivers
+        final DerivableProperties jdbcProperties = new DerivableProperties();
+        jdbcProperties.setDerivableProperty("UserAgentEntry", ValueType.LITERAL, DatabricksPlugin.getUserAgent());
+        ATTRIBUTE_JDBC_PROPERTIES = builder.add(Accessibility.EDITABLE,
+            DBConnectionManagerAttributes.ATTRIBUTE_JDBC_PROPERTIES, jdbcProperties);
         ATTRIBUTES_CONNECTION = builder.build();
     }
 

@@ -8,6 +8,7 @@ Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.databricks.DatabricksPlugin
 Export-Package: org.knime.bigdata.database.databricks,
  org.knime.bigdata.database.databricks.testing,
+ org.knime.bigdata.databricks,
  org.knime.bigdata.dbfs.filehandling.testing,
  org.knime.bigdata.dbfs.testing,
  org.knime.bigdata.spark.core.databricks.jobapi

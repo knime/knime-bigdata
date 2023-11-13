@@ -54,6 +54,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.KNIMEConstants;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -84,6 +85,13 @@ public class DatabricksPlugin extends AbstractUIPlugin {
         synchronized (DatabricksPlugin.class) {
             plugin = this;
         }
+    }
+
+    /**
+     * @return HTTP User-Agent name
+     */
+    public static String getUserAgent() {
+        return "KNIME/" + KNIMEConstants.VERSION;
     }
 
     /**

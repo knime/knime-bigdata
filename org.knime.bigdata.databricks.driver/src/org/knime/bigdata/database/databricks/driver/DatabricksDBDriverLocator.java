@@ -55,12 +55,16 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.knime.bigdata.database.databricks.Databricks;
+import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.database.DBType;
+import org.knime.database.attribute.Attribute;
 import org.knime.database.attribute.AttributeCollection;
 import org.knime.database.attribute.AttributeCollection.Accessibility;
 import org.knime.database.connection.DBConnectionManagerAttributes;
 import org.knime.database.driver.AbstractDriverLocator;
 import org.knime.database.driver.DBDriverLocator;
+import org.knime.database.util.DerivableProperties;
+import org.knime.database.util.DerivableProperties.ValueType;
 
 /**
  * A driver locator class for the official Databricks JDBC Driver.
@@ -77,9 +81,20 @@ public class DatabricksDBDriverLocator extends AbstractDriverLocator {
      */
     public static final AttributeCollection ATTRIBUTES;
 
+    /**
+     * Attribute that contains the JDBC properties.
+     */
+    public static final Attribute<DerivableProperties> ATTRIBUTE_JDBC_PROPERTIES;
+
     static {
     	final AttributeCollection.Builder builder =
                 AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
+        //add the user agent entry to default JDBC parameters
+        final DerivableProperties jdbcProperties = new DerivableProperties();
+        //Used to set the user agent entry for all drivers shipped by us
+        jdbcProperties.setDerivableProperty("UserAgentEntry", ValueType.LITERAL, DatabricksPlugin.getUserAgent());
+        ATTRIBUTE_JDBC_PROPERTIES = builder.add(Accessibility.EDITABLE,
+            DBConnectionManagerAttributes.ATTRIBUTE_JDBC_PROPERTIES, jdbcProperties);
         //change only visibility but keep the default values
         builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL);
         builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR);
