@@ -49,6 +49,7 @@ import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIB
 import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR;
 import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL;
 import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL;
+import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED;
 import static org.knime.database.connection.DBConnectionManagerAttributes.ATTRIBUTE_TRANSACTION_ENABLED;
 
 import java.util.Collection;
@@ -101,6 +102,7 @@ public class DatabricksDBDriverLocator extends AbstractDriverLocator {
         builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR);
         builder.add(Accessibility.HIDDEN, ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL);
         builder.add(Accessibility.HIDDEN, ATTRIBUTE_TRANSACTION_ENABLED, false);
+        builder.add(Accessibility.EDITABLE, ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED, false);
         ATTRIBUTES = builder.build();
     }
 
