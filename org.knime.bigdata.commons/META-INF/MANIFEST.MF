@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Commons
 Bundle-SymbolicName: org.knime.bigdata.commons;singleton:=true
-Bundle-Version: 5.2.0.qualifier
+Bundle-Version: 5.3.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.commons.CommonsPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
@@ -11,18 +11,18 @@ Export-Package: org.knime.bigdata.commons.config,
   org.knime.bigdata.commons.icons,
   org.knime.bigdata.commons.rest,
   org.knime.bigdata.commons.testing
-Require-Bundle: org.knime.core.util;bundle-version="[6.2.0,7.0.0)",
+Require-Bundle: org.knime.core.util;bundle-version="[6.3.0,7.0.0)",
  org.eclipse.jface;bundle-version="[3.22.0,4.0.0)",
  org.eclipse.ui.workbench;bundle-version="[3.122.0,4.0.0)",
  org.eclipse.ui;bundle-version="3.107.0",
  org.eclipse.core.net;bundle-version="1.3.0",
- org.knime.core;bundle-version="[5.2.0,6.0.0)",
- org.knime.workbench.ui;bundle-version="[5.2.0,6.0.0)",
+ org.knime.core;bundle-version="[5.3.0,6.0.0)",
+ org.knime.workbench.ui;bundle-version="[5.3.0,6.0.0)",
  org.apache.hadoop.client;bundle-version="[2.7.6.knimebd-20230515,3.0.0)",
- org.knime.kerberos;bundle-version="[5.2.0,6.0.0)",
+ org.knime.kerberos;bundle-version="[5.3.0,6.0.0)",
  org.apache.cxf.cxf-core;bundle-version="[4.0.3,5.0.0)",
  org.apache.cxf.cxf-rt-transports-http;bundle-version="[4.0.3,5.0.0)",
- org.knime.filehandling.core;bundle-version="[5.2.0,6.0.0)"
+ org.knime.filehandling.core;bundle-version="[5.3.0,6.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
