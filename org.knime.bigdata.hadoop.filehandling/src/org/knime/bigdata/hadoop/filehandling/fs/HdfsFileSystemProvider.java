@@ -76,6 +76,7 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.AccessControlException;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
@@ -106,7 +107,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
         final Path sourcePath = source.toHadoopPath();
         final Path targetPath = target.toHadoopPath();
 
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             // remove target if required
             if (existsCached(target) && ArrayUtils.contains(options, StandardCopyOption.REPLACE_EXISTING)) {
                 delete(target);
@@ -139,7 +140,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
             delete(target);
         }
 
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             if (Files.isDirectory(source)) {
                 createDirectoryInternal(target);
             } else if (!FileUtil.copy(fs, sourcePath, fs, targetPath, deleteSource, overwrite, fs.getConf())) {
@@ -163,16 +164,18 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
         final FileSystem fs = getHadoopFS();
         final Path hadoopPath = path.toHadoopPath();
 
-        // The summary includes the target in the file count, if it is a file
-        // or the directory in the directory count if it is a directory.
-        final ContentSummary summary = fs.getContentSummary(hadoopPath);
-        return summary.getFileCount() + summary.getDirectoryCount() > 1;
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            // The summary includes the target in the file count, if it is a file
+            // or the directory in the directory count if it is a directory.
+            final ContentSummary summary = fs.getContentSummary(hadoopPath);
+            return summary.getFileCount() + summary.getDirectoryCount() > 1;
+        }
     }
 
     @SuppressWarnings("resource")
     @Override
     protected InputStream newInputStreamInternal(final HdfsPath path, final OpenOption... options) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return getHadoopFS().open(path.toHadoopPath());
         } catch (final Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e, path);
@@ -182,7 +185,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected OutputStream newOutputStreamInternal(final HdfsPath path, final OpenOption... options) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             if (ArrayUtils.contains(options, StandardOpenOption.APPEND)) {
                 return getHadoopFS().append(path.toHadoopPath());
             } else {
@@ -197,7 +200,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected Iterator<HdfsPath> createPathIterator(final HdfsPath path, final Filter<? super java.nio.file.Path> filter) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final Path hadoopPath = path.toHadoopPath();
             final FileStatus[] stats = getHadoopFS().listStatus(hadoopPath);
             return new HdfsPathIterator(path, hadoopPath, stats, filter);
@@ -209,7 +212,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected void createDirectoryInternal(final HdfsPath path, final FileAttribute<?>... attrs) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             if (!getHadoopFS().mkdirs(path.toHadoopPath())) {
                 throw new IOException("Failed to create directory '" + path + "' (hadoop returns false).");
             }
@@ -221,7 +224,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected boolean exists(final HdfsPath path) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return getHadoopFS().exists(path.toHadoopPath());
         } catch (final AccessControlException e) { // NOSONAR
             final java.nio.file.Path parent = path.getParent();
@@ -241,7 +244,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected BaseFileAttributes fetchAttributesInternal(final HdfsPath path, final Class<?> type) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final FileStatus status = getHadoopFS().getFileStatus(path.toHadoopPath());
             return toBaseFileAttributes(path, status);
         } catch (final Exception e) { // NOSONAR
@@ -294,7 +297,7 @@ class HdfsFileSystemProvider extends BaseFileSystemProvider<HdfsPath, HdfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected void deleteInternal(final HdfsPath path) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final boolean recursive = false;
             getHadoopFS().delete(path.toHadoopPath(), recursive);
         } catch (final Exception e) { // NOSONAR

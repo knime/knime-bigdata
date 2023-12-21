@@ -51,6 +51,7 @@ import java.nio.file.OpenOption;
 import java.util.Set;
 
 import org.apache.hadoop.fs.Path;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.TempFileSeekableByteChannel;
 
 
@@ -75,7 +76,7 @@ class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPath> {
     @SuppressWarnings("resource")
     @Override
     public void copyFromRemote(final HdfsPath remoteFile, final java.nio.file.Path tempFile) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final Path src = remoteFile.toHadoopPath();
             final Path dst = new Path(tempFile.toUri());
             final boolean deleteSource = false;
@@ -93,7 +94,7 @@ class HdfsSeekableByteChannel extends TempFileSeekableByteChannel<HdfsPath> {
     @SuppressWarnings("resource")
     @Override
     public void copyToRemote(final HdfsPath remoteFile, final java.nio.file.Path tempFile) throws IOException {
-        try {
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final Path src = new Path(tempFile.toUri());
             final Path dst = remoteFile.toHadoopPath();
             final boolean deleteSource = false;

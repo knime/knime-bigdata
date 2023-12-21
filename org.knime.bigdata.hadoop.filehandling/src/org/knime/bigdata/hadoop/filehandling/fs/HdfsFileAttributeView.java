@@ -60,6 +60,7 @@ import java.util.Set;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.permission.FsPermission;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.attributes.BasePosixFileAttributeView;
 
 /**
@@ -88,22 +89,29 @@ class HdfsFileAttributeView extends BasePosixFileAttributeView<HdfsPath, HdfsFil
     @Override
     protected void setTimesInternal(final FileTime lastModifiedTime, final FileTime lastAccessTime,
         final FileTime createTime) throws IOException {
-        getHadoopFS().setTimes(getPath().toHadoopPath(), lastModifiedTime.toMillis(), lastAccessTime.toMillis());
-        clearAttributeCache();
+
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getHadoopFS().setTimes(getPath().toHadoopPath(), lastModifiedTime.toMillis(), lastAccessTime.toMillis());
+            clearAttributeCache();
+        }
     }
 
     @SuppressWarnings("resource")
     @Override
     protected void setOwnerInternal(final UserPrincipal owner) throws IOException {
-        getHadoopFS().setOwner(getPath().toHadoopPath(), owner.getName(), null);
-        clearAttributeCache();
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getHadoopFS().setOwner(getPath().toHadoopPath(), owner.getName(), null);
+            clearAttributeCache();
+        }
     }
 
     @SuppressWarnings("resource")
     @Override
     protected void setGroupInternal(final GroupPrincipal group) throws IOException {
-        getHadoopFS().setOwner(getPath().toHadoopPath(), null, group.getName());
-        clearAttributeCache();
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getHadoopFS().setOwner(getPath().toHadoopPath(), null, group.getName());
+            clearAttributeCache();
+        }
     }
 
     @SuppressWarnings("resource")
@@ -115,10 +123,12 @@ class HdfsFileAttributeView extends BasePosixFileAttributeView<HdfsPath, HdfsFil
             PosixFilePermission.GROUP_EXECUTE);
         var others = toFsAction(perms, PosixFilePermission.OTHERS_READ, PosixFilePermission.OTHERS_WRITE,
             PosixFilePermission.OTHERS_EXECUTE);
-
         var permission = new FsPermission(user, group, others);
-        getHadoopFS().setPermission(getPath().toHadoopPath(), permission);
-        clearAttributeCache();
+
+        try (var auth = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getHadoopFS().setPermission(getPath().toHadoopPath(), permission);
+            clearAttributeCache();
+        }
     }
 
     private static FsAction toFsAction(final Set<PosixFilePermission> perms, final PosixFilePermission read,
