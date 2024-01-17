@@ -19,7 +19,7 @@
          point="org.knime.core.PortType">
      <portType
             hidden="false"
-            name="KnoxHdfsConnection"
+            name="Knox HDFS Connection"
             objectClass="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObject"
             objectSerializer="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObject$Serializer"
             specClass="org.knime.bigdata.filehandling.knox.util.KnoxHdfsConnectionInformationPortObjectSpec"
