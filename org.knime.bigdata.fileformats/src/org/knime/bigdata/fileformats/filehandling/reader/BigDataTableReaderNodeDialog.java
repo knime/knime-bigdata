@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader;
 
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -94,11 +95,17 @@ public final class BigDataTableReaderNodeDialog
 
     private static final String TRANSFORMATION_TAB = "Transformation";
 
+    private static final String ADVANCED_TAB = "Advanced";
+
     private final DialogComponentReaderFileChooser m_fileChooser;
 
-    private final JCheckBox m_failOnDifferingSpecs = new JCheckBox("Fail on differing specs");
+    private final JCheckBox m_failOnDifferingSpecs = new JCheckBox("Fail if specs differ");
 
-    private final JCheckBox m_supportChangingFileSchemas = new JCheckBox("Support changing file schemas");
+    private final JRadioButton m_ignoreChangedSchema = new JRadioButton("Ignore");
+
+    private final JRadioButton m_failOnChangedSchema = new JRadioButton("Fail");
+
+    private final JRadioButton m_useNewSchema = new JRadioButton("Use new schema");
 
     private final SourceIdentifierColumnPanel m_pathColumnPanel = new SourceIdentifierColumnPanel("Path");
 
@@ -128,18 +135,102 @@ public final class BigDataTableReaderNodeDialog
         final FlowVariableModel locationFvm = createFlowVariableModel(keyChain, FSLocationVariableType.INSTANCE);
         m_fileChooser = new DialogComponentReaderFileChooser(pathSettings, "parquet", locationFvm);
         pathSettings.addChangeListener(e -> handlePathSettingsChange());
+
+        final var schemaChangeButtonGroup = new ButtonGroup();
+        schemaChangeButtonGroup.add(m_ignoreChangedSchema);
+        schemaChangeButtonGroup.add(m_failOnChangedSchema);
+        schemaChangeButtonGroup.add(m_useNewSchema);
+
+        m_ignoreChangedSchema.addActionListener(e -> updateTransformationTabEnabledStatus());
+        m_ignoreChangedSchema.addActionListener(e -> configChanged());
+        m_failOnChangedSchema.addActionListener(e -> updateTransformationTabEnabledStatus());
+        m_failOnChangedSchema.addActionListener(e -> configChanged());
+        m_useNewSchema.addActionListener(e -> updateTransformationTabEnabledStatus());
+        m_useNewSchema.addActionListener(e -> configChanged());
+
         m_failOnDifferingSpecs.addActionListener(e -> configChanged());
-        m_supportChangingFileSchemas.addActionListener(e -> configChanged());
-        m_supportChangingFileSchemas.addActionListener(e -> updateTransformationTableEnabledStatus());
         m_pathColumnPanel.addChangeListener(e -> configChanged());
+
+        final var group = new ButtonGroup();
+        group.add(m_failOnUnsupportedColumnTypes);
+        group.add(m_skipUnsupportedColumnTypes);
         m_failOnUnsupportedColumnTypes.addActionListener(e -> configChanged());
         m_skipUnsupportedColumnTypes.addActionListener(e -> configChanged());
-        addTab("Settings", createSettingsPanel(hasFailOnUnsupportedColumnTypeOption));
+
+        addTab("Settings", createSettingsPanel());
         addTab(TRANSFORMATION_TAB, createTransformationTab());
+        addTab(ADVANCED_TAB, createAdvancedTab(hasFailOnUnsupportedColumnTypeOption));
     }
 
-    private void updateTransformationTableEnabledStatus() {
-        setEnabled(!m_supportChangingFileSchemas.isSelected(), TRANSFORMATION_TAB);
+    private JPanel createAdvancedTab(final boolean hasFailOnUnsupportedColumnTypeOption) {
+        final JPanel outerPanel = new JPanel(new GridBagLayout());
+        final var gbc = new GBCBuilder()//
+                .resetPos()//
+                .anchorFirstLineStart()//
+                .setWeightX(1)//
+                .fillHorizontal();
+
+        outerPanel.add(createAdvancedTableSpecPanel(hasFailOnUnsupportedColumnTypeOption), gbc.build());
+        outerPanel.add(createAdvancedMultiFilePanel(), gbc.incY().build());
+        outerPanel.add(Box.createVerticalGlue(), gbc.incY().setWeightY(1).fillBoth().build());
+
+        return outerPanel;
+    }
+
+    private JPanel createAdvancedTableSpecPanel(final boolean hasFailOnUnsupportedColumnTypeOption) {
+        final var panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Table specification"));
+        final var gbc = new GBCBuilder()//
+                .resetPos()//
+                .anchorFirstLineStart()//
+                .setWeightX(1)//
+                .insets(5, 5, 0, 5);
+
+        if (hasFailOnUnsupportedColumnTypeOption) {
+            panel.add(new JLabel("Unsupported column types"), gbc.build());
+            panel.add(createAdvancedUnsupportedColumnTypesPanel(), gbc.incY().insets(0, 20, 0, 0).build());
+        }
+
+        panel.add(new JLabel("When schema in file has changed"), gbc.incY().insets(10, 5, 0, 0).build());
+        panel.add(createAdvancedSchemaChangedPanel(), gbc.incY().insets(0, 20, 0, 0).build());
+
+        return panel;
+    }
+
+    private JPanel createAdvancedUnsupportedColumnTypesPanel() {
+        final var panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        panel.add(m_failOnUnsupportedColumnTypes);
+        panel.add(m_skipUnsupportedColumnTypes);
+        panel.add(Box.createHorizontalGlue());
+
+        return panel;
+    }
+
+    private JPanel createAdvancedSchemaChangedPanel() {
+        final var specChangedPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        specChangedPanel.add(m_failOnChangedSchema);
+        specChangedPanel.add(m_ignoreChangedSchema);
+        specChangedPanel.add(m_useNewSchema);
+        specChangedPanel.add(Box.createHorizontalGlue());
+
+        return specChangedPanel;
+    }
+
+
+    private JPanel createAdvancedMultiFilePanel() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),//
+            "Options for multiple files"));
+        final var gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
+        panel.add(m_failOnDifferingSpecs, gbc.build());
+        panel.add(Box.createHorizontalGlue(), gbc.incX().setWeightX(1).build());
+        return panel;
+    }
+
+    private void updateTransformationTabEnabledStatus() {
+        setEnabled(!m_useNewSchema.isSelected(), TRANSFORMATION_TAB);
     }
 
     private void handlePathSettingsChange() {
@@ -157,47 +248,14 @@ public final class BigDataTableReaderNodeDialog
         return m_fileChooser.getSettingsModel().getFilterMode() != FilterMode.FILE;
     }
 
-    private JPanel createSettingsPanel(final boolean hasFailOnUnsupportedColumnTypeOption) {
+    private JPanel createSettingsPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
         final GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal().setWeightX(1.0);
         final JPanel fileChooserPanel = m_fileChooser.getComponentPanel();
         fileChooserPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input location"));
         panel.add(fileChooserPanel, gbc.build());
-        panel.add(createMultiFilePanel(), gbc.incY().build());
-        panel.add(createParquetFileOptionsPanel(hasFailOnUnsupportedColumnTypeOption), gbc.incY().build());
         panel.add(m_pathColumnPanel, gbc.incY().build());
         panel.add(createPreview(), gbc.incY().fillBoth().setWeightY(1.0).build());
-        return panel;
-    }
-
-    private JPanel createMultiFilePanel() {
-        final JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(
-            BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options for multiple files"));
-        GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
-        panel.add(m_failOnDifferingSpecs, gbc.build());
-        panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
-        return panel;
-    }
-
-    private JPanel createParquetFileOptionsPanel(final boolean hasFailOnUnsupportedColumnTypeOption) {
-        final var panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parquet options"));
-        final GBCBuilder gbc = new GBCBuilder().resetPos().anchorFirstLineStart().fillHorizontal();
-        panel.add(m_supportChangingFileSchemas, gbc.build());
-        panel.add(Box.createHorizontalGlue(), gbc.incX().setWeightX(1.0).setWidth(3).build());
-
-        if (hasFailOnUnsupportedColumnTypeOption) {
-            panel.add(new JLabel("Unsupported column types: "), gbc.incY().setX(0).setWidth(1).setWeightX(0).build());
-            panel.add(m_failOnUnsupportedColumnTypes, gbc.incX().build());
-            panel.add(m_skipUnsupportedColumnTypes, gbc.incX().build());
-            panel.add(new JPanel(), gbc.incX().setWeightX(1.0).build());
-
-            final var group = new ButtonGroup();
-            group.add(m_failOnUnsupportedColumnTypes);
-            group.add(m_skipUnsupportedColumnTypes);
-        }
-
         return panel;
     }
 
@@ -225,9 +283,15 @@ public final class BigDataTableReaderNodeDialog
         m_config.setFailOnDifferingSpecs(m_failOnDifferingSpecs.isSelected());
         m_config.setAppendItemIdentifierColumn(m_pathColumnPanel.isAppendSourceIdentifierColumn());
         m_config.setItemIdentifierColumnName(m_pathColumnPanel.getSourceIdentifierColumnName());
-        final boolean saveTableSpecConfig = !m_supportChangingFileSchemas.isSelected();
+
+
+        // prior to 5.2.2 we had a checkbox "support changing file schemas", which was replaced by a radio button
+        // group as part of AP-19239
+        final boolean saveTableSpecConfig = !m_useNewSchema.isSelected();
         m_config.setSaveTableSpecConfig(saveTableSpecConfig);
         m_config.setTableSpecConfig(saveTableSpecConfig ? getTableSpecConfig() : null);
+        m_config.setCheckSavedTableSpec(m_failOnChangedSchema.isSelected());
+
         m_config.getReaderSpecificConfig().setFailOnUnsupportedColumnTypes(m_failOnUnsupportedColumnTypes.isSelected());
     }
 
@@ -239,13 +303,24 @@ public final class BigDataTableReaderNodeDialog
         m_failOnDifferingSpecs.setSelected(m_config.failOnDifferingSpecs());
         m_pathColumnPanel.load(m_config.appendItemIdentifierColumn(), m_config.getItemIdentifierColumnName());
         updateMultiFileEnabledStatus();
-        m_supportChangingFileSchemas.setSelected(!m_config.saveTableSpecConfig());
+
+        // prior to 5.2.2 we had a single checkbox "support changing file schemas", which was replaced
+        // by a radio button group as part of AP-19239
+        if (m_config.saveTableSpecConfig() && m_config.checkSavedTableSpec()) {
+            m_failOnChangedSchema.setSelected(true);
+        } else if (m_config.saveTableSpecConfig()) {
+            m_ignoreChangedSchema.setSelected(true);
+        } else {
+            m_useNewSchema.setSelected(true);
+        }
+
         if (m_config.getReaderSpecificConfig().failOnUnsupportedColumnTypes()) {
             m_failOnUnsupportedColumnTypes.setSelected(true);
         } else {
             m_skipUnsupportedColumnTypes.setSelected(true);
         }
-        updateTransformationTableEnabledStatus();
+        updateTransformationTabEnabledStatus();
+
         return m_config;
     }
 

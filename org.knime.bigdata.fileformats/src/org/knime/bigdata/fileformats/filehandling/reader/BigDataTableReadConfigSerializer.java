@@ -78,6 +78,8 @@ enum BigDataTableReadConfigSerializer
     implements ConfigSerializer<BigDataMultiTableReadConfig>, ConfigIDFactory<BigDataMultiTableReadConfig> {
         INSTANCE;
 
+    private static final String ADVANCED_TAB = "advanced";
+
     private static final String CFG_FAIL_ON_DIFFERING_SPECS = "fail_on_differing_specs";
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(BigDataTableReadConfigSerializer.class);
@@ -85,6 +87,8 @@ enum BigDataTableReadConfigSerializer
     private static final String CFG_TABLE_SPEC_CONFIG = "table_spec_config" + SettingsModel.CFGKEY_INTERNAL;
 
     private static final String CFG_SAVE_TABLE_SPEC_CONFIG = "save_table_spec_config" + SettingsModel.CFGKEY_INTERNAL;
+
+    private static final String CFG_CHECK_TABLE_SPEC = "check_table_spec";
 
     private static final String CFG_APPEND_PATH_COLUMN = "append_path_column" + SettingsModel.CFGKEY_INTERNAL;
 
@@ -148,6 +152,10 @@ enum BigDataTableReadConfigSerializer
         config.setItemIdentifierColumnName(
             settingsTab.getString(CFG_PATH_COLUMN_NAME, config.getItemIdentifierColumnName()));
 
+        // added in 5.2.2 (AP-19239); we don't want existing workflows to make the check
+        final NodeSettingsRO advancedTab = SettingsUtils.getOrEmpty(settings, ADVANCED_TAB);
+        config.setCheckSavedTableSpec(advancedTab.getBoolean(CFG_CHECK_TABLE_SPEC, false));
+
         final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
         // introduced in 4.5.0
         bigDataConfig.setFailOnUnsupportedColumnTypes(
@@ -167,7 +175,9 @@ enum BigDataTableReadConfigSerializer
     @Override
     public void loadInModel(final BigDataMultiTableReadConfig config, final NodeSettingsRO settings)
         throws InvalidSettingsException {
+
         config.setTableSpecConfig(loadTableSpecConfig(settings));
+
         final NodeSettingsRO settingsTab = settings.getNodeSettings(SettingsUtils.CFG_SETTINGS_TAB);
         config.setFailOnDifferingSpecs(settingsTab.getBoolean(CFG_FAIL_ON_DIFFERING_SPECS));
         // introduced with 4.3.1
@@ -179,12 +189,15 @@ enum BigDataTableReadConfigSerializer
             config.setAppendItemIdentifierColumn(settingsTab.getBoolean(CFG_APPEND_PATH_COLUMN));
             config.setItemIdentifierColumnName(settingsTab.getString(CFG_PATH_COLUMN_NAME));
         }
-
         final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
         // introduced in 4.5.0
         if (settingsTab.containsKey(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE)) {
             bigDataConfig.setFailOnUnsupportedColumnTypes(settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE));
         }
+
+        // added in 5.2.2 (AP-19239); we don't want existing workflows to make the check
+        final NodeSettingsRO advancedTab = SettingsUtils.getOrEmpty(settings, ADVANCED_TAB);
+        config.setCheckSavedTableSpec(advancedTab.getBoolean(CFG_CHECK_TABLE_SPEC, false));
     }
 
     @Override
@@ -198,6 +211,10 @@ enum BigDataTableReadConfigSerializer
         settingsTab.addBoolean(CFG_SAVE_TABLE_SPEC_CONFIG, config.saveTableSpecConfig());
         settingsTab.addBoolean(CFG_APPEND_PATH_COLUMN, config.appendItemIdentifierColumn());
         settingsTab.addString(CFG_PATH_COLUMN_NAME, config.getItemIdentifierColumnName());
+
+        // added in 5.2.2 (AP-19239)
+        final NodeSettingsWO advancedTab = SettingsUtils.getOrAdd(settings, ADVANCED_TAB);
+        advancedTab.addBoolean(CFG_CHECK_TABLE_SPEC, config.checkSavedTableSpec());
 
         final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
         settingsTab.addBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes());
@@ -229,6 +246,12 @@ enum BigDataTableReadConfigSerializer
         // introduced in 4.5.0
         if (settingsTab.containsKey(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE)) {
             settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE);
+        }
+
+        // added in 5.2.2
+        final NodeSettingsRO advancedTab = SettingsUtils.getOrEmpty(settings, ADVANCED_TAB);
+        if (advancedTab.containsKey(CFG_CHECK_TABLE_SPEC)) {
+            advancedTab.getBoolean(CFG_CHECK_TABLE_SPEC);
         }
     }
 
