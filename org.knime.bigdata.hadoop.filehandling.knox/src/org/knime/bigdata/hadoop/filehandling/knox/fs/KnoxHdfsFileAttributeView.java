@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.FileTime;
@@ -61,6 +62,7 @@ import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam.Op;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.attributes.BasePosixFileAttributeView;
 
 /**
@@ -89,21 +91,28 @@ class KnoxHdfsFileAttributeView extends BasePosixFileAttributeView<KnoxHdfsPath,
     @Override
     protected void setTimesInternal(final FileTime lastModifiedTime, final FileTime lastAccessTime,
         final FileTime createTime) throws IOException {
-        getClient().setTimes(getPath().toString(), Op.SETTIMES, lastModifiedTime.toMillis(), lastAccessTime.toMillis());
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getClient().setTimes(getPath().toString(), Op.SETTIMES,
+                lastModifiedTime.toMillis(), lastAccessTime.toMillis());
+        }
         clearAttributeCache();
     }
 
     @SuppressWarnings("resource")
     @Override
     protected void setOwnerInternal(final UserPrincipal owner) throws IOException {
-        getClient().setOwner(getPath().toString(), Op.SETOWNER, owner.getName());
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getClient().setOwner(getPath().toString(), Op.SETOWNER, owner.getName());
+        }
         clearAttributeCache();
     }
 
     @SuppressWarnings("resource")
     @Override
     protected void setGroupInternal(final GroupPrincipal group) throws IOException {
-        getClient().setGroup(getPath().toString(), Op.SETOWNER,  group.getName());
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            getClient().setGroup(getPath().toString(), Op.SETOWNER,  group.getName());
+        }
         clearAttributeCache();
     }
 

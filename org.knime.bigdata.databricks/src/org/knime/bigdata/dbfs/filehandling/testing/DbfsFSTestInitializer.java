@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.dbfs.filehandling.testing;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -61,6 +62,7 @@ import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsPath;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.testing.DefaultFSTestInitializer;
 
 /**
@@ -85,10 +87,11 @@ public class DbfsFSTestInitializer extends DefaultFSTestInitializer<DbfsPath, Db
     @Override
     public DbfsPath createFileWithContent(final String content, final String... pathComponents) throws IOException {
         DbfsPath path = makePath(pathComponents);
-
-        FileHandle handle = m_client.create(Create.create(path.toString(), true));
-        m_client.addBlock(AddBlock.create(handle.handle, Base64.getEncoder().encodeToString(content.getBytes())));//NOSONAR
-        m_client.close(Close.create(handle.handle));
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            FileHandle handle = m_client.create(Create.create(path.toString(), true));
+            m_client.addBlock(AddBlock.create(handle.handle, Base64.getEncoder().encodeToString(content.getBytes())));//NOSONAR
+            m_client.close(Close.create(handle.handle));
+        }
         return path;
     }
 

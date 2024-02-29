@@ -45,6 +45,7 @@
  */
 package org.knime.bigdata.filehandling.knox;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,6 +67,7 @@ import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
 import org.knime.bigdata.hdfs.filehandler.HDFSCompatibleConnection;
 import org.knime.core.util.KnimeEncryption;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
  * Web HDFS via KNOX connection implementation.
@@ -93,7 +95,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized boolean delete(final String path, final boolean recursive) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_client.delete(path, DeleteOpParam.Op.DELETE, recursive);
         } catch (Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e);
@@ -101,7 +103,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized void move(final String source, final String destination) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             m_client.rename(source, PutOpParam.Op.RENAME, destination);
         } catch (Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e);
@@ -109,7 +111,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized boolean mkdirs(final String path) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_client.mkdirs(path, PutOpParam.Op.MKDIRS);
         } catch (Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e);
@@ -125,7 +127,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized FileStatus getFileStatus(final String path) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             return m_client.getFileStatus(path, GetOpParam.Op.GETFILESTATUS);
         } catch (Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e);
@@ -133,7 +135,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
     }
 
     synchronized FileStatus[] listFiles(final String path) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final FileStatus[] files = m_client.listStatus(path, GetOpParam.Op.LISTSTATUS).fileStatus;
             return files != null ? files : new FileStatus[0];
         } catch (Exception e) { // NOSONAR
@@ -153,7 +155,7 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
 
     @Override
     public synchronized URI getHomeDirectory() throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final URI baseURI = m_connectionInformation.toURI();
             return baseURI.resolve(m_client.getHomeDirectory(GetOpParam.Op.GETHOMEDIRECTORY).toUri().getPath());
         } catch (Exception e) { // NOSONAR

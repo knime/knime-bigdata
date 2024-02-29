@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
@@ -56,6 +57,7 @@ import java.util.Iterator;
 
 import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
 import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BasePathIterator;
 
 /**
@@ -75,13 +77,15 @@ class DbfsPathIterator extends BasePathIterator<DbfsPath> {
     public DbfsPathIterator(final DbfsPath path, final Filter<? super Path> filter) throws IOException {
         super(path, filter);
 
-        @SuppressWarnings("resource")
-        FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
-        FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            @SuppressWarnings("resource")
+            FileInfoList list = m_path.getFileSystem().getClient().list(m_path.toString());
+            FileInfo[] files = list.files != null ? list.files : new FileInfo[0];
 
-        Iterator<DbfsPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
+            Iterator<DbfsPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
 
-        setFirstPage(iterator);//NOSONAR
+            setFirstPage(iterator);//NOSONAR
+        }
     }
 
     @SuppressWarnings("resource")

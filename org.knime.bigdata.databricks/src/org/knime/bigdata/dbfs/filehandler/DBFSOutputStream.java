@@ -45,6 +45,7 @@
  */
 package org.knime.bigdata.dbfs.filehandler;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -55,6 +56,7 @@ import org.knime.bigdata.databricks.rest.dbfs.AddBlock;
 import org.knime.bigdata.databricks.rest.dbfs.Close;
 import org.knime.bigdata.databricks.rest.dbfs.Create;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
  * {@link OutputStream} to write files in 1MB blocks to DBFS.
@@ -93,7 +95,7 @@ public class DBFSOutputStream extends OutputStream {
         m_buffer = new byte[BLOCK_SIZE];
         m_bufferOffset = 0;
 
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             m_handle = m_api.create(Create.create(path, overwrite)).handle;
         } catch (Exception e) {
             throw new IOException("Failed to open handle for " + m_path, e);
@@ -101,7 +103,7 @@ public class DBFSOutputStream extends OutputStream {
     }
 
     void submitBufferIfNecessary(final boolean flush) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             if (m_bufferOffset > 0 && (m_bufferOffset == m_buffer.length || flush)) {
                 final String base64Data;
 
@@ -158,7 +160,7 @@ public class DBFSOutputStream extends OutputStream {
     @Override
     public void close() throws IOException {
         if (m_isOpen) {
-            try {
+            try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
                 flush();
                 m_api.close(Close.create(m_handle));
 
