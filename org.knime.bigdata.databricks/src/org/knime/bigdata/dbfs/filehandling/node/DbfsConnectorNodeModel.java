@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
@@ -65,6 +66,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
@@ -112,7 +114,9 @@ class DbfsConnectorNodeModel extends NodeModel {
 
     @SuppressWarnings("resource")
     private static void testConnection(final DbfsFSConnection connection) throws IOException {
-        ((DbfsFileSystem)connection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            ((DbfsFileSystem)connection.getFileSystem()).getClient().list(DbfsFileSystem.PATH_SEPARATOR);
+        }
     }
 
     @Override

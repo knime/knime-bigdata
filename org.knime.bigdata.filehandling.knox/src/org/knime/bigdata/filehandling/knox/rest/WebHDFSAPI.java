@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.filehandling.knox.rest;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -55,6 +56,7 @@ import org.apache.hadoop.hdfs.web.resources.DeleteOpParam;
 import org.apache.hadoop.hdfs.web.resources.GetOpParam;
 import org.apache.hadoop.hdfs.web.resources.PostOpParam;
 import org.apache.hadoop.hdfs.web.resources.PutOpParam;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -110,7 +112,9 @@ public interface WebHDFSAPI {
     default void setPermission(final String path, final FsPermission permission) throws IOException {
         final int n = permission.toShort();
         final int octal = ((n >>> 9) & 1) * 1000 + ((n >>> 6) & 7) * 100 + ((n >>> 3) & 7) * 10 + (n & 7);
-        setPermission(path, PutOpParam.Op.SETPERMISSION, (short)octal);
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            setPermission(path, PutOpParam.Op.SETPERMISSION, (short)octal);
+        }
     }
 
     @DELETE

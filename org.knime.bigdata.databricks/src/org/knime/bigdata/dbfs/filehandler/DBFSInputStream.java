@@ -45,6 +45,7 @@
  */
 package org.knime.bigdata.dbfs.filehandler;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -52,6 +53,7 @@ import java.util.Base64.Decoder;
 
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.FileBlock;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
  * {@link InputStream} to read files in 1MB blocks from DBFS.
@@ -95,13 +97,15 @@ public class DBFSInputStream extends InputStream {
 
     private void readNextBlockIfNecessary() throws IOException {
         if (!m_lastBlock && m_bufferOffset == m_bufferLength) {
-            final FileBlock fileBlock = m_api.read(m_path, m_nextOffset, BLOCK_SIZE);
-            m_lastBlock = fileBlock.bytes_read < BLOCK_SIZE;
-            m_bufferOffset = m_bufferLength = 0;
+            try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+                final FileBlock fileBlock = m_api.read(m_path, m_nextOffset, BLOCK_SIZE);
+                m_lastBlock = fileBlock.bytes_read < BLOCK_SIZE;
+                m_bufferOffset = m_bufferLength = 0;
 
-            if (fileBlock.bytes_read > 0) {
-                m_nextOffset += fileBlock.bytes_read;
-                m_bufferLength = m_decoder.decode(fileBlock.data.getBytes(), m_buffer);
+                if (fileBlock.bytes_read > 0) {
+                    m_nextOffset += fileBlock.bytes_read;
+                    m_bufferLength = m_decoder.decode(fileBlock.data.getBytes(), m_buffer);
+                }
             }
         }
     }

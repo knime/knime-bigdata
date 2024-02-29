@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +78,7 @@ import org.knime.bigdata.databricks.rest.dbfs.Mkdir;
 import org.knime.bigdata.databricks.rest.dbfs.Move;
 import org.knime.bigdata.dbfs.filehandler.DBFSInputStream;
 import org.knime.bigdata.dbfs.filehandler.DBFSOutputStream;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 
@@ -101,8 +103,10 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
             delete(target);
         }
 
-        DBFSAPI client = source.getFileSystem().getClient();
-        client.move(Move.create(source.toString(), target.toString()));
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            DBFSAPI client = source.getFileSystem().getClient();
+            client.move(Move.create(source.toString(), target.toString()));
+        }
     }
 
     @Override
@@ -148,13 +152,15 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected void createDirectoryInternal(final DbfsPath dir, final FileAttribute<?>... attrs) throws IOException {
-        dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
+        }
     }
 
     @SuppressWarnings("resource")
     @Override
     protected BaseFileAttributes fetchAttributesInternal(final DbfsPath path, final Class<?> type) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             FileInfo info = path.getFileSystem().getClient().getStatus(path.toString());
             return createBaseFileAttrs(info, path);
         } catch (FileNotFoundException e) {
@@ -188,8 +194,10 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected void deleteInternal(final DbfsPath path) throws IOException {
-        DBFSAPI client = path.getFileSystem().getClient();
-        client.delete(Delete.create(path.toString(), false));
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            DBFSAPI client = path.getFileSystem().getClient();
+            client.delete(Delete.create(path.toString(), false));
+        }
     }
 
     @Override
