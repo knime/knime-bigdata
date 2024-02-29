@@ -45,6 +45,7 @@
  */
 package org.knime.bigdata.hadoop.filehandling.knox.fs;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +83,7 @@ import org.knime.bigdata.filehandling.knox.rest.ContentSummary;
 import org.knime.bigdata.filehandling.knox.rest.FileStatus;
 import org.knime.bigdata.filehandling.knox.rest.KnoxHDFSClient;
 import org.knime.bigdata.filehandling.knox.rest.WebHDFSAPI;
+import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 import org.knime.filehandling.core.connections.base.attributes.BasePrincipal;
@@ -114,7 +116,7 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
             delete(target);
         }
 
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             if (!getClient().rename(source.toString(), PutOpParam.Op.RENAME, target.toString())) {
                 throw new IOException("Failed to move '" + source + "' to '" + target + "' (hadoop returns false).");
             }
@@ -164,7 +166,7 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
      */
     @Override
     protected boolean isNonEmptyDirectory(final KnoxHdfsPath path) throws IOException {
-        try  {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             // The summary includes the target in the file count, if it is a file
             // or the directory in the directory count if it is a directory.
             final ContentSummary summary = getClient().getContentSummary(path.toString(), GetOpParam.Op.GETCONTENTSUMMARY);
@@ -204,7 +206,7 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
     }
 
     FileStatus[] listFiles(final KnoxHdfsPath path) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final FileStatus[] files = getClient().listStatus(path.toString(), GetOpParam.Op.LISTSTATUS).fileStatus;
             return files != null ? files : new FileStatus[0];
         } catch (final Exception e) { // NOSONAR
@@ -214,7 +216,7 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
 
     @Override
     protected void createDirectoryInternal(final KnoxHdfsPath path, final FileAttribute<?>... attrs) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             getClient().mkdirs(path.toString(), PutOpParam.Op.MKDIRS);
         } catch (final Exception e) { // NOSONAR
             throw ExceptionMapper.mapException(e, path, null);
@@ -282,12 +284,14 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
     }
 
     private FileStatus getFileStatus(final KnoxHdfsPath path) throws IOException {
-        return getClient().getFileStatus(path.toString(), GetOpParam.Op.GETFILESTATUS);
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+            return getClient().getFileStatus(path.toString(), GetOpParam.Op.GETFILESTATUS);
+        }
     }
 
     @Override
     protected void checkAccessInternal(final KnoxHdfsPath path, final AccessMode... modes) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             for (final AccessMode mode : modes) {
                 final FsActionParam fsAction = new FsActionParam(mapAccessModeToFsAction(mode));
                 getClient().checkAccess(path.toString(), GetOpParam.Op.CHECKACCESS, fsAction.getValue());
@@ -308,7 +312,7 @@ class KnoxHdfsFileSystemProvider extends BaseFileSystemProvider<KnoxHdfsPath, Kn
 
     @Override
     protected void deleteInternal(final KnoxHdfsPath path) throws IOException {
-        try {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             final boolean recursive = false;
             getClient().delete(path.toString(), DeleteOpParam.Op.DELETE, recursive);
         } catch (final Exception e) { // NOSONAR

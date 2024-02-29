@@ -192,28 +192,26 @@ public class KnoxHDFSClient extends AbstractRESTClient {
      * Read a file.
      */
     public static InputStream openFile(final WebHDFSAPI proxyImpl, final String path) throws IOException {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups();
+                final Response respOpen = proxyImpl.open(path, GetOpParam.Op.OPEN, CHUNK_LENGTH)) {
+            validateStatusCode(respOpen, 307);
+            final WebHDFSAPI proxyToUse = (proxyImpl instanceof WebHDFSAPIWrapper) //
+                ? ((WebHDFSAPIWrapper)proxyImpl).getWrappedWebHDFsAPI() //
+                : proxyImpl;
 
-        final Response respOpen = proxyImpl.open(path, GetOpParam.Op.OPEN, CHUNK_LENGTH);
-        validateStatusCode(respOpen, 307);
+            final Response respRead = WebClient.fromClient(WebClient.client(proxyToUse), true) //
+                .to(respOpen.getLocation().toString(), false) //
+                .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE) //
+                .get();
+            validateStatusCode(respRead, 200);
 
-       try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-           final WebHDFSAPI proxyToUse = (proxyImpl instanceof WebHDFSAPIWrapper) //
-                   ? ((WebHDFSAPIWrapper)proxyImpl).getWrappedWebHDFsAPI() //
-                   : proxyImpl;
-
-           final Response respRead = WebClient.fromClient(WebClient.client(proxyToUse), true)
-                   .to(respOpen.getLocation().toString(), false)
-                   .accept(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                   .get();
-           validateStatusCode(respRead, 200);
-
-           final Object entity = respRead.getEntity();
-           if (entity instanceof InputStream) {
-               return new BufferedInputStream((InputStream) entity, CHUNK_LENGTH);
-           } else {
-               throw new IOException("Unknown entity received: " + entity.getClass().getName());
-           }
-       }
+            final Object entity = respRead.getEntity();
+            if (entity instanceof InputStream) {
+                return new BufferedInputStream((InputStream)entity, CHUNK_LENGTH);
+            } else {
+                throw new IOException("Unknown entity received: " + entity.getClass().getName());
+            }
+        }
     }
 
     /**
@@ -234,7 +232,8 @@ public class KnoxHDFSClient extends AbstractRESTClient {
     public static OutputStream createFile(final WebHDFSAPI proxyImpl, final ExecutorService executor, final String path,
         final boolean overwrite) throws IOException {
 
-        try (final Response respCreate = proxyImpl.create(path, PutOpParam.Op.CREATE, CHUNK_LENGTH, overwrite)) {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups();
+                final Response respCreate = proxyImpl.create(path, PutOpParam.Op.CREATE, CHUNK_LENGTH, overwrite)) {
             validateStatusCode(respCreate, 307);
             return uploadFile(proxyImpl, HttpMethod.PUT, respCreate.getLocation(), 201, executor);
         }
@@ -257,7 +256,8 @@ public class KnoxHDFSClient extends AbstractRESTClient {
     public static OutputStream appendFile(final WebHDFSAPI proxyImpl, final ExecutorService executor, final String path)
         throws IOException {
 
-        try (Response respCreate = proxyImpl.append(path, PostOpParam.Op.APPEND, CHUNK_LENGTH)) {
+        try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups();
+                final Response respCreate = proxyImpl.append(path, PostOpParam.Op.APPEND, CHUNK_LENGTH)) {
             validateStatusCode(respCreate, 307);
             return uploadFile(proxyImpl, HttpMethod.POST, respCreate.getLocation(), 200, executor);
         }
