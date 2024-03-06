@@ -101,11 +101,11 @@ public final class BigDataTableReaderNodeDialog
 
     private final JCheckBox m_failOnDifferingSpecs = new JCheckBox("Fail if specs differ");
 
-    private final JRadioButton m_ignoreChangedSchema = new JRadioButton("Ignore");
-
     private final JRadioButton m_failOnChangedSchema = new JRadioButton("Fail");
 
     private final JRadioButton m_useNewSchema = new JRadioButton("Use new schema");
+
+    private final JRadioButton m_ignoreChangedSchema = new JRadioButton("Ignore (deprecated)");
 
     private final SourceIdentifierColumnPanel m_pathColumnPanel = new SourceIdentifierColumnPanel("Path");
 
@@ -141,6 +141,7 @@ public final class BigDataTableReaderNodeDialog
         schemaChangeButtonGroup.add(m_failOnChangedSchema);
         schemaChangeButtonGroup.add(m_useNewSchema);
 
+        m_ignoreChangedSchema.setEnabled(false);
         m_ignoreChangedSchema.addActionListener(e -> updateTransformationTabEnabledStatus());
         m_ignoreChangedSchema.addActionListener(e -> configChanged());
         m_failOnChangedSchema.addActionListener(e -> updateTransformationTabEnabledStatus());
@@ -211,8 +212,8 @@ public final class BigDataTableReaderNodeDialog
         final var specChangedPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         specChangedPanel.add(m_failOnChangedSchema);
-        specChangedPanel.add(m_ignoreChangedSchema);
         specChangedPanel.add(m_useNewSchema);
+        specChangedPanel.add(m_ignoreChangedSchema);
         specChangedPanel.add(Box.createHorizontalGlue());
 
         return specChangedPanel;
