@@ -133,7 +133,7 @@
                         <configuration>
                             <includeScope>runtime</includeScope>
                             <outputDirectory>../</outputDirectory>
-                            <excludeGroupIds>org.apache.hadoop,org.scala-lang,org.scala-lang.modules,log4j,org.apache.logging.log4j</excludeGroupIds>
+                            <excludeGroupIds>org.apache.hadoop,org.scala-lang,org.scala-lang.modules,log4j,org.apache.logging.log4j,org.apache.zookeeper</excludeGroupIds>
                         </configuration>
                         <phase>package</phase>
                         <goals>
