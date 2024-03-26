@@ -55,11 +55,10 @@ import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.transports.http.configuration.ProxyServerType;
 import org.eclipse.core.net.proxy.IProxyData;
-import org.eclipse.core.net.proxy.IProxyService;
+import org.knime.core.internal.CorePlugin;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Abstract CXF/JAXRS REST client.
@@ -77,13 +76,6 @@ public class AbstractRESTClient {
 
     private static final Version CLIENT_VERSION = FrameworkUtil.getBundle(AbstractRESTClient.class).getVersion();
     private static final String USER_AGENT = "KNIME/" + CLIENT_VERSION;
-
-    private static final ServiceTracker<IProxyService, IProxyService> PROXY_TRACKER;
-    static {
-        PROXY_TRACKER = new ServiceTracker<>(FrameworkUtil.getBundle(AbstractRESTClient.class).getBundleContext(),
-            IProxyService.class, null);
-        PROXY_TRACKER.open();
-    }
 
     /**
      * @return HTTP User-Agent name
@@ -122,11 +114,12 @@ public class AbstractRESTClient {
         final URI uri = URI.create(url);
         ProxyAuthorizationPolicy proxyAuthPolicy = null;
 
-        IProxyService proxyService = PROXY_TRACKER.getService();
-        if (proxyService == null) {
+        final var maybeProxyService = CorePlugin.getInstance().getProxyService(true);
+        if (maybeProxyService.isEmpty()) {
             LOG.error("No Proxy service registered in Eclipse framework. Not using any proxies for databricks connection.");
             return null;
         }
+        final var proxyService = maybeProxyService.get();
 
         for (IProxyData proxy : proxyService.select(uri)) {
 
