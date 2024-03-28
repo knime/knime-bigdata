@@ -56,6 +56,7 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.transports.http.configuration.ProxyServerType;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.knime.core.eclipseUtil.EclipseProxyServiceInitializer;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
@@ -80,8 +81,9 @@ public class AbstractRESTClient {
 
     private static final ServiceTracker<IProxyService, IProxyService> PROXY_TRACKER;
     static {
+        // using proxy service class name as String to avoid initialization of the class
         PROXY_TRACKER = new ServiceTracker<>(FrameworkUtil.getBundle(AbstractRESTClient.class).getBundleContext(),
-            IProxyService.class, null);
+            "org.eclipse.core.net.proxy.IProxyService", null);
         PROXY_TRACKER.open();
     }
 
@@ -122,6 +124,7 @@ public class AbstractRESTClient {
         final URI uri = URI.create(url);
         ProxyAuthorizationPolicy proxyAuthPolicy = null;
 
+        EclipseProxyServiceInitializer.ensureInitialized();
         IProxyService proxyService = PROXY_TRACKER.getService();
         if (proxyService == null) {
             LOG.error("No Proxy service registered in Eclipse framework. Not using any proxies for databricks connection.");
