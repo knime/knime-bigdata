@@ -1,6 +1,7 @@
 autoEnabled=true
+bindingSuggestionsDisabled=false
 eclipse.preferences.version=1
-idePrefixKey=src/org/knime/bigdata/phoenix
-projectKey=org.knime\:knime-bigdata
-serverId=sonar.knime.com
-sqPrefixKey=org.knime.bigdata.hive/src/org/knime/bigdata/hive
+idePrefixKey=src-deprecated
+projectKey=KNIME_knime-bigdata
+serverId=SonarCloud
+sqPrefixKey=org.knime.bigdata.phoenix
