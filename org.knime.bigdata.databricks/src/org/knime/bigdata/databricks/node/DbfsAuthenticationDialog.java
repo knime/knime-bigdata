@@ -301,13 +301,13 @@ public class DbfsAuthenticationDialog extends JPanel {
 
         if (m_credentialsSupplier.get().listNames().isEmpty()) {
             m_settings.getUserPassUseCredentialsModel().setBooleanValue(false);
-            m_userPassUseCredentials.setEnabled(false);
+            m_userPassUseCredentials.getModel().setEnabled(false);
 
             m_settings.getTokenUseCredentialsModel().setBooleanValue(false);
-            m_tokenUseCredentials.setEnabled(false);
+            m_tokenUseCredentials.getModel().setEnabled(false);
         } else {
-            m_userPassUseCredentials.setEnabled(authType == AuthType.USER_PWD);
-            m_tokenUseCredentials.setEnabled(authType == AuthType.TOKEN);
+            m_userPassUseCredentials.getModel().setEnabled(authType == AuthType.USER_PWD);
+            m_tokenUseCredentials.getModel().setEnabled(authType == AuthType.TOKEN);
         }
     }
 

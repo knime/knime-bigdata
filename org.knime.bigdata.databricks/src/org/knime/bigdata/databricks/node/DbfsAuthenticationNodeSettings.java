@@ -55,6 +55,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelPassword;
@@ -475,6 +476,7 @@ public class DbfsAuthenticationNodeSettings {
             default:
                 break;
         }
+        clearDeselectedAuthTypes();
     }
 
     private void validateUserPasswordSettings() throws InvalidSettingsException {
@@ -483,8 +485,13 @@ public class DbfsAuthenticationNodeSettings {
                 throw new InvalidSettingsException(
                     "Please choose a credentials flow variable for username/password authentication.");
             }
-        } else if (StringUtils.isBlank(m_user.getStringValue()) || StringUtils.isBlank(m_password.getStringValue())) {
-            throw new InvalidSettingsException("Please provide a valid username and password.");
+            m_user.setStringValue("");
+            m_password.setStringValue("");
+        } else {
+            if (StringUtils.isBlank(m_user.getStringValue()) || StringUtils.isBlank(m_password.getStringValue())) {
+                throw new InvalidSettingsException("Please provide a valid username and password.");
+            }
+            m_userPassCredentialsName.setStringValue("");
         }
     }
 
@@ -494,8 +501,12 @@ public class DbfsAuthenticationNodeSettings {
                 throw new InvalidSettingsException(
                     "Please choose a credentials flow variable for token authentication.");
             }
-        } else if (StringUtils.isBlank(m_token.getStringValue())) {
-            throw new InvalidSettingsException("Please provide a valid token.");
+            m_token.setStringValue("");
+        } else {
+            if (StringUtils.isBlank(m_token.getStringValue())) {
+                throw new InvalidSettingsException("Please provide a valid token.");
+            }
+            m_tokenCredentialsName.setStringValue("");
         }
     }
 
@@ -555,5 +566,32 @@ public class DbfsAuthenticationNodeSettings {
     public void configureInModel(final PortObjectSpec[] inSpecs, final Consumer<StatusMessage> statusConsumer)
         throws InvalidSettingsException {
         // nothing for now
+    }
+
+    /**
+     * Clears the data of the 'other' authentication types. Added as part of AP-21749 to
+     * only store authentication data when needed. To specifically clear the settings model,
+     * call {@link SettingsModelAuthentication#clear()}.
+     */
+    private void clearDeselectedAuthTypes() {
+        final AuthType selectedType = getAuthType();
+        for (AuthType otherType : AuthType.values()) {
+            if (otherType == selectedType) {
+                continue;
+            }
+            switch (otherType) {
+                case USER_PWD:
+                    m_user.setStringValue("");
+                    m_password.setStringValue("");
+                    m_userPassCredentialsName.setStringValue("");
+                    break;
+                case TOKEN:
+                    m_token.setStringValue("");
+                    m_tokenCredentialsName.setStringValue("");
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
