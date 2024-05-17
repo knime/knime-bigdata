@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Cloudera Impala Connector
 Bundle-SymbolicName: org.knime.bigdata.impala;singleton:=true
-Bundle-Version: 5.2.0.qualifier
+Bundle-Version: 5.2.4.qualifier
 Bundle-Activator: org.knime.bigdata.impala.ImpalaPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.impala.utility
