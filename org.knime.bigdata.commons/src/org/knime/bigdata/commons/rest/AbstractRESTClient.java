@@ -54,13 +54,12 @@ import java.time.Duration;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.transports.http.configuration.ProxyServerType;
-import org.eclipse.core.net.proxy.IProxyData;
-import org.eclipse.core.net.proxy.IProxyService;
 import org.knime.core.eclipseUtil.EclipseProxyServiceInitializer;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.util.proxy.ProxyProtocol;
+import org.knime.core.util.proxy.search.GlobalProxySearch;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Abstract CXF/JAXRS REST client.
@@ -79,14 +78,6 @@ public class AbstractRESTClient {
     private static final Version CLIENT_VERSION = FrameworkUtil.getBundle(AbstractRESTClient.class).getVersion();
     private static final String USER_AGENT = "KNIME/" + CLIENT_VERSION;
 
-    private static final ServiceTracker<IProxyService, IProxyService> PROXY_TRACKER;
-    static {
-        // using proxy service class name as String to avoid initialization of the class
-        PROXY_TRACKER = new ServiceTracker<>(FrameworkUtil.getBundle(AbstractRESTClient.class).getBundleContext(),
-            "org.eclipse.core.net.proxy.IProxyService", null);
-        PROXY_TRACKER.open();
-    }
-
     /**
      * @return HTTP User-Agent name
      */
@@ -99,8 +90,9 @@ public class AbstractRESTClient {
      * @param connectionTimeoutMillis connection timeout
      * @return default {@link HTTPClientPolicy} to use REST clients
      */
-    protected static HTTPClientPolicy createClientPolicy(final Duration receiveTimeoutMillis, final Duration connectionTimeoutMillis) {
-        final HTTPClientPolicy clientPolicy = new HTTPClientPolicy();
+    protected static HTTPClientPolicy createClientPolicy(final Duration receiveTimeoutMillis,
+        final Duration connectionTimeoutMillis) {
+        final var clientPolicy = new HTTPClientPolicy();
         clientPolicy.setAllowChunking(true);
         clientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
         clientPolicy.setChunkLength(CHUNK_LENGTH);
@@ -121,63 +113,32 @@ public class AbstractRESTClient {
     protected static ProxyAuthorizationPolicy configureProxyIfNecessary(final String url,
             final HTTPClientPolicy clientPolicy) {
 
-        final URI uri = URI.create(url);
-        ProxyAuthorizationPolicy proxyAuthPolicy = null;
+        final var uri = URI.create(url);
 
         EclipseProxyServiceInitializer.ensureInitialized();
-        IProxyService proxyService = PROXY_TRACKER.getService();
-        if (proxyService == null) {
-            LOG.error("No Proxy service registered in Eclipse framework. Not using any proxies for databricks connection.");
+        final var proxyResult = GlobalProxySearch.getCurrentFor(uri);
+        if (proxyResult.isEmpty()) {
+            LOG.error(
+                "No Proxy service registered in Eclipse framework. Not using any proxies for databricks connection.");
             return null;
         }
+        final var proxyData = proxyResult.get();
+        clientPolicy.setProxyServerType(
+            proxyData.protocol() == ProxyProtocol.SOCKS ? ProxyServerType.SOCKS : ProxyServerType.HTTP);
+        clientPolicy.setProxyServer(proxyData.host());
+        clientPolicy.setProxyServerPort(proxyData.intPort());
 
-        for (IProxyData proxy : proxyService.select(uri)) {
-
-            final ProxyServerType proxyType;
-            final int defaultPort;
-
-            switch (proxy.getType()) {
-                case IProxyData.HTTP_PROXY_TYPE:
-                    proxyType = ProxyServerType.HTTP;
-                    defaultPort = 80;
-                    break;
-                case IProxyData.HTTPS_PROXY_TYPE:
-                    proxyType = ProxyServerType.HTTP;
-                    defaultPort = 443;
-                    break;
-                case IProxyData.SOCKS_PROXY_TYPE:
-                    proxyType = ProxyServerType.SOCKS;
-                    defaultPort = 1080;
-                    break;
-                default:
-                    throw new UnsupportedOperationException(String.format(
-                        "Unsupported proxy type: %s. Please remove the proxy setting from File > Preferences > General > Network Connections.",
-                        proxy.getType()));
-            }
-
-            if (proxy.getHost() != null) {
-                clientPolicy.setProxyServerType(proxyType);
-                clientPolicy.setProxyServer(proxy.getHost());
-
-                clientPolicy.setProxyServerPort(defaultPort);
-                if (proxy.getPort() != -1) {
-                    clientPolicy.setProxyServerPort(proxy.getPort());
-                }
-
-                if (proxy.isRequiresAuthentication() && proxy.getUserId() != null && proxy.getPassword() != null) {
-                    proxyAuthPolicy = new ProxyAuthorizationPolicy();
-                    proxyAuthPolicy.setUserName(proxy.getUserId());
-                    proxyAuthPolicy.setPassword(proxy.getPassword());
-                }
-
-                LOG.debug(String.format(
-                    "Using proxy for REST connection to %s: %s:%d (type: %s, proxyAuthentication: %b)",
-                    url, clientPolicy.getProxyServer(), clientPolicy.getProxyServerPort(), proxy.getType(),
-                    proxyAuthPolicy != null));
-
-                break;
-            }
+        ProxyAuthorizationPolicy proxyAuthPolicy = null;
+        if (proxyData.useAuthentication()) {
+            proxyAuthPolicy = new ProxyAuthorizationPolicy();
+            proxyAuthPolicy.setUserName(proxyData.username());
+            proxyAuthPolicy.setPassword(proxyData.password());
         }
+
+        LOG.debug(String.format(
+            "Using proxy for REST connection to %s: %s:%d (type: %s, proxyAuthentication: %b)",
+            url, clientPolicy.getProxyServer(), clientPolicy.getProxyServerPort(), clientPolicy.getProxyServerType(),
+            proxyAuthPolicy != null));
 
         return proxyAuthPolicy;
     }
