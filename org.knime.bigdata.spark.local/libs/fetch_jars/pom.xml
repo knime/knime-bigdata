@@ -119,7 +119,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+        <!-- replace log4j-slf4j-impl with slf4j-reload4j as Spark 3.3 requires a class called org.slf4j.impl.StaticLoggerBinder -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-reload4j</artifactId>
+            <version>1.7.36</version>
+        </dependency>
     </dependencies>
 
     <build>
