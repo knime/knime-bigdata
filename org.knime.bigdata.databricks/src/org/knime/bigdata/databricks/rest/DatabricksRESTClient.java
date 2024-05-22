@@ -55,22 +55,29 @@ import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.common.util.Base64Utility;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
+import org.apache.cxf.helpers.CastUtils;
+import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.ResponseExceptionMapper;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.apache.cxf.phase.Phase;
 import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
 import org.apache.cxf.transport.http.asyncclient.AsyncHTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.database.databricks.DatabricksRateLimitException;
 import org.knime.bigdata.databricks.DatabricksPlugin;
+import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
 import org.knime.core.node.NodeLogger;
@@ -88,7 +95,8 @@ import jakarta.ws.rs.core.Response;
 public class DatabricksRESTClient extends AbstractRESTClient {
     private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksRESTClient.class);
 
-    private DatabricksRESTClient() {}
+    private DatabricksRESTClient() {
+    }
 
     /**
      * Map response HTTP status codes to {@link IOException}s with error message from response if possible.
@@ -158,8 +166,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * @param connectionTimeout connection timeout
      * @return Client implementation for given proxy interface
      */
-    private static <T> T create(final String deploymentUrl, final Class<T> proxy,
-        final Duration receiveTimeout, final Duration connectionTimeout, final boolean doRequestLogging) {
+    private static <T> T create(final String deploymentUrl, final Class<T> proxy, final Duration receiveTimeout,
+        final Duration connectionTimeout, final boolean doRequestLogging) {
 
         final String baseUrl = deploymentUrl + "/api/";
 
@@ -169,9 +177,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         // Create the API Proxy
         final List<Object> provider = Arrays.asList(new JacksonJsonProvider(), new DatabricksResponseExceptionMapper());
         final T proxyImpl = JAXRSClientFactory.create(baseUrl, proxy, provider);
-        WebClient.client(proxyImpl)
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .type(MediaType.APPLICATION_JSON_TYPE)
+        WebClient.client(proxyImpl).accept(MediaType.APPLICATION_JSON_TYPE).type(MediaType.APPLICATION_JSON_TYPE)
             .header("User-Agent", DatabricksPlugin.getUserAgent());
         final ClientConfiguration config = WebClient.getConfig(proxyImpl);
         config.getInInterceptors().add(new GZIPInInterceptor());
@@ -224,11 +230,40 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * @return Client implementation for given proxy interface
      * @throws UnsupportedEncodingException if given user and password can't be encoded as UTF-8
      */
-    public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String user, final String password,
-        final Duration receiveTimeout, final Duration connectionTimeout) throws UnsupportedEncodingException {
+    public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String user,
+        final String password, final Duration receiveTimeout, final Duration connectionTimeout)
+        throws UnsupportedEncodingException {
 
         final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, false);
-        WebClient.client(proxyImpl).header("Authorization", "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
+        WebClient.client(proxyImpl).header("Authorization",
+            "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
+        return wrap(proxyImpl);
+    }
+
+    /**
+     * Creates a service proxy for given Databricks REST API interface using the URL and credentials of a @link
+     * DatabricksWorkspaceAccessor}.
+     *
+     * @param accessor A {@link DatabricksWorkspaceAccessor} which provides both the Databricks workspace URL as well as
+     *            credentials.
+     * @param proxy Interface to create proxy for
+     * @param receiveTimeout Receive timeout
+     * @param connectionTimeout connection timeout
+     * @return client implementation for given proxy interface
+     */
+    public static <T> T create(final DatabricksWorkspaceAccessor accessor, final Class<T> proxy,
+        final Duration receiveTimeout, final Duration connectionTimeout) {
+
+        final T proxyImpl = create(accessor.getDatabricksWorkspaceUrl().toString(), //
+            proxy, //
+            receiveTimeout, //
+            connectionTimeout, //
+            false);
+
+        WebClient.getConfig(proxyImpl)//
+            .getOutInterceptors()//
+            .add(new DatabricksCredentialInterceptor(accessor));
+
         return wrap(proxyImpl);
     }
 
@@ -239,7 +274,6 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         }
         return api;
     }
-
 
     /**
      * Release the internal state and configuration associated with this service proxy.
@@ -252,5 +286,30 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             toClose = ((DBFSAPIWrapper)proxy).getWrappedDBFSAPI();
         }
         WebClient.client(toClose).close();
+    }
+
+    private static class DatabricksCredentialInterceptor extends AbstractPhaseInterceptor<Message> {
+
+        final DatabricksWorkspaceAccessor m_workspaceAccessor;
+
+        DatabricksCredentialInterceptor(final DatabricksWorkspaceAccessor workspaceAccessor) {
+            super(Phase.SETUP);
+            m_workspaceAccessor = workspaceAccessor;
+        }
+
+        @Override
+        public void handleMessage(final Message message) throws Fault {
+            @SuppressWarnings("unchecked")
+            final Map<String, List<Object>> headers =
+                CastUtils.cast((Map<String, List<Object>>)message.get(Message.PROTOCOL_HEADERS));
+
+            try {
+                final String authHeader = String.format("%s %s", //
+                    m_workspaceAccessor.getAuthScheme(), m_workspaceAccessor.getAuthParameters());
+                headers.put("Authorization", List.of(authHeader));
+            } catch (IOException ex) {
+                throw new Fault(ex);
+            }
+        }
     }
 }

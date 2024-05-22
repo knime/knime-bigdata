@@ -35,6 +35,25 @@
           category-path="/io/connectors"
           factory-class="org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeFactory">
     </node>
+    <node
+          category-path="/toolintegration/spark"
+          factory-class="org.knime.bigdata.databricks.workspace.connector.WorkspaceConnectorNodeFactory">
+    </node>
+  </extension>
+  
+  <extension point="org.knime.credentials.base.CredentialType">
+    <credentialType
+      credentialClass="org.knime.bigdata.databricks.credential.DatabricksUsernamePasswordCredential"
+      credentialSerializerClass="org.knime.bigdata.databricks.credential.DatabricksUsernamePasswordCredential$Serializer"
+      id="knime.DatabricksUsernamePasswordCredential"
+      name="Databricks username/password">
+    </credentialType>
+    <credentialType
+      credentialClass="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential"
+      credentialSerializerClass="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential$Serializer"
+      id="knime.DatabricksAccessTokenCredential"
+      name="Databricks access token">
+    </credentialType>
   </extension>
   
   <!--************************** DB Extensions **************************-->
