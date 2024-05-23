@@ -78,6 +78,8 @@ import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
 import org.knime.bigdata.databricks.rest.files.FilesAPI;
 import org.knime.bigdata.databricks.rest.files.FilesAPIWrapper;
+import org.knime.bigdata.databricks.rest.scim.ScimAPI;
+import org.knime.bigdata.databricks.rest.scim.ScimAPIWrapper;
 import org.knime.core.node.NodeLogger;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
@@ -222,6 +224,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             return (T)new CatalogAPIWrapper((CatalogAPI)api);
         } else if (api instanceof FilesAPI) {
             return (T)new FilesAPIWrapper((FilesAPI)api);
+        } else if (api instanceof ScimAPI) {
+            return (T)new ScimAPIWrapper((ScimAPI)api);
         }
 
         return api;
