@@ -72,8 +72,12 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
+import org.knime.bigdata.databricks.rest.catalog.CatalogAPI;
+import org.knime.bigdata.databricks.rest.catalog.CatalogAPIWrapper;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
+import org.knime.bigdata.databricks.rest.files.FilesAPI;
+import org.knime.bigdata.databricks.rest.files.FilesAPIWrapper;
 import org.knime.core.node.NodeLogger;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
@@ -214,7 +218,12 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     private static <T> T wrap(final T api) {
         if (api instanceof DBFSAPI) {
             return (T)new DBFSAPIWrapper((DBFSAPI)api);
+        } else if (api instanceof CatalogAPI) {
+            return (T)new CatalogAPIWrapper((CatalogAPI)api);
+        } else if (api instanceof FilesAPI) {
+            return (T)new FilesAPIWrapper((FilesAPI)api);
         }
+
         return api;
     }
 
@@ -223,10 +232,12 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      *
      * @param proxy Client proxy implementation
      */
-    public static void close(final DBFSAPI proxy) {
-        DBFSAPI toClose = proxy;
+    public static <T> void close(final T proxy) {
+        Object toClose = proxy;
         if (proxy instanceof DBFSAPIWrapper) {
             toClose = ((DBFSAPIWrapper)proxy).getWrappedDBFSAPI();
+        } else if (proxy instanceof APIWrapper) {
+            toClose = ((APIWrapper<?>)proxy).getWrappedAPI();
         }
         WebClient.client(toClose).close();
     }
@@ -255,4 +266,5 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             }
         }
     }
+
 }

@@ -209,4 +209,7 @@
    <extension point="org.knime.filehandling.core.FSDescriptorProvider">
       <FSDescriptorProvider class="org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider" />
    </extension>
+   <extension point="org.knime.filehandling.core.FSDescriptorProvider">
+      <FSDescriptorProvider class="org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider" />
+   </extension>
 </plugin>
