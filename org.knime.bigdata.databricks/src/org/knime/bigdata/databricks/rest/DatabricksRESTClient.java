@@ -48,22 +48,17 @@
  */
 package org.knime.bigdata.databricks.rest;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.common.util.Base64Utility;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.helpers.CastUtils;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.LoggingInInterceptor;
-import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.ResponseExceptionMapper;
@@ -75,7 +70,6 @@ import org.apache.cxf.transport.common.gzip.GZIPInInterceptor;
 import org.apache.cxf.transport.http.asyncclient.AsyncHTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
-import org.knime.bigdata.database.databricks.DatabricksRateLimitException;
 import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
@@ -85,7 +79,6 @@ import org.knime.core.node.NodeLogger;
 import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 /**
  * Client to access Databricks REST API using CXF, JAX-RS and Jackson.
@@ -96,63 +89,6 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksRESTClient.class);
 
     private DatabricksRESTClient() {
-    }
-
-    /**
-     * Map response HTTP status codes to {@link IOException}s with error message from response if possible.
-     *
-     * The API response might have:
-     * <ul>
-     * <li>Content-type application/json and a message field in the JSON content body</li>
-     * <li>Content-type text/plain and an error message in content body</li>
-     * <li>No content-type header, no content, but a x-thriftserver-error-message header with some message</li>
-     * </ul>
-     */
-    static class DatabricksResponseExceptionMapper implements ResponseExceptionMapper<IOException> {
-        @Override
-        public IOException fromResponse(final Response response) {
-            final MediaType mediaType = response.getMediaType();
-            String message = "";
-
-            // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
-            if (mediaType != null && mediaType.getSubtype().toLowerCase().contains("json")) {
-                try {
-                    final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
-                    if (!StringUtils.isBlank(resp.message)) {
-                        message = resp.message;
-                    } else if (!StringUtils.isBlank(resp.error)) {
-                        message = resp.error;
-                    } else {
-                        message = response.getStatusInfo().getReasonPhrase();
-                    }
-                } catch (Exception e) {
-                    message = e.getMessage();
-                }
-
-            } else if (!StringUtils.isBlank(response.getHeaderString("x-thriftserver-error-message"))) {
-                message = response.getHeaderString("x-thriftserver-error-message");
-            }
-
-            if ((response.getStatus() == 401 || response.getStatus() == 403) && !StringUtils.isBlank(message)) {
-                return new AccessDeniedException(message);
-            } else if (response.getStatus() == 401 || response.getStatus() == 403) {
-                return new AccessDeniedException("Invalid or missing authentication data");
-            } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
-                return new FileNotFoundException(message);
-            } else if (response.getStatus() == 404) {
-                return new FileNotFoundException("Resource not found");
-            } else if (response.getStatus() == 429 && !StringUtils.isBlank(message)) {
-                return new DatabricksRateLimitException(message);
-            } else if (response.getStatus() == 429) {
-                return new DatabricksRateLimitException();
-            } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
-                return new FileNotFoundException("Context not found");
-            } else if (!StringUtils.isBlank(message)) {
-                return new IOException("Server error: " + message);
-            } else {
-                return new IOException("Server error: " + response.getStatus());
-            }
-        }
     }
 
     /**
@@ -167,7 +103,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * @return Client implementation for given proxy interface
      */
     private static <T> T create(final String deploymentUrl, final Class<T> proxy, final Duration receiveTimeout,
-        final Duration connectionTimeout, final boolean doRequestLogging) {
+        final Duration connectionTimeout, final ResponseExceptionMapper<?> exceptionMapper) {
 
         final String baseUrl = deploymentUrl + "/api/";
 
@@ -175,7 +111,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
 
         // Create the API Proxy
-        final List<Object> provider = Arrays.asList(new JacksonJsonProvider(), new DatabricksResponseExceptionMapper());
+        final List<Object> provider = Arrays.asList(new JacksonJsonProvider(), exceptionMapper);
         final T proxyImpl = JAXRSClientFactory.create(baseUrl, proxy, provider);
         WebClient.client(proxyImpl).accept(MediaType.APPLICATION_JSON_TYPE).type(MediaType.APPLICATION_JSON_TYPE)
             .header("User-Agent", DatabricksPlugin.getUserAgent());
@@ -187,10 +123,9 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             config.getHttpConduit().setProxyAuthorization(proxyAuthPolicy);
         }
 
-        if (doRequestLogging) {
-            config.getInInterceptors().add(new LoggingInInterceptor());
-            config.getOutInterceptors().add(new LoggingOutInterceptor());
-        }
+        // Enable request logging:
+        // config.getInInterceptors().add(new LoggingInInterceptor());
+        // config.getOutInterceptors().add(new LoggingOutInterceptor());
 
         // This forces usage of the Apache HTTP client over the JDK built-in HTTP client,
         // that does not work well with the strange configured Databricks HTTP/2 endpoint, see BD-1242.
@@ -202,6 +137,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     /**
      * Creates a service proxy for given Databricks REST API interface using a bearer authentication token.
      *
+     * Note that errors in this client are handled with {@code IOException}.
+     *
      * @param deploymentUrl https://...cloud.databricks.com
      * @param proxy Interface to create proxy for
      * @param token Authentication token
@@ -212,7 +149,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     public static <T> T create(final String deploymentUrl, final Class<T> proxy, final String token,
         final Duration receiveTimeout, final Duration connectionTimeout) {
 
-        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, false);
+        final T proxyImpl =
+            create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, new DatabricksResponseIOExceptionMapper());
         WebClient.client(proxyImpl).header("Authorization", "Bearer " + token);
         return wrap(proxyImpl);
     }
@@ -220,6 +158,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     /**
      * Creates a service proxy for given Databricks REST API interface using basic authentication with user and
      * password.
+     *
+     * Note that errors in this client are handled with {@code IOException}.
      *
      * @param deploymentUrl https://...cloud.databricks.com
      * @param proxy Interface to create proxy for
@@ -234,7 +174,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         final String password, final Duration receiveTimeout, final Duration connectionTimeout)
         throws UnsupportedEncodingException {
 
-        final T proxyImpl = create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, false);
+        final T proxyImpl =
+            create(deploymentUrl, proxy, receiveTimeout, connectionTimeout, new DatabricksResponseIOExceptionMapper());
         WebClient.client(proxyImpl).header("Authorization",
             "Basic " + Base64Utility.encode((user + ":" + password).getBytes("UTF-8")));
         return wrap(proxyImpl);
@@ -243,6 +184,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     /**
      * Creates a service proxy for given Databricks REST API interface using the URL and credentials of a @link
      * DatabricksWorkspaceAccessor}.
+     *
+     * Note that errors in this client are handled with {@code ClientErrorException}.
      *
      * @param accessor A {@link DatabricksWorkspaceAccessor} which provides both the Databricks workspace URL as well as
      *            credentials.
@@ -258,7 +201,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             proxy, //
             receiveTimeout, //
             connectionTimeout, //
-            false);
+            new DatabricksResponseClientErrorExceptionMapper());
 
         WebClient.getConfig(proxyImpl)//
             .getOutInterceptors()//

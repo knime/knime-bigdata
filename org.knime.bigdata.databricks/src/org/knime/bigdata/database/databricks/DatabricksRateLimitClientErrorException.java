@@ -48,21 +48,23 @@
  */
 package org.knime.bigdata.database.databricks;
 
-import java.io.IOException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
- * Exception that describes a rate limit error, extending {@code IOException}.
+ * Exception that describes a rate limit error, extending {@code ClientErrorException} from Jakarta.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksRateLimitException extends IOException {
+public class DatabricksRateLimitClientErrorException extends ClientErrorException {
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructor with default error message.
      */
-    public DatabricksRateLimitException() {
-        super("Maximum number of requests per seconds has been exceeded, please try again later.");
+    public DatabricksRateLimitClientErrorException() {
+        super("Maximum number of requests per seconds has been exceeded, please try again later.",
+            Status.TOO_MANY_REQUESTS);
     }
 
     /**
@@ -70,8 +72,8 @@ public class DatabricksRateLimitException extends IOException {
      *
      * @param message error message from API response
      */
-    public DatabricksRateLimitException(final String message) {
-        super(message);
+    public DatabricksRateLimitClientErrorException(final String message) {
+        super(message, Status.TOO_MANY_REQUESTS);
     }
 
 }
