@@ -65,6 +65,7 @@ import org.knime.credentials.base.CredentialType;
 import org.knime.credentials.base.CredentialTypeRegistry;
 import org.knime.credentials.base.NoOpCredentialSerializer;
 import org.knime.credentials.base.oauth.api.AccessTokenAccessor;
+import org.knime.credentials.base.oauth.api.AccessTokenCredential;
 
 /**
  * {@link Credential} that provides a Databricks access token (Bearer).
@@ -89,7 +90,7 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
 
     private URI m_databricksWorkspaceUrl;
 
-    private String m_accessToken;
+    private AccessTokenAccessor m_wrappedAccessToken;
 
     private String m_userId;
 
@@ -102,17 +103,34 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
     }
 
     /**
-     * Constructor that wraps a given access token (OAuth2 or personal).
+     * Constructor that wraps a given Databricks personal access token.
      *
      * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
-     * @param accessToken The Databricks access token (OAuth2 or personal).
+     * @param accessToken The Databricks personal access token.
      * @param userId The technical Databricks user id.
      * @param displayName The Databricks user display name.
      */
     public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl, final String accessToken,
         final String userId, final String displayName) {
+        this(databricksWorkspaceUrl,//
+            new AccessTokenCredential(accessToken, null, TOKEN_TYPE_BEARER, null),//
+            userId,//
+            displayName);
+    }
+
+    /**
+     * Constructor that wraps a given {@link AccessTokenAccessor}.
+     *
+     * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
+     * @param accessTokenAccessor The Databricks personal access token.
+     * @param userId The technical Databricks user id.
+     * @param displayName The Databricks user display name.
+     */
+    public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl,
+        final AccessTokenAccessor accessTokenAccessor, final String userId, final String displayName) {
+
         m_databricksWorkspaceUrl = databricksWorkspaceUrl;
-        m_accessToken = accessToken;
+        m_wrappedAccessToken = accessTokenAccessor;
         m_userId = userId;
         m_displayName = displayName;
     }
@@ -124,7 +142,7 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
 
     @Override
     public String getAccessToken() throws IOException {
-        return m_accessToken;
+        return m_wrappedAccessToken.getAccessToken();
     }
 
     @Override
@@ -139,7 +157,7 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
 
     @Override
     public String getTokenType() {
-        return TOKEN_TYPE_BEARER;
+        return m_wrappedAccessToken.getTokenType();
     }
 
     @Override
@@ -169,12 +187,13 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
 
     @Override
     public CredentialPortViewData describe() {
+
         return new CredentialPortViewData(List.of(new Section("Databricks Credentials", new String[][]{//
             {"Property", "Value"}, //
             {"Databricks workspace URL", m_databricksWorkspaceUrl.toString()}, //
             {"Databricks user ID", m_userId}, //
             {"Databricks user", m_displayName}, //
-            {"Token", obfuscate(m_accessToken)}, //
+            {"Token", obfuscate("xxxxxxxxxxxxxxxxxxxxxxxx")}, // okay, this is just for show really...
             {"Token type", getTokenType()} //
         })));
     }

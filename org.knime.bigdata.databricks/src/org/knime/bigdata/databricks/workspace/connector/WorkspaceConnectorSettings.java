@@ -51,13 +51,17 @@ package org.knime.bigdata.databricks.workspace.connector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.After;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
+import org.knime.core.webui.node.dialog.defaultdialog.rule.And;
+import org.knime.core.webui.node.dialog.defaultdialog.rule.ConstantSignal;
 import org.knime.core.webui.node.dialog.defaultdialog.rule.Effect;
 import org.knime.core.webui.node.dialog.defaultdialog.rule.Effect.EffectType;
 import org.knime.core.webui.node.dialog.defaultdialog.rule.OneOfEnumCondition;
@@ -67,6 +71,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.CredentialsWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
+import org.knime.credentials.base.CredentialPortObject;
 
 /**
  * Node settings for the Databricks Workspace Connector node.
@@ -76,14 +81,28 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.Passwor
 @SuppressWarnings("restriction")
 public class WorkspaceConnectorSettings implements DefaultNodeSettings {
 
+    /**
+     * Constant signal to indicate whether the user has added a credential port or not.
+     */
+    public static final class CredentialInputNotConnectedSignal implements ConstantSignal {
+        @Override
+        public boolean applies(final DefaultNodeSettingsContext context) {
+            return Stream.of(context.getInPortTypes()).noneMatch(CredentialPortObject.TYPE::equals);
+        }
+    }
+
     @Section(title = "Username and Password")
-    @Effect(signals = AuthType.IsUsernamePassword.class, type = EffectType.SHOW)
+    @Effect(signals = {AuthType.IsUsernamePassword.class, CredentialInputNotConnectedSignal.class},//
+        operation = And.class, //
+        type = EffectType.SHOW)
     interface UsernamePasswordSection {
     }
 
     @Section(title = "Token")
     @After(UsernamePasswordSection.class)
-    @Effect(signals = AuthType.IsToken.class, type = EffectType.SHOW)
+    @Effect(signals = {AuthType.IsToken.class, CredentialInputNotConnectedSignal.class}, //
+        operation = And.class, //
+        type = EffectType.SHOW)
     interface TokenSection {
     }
 
@@ -92,20 +111,25 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             + "or https://adb-&lt;workspace-id&gt;.&lt;random-number&gt;.azuredatabricks.net/ on Azure.")
     String m_workspaceUrl = "";
 
+
     @Widget(title = "Authentication type", //
-        description = "Authentication type to use. The following types are supported:\n" + "<ul>\n"
-            + "<li><b>Username/Password</b>: Authenticate with the username/password of a Databricks account.</li>\n"
-            + "<li><b>Token</b>: Authenticate with a personal access token.</li>\n" + "</ul>")
+        description = "Authentication type to use. The following types are supported:\n"//
+            + "<ul>"//
+            + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
+            + "<li><b>Username/Password (Legacy)</b>: Legacy authenication with the username/password of a "
+            + "Databricks account. Not supported on Azure Databricks.</li>"//
+            + "</ul>")
     @Signal(condition = AuthType.IsUsernamePassword.class)
     @Signal(condition = AuthType.IsToken.class)
-    AuthType m_authType = AuthType.USERNAME_PASSWORD;
+    @Effect(signals = CredentialInputNotConnectedSignal.class, type = EffectType.SHOW)
+    AuthType m_authType = AuthType.TOKEN;
 
     enum AuthType {
-            @Label("Username/Password")
-            USERNAME_PASSWORD,
+            @Label("Personal access token")
+            TOKEN,
 
-            @Label("Token")
-            TOKEN;
+            @Label("Username/Password (Legacy)")
+            USERNAME_PASSWORD;
 
         static class IsUsernamePassword extends OneOfEnumCondition<AuthType> {
             @Override
@@ -136,7 +160,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     @Layout(TokenSection.class)
     Credentials m_token = new Credentials();
 
-    void validate() throws InvalidSettingsException {
+    void validate(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (StringUtils.isBlank(m_workspaceUrl)) {
             throw new InvalidSettingsException("Please specify a Databricks workspace URL");
         }
@@ -148,6 +172,12 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             }
         } catch (URISyntaxException e) { // NOSONAR not rethrowing
             throw new InvalidSettingsException("The provided Databricks workspace URL is invalid");
+        }
+
+        if (inSpecs != null && inSpecs.length > 0) {
+            // if a credential input port is attached then usernamePassword and token don't matter
+            // because they will be ignored anyway
+            return;
         }
 
         if (m_authType == AuthType.USERNAME_PASSWORD) {

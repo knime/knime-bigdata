@@ -48,9 +48,24 @@
  */
 package org.knime.bigdata.databricks.workspace.connector;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import org.apache.xmlbeans.XmlException;
+import org.knime.core.node.ConfigurableNodeFactory;
+import org.knime.core.node.NodeDescription;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeView;
+import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.ports.PortsConfiguration;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
 import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeFactory;
 import org.knime.credentials.base.CredentialPortObject;
+import org.xml.sax.SAXException;
 
 /**
  * The Databricks Workspace Connector node factory.
@@ -58,29 +73,73 @@ import org.knime.credentials.base.CredentialPortObject;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SuppressWarnings("restriction")
-public class WorkspaceConnectorNodeFactory extends WebUINodeFactory<WorkspaceConnectorNodeModel> {
-    private static final String FULL_DESCRIPTION =
-        "The Databricks Workspace Connector node allows to connect to" + " a Databricks workspace.";
+public class WorkspaceConnectorNodeFactory extends ConfigurableNodeFactory<WorkspaceConnectorNodeModel>
+    implements NodeDialogFactory {
 
-    private static final WebUINodeConfiguration CONFIGURATION = WebUINodeConfiguration.builder()//
+    private static final String CREDENTIAL_INPUT_NAME = "Microsoft Credential (OAuth2 access token)";
+
+    private static final String CREDENTIAL_OUTPUT_NAME = "Databricks Credential";
+
+    private static final String FULL_DESCRIPTION =
+        "The Databricks Workspace Connector node allows to connect to a Databricks workspace.\n"//
+            + "It supports both Databricks and Azure Databricks workspaces. To use Azure Entra ID authentication\n"
+            + "you can add add credential input port and attach the Microsoft Authenticator node.";
+
+    static final WebUINodeConfiguration CONFIG = WebUINodeConfiguration.builder()//
         .name("Databricks Workspace Connector")//
         .icon("./icon.png")//
         .shortDescription("Databricks Workspace Connector node.")//
         .fullDescription(FULL_DESCRIPTION) //
         .modelSettingsClass(WorkspaceConnectorSettings.class)//
-        .addOutputPort("Credential", CredentialPortObject.TYPE, "Databricks credential (access token).")//
+        .addInputPort(CREDENTIAL_INPUT_NAME, CredentialPortObject.TYPE, "Microsoft/Azure credential (access token)",
+            true)//
+        .addOutputPort(CREDENTIAL_OUTPUT_NAME, CredentialPortObject.TYPE, "Databricks credential (access token).")//
+        .nodeType(NodeType.Source)//
         .sinceVersion(5, 3, 0)//
         .build();
 
-    /**
-     * Creates new instance.
-     */
-    public WorkspaceConnectorNodeFactory() {
-        super(CONFIGURATION);
+    @Override
+    protected NodeDescription createNodeDescription() throws SAXException, IOException, XmlException {
+        return WebUINodeFactory.createNodeDescription(CONFIG);
     }
 
     @Override
-    public WorkspaceConnectorNodeModel createNodeModel() {
-        return new WorkspaceConnectorNodeModel(CONFIGURATION);
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, WorkspaceConnectorSettings.class);
+    }
+
+    @Override
+    protected Optional<PortsConfigurationBuilder> createPortsConfigBuilder() {
+        final PortsConfigurationBuilder b = new PortsConfigurationBuilder();
+        b.addOptionalInputPortGroup(CREDENTIAL_INPUT_NAME, CredentialPortObject.TYPE);
+        b.addFixedOutputPortGroup(CREDENTIAL_OUTPUT_NAME, CredentialPortObject.TYPE);
+        return Optional.of(b);
+    }
+
+    @Override
+    protected WorkspaceConnectorNodeModel createNodeModel(final NodeCreationConfiguration creationConfig) {
+        final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
+        return new WorkspaceConnectorNodeModel(portsConfig);
+    }
+
+    @Override
+    protected NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
+        return null;
+    }
+
+    @Override
+    protected int getNrNodeViews() {
+        return 0;
+    }
+
+    @Override
+    public NodeView<WorkspaceConnectorNodeModel> createNodeView(final int viewIndex,
+        final WorkspaceConnectorNodeModel nodeModel) {
+        return null;
+    }
+
+    @Override
+    protected boolean hasDialog() {
+        return true;
     }
 }
