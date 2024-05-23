@@ -31,8 +31,8 @@
 		<module>org.knime.bigdata.commons.windows</module>
 		<module>org.knime.bigdata.database</module>		
 		<module>org.knime.bigdata.databricks</module>
-        <module>org.knime.bigdata.databricks.driver/lib/fetch_jars</module>
-        <module>org.knime.bigdata.databricks.driver</module>
+		<module>org.knime.bigdata.databricks.driver/lib/fetch_jars</module>
+		<module>org.knime.bigdata.databricks.driver</module>
 		<module>org.knime.bigdata.fileformats</module>
 		<module>org.knime.bigdata.filehandling</module>
 		<module>org.knime.bigdata.filehandling.knox</module>
@@ -90,6 +90,11 @@
 			<id>p2-knime-core-ui</id>
 			<layout>p2</layout>
 			<url>${knime.core.ui.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-credentials-base</id>
+			<layout>p2</layout>
+			<url>${knime.credentials.base.p2}</url>
 		</repository>
 		<repository>
 			<id>p2-knime-core-columnar</id>
