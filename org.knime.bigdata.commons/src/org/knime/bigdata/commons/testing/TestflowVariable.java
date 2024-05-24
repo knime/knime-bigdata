@@ -412,6 +412,11 @@ public enum TestflowVariable {
         SPARK_DATABRICKS_STAGINGAREAFOLDER("spark.databricks.stagingAreaFolder"),
 
         /**
+         * Flow variable referencing a Unity Catalog Volume for the Unity File System Connector node.
+         */
+        SPARK_DATABRICKS_UNITY_VOLUME("spark.databricks.unityVolume"),
+
+        /**
          * Flow variable for the "connectionTimeout" node setting of the "Create Spark Context (Databricks)" node in
          * seconds. Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test
          * Environment" node when creating a Spark context via Databricks.

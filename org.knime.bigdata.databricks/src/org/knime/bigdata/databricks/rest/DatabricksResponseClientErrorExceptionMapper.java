@@ -49,6 +49,8 @@
 package org.knime.bigdata.databricks.rest;
 
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.client.ResponseExceptionMapper;
 import org.knime.bigdata.database.databricks.DatabricksRateLimitClientErrorException;
@@ -71,13 +73,45 @@ import jakarta.ws.rs.core.Response;
  * </ul>
  */
 class DatabricksResponseClientErrorExceptionMapper implements ResponseExceptionMapper<ClientErrorException> {
+
     @Override
-    public ClientErrorException fromResponse(final Response response) {
+    public ClientErrorException fromResponse(final Response response) { // NOSONAR it's simple enough...
         final MediaType mediaType = response.getMediaType();
+        final String message = extractErrorMessage(response, mediaType);
+
+        final ClientErrorException toReturn;
+        if (response.getStatus() == 401 && !StringUtils.isBlank(message)) {
+            toReturn = new NotAuthorizedException(message);
+        } else if (response.getStatus() == 401) {
+            toReturn = new NotAuthorizedException("Invalid or missing authentication data");
+        } else if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
+            toReturn = new ForbiddenException(message);
+        } else if (response.getStatus() == 403) {
+            toReturn = new ForbiddenException("Invalid or missing authentication data");
+        } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
+            toReturn = new NotFoundException(message);
+        } else if (response.getStatus() == 404) {
+            toReturn = new NotFoundException("Resource not found");
+        } else if (response.getStatus() == 429 && !StringUtils.isBlank(message)) {
+            toReturn = new DatabricksRateLimitClientErrorException(message);
+        } else if (response.getStatus() == 429) {
+            toReturn = new DatabricksRateLimitClientErrorException();
+        } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
+            toReturn = new NotFoundException("Context not found");
+        } else if (!StringUtils.isBlank(message)) {
+            toReturn = new ClientErrorException("Server error: " + message, response.getStatus());
+        } else {
+            toReturn = new ClientErrorException("Server error: " + response.getStatus(), response.getStatus());
+        }
+
+        return toReturn;
+    }
+
+    private static String extractErrorMessage(final Response response, final MediaType mediaType) {
         String message = "";
 
         // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
-        if (mediaType != null && mediaType.getSubtype().toLowerCase().contains("json")) {
+        if (mediaType != null && mediaType.getSubtype().toLowerCase(Locale.ENGLISH).contains("json")) {
             try {
                 final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
                 if (!StringUtils.isBlank(resp.message)) {
@@ -87,36 +121,13 @@ class DatabricksResponseClientErrorExceptionMapper implements ResponseExceptionM
                 } else {
                     message = response.getStatusInfo().getReasonPhrase();
                 }
-            } catch (final Exception e) {
+            } catch (final Exception e) { // NOSONAR
                 message = e.getMessage();
             }
 
         } else if (!StringUtils.isBlank(response.getHeaderString("x-thriftserver-error-message"))) {
             message = response.getHeaderString("x-thriftserver-error-message");
         }
-
-        if (response.getStatus() == 401 && !StringUtils.isBlank(message)) {
-            return new NotAuthorizedException(message);
-        } else if (response.getStatus() == 401) {
-            return new NotAuthorizedException("Invalid or missing authentication data");
-        } else if (response.getStatus() == 403 && !StringUtils.isBlank(message)) {
-            return new ForbiddenException(message);
-        } else if (response.getStatus() == 403) {
-            return new ForbiddenException("Invalid or missing authentication data");
-        } else if (response.getStatus() == 404 && !StringUtils.isBlank(message)) {
-            return new NotFoundException(message);
-        } else if (response.getStatus() == 404) {
-            return new NotFoundException("Resource not found");
-        } else if (response.getStatus() == 429 && !StringUtils.isBlank(message)) {
-            return new DatabricksRateLimitClientErrorException(message);
-        } else if (response.getStatus() == 429) {
-            return new DatabricksRateLimitClientErrorException();
-        } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
-            return new NotFoundException("Context not found");
-        } else if (!StringUtils.isBlank(message)) {
-            return new ClientErrorException("Server error: " + message, response.getStatus());
-        } else {
-            return new ClientErrorException("Server error: " + response.getStatus(), response.getStatus());
-        }
+        return message;
     }
 }

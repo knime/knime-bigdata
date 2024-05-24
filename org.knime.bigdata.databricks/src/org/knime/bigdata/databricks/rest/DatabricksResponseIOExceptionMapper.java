@@ -42,7 +42,7 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- * 
+ *
  * History
  *   2024-05-23 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
@@ -51,6 +51,7 @@ package org.knime.bigdata.databricks.rest;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.client.ResponseExceptionMapper;
@@ -70,29 +71,11 @@ import jakarta.ws.rs.core.Response;
  * </ul>
  */
 class DatabricksResponseIOExceptionMapper implements ResponseExceptionMapper<IOException> {
+
     @Override
-    public IOException fromResponse(final Response response) {
+    public IOException fromResponse(final Response response) { // NOSONAR it's simple enough
         final MediaType mediaType = response.getMediaType();
-        String message = "";
-
-        // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
-        if (mediaType != null && mediaType.getSubtype().toLowerCase().contains("json")) {
-            try {
-                final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
-                if (!StringUtils.isBlank(resp.message)) {
-                    message = resp.message;
-                } else if (!StringUtils.isBlank(resp.error)) {
-                    message = resp.error;
-                } else {
-                    message = response.getStatusInfo().getReasonPhrase();
-                }
-            } catch (Exception e) {
-                message = e.getMessage();
-            }
-
-        } else if (!StringUtils.isBlank(response.getHeaderString("x-thriftserver-error-message"))) {
-            message = response.getHeaderString("x-thriftserver-error-message");
-        }
+        final String message = extractErrorMessage(response, mediaType);
 
         if ((response.getStatus() == 401 || response.getStatus() == 403) && !StringUtils.isBlank(message)) {
             return new AccessDeniedException(message);
@@ -113,5 +96,29 @@ class DatabricksResponseIOExceptionMapper implements ResponseExceptionMapper<IOE
         } else {
             return new IOException("Server error: " + response.getStatus());
         }
+    }
+
+    private static String extractErrorMessage(final Response response, final MediaType mediaType) {
+        String message = "";
+
+        // try to parse JSON response with error (REST 1.2 API) or message (REST 2.0 API) field
+        if (mediaType != null && mediaType.getSubtype().toLowerCase(Locale.ENGLISH).contains("json")) {
+            try {
+                final GenericErrorResponse resp = response.readEntity(GenericErrorResponse.class);
+                if (!StringUtils.isBlank(resp.message)) {
+                    message = resp.message;
+                } else if (!StringUtils.isBlank(resp.error)) {
+                    message = resp.error;
+                } else {
+                    message = response.getStatusInfo().getReasonPhrase();
+                }
+            } catch (Exception e) { // NOSONAR
+                message = e.getMessage();
+            }
+
+        } else if (!StringUtils.isBlank(response.getHeaderString("x-thriftserver-error-message"))) {
+            message = response.getHeaderString("x-thriftserver-error-message");
+        }
+        return message;
     }
 }

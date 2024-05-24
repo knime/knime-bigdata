@@ -279,6 +279,7 @@ public class FlowVariableReader {
                 if (TestflowVariable.isTrue(TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, flowVariables)) {
                     ensureHas(TestflowVariable.SPARK_DATABRICKS_STAGINGAREAFOLDER, flowVariables);
                 }
+                ensureHas(TestflowVariable.SPARK_DATABRICKS_UNITY_VOLUME, flowVariables);
                 ensureHas(TestflowVariable.SPARK_DATABRICKS_CONNECTIONTIMEOUT, flowVariables);
                 ensureHas(TestflowVariable.SPARK_DATABRICKS_RECEIVETIMEOUT, flowVariables);
             }

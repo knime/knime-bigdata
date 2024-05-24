@@ -79,7 +79,6 @@ import org.knime.bigdata.databricks.rest.catalog.CatalogVolumesInfo;
 import org.knime.bigdata.databricks.rest.catalog.MetastoreSummary;
 import org.knime.bigdata.databricks.rest.files.FileInfo;
 import org.knime.bigdata.databricks.rest.files.FilesAPI;
-import org.knime.bigdata.databricks.unity.filehandler.UnityFileOutputStream;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
 

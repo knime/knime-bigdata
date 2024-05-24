@@ -36,6 +36,10 @@
           factory-class="org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeFactory">
     </node>
     <node
+          category-path="/io/connectors"
+          factory-class="org.knime.bigdata.databricks.unity.filehandling.node.UnityFileSystemConnectorNodeFactory">
+    </node>
+    <node
           category-path="/toolintegration/spark"
           factory-class="org.knime.bigdata.databricks.workspace.connector.WorkspaceConnectorNodeFactory">
     </node>

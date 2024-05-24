@@ -43,7 +43,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.databricks.unity.filehandler;
+package org.knime.bigdata.databricks.unity.filehandling.fs;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -62,7 +62,7 @@ import org.knime.filehandling.core.connections.FSFiles;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class UnityFileOutputStream extends OutputStream {
+class UnityFileOutputStream extends OutputStream {
 
     private final String m_path;
 
