@@ -34,6 +34,7 @@ import org.knime.bigdata.commons.CommonsPlugin;
 import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.NodeContext;
+import org.knime.core.util.ContextProperties;
 import org.knime.core.util.KNIMERuntimeContext;
 
 /**
@@ -191,17 +192,18 @@ public class CommonConfigContainer {
     public Optional<String> getUserToImpersonate() {
         Optional<String> wfUser = Optional.empty();
 
+
         if (KNIMERuntimeContext.INSTANCE.runningInServerContext() || getUserToImpersonateForTesting().isPresent()) {
+
             if (enableKerberosImpersonation()) {
 
-                wfUser = getUserToImpersonateForTesting();
-                if (!wfUser.isPresent()) {
-                    wfUser = NodeContext.getWorkflowUser();
-                }
+                wfUser = getUserToImpersonateForTesting()//
+                    .or(() -> Optional
+                        .ofNullable(ContextProperties.extractContextProperty("context.workflow.username")));
 
                 if (!wfUser.isPresent()) {
                     LOGGER.warn(
-                        "Kerberos impersonation disabled on KNIME Server because no workflow user is present in node context.");
+                        "Kerberos impersonation disabled because no workflow user is present in node context.");
                 }
             } else {
                 LOGGER.info("Kerberos impersonation disabled on KNIME Server");
