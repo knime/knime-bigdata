@@ -50,7 +50,7 @@ package org.knime.bigdata.databricks.workspace.connector;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.AccessDeniedException;
+import java.net.UnknownHostException;
 import java.time.Duration;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
@@ -73,6 +73,12 @@ import org.knime.credentials.base.CredentialPortObjectSpec;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.credentials.base.node.AuthenticatorNodeModel;
 import org.knime.credentials.base.oauth.api.AccessTokenAccessor;
+import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
+
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.ProcessingException;
 
 /**
  * The Databricks Workspace Connector node model.
@@ -122,8 +128,19 @@ public class WorkspaceConnectorNodeModel extends AuthenticatorNodeModel<Workspac
         final ScimUser scimUser;
         try {
             scimUser = getCurrentDatabricksUser(settings, ingoingAccessToken);
-        } catch (AccessDeniedException e) {
+        } catch (ForbiddenException | NotAuthorizedException | BadRequestException e) {
             throw KNIMEException.of(Message.fromSummary("Authentication failed. Please provide valid credentials."), e);
+        } catch (ProcessingException e) {
+            final Throwable deepestError = ExceptionUtil.getDeepestError(e);
+            if (deepestError instanceof UnknownHostException) {
+                throw KNIMEException.of(
+                    Message.fromSummary("Unknown Databricks workspace. Please provide a valid workspace URL."),
+                    deepestError);
+            } else {
+                throw KNIMEException.of(
+                    Message.fromSummary("Failure while validating credentials: " + deepestError.getMessage()),
+                    deepestError);
+            }
         } catch (Exception e) { // NOSONAR intentional
             throw KNIMEException.of(Message.fromSummary("Failure while validating credentials: " + e.getMessage()), e);
         }
