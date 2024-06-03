@@ -6,7 +6,7 @@
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for assembling, executing and managing Apache Spark applications. Supports Spark versions 2.4 and 3.
+      KNIME nodes for assembling, executing and managing Apache Spark applications. Supports Spark versions 3.3.
    </description>
 
    <copyright>
@@ -742,12 +742,6 @@ propagated with or for interoperation with KNIME.
          version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.spark.core.sparkjobserver"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.knime.bigdata.spark.core.livy"
          download-size="0"
          install-size="0"
@@ -755,30 +749,6 @@ propagated with or for interoperation with KNIME.
 
    <plugin
          id="org.knime.bigdata.spark.node"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark2_4"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark3_0"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark3_1"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark3_2"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
