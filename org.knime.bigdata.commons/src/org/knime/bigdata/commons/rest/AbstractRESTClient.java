@@ -118,8 +118,6 @@ public class AbstractRESTClient {
         EclipseProxyServiceInitializer.ensureInitialized();
         final var proxyResult = GlobalProxySearch.getCurrentFor(uri);
         if (proxyResult.isEmpty()) {
-            LOG.error(
-                "No Proxy service registered in Eclipse framework. Not using any proxies for databricks connection.");
             return null;
         }
         final var proxyData = proxyResult.get();
