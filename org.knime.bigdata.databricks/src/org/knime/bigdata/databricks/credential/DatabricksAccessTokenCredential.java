@@ -146,6 +146,11 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
     }
 
     @Override
+    public String getAccessToken(final boolean forceRefresh) throws IOException {
+        return m_wrappedAccessToken.getAccessToken(forceRefresh);
+    }
+
+    @Override
     public String getUserId() {
         return m_userId;
     }
