@@ -72,13 +72,14 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
-import org.knime.bigdata.databricks.rest.catalog.CatalogAPI;
 import org.knime.bigdata.databricks.rest.catalog.CatalogAPIWrapper;
-import org.knime.bigdata.databricks.rest.dbfs.DBFSAPI;
+import org.knime.bigdata.databricks.rest.clusters.ClusterAPIWrapper;
+import org.knime.bigdata.databricks.rest.commands.CommandsAPIWrapper;
+import org.knime.bigdata.databricks.rest.contexts.ContextsAPIWrapper;
 import org.knime.bigdata.databricks.rest.dbfs.DBFSAPIWrapper;
-import org.knime.bigdata.databricks.rest.files.FilesAPI;
 import org.knime.bigdata.databricks.rest.files.FilesAPIWrapper;
-import org.knime.bigdata.databricks.rest.scim.ScimAPI;
+import org.knime.bigdata.databricks.rest.jobs.JobsAPIWrapper;
+import org.knime.bigdata.databricks.rest.libraries.LibrariesAPIWrapper;
 import org.knime.bigdata.databricks.rest.scim.ScimAPIWrapper;
 import org.knime.core.node.NodeLogger;
 
@@ -217,18 +218,28 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T wrap(final T api) {
-        if (api instanceof DBFSAPI) {
-            return (T)new DBFSAPIWrapper((DBFSAPI)api);
-        } else if (api instanceof CatalogAPI) {
-            return (T)new CatalogAPIWrapper((CatalogAPI)api);
-        } else if (api instanceof FilesAPI) {
-            return (T)new FilesAPIWrapper((FilesAPI)api);
-        } else if (api instanceof ScimAPI) {
-            return (T)new ScimAPIWrapper((ScimAPI)api);
+    private static <T> T wrap(final T api) { // NOSONAR ignore to many returns
+        if (api instanceof CatalogAPIWrapper) {
+            return (T)new CatalogAPIWrapper((CatalogAPIWrapper)api);
+        } else if (api instanceof ClusterAPIWrapper) {
+            return (T)new ClusterAPIWrapper((ClusterAPIWrapper)api);
+        } else if (api instanceof CommandsAPIWrapper) {
+            return (T)new CommandsAPIWrapper((CommandsAPIWrapper)api);
+        } else if (api instanceof ContextsAPIWrapper) {
+            return (T)new ContextsAPIWrapper((ContextsAPIWrapper)api);
+        } else if (api instanceof DBFSAPIWrapper) {
+            return (T)new DBFSAPIWrapper((DBFSAPIWrapper)api);
+        } else if (api instanceof FilesAPIWrapper) {
+            return (T)new FilesAPIWrapper((FilesAPIWrapper)api);
+        } else if (api instanceof JobsAPIWrapper) {
+            return (T)new JobsAPIWrapper((JobsAPIWrapper)api);
+        } else if (api instanceof LibrariesAPIWrapper) {
+            return (T)new LibrariesAPIWrapper((LibrariesAPIWrapper)api);
+        } else if (api instanceof ScimAPIWrapper) {
+            return (T)new ScimAPIWrapper((ScimAPIWrapper)api);
         }
 
-        return api;
+        throw new IllegalArgumentException("Unsupported API: " + api.getClass());
     }
 
     /**
@@ -238,9 +249,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      */
     public static <T> void close(final T proxy) {
         Object toClose = proxy;
-        if (proxy instanceof DBFSAPIWrapper) {
-            toClose = ((DBFSAPIWrapper)proxy).getWrappedDBFSAPI();
-        } else if (proxy instanceof APIWrapper) {
+        if (proxy instanceof APIWrapper) {
             toClose = ((APIWrapper<?>)proxy).getWrappedAPI();
         }
         WebClient.client(toClose).close();

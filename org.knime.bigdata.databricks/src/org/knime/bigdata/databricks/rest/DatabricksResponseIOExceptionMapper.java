@@ -86,9 +86,9 @@ class DatabricksResponseIOExceptionMapper implements ResponseExceptionMapper<IOE
         } else if (response.getStatus() == 404) {
             return new FileNotFoundException("Resource not found");
         } else if (response.getStatus() == 429 && !StringUtils.isBlank(message)) {
-            return new DatabricksRateLimitException(message);
+            return new DatabricksRateLimitException(response.getHeaderString("retry-after"), message);
         } else if (response.getStatus() == 429) {
-            return new DatabricksRateLimitException();
+            return new DatabricksRateLimitException(response.getHeaderString("retry-after"));
         } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
             return new FileNotFoundException("Context not found");
         } else if (!StringUtils.isBlank(message)) {

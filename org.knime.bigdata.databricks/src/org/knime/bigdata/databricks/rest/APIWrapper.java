@@ -50,7 +50,11 @@ package org.knime.bigdata.databricks.rest;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.Duration;
 
+import org.knime.bigdata.database.databricks.DatabricksRateLimitClientErrorException;
+import org.knime.bigdata.database.databricks.DatabricksRateLimitException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 
 /**
@@ -62,40 +66,106 @@ import org.knime.core.util.ThreadLocalHTTPAuthenticator;
  */
 public class APIWrapper<T> {
 
+    private static final long MAX_WAIT_TIME = 60 * 1000l; // 60 seconds
+
+    private static final NodeLogger m_logger = NodeLogger.getLogger(DatabricksRESTClient.class); // NOSONAR use a more specific logger name instead of APIWrapper
+
     /**
      * Wrapped API
      */
     protected final T m_api;
 
     /**
+     * Name of the API endpoint, used in logging messages.
+     */
+    private final String m_apiName;
+
+    /**
      * Default constructor.
      *
      * @param api the API to wrap
+     * @param apiName the name of the API endpoint
      */
-    protected APIWrapper(final T api) {
+    protected APIWrapper(final T api, final String apiName) {
         m_api = api;
+        m_apiName = apiName;
     }
 
     /**
      * Functional interface used as parameter of the {@link APIWrapper#invoke(Invoker)} method.
+     *
+     * @param <R> type of return value
      */
     @FunctionalInterface
-    protected interface Invoker<T> {
-        T invoke() throws IOException;
+    protected interface Invoker<R> {
+        R invoke() throws IOException;
     }
 
     /**
      * Helper to wrap method calls on the API.
      *
-     * @param <T> type of return value
+     * @param <R> type of return value
      * @param invoker runnable to invoke
      * @return value returned by invoker
      * @throws IOException
      */
-    protected static <T> T invoke(final Invoker<T> invoker) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return invoker.invoke();
+    protected <R> R invoke(final Invoker<R> invoker) throws IOException {
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
+                return invoker.invoke();
+            } catch (final DatabricksRateLimitClientErrorException e) { // NOSONAR
+                waitBeforeRetry(i, e.getRetryAfter().orElse(null));
+            } catch (final DatabricksRateLimitException e) { // NOSONAR
+                waitBeforeRetry(i, e.getRetryAfter().orElse(null));
+            }
         }
+
+        throw new IOException("To many retries, Databrick request failed with rate limit."); // shoud never be reached
+    }
+
+    /**
+     * Wait some time before doing a request retry.
+     *
+     * @param retryRound the round of the request, starting with {@code 0} on the first request
+     * @param retryAfter duration from retry after response header, or {@code null} if not present in response
+     * @throws IOException if thread was interrupted while waiting
+     */
+    private void waitBeforeRetry(final int retryRound, final Duration retryAfter) throws IOException {
+        final Duration wait = waitTime(retryRound, retryAfter);
+
+        if (retryRound % 10 == 0) {
+            m_logger.debug(String.format(
+                "Databricks REST API returned rate-limit error, waiting %d seconds before next retry."
+                    + " (retry: %d, API: %s)",
+                wait.getSeconds(), retryRound + 1, m_apiName));
+        }
+
+        try {
+            Thread.sleep(wait.toMillis());
+        } catch (final InterruptedException ex) { // NOSONAR rethrowing the exception
+            throw new IOException("Databricks REST request interrupted while waiting for retry.", ex);
+        }
+    }
+
+    /**
+     * Calculate the next wait time using the duration from the retry-after response header, or exponential backoff time
+     * if header not present.
+     *
+     * @param retryRound the round of the request, starting with {@code 0} on the first request
+     * @param retryAfter duration from retry after response header, or {@code null} if not present in response
+     * @throws IOException if thread was interrupted while waiting
+     */
+    private static Duration waitTime(final int round, final Duration retryAfter) {
+        if (retryAfter != null) {
+            return retryAfter;
+        }
+
+        if (round == 0) {
+            return Duration.ofSeconds(1);
+        }
+
+        final long waitTime = (long)Math.pow(2, round);
+        return Duration.ofSeconds(Math.min(MAX_WAIT_TIME, waitTime));
     }
 
     /**

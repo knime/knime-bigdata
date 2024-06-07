@@ -49,6 +49,8 @@
 package org.knime.bigdata.database.databricks;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Optional;
 
 /**
  * Exception that describes a rate limit error, extending {@code IOException}.
@@ -59,19 +61,44 @@ public class DatabricksRateLimitException extends IOException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor with default error message.
+     * Optional time from {@code retry-after} response header if present.
      */
-    public DatabricksRateLimitException() {
-        super("Maximum number of requests per seconds has been exceeded, please try again later.");
+    private final Duration m_retryAfter;
+
+    /**
+     * Constructor with default error message.
+     *
+     * @param retryAfter retry after response header, containing the seconds to wait or {@code null} if not present
+     */
+    public DatabricksRateLimitException(final String retryAfter) {
+        this(retryAfter, "Maximum number of requests per seconds has been exceeded, please try again later.");
     }
 
     /**
      * Constructor with error message from API response.
      *
+     * @param retryAfter retry after response header, containing the seconds to wait or {@code null} if not present
      * @param message error message from API response
      */
-    public DatabricksRateLimitException(final String message) {
+    public DatabricksRateLimitException(final String retryAfter, final String message) {
         super(message);
+        m_retryAfter = parseRetryAfter(retryAfter).orElse(null);
+    }
+
+    /**
+     * @return the optional time to wait from {@code retry-after} response header if present
+     */
+    public Optional<Duration> getRetryAfter() {
+        return Optional.ofNullable(m_retryAfter);
+    }
+
+    private static Optional<Duration> parseRetryAfter(final String retryAfter) {
+        try {
+            final int seconds = Integer.parseInt(retryAfter);
+            return Optional.of(Duration.ofSeconds(seconds));
+        } catch (final NumberFormatException ex) { // NOSONAR
+            return Optional.empty();
+        }
     }
 
 }

@@ -93,9 +93,9 @@ class DatabricksResponseClientErrorExceptionMapper implements ResponseExceptionM
         } else if (response.getStatus() == 404) {
             toReturn = new NotFoundException("Resource not found");
         } else if (response.getStatus() == 429 && !StringUtils.isBlank(message)) {
-            toReturn = new DatabricksRateLimitClientErrorException(message);
+            toReturn = new DatabricksRateLimitClientErrorException(response.getHeaderString("retry-after"), message);
         } else if (response.getStatus() == 429) {
-            toReturn = new DatabricksRateLimitClientErrorException();
+            toReturn = new DatabricksRateLimitClientErrorException(response.getHeaderString("retry-after"));
         } else if (response.getStatus() == 500 && message.startsWith("ContextNotFound: ")) {
             toReturn = new NotFoundException("Context not found");
         } else if (!StringUtils.isBlank(message)) {

@@ -70,7 +70,7 @@ public class FilesAPIWrapper extends APIWrapper<FilesAPI> implements FilesAPI {
      * @param api the API to wrap
      */
     public FilesAPIWrapper(final FilesAPI api) {
-        super(api);
+        super(api, "files");
     }
 
     /**

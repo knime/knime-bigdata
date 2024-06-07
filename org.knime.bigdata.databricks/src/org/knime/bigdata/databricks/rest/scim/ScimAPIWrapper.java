@@ -65,7 +65,7 @@ public class ScimAPIWrapper extends APIWrapper<ScimAPI> implements ScimAPI {
      * @param api the API to wrap
      */
     public ScimAPIWrapper(final ScimAPI api) {
-        super(api);
+        super(api, "scim");
     }
 
     @Override

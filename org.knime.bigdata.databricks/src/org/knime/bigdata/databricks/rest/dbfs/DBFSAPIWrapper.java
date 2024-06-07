@@ -48,12 +48,11 @@
  */
 package org.knime.bigdata.databricks.rest.dbfs;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.knime.core.util.ThreadLocalHTTPAuthenticator;
+import org.knime.bigdata.databricks.rest.APIWrapper;
 
 /**
  * Wrapper class for {@link DBFSAPI} that suppresses authentication popups and performs percent-encoding of URL query
@@ -61,9 +60,7 @@ import org.knime.core.util.ThreadLocalHTTPAuthenticator;
  *
  * @author Alexander Bondaletov
  */
-public class DBFSAPIWrapper implements DBFSAPI {
-
-    private final DBFSAPI m_api;
+public class DBFSAPIWrapper extends APIWrapper<DBFSAPI> implements DBFSAPI {
 
     /**
      * Creates new instance.
@@ -72,7 +69,7 @@ public class DBFSAPIWrapper implements DBFSAPI {
      *
      */
     public DBFSAPIWrapper(final DBFSAPI api) {
-        m_api = api;
+        super(api, "DBFS");
     }
 
     private static final String percentEncodeQueryValue(final String value) {
@@ -80,16 +77,6 @@ public class DBFSAPIWrapper implements DBFSAPI {
             return new URI("dummy", "dummy", "/", value, null).getRawQuery();
         } catch (URISyntaxException ex) {
             throw new IllegalArgumentException(ex);
-        }
-    }
-
-    private interface Invoker<T> {
-        T invoke() throws IOException;
-    }
-
-    private static <T> T invoke(final Invoker<T> invoker) throws IOException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return invoker.invoke();
         }
     }
 
@@ -154,10 +141,4 @@ public class DBFSAPIWrapper implements DBFSAPI {
         });
     }
 
-    /**
-     * @return the underlying {@link DBFSAPI} object.
-     */
-    public DBFSAPI getWrappedDBFSAPI() {
-        return m_api;
-    }
 }

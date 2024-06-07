@@ -44,80 +44,49 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2024-05-15 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   2024-06-04 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.databricks.rest.catalog;
+package org.knime.bigdata.databricks.rest.libraries;
 
 import java.io.IOException;
 
 import org.knime.bigdata.databricks.rest.APIWrapper;
 
 /**
- * Wrapper class for {@link CatalogAPI} that suppresses authentication popups and handles rate limits.
+ * Wrapper class for {@link LibrariesAPI} that suppresses authentication popups and handles rate limits.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-public class CatalogAPIWrapper extends APIWrapper<CatalogAPI> implements CatalogAPI {
+public class LibrariesAPIWrapper extends APIWrapper<LibrariesAPI> implements LibrariesAPI {
 
     /**
      * Default constructor.
      *
      * @param api the api to wrap
      */
-    public CatalogAPIWrapper(final CatalogAPI api) {
-        super(api, "unity-catalog");
+    public LibrariesAPIWrapper(final LibrariesAPI api) {
+        super(api, "libraries");
     }
 
     @Override
-    public CatalogInfoList listCatalogs() throws IOException {
-        return invoke(m_api::listCatalogs);
+    public ClusterLibraryStatus getClusterStatus(final String clusterId) throws IOException {
+        return invoke(() -> m_api.getClusterStatus(clusterId));
     }
 
     @Override
-    public CatalogSchemaInfoList listSchemas(final String catalogName) throws IOException {
-        return invoke(() -> m_api.listSchemas(catalogName));
+    public void install(final UnInstallLibrary library) throws IOException {
+        invoke(() -> {
+            m_api.install(library);
+            return null;
+        });
     }
 
     @Override
-    public CatalogSchemaInfoList listSchemas(final String catalogName, final String pageToken) throws IOException {
-        return invoke(() -> m_api.listSchemas(catalogName, pageToken));
-    }
-
-    @Override
-    public CatalogVolumesInfoList listVolumes(final String catalogName, final String schemaName) throws IOException {
-        return invoke(() -> m_api.listVolumes(catalogName, schemaName));
-    }
-
-    @Override
-    public CatalogVolumesInfoList listVolumes(final String catalogName, final String schemaName, final String pageToken)
-        throws IOException {
-        return invoke(() -> m_api.listVolumes(catalogName, schemaName, pageToken));
-    }
-
-    @Override
-    public MetastoreAssignmentInfo getMetastoreAssignment() throws IOException {
-        return invoke(m_api::getMetastoreAssignment);
-    }
-
-    @Override
-    public MetastoreSummary getCurrentMetastore() throws IOException {
-        return invoke(m_api::getCurrentMetastore);
-    }
-
-    @Override
-    public CatalogInfo getCatalogMetadata(final String catalog) throws IOException {
-        return invoke(() -> m_api.getCatalogMetadata(catalog));
-    }
-
-    @Override
-    public CatalogSchemaInfo getSchemaMetadata(final String catalog, final String schema) throws IOException {
-        return invoke(() -> m_api.getSchemaMetadata(catalog, schema));
-    }
-
-    @Override
-    public CatalogVolumesInfo getVolumeMetadata(final String catalog, final String schema, final String volume)
-        throws IOException {
-        return invoke(() -> m_api.getVolumeMetadata(catalog, schema, volume));
+    public void uninstall(final UnInstallLibrary library) throws IOException {
+        invoke(() -> {
+            m_api.uninstall(library);
+            return null;
+        });
     }
 
 }
