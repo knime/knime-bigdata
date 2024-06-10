@@ -48,10 +48,12 @@
  */
 package org.knime.bigdata.databricks.workspace.connector;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.util.UUID;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.credential.DatabricksUsernamePasswordCredential;
@@ -60,18 +62,24 @@ import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.scim.ScimAPI;
 import org.knime.bigdata.databricks.rest.scim.ScimUser;
 import org.knime.bigdata.databricks.workspace.connector.WorkspaceConnectorSettings.AuthType;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.KNIMEException;
 import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.message.Message;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.webui.node.impl.WebUINodeModel;
 import org.knime.credentials.base.Credential;
+import org.knime.credentials.base.CredentialCache;
 import org.knime.credentials.base.CredentialPortObject;
 import org.knime.credentials.base.CredentialPortObjectSpec;
+import org.knime.credentials.base.CredentialType;
 import org.knime.credentials.base.NoSuchCredentialException;
-import org.knime.credentials.base.node.AuthenticatorNodeModel;
 import org.knime.credentials.base.oauth.api.AccessTokenAccessor;
 import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 
@@ -86,9 +94,11 @@ import jakarta.ws.rs.ProcessingException;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SuppressWarnings("restriction")
-public class WorkspaceConnectorNodeModel extends AuthenticatorNodeModel<WorkspaceConnectorSettings> {
+final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnectorSettings> {
 
     private static final ScimUser DUMMY_USER = new ScimUser();
+
+    private UUID m_credentialCacheKey;
 
     /**
      * @param portsConfig The node configuration.
@@ -98,7 +108,22 @@ public class WorkspaceConnectorNodeModel extends AuthenticatorNodeModel<Workspac
     }
 
     @Override
-    protected void validateOnConfigure(final PortObjectSpec[] inSpecs, final WorkspaceConnectorSettings settings)
+    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs, final WorkspaceConnectorSettings modelSettings)
+        throws InvalidSettingsException {
+
+        m_credentialCacheKey = null;
+        final CredentialType credType = validateOnConfigure(inSpecs, modelSettings);
+
+        return new PortObjectSpec[]{//
+            new DatabricksWorkspacePortObjectSpec(//
+                credType, //
+                null, //
+                modelSettings.getConnectionTimeout(), //
+                modelSettings.getReadTimeout())};
+    }
+
+    private static CredentialType validateOnConfigure(final PortObjectSpec[] inSpecs,
+        final WorkspaceConnectorSettings settings)
         throws InvalidSettingsException {
 
         settings.validate(inSpecs);
@@ -113,11 +138,31 @@ public class WorkspaceConnectorNodeModel extends AuthenticatorNodeModel<Workspac
                 }
             }
         }
+
+        if ((inSpecs != null && inSpecs.length > 0) || settings.m_authType == AuthType.TOKEN) {
+            return DatabricksAccessTokenCredential.TYPE;
+        } else {
+            return DatabricksUsernamePasswordCredential.TYPE;
+        }
     }
 
     @Override
-    protected Credential createCredential(final PortObject[] inObjects, final ExecutionContext exec,
+    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
         final WorkspaceConnectorSettings settings) throws Exception {
+
+        final Credential credential = createCredential(inObjects, settings);
+        m_credentialCacheKey = CredentialCache.store(credential);
+
+        return new PortObject[]{new DatabricksWorkspacePortObject(//
+            new DatabricksWorkspacePortObjectSpec(//
+                credential.getType(), //
+                m_credentialCacheKey, //
+                settings.getConnectionTimeout(), //
+                settings.getReadTimeout()))};
+    }
+
+    private static Credential createCredential(final PortObject[] inObjects, final WorkspaceConnectorSettings settings)
+        throws NoSuchCredentialException, KNIMEException {
 
         AccessTokenAccessor ingoingAccessToken = null;
         if (inObjects != null && inObjects.length > 0 && inObjects[0] != null) {
@@ -191,5 +236,24 @@ public class WorkspaceConnectorNodeModel extends AuthenticatorNodeModel<Workspac
             Duration.ofSeconds(60));
 
         return scimApi.currentUser();
+    }
+
+    @Override
+    protected void onDispose() {
+        reset();
+    }
+
+    @Override
+    protected void reset() {
+        if (m_credentialCacheKey != null) {
+            CredentialCache.delete(m_credentialCacheKey);
+            m_credentialCacheKey = null;
+        }
+    }
+
+    @Override
+    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)
+        throws IOException, CanceledExecutionException {
+        setWarningMessage("Credential not available anymore. Please re-execute this node.");
     }
 }

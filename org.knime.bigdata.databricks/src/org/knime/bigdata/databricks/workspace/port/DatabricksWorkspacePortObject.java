@@ -44,44 +44,48 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2024-05-24 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   Jun 10, 2024 (jannik.loescher): created
  */
-package org.knime.bigdata.databricks.unity.filehandling.node;
+package org.knime.bigdata.databricks.workspace.port;
 
-import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
+import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
+import org.knime.credentials.base.CredentialPortObject;
 
 /**
- * Node settings for the Databricks Unity File System Connector.
+ * Represents a connection to a Databricks workspace, including credential. Subclass of {@link CredentialPortObject}.
  *
- * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author Jannik Loescher, KNIME GmbH
  */
-@SuppressWarnings("restriction")
-public class UnityFileSystemConnectorSettings implements DefaultNodeSettings {
+public final class DatabricksWorkspacePortObject extends CredentialPortObject {
 
-    @Section(title = "File System")
-    interface FileSystemSection {
+    /**
+     * Port type.
+     */
+    @SuppressWarnings("hiding")
+    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(DatabricksWorkspacePortObject.class);
+
+    /** Serializer as required by ext point definition. */
+    public static final class Serializer extends AbstractSimplePortObjectSerializer<DatabricksWorkspacePortObject> {
     }
 
-    @Widget(title = "Working directory", //
-        description = "Specifies the <i>working directory</i> using the path syntax explained above."
-            + " The working directory must be specified as an absolute path."
-            + " A working directory allows downstream nodes to access files/folders using <i>relative</i> paths,"
-            + " i.e. paths that do not have a leading slash."
-            + " If not specified, the default working directory is \"/\".")
-    @Layout(FileSystemSection.class)
-    String m_workingDirectory = "/";
+    /**
+     * Init object with spec.
+     *
+     * @param spec Non null spec.
+     */
+    public DatabricksWorkspacePortObject(final DatabricksWorkspacePortObjectSpec spec) {
+        super(spec);
+    }
 
-    void validate() throws InvalidSettingsException {
-        if (StringUtils.isAllBlank(m_workingDirectory)) {
-            throw new InvalidSettingsException("Please specify a working directory.");
-        } else if (!m_workingDirectory.startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
-            throw new InvalidSettingsException("Working directory must be an absolute path that starts with \"/\"");
-        }
+    /**
+     * API method, do not use.
+     */
+    public DatabricksWorkspacePortObject() {
+    }
+
+    @Override
+    public DatabricksWorkspacePortObjectSpec getSpec() {
+        return (DatabricksWorkspacePortObjectSpec)super.getSpec();
     }
 }

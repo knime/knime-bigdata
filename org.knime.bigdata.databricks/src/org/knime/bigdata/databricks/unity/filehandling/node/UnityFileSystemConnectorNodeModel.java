@@ -49,20 +49,20 @@
 package org.knime.bigdata.databricks.unity.filehandling.node;
 
 import java.io.IOException;
-import java.time.Duration;
 
 import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnection;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnectionConfig;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFileSystem;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeModel;
-import org.knime.credentials.base.CredentialPortObjectSpec;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
@@ -93,12 +93,12 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
 
         PortObjectSpec[] toReturn = new PortObjectSpec[]{null};
         if (inSpecs[0] != null) {
-            final CredentialPortObjectSpec spec = (CredentialPortObjectSpec)inSpecs[0];
+            final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
             if (spec.isPresent()) {
                 try {
                     final DatabricksWorkspaceAccessor workspaceAccessor =
                         spec.toAccessor(DatabricksWorkspaceAccessor.class);
-                    final UnityFSConnectionConfig config = createFSConnectionConfig(workspaceAccessor, settings);
+                    final UnityFSConnectionConfig config = createFSConnectionConfig(workspaceAccessor, spec, settings);
                     toReturn = new PortObjectSpec[]{createSpec(config)};
                 } catch (final NoSuchCredentialException ex) {
                     throw new InvalidSettingsException(ex.getMessage(), ex);
@@ -109,13 +109,13 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
     }
 
     private static UnityFSConnectionConfig createFSConnectionConfig(final DatabricksWorkspaceAccessor workspace,
-        final UnityFileSystemConnectorSettings settings) {
+        final DatabricksWorkspacePortObjectSpec spec, final UnityFileSystemConnectorSettings settings) {
 
         return UnityFSConnectionConfig.builder() //
             .withWorkspace(workspace) //
             .withWorkingDirectory(settings.m_workingDirectory) //
-            .withConnectionTimeout(Duration.ofSeconds(settings.m_connectionTimeout)) //
-            .withReadTimeout(Duration.ofSeconds(settings.m_readTimeout)) //
+            .withConnectionTimeout(spec.getConnectionTimeout()) //
+            .withReadTimeout(spec.getConnectionTimeout()) //
             .build();
     }
 
@@ -129,9 +129,9 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
         final UnityFileSystemConnectorSettings settings) throws Exception {
 
-        final CredentialPortObjectSpec spec = (CredentialPortObjectSpec)inObjects[0].getSpec();
+        final DatabricksWorkspacePortObjectSpec spec = ((DatabricksWorkspacePortObject)inObjects[0]).getSpec();
         final DatabricksWorkspaceAccessor workspace = spec.toAccessor(DatabricksWorkspaceAccessor.class);
-        final UnityFSConnectionConfig config = createFSConnectionConfig(workspace, settings);
+        final UnityFSConnectionConfig config = createFSConnectionConfig(workspace, spec, settings);
         m_fsConnection = new UnityFSConnection(config);
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
 

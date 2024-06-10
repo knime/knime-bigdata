@@ -50,6 +50,7 @@ package org.knime.bigdata.databricks.workspace.connector;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -68,6 +69,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.rule.OneOfEnumCondition;
 import org.knime.core.webui.node.dialog.defaultdialog.rule.Signal;
 import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.Credentials;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.CredentialsWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
@@ -92,7 +94,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     }
 
     @Section(title = "Username and Password")
-    @Effect(signals = {AuthType.IsUsernamePassword.class, CredentialInputNotConnectedSignal.class},//
+    @Effect(signals = {AuthType.IsUsernamePassword.class, CredentialInputNotConnectedSignal.class}, //
         operation = And.class, //
         type = EffectType.SHOW)
     interface UsernamePasswordSection {
@@ -106,11 +108,15 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     interface TokenSection {
     }
 
+    @Section(title = "Timeouts", advanced = true)
+    @After(TokenSection.class)
+    interface ConnectionTimeoutsSection {
+    }
+
     @Widget(title = "Databricks workspace URL", //
         description = "Full URL of the Databricks workspace, e.g. https://&lt;workspace&gt;.cloud.databricks.com/ "//
             + "or https://adb-&lt;workspace-id&gt;.&lt;random-number&gt;.azuredatabricks.net/ on Azure.")
     String m_workspaceUrl = "";
-
 
     @Widget(title = "Authentication type", //
         description = "Authentication type to use. The following types are supported:\n"//
@@ -160,19 +166,32 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     @Layout(TokenSection.class)
     Credentials m_token = new Credentials();
 
-    void validate(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (StringUtils.isBlank(m_workspaceUrl)) {
-            throw new InvalidSettingsException("Please specify a Databricks workspace URL");
-        }
+    @Widget(title = "Connection timeout (seconds)",
+        description = "Timeout in seconds to establish a connection, or 0 for an infinite timeout.  "
+            + " Used by this and downstream nodes connecting to Databricks.", //
+        advanced = true)
+    @NumberInputWidget(min = 0)
+    @Layout(ConnectionTimeoutsSection.class)
+    int m_connectionTimeout = 30;
 
-        try {
-            final URI parsedUrl = new URI(m_workspaceUrl);
-            if (!Objects.equals("https", parsedUrl.getScheme())) {
-                throw new InvalidSettingsException("The provided Databricks workspace URL must start with https://");
-            }
-        } catch (URISyntaxException e) { // NOSONAR not rethrowing
-            throw new InvalidSettingsException("The provided Databricks workspace URL is invalid");
-        }
+    @Widget(title = "Read timeout (seconds)",
+        description = "Timeout in seconds to read data from an established connection,"
+            + " or 0 for an infinite timeout. Used by this and downstream nodes connecting to Databricks.", //
+        advanced = true)
+    @NumberInputWidget(min = 0)
+    @Layout(ConnectionTimeoutsSection.class)
+    int m_readTimeout = 30;
+
+    Duration getReadTimeout() {
+        return Duration.ofSeconds(m_readTimeout);
+    }
+
+    Duration getConnectionTimeout() {
+        return Duration.ofSeconds(m_readTimeout);
+    }
+
+    void validate(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        validateBasicSettings();
 
         if (inSpecs != null && inSpecs.length > 0) {
             // if a credential input port is attached then usernamePassword and token don't matter
@@ -189,6 +208,29 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             }
         } else if (m_authType == AuthType.TOKEN && StringUtils.isBlank(m_token.getPassword())) {
             throw new InvalidSettingsException("Please specify the personal access token to use");
+        }
+    }
+
+    private void validateBasicSettings() throws InvalidSettingsException {
+        if (StringUtils.isBlank(m_workspaceUrl)) {
+            throw new InvalidSettingsException("Please specify a Databricks workspace URL");
+        }
+
+        try {
+            final URI parsedUrl = new URI(m_workspaceUrl);
+            if (!Objects.equals("https", parsedUrl.getScheme())) {
+                throw new InvalidSettingsException("The provided Databricks workspace URL must start with https://");
+            }
+        } catch (URISyntaxException e) { // NOSONAR not rethrowing
+            throw new InvalidSettingsException("The provided Databricks workspace URL is invalid");
+        }
+
+        if (m_connectionTimeout < 0) {
+            throw new InvalidSettingsException("Connection timeout must be a positive number.");
+        }
+
+        if (m_readTimeout < 0) {
+            throw new InvalidSettingsException("Read timeout must be a positive number.");
         }
     }
 }

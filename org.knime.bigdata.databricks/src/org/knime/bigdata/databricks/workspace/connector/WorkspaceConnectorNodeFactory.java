@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.xmlbeans.XmlException;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
 import org.knime.core.node.ConfigurableNodeFactory;
 import org.knime.core.node.NodeDescription;
 import org.knime.core.node.NodeDialogPane;
@@ -78,7 +79,7 @@ public class WorkspaceConnectorNodeFactory extends ConfigurableNodeFactory<Works
 
     private static final String CREDENTIAL_INPUT_NAME = "Microsoft Credential (OAuth2 access token)";
 
-    private static final String CREDENTIAL_OUTPUT_NAME = "Databricks Credential";
+    private static final String CREDENTIAL_OUTPUT_NAME = "Databricks Workspace Connection";
 
     private static final String FULL_DESCRIPTION =
         "The Databricks Workspace Connector node allows to connect to a Databricks workspace.\n"//
@@ -93,7 +94,7 @@ public class WorkspaceConnectorNodeFactory extends ConfigurableNodeFactory<Works
         .modelSettingsClass(WorkspaceConnectorSettings.class)//
         .addInputPort(CREDENTIAL_INPUT_NAME, CredentialPortObject.TYPE, "Microsoft/Azure credential (access token)",
             true)//
-        .addOutputPort(CREDENTIAL_OUTPUT_NAME, CredentialPortObject.TYPE, "Databricks credential (access token).")//
+        .addOutputPort(CREDENTIAL_OUTPUT_NAME, DatabricksWorkspacePortObject.TYPE, "Databricks Workspace connection")//
         .nodeType(NodeType.Source)//
         .sinceVersion(5, 3, 0)//
         .build();
@@ -112,7 +113,7 @@ public class WorkspaceConnectorNodeFactory extends ConfigurableNodeFactory<Works
     protected Optional<PortsConfigurationBuilder> createPortsConfigBuilder() {
         final PortsConfigurationBuilder b = new PortsConfigurationBuilder();
         b.addOptionalInputPortGroup(CREDENTIAL_INPUT_NAME, CredentialPortObject.TYPE);
-        b.addFixedOutputPortGroup(CREDENTIAL_OUTPUT_NAME, CredentialPortObject.TYPE);
+        b.addFixedOutputPortGroup(CREDENTIAL_OUTPUT_NAME, DatabricksWorkspacePortObject.TYPE);
         return Optional.of(b);
     }
 

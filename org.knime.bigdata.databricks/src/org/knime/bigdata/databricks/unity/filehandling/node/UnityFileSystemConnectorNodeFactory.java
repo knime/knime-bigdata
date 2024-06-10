@@ -48,9 +48,9 @@
  */
 package org.knime.bigdata.databricks.unity.filehandling.node;
 
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
 import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeFactory;
-import org.knime.credentials.base.CredentialPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 
 /**
@@ -80,7 +80,7 @@ public class UnityFileSystemConnectorNodeFactory extends WebUINodeFactory<UnityF
             + "    <li>the name of a volume in the schema (<tt>example-volume</tt>)</li>\n"//
             + "    <li>The name of a folder or file in the volume (<tt>myfolder/file.csv</tt>)</li>\n"//
             + "</ol>\n"//
-        + "</p>";
+            + "</p>";
 
     private static final WebUINodeConfiguration CONFIGURATION = WebUINodeConfiguration.builder()//
         .name("Databricks Unity File System Connector") //
@@ -89,7 +89,9 @@ public class UnityFileSystemConnectorNodeFactory extends WebUINodeFactory<UnityF
         .fullDescription(FULL_DESCRIPTION) //
         .modelSettingsClass(UnityFileSystemConnectorSettings.class) //
         .nodeType(NodeType.Source)//
-        .addInputPort("Credential", CredentialPortObject.TYPE, "Databricks credential") //
+        .addInputPort("Databricks Workspace Connection", //
+            DatabricksWorkspacePortObject.TYPE, //
+            "Databricks Workspace connection") //
         .addOutputPort("File System", FileSystemPortObject.TYPE, "Databricks Unity File System.") //
         .sinceVersion(5, 3, 0)//
         .build();

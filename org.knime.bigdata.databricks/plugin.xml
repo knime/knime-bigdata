@@ -216,4 +216,16 @@
    <extension point="org.knime.filehandling.core.FSDescriptorProvider">
       <FSDescriptorProvider class="org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider" />
    </extension>
+   <extension
+         point="org.knime.core.PortType">
+      <portType
+            hidden="false"
+            name="Credential"
+            color="#4386f7"
+            objectClass="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject"
+            objectSerializer="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject$Serializer"
+            specClass="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec"
+            specSerializer="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec$Serializer">
+      </portType>
+   </extension>
 </plugin>
