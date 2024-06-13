@@ -42,7 +42,8 @@ public class LivyPlugin extends AbstractUIPlugin {
      */
     public static final CompatibilityChecker LIVY_SPARK_VERSION_CHECKER = new FixedVersionCompatibilityChecker( //
         SparkVersion.V_2_2, SparkVersion.V_2_3, SparkVersion.V_2_4, //
-        SparkVersion.V_3_0, SparkVersion.V_3_1, SparkVersion.V_3_2, SparkVersion.V_3_3, SparkVersion.V_3_4);
+        SparkVersion.V_3_0, SparkVersion.V_3_1, SparkVersion.V_3_2, SparkVersion.V_3_3, SparkVersion.V_3_4,
+        SparkVersion.V_3_5);
 
     /**
      * Holds the singleton instance of the Apache Livy connector plugin, once it has been created by the OSGI framework.
