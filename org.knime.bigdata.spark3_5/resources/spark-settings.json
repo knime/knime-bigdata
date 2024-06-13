@@ -67,6 +67,10 @@
   "default" : null,
   "description" : "Application information that will be written into Yarn RM log/HDFS audit log when running on Yarn/HDFS. Its length depends on the Hadoop configuration hadoop.caller.context.max.size. It should be concise, and typically can have up to 50 characters."
 }, {
+  "setting" : "spark.log.level",
+  "default" : null,
+  "description" : "When set, overrides any user-defined log settings as if calling SparkContext.setLogLevel() at Spark startup. Valid log levels include: \"ALL\", \"DEBUG\", \"ERROR\", \"FATAL\", \"INFO\", \"OFF\", \"TRACE\", \"WARN\"."
+}, {
   "setting" : "spark.driver.supervise",
   "default" : "false",
   "description" : "If true, restarts the driver automatically if it fails with a non-zero exit status. Only has effect in Spark standalone mode or Mesos cluster deploy mode."
@@ -287,6 +291,10 @@
   "default" : null,
   "description" : "Timeout for the established connections between shuffle servers and clients to be marked as idled and closed if there are still outstanding fetch requests but no traffic no the channel for at least `connectionTimeout`."
 }, {
+  "setting" : "spark.shuffle.io.connectionCreationTimeout",
+  "default" : null,
+  "description" : "Timeout for establishing a connection between the shuffle servers and clients."
+}, {
   "setting" : "spark.shuffle.service.enabled",
   "default" : "false",
   "description" : "Enables the external shuffle service. This service preserves the shuffle files written by executors e.g. so that executors can be safely removed, or so that shuffle fetches can continue in the event of executor failure. The external shuffle service must be set up in order to enable it. See dynamic allocation configuration and setup documentation for more information."
@@ -362,6 +370,10 @@
   "setting" : "spark.files.io.connectionTimeout",
   "default" : null,
   "description" : "Timeout for the established connections for fetching files in Spark RPC environments to be marked as idled and closed if there are still outstanding files being downloaded but no traffic no the channel for at least `connectionTimeout`."
+}, {
+  "setting" : "spark.files.io.connectionCreationTimeout",
+  "default" : null,
+  "description" : "Timeout for establishing a connection for fetching files in Spark RPC environments."
 }, {
   "setting" : "spark.shuffle.checksum.enabled",
   "default" : "true",
@@ -807,6 +819,10 @@
   "default" : "120s",
   "description" : "Default timeout for all network interactions. This config will be used in place of spark.storage.blockManagerHeartbeatTimeoutMs, spark.shuffle.io.connectionTimeout, spark.rpc.askTimeout or spark.rpc.lookupTimeout if they are not configured."
 }, {
+  "setting" : "spark.network.timeoutInterval",
+  "default" : "60s",
+  "description" : "Interval for the driver to check and expire dead executors."
+}, {
   "setting" : "spark.network.io.preferDirectBufs",
   "default" : "true",
   "description" : "If enabled then off-heap buffer allocations are preferred by the shared allocators. Off-heap buffers are used to reduce garbage collection during shuffle and cache block transfer. For environments where off-heap memory is tightly limited, users may wish to turn this off to force all allocations to be on-heap."
@@ -830,6 +846,10 @@
   "setting" : "spark.rpc.io.connectionTimeout",
   "default" : null,
   "description" : "Timeout for the established connections between RPC peers to be marked as idled and closed if there are outstanding RPC requests but no traffic on the channel for at least `connectionTimeout`."
+}, {
+  "setting" : "spark.rpc.io.connectionCreationTimeout",
+  "default" : null,
+  "description" : "Timeout for establishing a connection between RPC peers."
 }, {
   "setting" : "spark.cores.max",
   "default" : null,
@@ -1025,7 +1045,7 @@
 }, {
   "setting" : "spark.dynamicAllocation.enabled",
   "default" : "false",
-  "description" : "Whether to use dynamic resource allocation, which scales the number of executors registered with this application up and down based on the workload. For more detail, see the description here. This requires spark.shuffle.service.enabled or spark.dynamicAllocation.shuffleTracking.enabled to be set. The following configurations are also relevant: spark.dynamicAllocation.minExecutors, spark.dynamicAllocation.maxExecutors, and spark.dynamicAllocation.initialExecutorsspark.dynamicAllocation.executorAllocationRatio"
+  "description" : "Whether to use dynamic resource allocation, which scales the number of executors registered with this application up and down based on the workload. For more detail, see the description here. This requires one of the following conditions: 1) enabling external shuffle service through spark.shuffle.service.enabled, or 2) enabling shuffle tracking through spark.dynamicAllocation.shuffleTracking.enabled, or 3) enabling shuffle blocks decommission through spark.decommission.enabled and spark.storage.decommission.shuffleBlocks.enabled, or 4) (Experimental) configuring spark.shuffle.sort.io.plugin.class to use a custom ShuffleDataIO who's ShuffleDriverComponents supports reliable storage. The following configurations are also relevant: spark.dynamicAllocation.minExecutors, spark.dynamicAllocation.maxExecutors, and spark.dynamicAllocation.initialExecutorsspark.dynamicAllocation.executorAllocationRatio"
 }, {
   "setting" : "spark.dynamicAllocation.executorIdleTimeout",
   "default" : "60s",
@@ -1134,6 +1154,10 @@
   "setting" : "spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes",
   "default" : "256MB",
   "description" : "A partition is considered as skewed if its size in bytes is larger than this threshold and also larger than 'spark.sql.adaptive.skewJoin.skewedPartitionFactor' multiplying the median partition size. Ideally this config should be set larger than 'spark.sql.adaptive.advisoryPartitionSizeInBytes'."
+}, {
+  "setting" : "spark.sql.allowNamedFunctionArguments",
+  "default" : "true",
+  "description" : "If true, Spark will turn on support for named parameters for all functions that has it implemented."
 }, {
   "setting" : "spark.sql.ansi.doubleQuotedIdentifiers",
   "default" : "false",
@@ -1271,6 +1295,10 @@
   "default" : "false",
   "description" : "When true, make use of Apache Arrow for columnar data transfers in SparkR. This optimization applies to: 1. createDataFrame when its input is an R DataFrame 2. collect 3. dapply 4. gapply The following data types are unsupported: FloatType, BinaryType, ArrayType, StructType and MapType."
 }, {
+  "setting" : "spark.sql.execution.pandas.structHandlingMode",
+  "default" : "legacy",
+  "description" : "The conversion mode of struct type when creating pandas DataFrame. When \"legacy\",1. when Arrow optimization is disabled, convert to Row object, 2. when Arrow optimization is enabled, convert to dict or raise an Exception if there are duplicated nested field names. When \"row\", convert to Row object regardless of Arrow optimization. When \"dict\", convert to dict and use suffixed key names, e.g., a_0, a_1, if there are duplicated nested field names, regardless of Arrow optimization."
+}, {
   "setting" : "spark.sql.execution.pandas.udf.buffer.size",
   "default" : null,
   "description" : "Same as spark.buffer.size but only applies to Pandas UDF executions. If it is not set, the fallback is spark.buffer.size. Note that Pandas execution requires more than 4 bytes. Lowering this value could make small Pandas UDF batch iterated and pipelined; however, it might degrade performance. See SPARK-27870."
@@ -1278,6 +1306,14 @@
   "setting" : "spark.sql.execution.pyspark.udf.simplifiedTraceback.enabled",
   "default" : "true",
   "description" : "When true, the traceback from Python UDFs is simplified. It hides the Python worker, (de)serialization, etc from PySpark in tracebacks, and only shows the exception messages from UDFs. Note that this works only with CPython 3.7+."
+}, {
+  "setting" : "spark.sql.execution.pythonUDF.arrow.enabled",
+  "default" : "false",
+  "description" : "Enable Arrow optimization in regular Python UDFs. This optimization can only be enabled when the given function takes at least one argument."
+}, {
+  "setting" : "spark.sql.execution.pythonUDTF.arrow.enabled",
+  "default" : "false",
+  "description" : "Enable Arrow optimization for Python UDTFs."
 }, {
   "setting" : "spark.sql.execution.topKSortFallbackThreshold",
   "default" : "2147483632",
@@ -1295,13 +1331,17 @@
   "default" : "128MB",
   "description" : "The maximum number of bytes to pack into a single partition when reading files. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
 }, {
+  "setting" : "spark.sql.files.maxPartitionNum",
+  "default" : null,
+  "description" : "The suggested (not guaranteed) maximum number of split file partitions. If it is set, Spark will rescale each partition to make the number of partitions is close to this value if the initial number of partitions exceeds this value. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+}, {
   "setting" : "spark.sql.files.maxRecordsPerFile",
   "default" : "0",
   "description" : "Maximum number of records to write out to a single file. If this value is zero or negative, there is no limit."
 }, {
   "setting" : "spark.sql.files.minPartitionNum",
   "default" : null,
-  "description" : "The suggested (not guaranteed) minimum number of split file partitions. If not set, the default value is spark.default.parallelism. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
+  "description" : "The suggested (not guaranteed) minimum number of split file partitions. If not set, the default value is spark.sql.leafNodeDefaultParallelism. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC."
 }, {
   "setting" : "spark.sql.function.concatBinaryAsString",
   "default" : "false",
@@ -1529,7 +1569,7 @@
 }, {
   "setting" : "spark.sql.parquet.compression.codec",
   "default" : "snappy",
-  "description" : "Sets the compression codec used when writing Parquet files. If either compression or parquet.compression is specified in the table-specific options/properties, the precedence would be compression, parquet.compression, spark.sql.parquet.compression.codec. Acceptable values include: none, uncompressed, snappy, gzip, lzo, brotli, lz4, zstd."
+  "description" : "Sets the compression codec used when writing Parquet files. If either compression or parquet.compression is specified in the table-specific options/properties, the precedence would be compression, parquet.compression, spark.sql.parquet.compression.codec. Acceptable values include: none, uncompressed, snappy, gzip, lzo, brotli, lz4, lz4raw, zstd."
 }, {
   "setting" : "spark.sql.parquet.enableNestedColumnVectorizedReader",
   "default" : "true",
@@ -1630,6 +1670,10 @@
   "setting" : "spark.sql.repl.eagerEval.truncate",
   "default" : "20",
   "description" : "The max number of characters for each cell that is returned by eager evaluation. This only takes effect when spark.sql.repl.eagerEval.enabled is set to true."
+}, {
+  "setting" : "spark.sql.session.localRelationCacheThreshold",
+  "default" : "67108864",
+  "description" : "The threshold for the size in bytes of local relations to be cached at the driver side after serialization."
 }, {
   "setting" : "spark.sql.session.timeZone",
   "default" : null,
@@ -1752,7 +1796,7 @@
   "description" : "How long to wait in milliseconds for the streaming execution thread to stop when calling the streaming query's stop() method. 0 or negative values wait indefinitely."
 }, {
   "setting" : "spark.sql.thriftServer.interruptOnCancel",
-  "default" : "false",
+  "default" : "true",
   "description" : "When true, all running tasks will be interrupted if one cancels a query. When false, all running tasks will remain until finished."
 }, {
   "setting" : "spark.sql.thriftServer.queryTimeout",
@@ -1774,6 +1818,10 @@
   "setting" : "spark.sql.timestampType",
   "default" : "TIMESTAMP_LTZ",
   "description" : "Configures the default timestamp type of Spark SQL, including SQL DDL, Cast clause, type literal and the schema inference of data sources. Setting the configuration as TIMESTAMP_NTZ will use TIMESTAMP WITHOUT TIME ZONE as the default type while putting it as TIMESTAMP_LTZ will use TIMESTAMP WITH LOCAL TIME ZONE. Before the 3.4.0 release, Spark only supports the TIMESTAMP WITH LOCAL TIME ZONE type."
+}, {
+  "setting" : "spark.sql.tvf.allowMultipleTableArguments.enabled",
+  "default" : "false",
+  "description" : "When true, allows multiple table arguments for table-valued functions, receiving the cartesian product of all the rows of these tables."
 }, {
   "setting" : "spark.sql.ui.explainMode",
   "default" : "formatted",
@@ -2133,7 +2181,7 @@
 }, {
   "setting" : "spark.yarn.am.tokenConfRegex",
   "default" : null,
-  "description" : "This config is only supported when Hadoop version is 2.9+ or 3.x (e.g., when using the Hadoop 3.x profile). The value of this config is a regex expression used to grep a list of config entries from the job's configuration file (e.g., hdfs-site.xml) and send to RM, which uses them when renewing delegation tokens. A typical use case of this feature is to support delegation tokens in an environment where a YARN cluster needs to talk to multiple downstream HDFS clusters, where the YARN RM may not have configs (e.g., dfs.nameservices, dfs.ha.namenodes.*, dfs.namenode.rpc-address.*) to connect to these clusters. In this scenario, Spark users can specify the config value to be ^dfs.nameservices$|^dfs.namenode.rpc-address.*$|^dfs.ha.namenodes.*$ to parse these HDFS configs from the job's local configuration files. This config is very similar to mapreduce.job.send-token-conf. Please check YARN-5910 for more details."
+  "description" : "The value of this config is a regex expression used to grep a list of config entries from the job's configuration file (e.g., hdfs-site.xml) and send to RM, which uses them when renewing delegation tokens. A typical use case of this feature is to support delegation tokens in an environment where a YARN cluster needs to talk to multiple downstream HDFS clusters, where the YARN RM may not have configs (e.g., dfs.nameservices, dfs.ha.namenodes.*, dfs.namenode.rpc-address.*) to connect to these clusters. In this scenario, Spark users can specify the config value to be ^dfs.nameservices$|^dfs.namenode.rpc-address.*$|^dfs.ha.namenodes.*$ to parse these HDFS configs from the job's local configuration files. This config is very similar to mapreduce.job.send-token-conf. Please check YARN-5910 for more details."
 }, {
   "setting" : "spark.yarn.executor.failuresValidityInterval",
   "default" : null,
@@ -2191,6 +2239,10 @@
   "default" : "1s",
   "description" : "Interval between reports of the current Spark job status in cluster mode."
 }, {
+  "setting" : "spark.yarn.report.loggingFrequency",
+  "default" : "30",
+  "description" : "Maximum number of application reports processed until the next application status is logged. If there is a change of state, the application status will be logged regardless of the number of application reports processed."
+}, {
   "setting" : "spark.yarn.clientLaunchMonitorInterval",
   "default" : "1s",
   "description" : "Interval between requests for status the client mode AM when starting the app."
@@ -2202,6 +2254,10 @@
   "setting" : "spark.yarn.unmanagedAM.enabled",
   "default" : "false",
   "description" : "In client mode, whether to launch the Application Master service as part of the client using unmanaged am."
+}, {
+  "setting" : "spark.yarn.shuffle.server.recovery.disabled",
+  "default" : "false",
+  "description" : "Set to true for applications that have higher security requirements and prefer that their secret is not saved in the db. The shuffle data of such applications wll not be recovered after the External Shuffle Service restarts."
 }, {
   "setting" : "spark.kerberos.keytab",
   "default" : null,
