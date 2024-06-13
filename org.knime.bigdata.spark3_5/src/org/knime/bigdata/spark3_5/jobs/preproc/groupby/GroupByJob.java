@@ -34,7 +34,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
@@ -99,7 +99,7 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
         if (input.validateValues()) {
             final int colIdx = inputFrame.schema().fieldIndex(input.getPivotColumn());
             validatedFrame =
-                inputFrame.map(new ValidateValuesMapper(colIdx, pivotValues), RowEncoder.apply(inputFrame.schema()));
+                inputFrame.map(new ValidateValuesMapper(colIdx, pivotValues), ExpressionEncoder.apply(inputFrame.schema()));
         } else {
             validatedFrame = inputFrame;
         }

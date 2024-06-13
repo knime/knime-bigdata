@@ -33,7 +33,7 @@ import org.apache.spark.api.java.function.MapPartitionsFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -91,7 +91,7 @@ public class AssociationRuleApplyJob implements SparkJob<AssociationRuleApplyJob
         final int itemsFieldIdx = itemsDataset.schema().fieldIndex(input.getItemColumn());
         final StructType outputSchema = itemsDataset.schema().add(input.getOutputColumn(), itemsField.dataType(), false);
         final Dataset<Row> result = itemsDataset
-            .mapPartitions(new RulesApplyFunction(itemsFieldIdx, brRules), RowEncoder.apply(outputSchema));
+            .mapPartitions(new RulesApplyFunction(itemsFieldIdx, brRules), ExpressionEncoder.apply(outputSchema));
         namedObjects.addDataFrame(input.getFirstNamedOutputObject(), result);
 
         LOGGER.info("Association rules apply job done.");

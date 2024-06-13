@@ -35,7 +35,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
@@ -74,7 +74,7 @@ public abstract class PMMLAssignJob<I extends PMMLAssignJobInput> implements Spa
         final String namedOutputObject = input.getFirstNamedOutputObject();
         final StructType outputSparkSchema = TypeConverters.convertSpec(input.getSpec(namedOutputObject));
         final MapFunction<Row, Row> assignMapFunction = createMapFunction(bytecode, input);
-        final Dataset<Row> resultDF = inputDF.map(assignMapFunction, RowEncoder.apply(outputSparkSchema));
+        final Dataset<Row> resultDF = inputDF.map(assignMapFunction, ExpressionEncoder.apply(outputSparkSchema));
         namedObjects.addDataFrame(namedOutputObject, resultDF);
 
         LOGGER.info("PMML assigment done");

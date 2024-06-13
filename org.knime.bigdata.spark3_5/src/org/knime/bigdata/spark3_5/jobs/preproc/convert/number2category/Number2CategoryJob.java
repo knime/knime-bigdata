@@ -31,7 +31,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
@@ -96,7 +96,7 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
             }
         };
         final StructType schema = createSchema(input, map, keepOriginalColumns, colSuffix);
-        return input.map(function, RowEncoder.apply(schema));
+        return input.map(function, ExpressionEncoder.apply(schema));
     }
 
     /**

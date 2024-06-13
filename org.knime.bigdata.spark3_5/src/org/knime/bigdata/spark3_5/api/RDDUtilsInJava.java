@@ -23,7 +23,7 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.NumericType;
@@ -313,7 +313,7 @@ public class RDDUtilsInJava {
                 rb.add(value);
             }
             return rb.build();
-        }, RowEncoder.apply(outputSchema));
+        }, ExpressionEncoder.apply(outputSchema));
     }
 
     /**
@@ -340,7 +340,7 @@ public class RDDUtilsInJava {
                 }
             }
             return row;
-        }, RowEncoder.apply(input.schema()));
+        }, ExpressionEncoder.apply(input.schema()));
     }
 
     /**
