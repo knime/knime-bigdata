@@ -69,7 +69,8 @@ public class DatabricksPlugin extends AbstractUIPlugin {
      */
     public static final CompatibilityChecker DATABRICKS_SPARK_VERSION_CHECKER = new FixedVersionCompatibilityChecker( //
         SparkVersion.V_2_4, //
-        SparkVersion.V_3_0, SparkVersion.V_3_1, SparkVersion.V_3_2, SparkVersion.V_3_3, SparkVersion.V_3_4);
+        SparkVersion.V_3_0, SparkVersion.V_3_1, SparkVersion.V_3_2, SparkVersion.V_3_3, SparkVersion.V_3_4,
+        SparkVersion.V_3_5);
 
     /**
      * Holds the singleton instance of the Databricks connector plugin, once it has been created by the OSGI framework.
