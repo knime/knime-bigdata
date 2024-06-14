@@ -732,7 +732,7 @@ propagated with or for interoperation with KNIME.
    </requires>
 
    <includes
-         id="org.knime.features.bigdata.connectors"
+         id="org.knime.features.bigdata.spark"
          version="0.0.0"/>
 
    <plugin
@@ -743,18 +743,6 @@ propagated with or for interoperation with KNIME.
 
    <plugin
          id="org.knime.bigdata.spark.core.sparkjobserver"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark.core.livy"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.spark.node"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
