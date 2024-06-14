@@ -169,8 +169,8 @@ public abstract class AbstractFileFormatReader {
                     throw new IOException("This node only supports access key & secret for AWS authentication.");
                 }
 
-                toReturn.set("fs.s3n.awsAccessKeyId", accessID);
-                toReturn.set("fs.s3n.awsSecretAccessKey", secretKey);
+                toReturn.set("fs.s3a.access.key", accessID);
+                toReturn.set("fs.s3a.secret.key", secretKey);
                 toReturn.set("fs.s3.awsAccessKeyId", accessID);
                 toReturn.set("fs.s3.awsSecretAccessKey", secretKey);
             }
@@ -186,7 +186,7 @@ public abstract class AbstractFileFormatReader {
      */
     protected static Path generateS3nPath(final CloudRemoteFile<Connection> cloudcon) {
         try {
-            return new Path(new URI("s3n", cloudcon.getContainerName(), "/" + cloudcon.getBlobName(), null));
+            return new Path(new URI("s3a", cloudcon.getContainerName(), "/" + cloudcon.getBlobName(), null));
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }

@@ -74,6 +74,9 @@ public class ConfigurationFactory {
         final Configuration conf = createBaseConfiguration();
         conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.KERBEROS.name());
 
+        // BD-1268: default setting from Hadoop 2.x, allow all namenode kerberos principals
+        conf.setStrings("dfs.namenode.kerberos.principal.pattern", "*");
+
         return conf;
     }
 

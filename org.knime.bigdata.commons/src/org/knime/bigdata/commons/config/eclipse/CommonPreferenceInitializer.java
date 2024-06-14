@@ -116,7 +116,7 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_TRUSTSTORE_LOCATION, "");
         store.setDefault(PREF_TRUSTSTORE_PASSWORD, "");
         store.setDefault(PREF_TRUSTSTORE_TYPE, FileBasedKeyStoresFactory.DEFAULT_KEYSTORE_TYPE);
-        store.setDefault(PREF_TRUSTSTORE_RELOAD_INTERVAL, FileBasedKeyStoresFactory.DEFAULT_SSL_TRUSTSTORE_RELOAD_INTERVAL);
+        store.setDefault(PREF_TRUSTSTORE_RELOAD_INTERVAL, FileBasedKeyStoresFactory.DEFAULT_SSL_STORES_RELOAD_INTERVAL);
 
         store.setDefault(PREF_KEYSTORE_ENABLE, false);
         store.setDefault(PREF_KEYSTORE_LOCATION, "");
