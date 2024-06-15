@@ -104,7 +104,6 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkMissingValueJobInput jobInput = new SparkMissingValueJobInput(namedInputObject, namedOutputObject);
         final SparkMissingValueHandler mvHandler[] = new SparkMissingValueHandler[inputSpec.getNumColumns()];
-        boolean validPMML = true;
 
         final DataTableSpec outputSpec = createOutputSpec(inputSpec);
 
@@ -125,12 +124,6 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
 
             jobInput.addColumnConfig(inputColSpec.getName(), colConfig);
             mvHandler[i] = handler;
-            validPMML &= handler.isPMML4_2Compatible();
-        }
-
-        if (!validPMML) {
-            setWarningMessage(
-                "The current settings use missing value handling methods that cannot be represented in PMML 4.2.");
         }
 
         final SparkDataPortObject sparkOutputPort;
