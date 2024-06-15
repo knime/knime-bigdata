@@ -5,5 +5,7 @@ org.knime.*.bigdata.externals/.settings*
 documentation/secured_cluster_connection_guide_server/index.html
 **/.flattened-pom.xml
 **/.polyglot.build.properties
+**/.polyglot.feature.xml
+**/.polyglot.META-INF
 */*.jar
 **/CHANGELOG.md
