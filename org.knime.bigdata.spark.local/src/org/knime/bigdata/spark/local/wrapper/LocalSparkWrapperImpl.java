@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.util.Shell.ExitCodeException;
+import org.apache.hive.service.Service.STATE;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
@@ -41,10 +42,10 @@ import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
-import org.knime.bigdata.spark3_3.api.NamedObjects;
-import org.knime.bigdata.spark3_3.api.SimpleSparkJob;
-import org.knime.bigdata.spark3_3.api.SparkJob;
-import org.knime.bigdata.spark3_3.api.SparkJobWithFiles;
+import org.knime.bigdata.spark3_5.api.NamedObjects;
+import org.knime.bigdata.spark3_5.api.SimpleSparkJob;
+import org.knime.bigdata.spark3_5.api.SparkJob;
+import org.knime.bigdata.spark3_5.api.SparkJobWithFiles;
 
 import scala.Option;
 
@@ -74,6 +75,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	private final Map<String, Object> m_namedObjects = new HashMap<>();
 
 	private SparkSession m_sparkSession;
+
+	private HiveThriftServer2 m_thriftServer;
 
 	private boolean m_adaptiveQueryExecution;
 
@@ -331,7 +334,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 			if (startThriftserver) {
 				try {
-					HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
+					m_thriftServer = HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
 				} catch (RuntimeException e) {
 					if (Shell.WINDOWS && e.getCause() != null && e.getCause() instanceof ExitCodeException
 							&& ((ExitCodeException)e.getCause()).getExitCode() == -1073741515) {
@@ -512,17 +515,33 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	@Override
 	public synchronized void destroy() throws KNIMESparkException {
-	    if (m_sparkSession != null) {
-    		m_sparkSession.close();
-    		m_sparkSession = null;
-    		try {
-    			// shut down the entire derby system
-    			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-    		} catch (SQLException e) {
-    		}
+	    if (m_thriftServer != null) {
+	        m_thriftServer.stop();
+
+	        STATE serviceState = m_thriftServer.getServiceState();
+            while (serviceState != STATE.STOPPED) {
+                LOG.warn(String.format("Thriftserver still in state %s. Waiting...", serviceState.toString()));
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    throw new KNIMESparkException("Spark shutdown interrupted.", ex);
+                }
+                serviceState = m_thriftServer.getServiceState();
+            }
+            m_thriftServer = null;
 	    }
-		FileUtils.deleteQuietly(m_sparkTmpDir);
-	}
+
+        if (m_sparkSession != null) {
+            m_sparkSession.close();
+            m_sparkSession = null;
+            try {
+                // shut down the entire derby system
+                DriverManager.getConnection("jdbc:derby:;shutdown=true");
+            } catch (SQLException e) {
+            }
+        }
+        FileUtils.deleteQuietly(m_sparkTmpDir);
+    }
 
 	@Override
 	public void deleteNamedObjects(Set<String> namedObjects) {

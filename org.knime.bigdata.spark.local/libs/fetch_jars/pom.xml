@@ -6,20 +6,20 @@
     <parent>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-parent_2.12</artifactId>
-        <version>3.3.1</version>
+        <version>3.5.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knime.bigdata</groupId>
     <artifactId>spark-local-fetch-jars</artifactId>
-    <version>3.3.1</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
+    <version>3.5.1</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
     <packaging>pom</packaging>
 
     <name>Jar fetcher for local Spark</name>
     <description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
     <properties>
-        <spark.version>3.3.1</spark.version>
+        <spark.version>3.5.1</spark.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
     </properties>
@@ -49,11 +49,6 @@
 	  Contra: Alters the maven dependency tree, which may be confusing.
 	 -->
     <dependencies>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.10.0</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
@@ -118,12 +113,6 @@
                     <artifactId>jdk.tools</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <!-- replace log4j-slf4j-impl with slf4j-reload4j as Spark 3.3 requires a class called org.slf4j.impl.StaticLoggerBinder -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-reload4j</artifactId>
-            <version>1.7.36</version>
         </dependency>
     </dependencies>
 
@@ -202,6 +191,29 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                    <!-- overwrite create-tmp-dir task from spark parent pom and use target/tmp -->
+                    <execution>
+                        <id>create-tmp-dir</id>
+                        <configuration>
+                          <target>
+                            <mkdir dir="target/tmp" />
+                          </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- disable scala tests from spark parent pom -->
+            <plugin>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>test</id>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
