@@ -78,6 +78,9 @@ public class LocalSparkWrapperFactory {
 	    // log4j2
 	    bundles.add(FrameworkUtil.getBundle(org.apache.logging.log4j.core.Logger.class));
 
+	    // guava
+	    bundles.add(FrameworkUtil.getBundle(com.google.common.collect.ImmutableMap.class));
+
 		// knosp.node (KNIME-on-Spark, aka KNIME Workflow Executor for Apache Spark)
 	    final Bundle knospNodeBundle = Platform.getBundle(KNOSP_NODE_PLUGIN);
 	    if (knospNodeBundle != null) {
