@@ -90,6 +90,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
+import org.knime.core.node.workflow.VariableType;
 import org.knime.core.util.Pair;
 import org.knime.database.VariableContext;
 import org.knime.database.agent.DBAgentFactory;
@@ -135,8 +136,14 @@ public class DatabricksSparkContextCreatorNodeDialog extends NodeDialogPane impl
         }
 
         @Override
+        @Deprecated
         public Map<String, FlowVariable> getInputFlowVariables() {
             return getAvailableFlowVariables();
+        }
+
+        @Override
+        public Map<String, FlowVariable> getInputFlowVariables(final VariableType<?>[] types) {
+            return getAvailableFlowVariables(types);
         }
 
     }

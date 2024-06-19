@@ -70,6 +70,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
+import org.knime.core.node.workflow.VariableType;
 import org.knime.database.DBType;
 import org.knime.database.DBTypeRegistry;
 import org.knime.database.VariableContext;
@@ -111,8 +112,14 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
         }
 
         @Override
+        @Deprecated
         public Map<String, FlowVariable> getInputFlowVariables() {
             return getAvailableInputFlowVariables();
+        }
+
+        @Override
+        public Map<String, FlowVariable> getInputFlowVariables(final VariableType<?>[] types) {
+            return getAvailableFlowVariables(types);
         }
     }
 

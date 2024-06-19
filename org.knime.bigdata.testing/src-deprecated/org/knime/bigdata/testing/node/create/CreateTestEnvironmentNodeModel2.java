@@ -26,6 +26,7 @@ import org.knime.bigdata.testing.node.create.utils.CreateTestDBSessionPortUtil;
 import org.knime.bigdata.testing.node.create.utils.CreateTestPortUtil;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
+import org.knime.core.node.workflow.VariableType;
 import org.knime.database.VariableContext;
 import org.knime.database.port.DBSessionPortObject;
 
@@ -52,6 +53,11 @@ public class CreateTestEnvironmentNodeModel2 extends AbstractCreateTestEnvironme
         @Override
         public Map<String, FlowVariable> getInputFlowVariables() {
             return getAvailableInputFlowVariables();
+        }
+
+        @Override
+        public Map<String, FlowVariable> getInputFlowVariables(final VariableType<?>[] types) {
+            return getAvailableFlowVariables(types);
         }
 
     }

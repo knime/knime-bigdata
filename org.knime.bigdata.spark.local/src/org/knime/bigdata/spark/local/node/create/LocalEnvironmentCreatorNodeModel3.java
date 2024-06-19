@@ -53,6 +53,7 @@ import org.knime.bigdata.spark.local.node.create.utils.CreateFileSystemConnectio
 import org.knime.bigdata.spark.local.node.create.utils.CreateLocalBDEPortUtil;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
+import org.knime.core.node.workflow.VariableType;
 import org.knime.database.VariableContext;
 import org.knime.database.port.DBSessionPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObject;
@@ -80,6 +81,11 @@ public class LocalEnvironmentCreatorNodeModel3 extends AbstractLocalEnvironmentC
         @Override
         public Map<String, FlowVariable> getInputFlowVariables() {
             return getAvailableInputFlowVariables();
+        }
+
+        @Override
+        public Map<String, FlowVariable> getInputFlowVariables(final VariableType<?>[] types) {
+            return getAvailableFlowVariables(types);
         }
 
     }

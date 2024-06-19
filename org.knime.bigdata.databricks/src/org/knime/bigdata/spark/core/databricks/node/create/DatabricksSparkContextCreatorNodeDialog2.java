@@ -99,6 +99,7 @@ import org.knime.core.node.util.FileSystemBrowser.DialogType;
 import org.knime.core.node.util.FileSystemBrowser.FileSelectionMode;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
+import org.knime.core.node.workflow.VariableType;
 import org.knime.core.util.Pair;
 import org.knime.database.VariableContext;
 import org.knime.database.agent.DBAgentFactory;
@@ -147,8 +148,14 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         }
 
         @Override
+        @Deprecated
         public Map<String, FlowVariable> getInputFlowVariables() {
             return getAvailableFlowVariables();
+        }
+
+        @Override
+        public Map<String, FlowVariable> getInputFlowVariables(final VariableType<?>[] types) {
+            return getAvailableFlowVariables(types);
         }
 
     }

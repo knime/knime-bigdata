@@ -29,6 +29,7 @@ import org.knime.bigdata.spark.local.node.create.utils.CreateDBSessionPortUtil;
 import org.knime.bigdata.spark.local.node.create.utils.CreateLocalBDEPortUtil;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
+import org.knime.core.node.workflow.VariableType;
 import org.knime.database.VariableContext;
 import org.knime.database.port.DBSessionPortObject;
 
@@ -56,6 +57,11 @@ public class LocalEnvironmentCreatorNodeModel2 extends AbstractLocalEnvironmentC
         @Override
         public Map<String, FlowVariable> getInputFlowVariables() {
             return getAvailableInputFlowVariables();
+        }
+
+        @Override
+        public Map<String, FlowVariable> getInputFlowVariables(final VariableType<?>[] types) {
+            return getAvailableFlowVariables(types);
         }
 
     }
