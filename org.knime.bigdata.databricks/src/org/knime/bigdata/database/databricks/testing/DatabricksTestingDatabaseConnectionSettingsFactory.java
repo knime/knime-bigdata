@@ -28,7 +28,6 @@ import java.util.Map;
 import org.apache.hive.jdbc.HiveDriver;
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
 import org.knime.bigdata.database.databricks.DatabricksDBConnectionController;
-import org.knime.bigdata.database.databricks.DatabricksDBDriverLocator;
 import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
@@ -45,7 +44,7 @@ import org.knime.database.node.connector.DBSessionSettings;
 public class DatabricksTestingDatabaseConnectionSettingsFactory {
 
     /**
-     * Creates {@link DBSessionSettings} from the given map of flow variables using the build-in Hive driver.
+     * Creates {@link DBSessionSettings} from the given map of flow variables.
      *
      * @param flowVariables A map of flow variables that provide the Spark context settings.
      * @return {@link DBSessionSettings} of the remote cluster.
@@ -53,9 +52,7 @@ public class DatabricksTestingDatabaseConnectionSettingsFactory {
      */
     public static DBSessionSettings createSettings(final Map<String, FlowVariable> flowVariables)
             throws InvalidSettingsException {
-        final DBSessionSettings settings = DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables);
-        settings.setDriver(DatabricksDBDriverLocator.DRIVER_ID);
-        return settings;
+        return DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables);
     }
 
     /**
@@ -77,8 +74,7 @@ public class DatabricksTestingDatabaseConnectionSettingsFactory {
     }
 
     /**
-     * Creates deprecated {@link DatabaseConnectionSettings} from the given map of flow variables using the build-in
-     * Hive driver.
+     * Creates deprecated {@link DatabaseConnectionSettings} from the given map of flow variables.
      *
      * @param flowVariables A map of flow variables that provide the Spark context settings.
      * @return {@link DatabaseConnectionSettings}
@@ -89,7 +85,6 @@ public class DatabricksTestingDatabaseConnectionSettingsFactory {
 
         final DatabricksSparkContextCreatorNodeSettings settings =
             DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables);
-        settings.setDriver(DatabricksDBDriverLocator.DRIVER_ID);
         final DefaultDatabaseConnectionSettings result = new DefaultDatabaseConnectionSettings();
 
         result.setDriver(HiveDriver.class.getName());
