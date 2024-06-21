@@ -729,6 +729,10 @@ propagated with or for interoperation with KNIME.
    
    <requires>
       <import feature="org.knime.features.python2" version="0.0.0"/>
+
+      <!-- The Spark job plugins require the Databricks plugin already,
+           include the Databricks feature here to install the JDBC driver too -->
+      <import feature="org.knime.features.bigdata.databricks" version="0.0.0"/>
    </requires>
 
    <includes
