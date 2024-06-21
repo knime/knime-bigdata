@@ -7,7 +7,7 @@
 
    <description>
       KNIME nodes to create a Apache Spark context in Databricks and
-      to connect to Databricks File System (DBFS).
+      to connect to Unity Catalog Volumes as well as the Databricks File System (DBFS).
    </description>
 
    <copyright>
