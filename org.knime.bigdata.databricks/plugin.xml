@@ -219,7 +219,7 @@
    <extension
          point="org.knime.core.PortType">
       <portType
-            hidden="false"
+            hidden="true"
             name="Databricks Workspace Connection"
             color="#4386f7"
             objectClass="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject"
