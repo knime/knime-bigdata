@@ -220,7 +220,7 @@
          point="org.knime.core.PortType">
       <portType
             hidden="false"
-            name="Credential"
+            name="Databricks Workspace Connection"
             color="#4386f7"
             objectClass="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject"
             objectSerializer="org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject$Serializer"
