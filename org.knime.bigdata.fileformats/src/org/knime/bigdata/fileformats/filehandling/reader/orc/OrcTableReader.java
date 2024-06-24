@@ -93,8 +93,9 @@ final class OrcTableReader implements TableReader<BigDataReaderConfig, KnimeType
     @Override
     public TypedReaderTableSpec<KnimeType> readSpec(final FSPath path, final TableReadConfig<BigDataReaderConfig> config,
         final ExecutionMonitor exec) throws IOException {
-        final Reader reader = createReader(path);
-        return createSpec(reader.getSchema());
+        try (final Reader reader = createReader(path)) {
+            return createSpec(reader.getSchema());
+        }
     }
 
     static TypedReaderTableSpec<KnimeType> createSpec(final TypeDescription schema) {
