@@ -24,6 +24,7 @@ import java.io.File;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
@@ -33,7 +34,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Bundle activator for Spark local. This class sets up logging for local Spark.
- * 
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkLocalPlugin extends AbstractUIPlugin {
@@ -69,6 +70,8 @@ public class SparkLocalPlugin extends AbstractUIPlugin {
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.spark"));
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.hadoop.hive.metastore"));
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.hive.service"));
+
+		Logger.getLogger("DataNucleus").setLevel(Level.FATAL);
 	}
 
 	private static void configureLoggerForLocalSparkLog(final Appender sparkLogAppender, final Logger logger) {
