@@ -56,7 +56,6 @@ import java.time.Duration;
 import java.util.UUID;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
-import org.knime.bigdata.databricks.credential.DatabricksUsernamePasswordCredential;
 import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.scim.ScimAPI;
@@ -139,11 +138,7 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
             }
         }
 
-        if ((inSpecs != null && inSpecs.length > 0) || settings.m_authType == AuthType.TOKEN) {
-            return DatabricksAccessTokenCredential.TYPE;
-        } else {
-            return DatabricksUsernamePasswordCredential.TYPE;
-        }
+        return DatabricksAccessTokenCredential.TYPE;
     }
 
     @Override
@@ -202,13 +197,6 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
             credential = new DatabricksAccessTokenCredential(//
                 URI.create(settings.m_workspaceUrl), //
                 maybeAccessToken, //
-                scimUser.id, //
-                scimUser.displayName);
-        } else if (settings.m_authType == AuthType.USERNAME_PASSWORD) {
-            credential = new DatabricksUsernamePasswordCredential(//
-                URI.create(settings.m_workspaceUrl), //
-                settings.m_usernamePassword.getUsername(), //
-                settings.m_usernamePassword.getPassword(), //
                 scimUser.id, //
                 scimUser.displayName);
         } else if (settings.m_authType == AuthType.TOKEN) {

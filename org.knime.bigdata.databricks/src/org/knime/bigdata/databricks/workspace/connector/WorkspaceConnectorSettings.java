@@ -71,7 +71,6 @@ import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.Creden
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.CredentialsWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
 import org.knime.credentials.base.CredentialPortObject;
 
@@ -93,15 +92,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         }
     }
 
-    @Section(title = "Username and Password")
-    @Effect(signals = {AuthType.IsUsernamePassword.class, CredentialInputNotConnectedSignal.class}, //
-        operation = And.class, //
-        type = EffectType.SHOW)
-    interface UsernamePasswordSection {
-    }
-
     @Section(title = "Token")
-    @After(UsernamePasswordSection.class)
     @Effect(signals = {AuthType.IsToken.class, CredentialInputNotConnectedSignal.class}, //
         operation = And.class, //
         type = EffectType.SHOW)
@@ -122,27 +113,14 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         description = "Authentication type to use. The following types are supported:\n"//
             + "<ul>"//
             + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
-            + "<li><b>Username/Password (Legacy)</b>: Legacy authenication with the username/password of a "
-            + "Databricks account. Not supported on Azure Databricks.</li>"//
             + "</ul>")
-    @Signal(condition = AuthType.IsUsernamePassword.class)
     @Signal(condition = AuthType.IsToken.class)
     @Effect(signals = CredentialInputNotConnectedSignal.class, type = EffectType.SHOW)
     AuthType m_authType = AuthType.TOKEN;
 
     enum AuthType {
             @Label("Personal access token")
-            TOKEN,
-
-            @Label("Username/Password (Legacy)")
-            USERNAME_PASSWORD;
-
-        static class IsUsernamePassword extends OneOfEnumCondition<AuthType> {
-            @Override
-            public AuthType[] oneOf() {
-                return new AuthType[]{USERNAME_PASSWORD};
-            }
-        }
+            TOKEN;
 
         static class IsToken extends OneOfEnumCondition<AuthType> {
             @Override
@@ -151,13 +129,6 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             }
         }
     }
-
-    @Widget(title = "Username and password",
-        description = "The Databricks username and password to use. The values"
-            + " entered here will be stored in weakly encrypted form with the workflow.")
-    @CredentialsWidget
-    @Layout(UsernamePasswordSection.class)
-    Credentials m_usernamePassword = new Credentials();
 
     @Widget(title = "Personal access token", //
         description = "The Databricks personal access token to use. The value\"\n"
@@ -199,14 +170,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             return;
         }
 
-        if (m_authType == AuthType.USERNAME_PASSWORD) {
-            if (StringUtils.isBlank(m_usernamePassword.getUsername())
-                || StringUtils.isBlank(m_usernamePassword.getPassword())) {
-
-                throw new InvalidSettingsException(
-                    "Please specify both the username and password of the Databricks account to use");
-            }
-        } else if (m_authType == AuthType.TOKEN && StringUtils.isBlank(m_token.getPassword())) {
+        if (m_authType == AuthType.TOKEN && StringUtils.isBlank(m_token.getPassword())) {
             throw new InvalidSettingsException("Please specify the personal access token to use");
         }
     }

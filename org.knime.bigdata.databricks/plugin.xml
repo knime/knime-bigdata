@@ -47,12 +47,6 @@
   
   <extension point="org.knime.credentials.base.CredentialType">
     <credentialType
-      credentialClass="org.knime.bigdata.databricks.credential.DatabricksUsernamePasswordCredential"
-      credentialSerializerClass="org.knime.bigdata.databricks.credential.DatabricksUsernamePasswordCredential$Serializer"
-      id="knime.DatabricksUsernamePasswordCredential"
-      name="Databricks username/password">
-    </credentialType>
-    <credentialType
       credentialClass="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential"
       credentialSerializerClass="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential$Serializer"
       id="knime.DatabricksAccessTokenCredential"
