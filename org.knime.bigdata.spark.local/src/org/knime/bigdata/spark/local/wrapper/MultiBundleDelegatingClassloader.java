@@ -73,11 +73,13 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 		}
 		
 		for (int i = 0; i < m_bundles.length; i++) {
-			try {
-				clazz = m_bundles[i].loadClass(name);
-				break;
-			} catch (ClassNotFoundException e) {
-				// do nothing for now
+			if (m_bundles[i].getState() != Bundle.UNINSTALLED) {
+				try {
+					clazz = m_bundles[i].loadClass(name);
+					break;
+				} catch (ClassNotFoundException e) {
+					// do nothing for now
+				}
 			}
 		}
 
@@ -96,9 +98,11 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	@Override
     protected URL findResource(final String name) {
 		for (int i = 0; i < m_bundles.length; i++) {
-			URL resource = m_bundles[i].getResource(name);
-			if (resource != null) {
-				return resource;
+			if (m_bundles[i].getState() != Bundle.UNINSTALLED) {
+				URL resource = m_bundles[i].getResource(name);
+				if (resource != null) {
+					return resource;
+				}
 			}
 		}
 		return null;
@@ -112,9 +116,11 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	@Override
     protected Enumeration<URL> findResources(final String name) throws IOException {
 		for (int i = 0; i < m_bundles.length; i++) {
-			Enumeration<URL> urls = m_bundles[i].getResources(name);
-			if (urls != null) {
-				return urls;
+			if (m_bundles[i].getState() != Bundle.UNINSTALLED) {
+				Enumeration<URL> urls = m_bundles[i].getResources(name);
+				if (urls != null) {
+					return urls;
+				}
 			}
 		}
 
