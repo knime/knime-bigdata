@@ -50,7 +50,7 @@ package org.knime.bigdata.database.databricks;
 
 import org.knime.bigdata.database.databricks.agent.DatabricksCaseSupportedBinner;
 import org.knime.bigdata.database.databricks.agent.DatabricksSampling;
-import org.knime.bigdata.database.loader.BigDataLoader;
+import org.knime.bigdata.database.databricks.agent.loader.DatabricksDataLoader;
 import org.knime.database.agent.AbstractDBAgentFactory;
 import org.knime.database.agent.DBAgentFactory;
 import org.knime.database.agent.binning.DBBinner;
@@ -89,7 +89,7 @@ public class DatabricksAgentFactory extends AbstractDBAgentFactory {
     */
     public DatabricksAgentFactory() {
         putCreator(DBBinner.class, parameters -> new DatabricksCaseSupportedBinner(parameters.getSessionReference()));
-        putCreator(DBLoader.class, parameters -> new BigDataLoader(parameters.getSessionReference()));
+        putCreator(DBLoader.class, parameters -> new DatabricksDataLoader(parameters.getSessionReference()));
         putAttributes(DBMetadataReader.class, METADATA_ATTRIBUTES);
         putCreator(DBMetadataReader.class, parameters -> new DefaultDBMetadataReader(parameters.getSessionReference()));
         putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
