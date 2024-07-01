@@ -76,6 +76,9 @@ public class LocalSparkWrapperFactory {
         // guava
         bundles.add(FrameworkUtil.getBundle(com.google.common.collect.ImmutableMap.class));
 
+        // netty
+        bundles.add(FrameworkUtil.getBundle(io.netty.channel.EventLoopGroup.class));
+
         // knosp.node (KNIME-on-Spark, aka KNIME Workflow Executor for Apache Spark)
         final Bundle knospNodeBundle = Platform.getBundle(KNOSP_NODE_PLUGIN);
         if (knospNodeBundle != null) {

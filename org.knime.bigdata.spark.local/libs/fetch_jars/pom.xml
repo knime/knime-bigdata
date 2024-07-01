@@ -54,10 +54,10 @@
             <artifactId>spark-sql_2.12</artifactId>
             <version>${spark.version}</version>
             <exclusions>
-                <!-- Netty 3.x is implicitly provided via the org.apache.hadoop.client OSGI bundle -->
+                <!-- Netty 4.x is implicitly provided via the org.apache.hadoop.client OSGI bundle -->
                 <exclusion>
                     <groupId>io.netty</groupId>
-                    <artifactId>netty</artifactId>
+                    <artifactId>*</artifactId>
                 </exclusion>
                 <!-- provided via the org.apache.hadoop.client OSGI bundle -->
                 <exclusion>
