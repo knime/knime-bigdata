@@ -19,7 +19,15 @@
     <description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
     <properties>
+        <aircompressor.version>0.27</aircompressor.version>
+        <avro.version>1.11.3</avro.version>
+        <commons.compress.version>1.26.2</commons.compress.version>
+        <gson.version>2.11.0</gson.version>
+        <ivy.version>2.5.2</ivy.version>
+        <parquet.version>1.14.1</parquet.version>
+        <snappy.version>1.1.10.5</snappy.version>
         <spark.version>3.5.1</spark.version>
+        <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
     </properties>
@@ -90,6 +98,10 @@
                     <groupId>jdk.tools</groupId>
                     <artifactId>jdk.tools</artifactId>
                 </exclusion>
+                <exclusion>
+                  <groupId>org.codehaus.jackson</groupId>
+                  <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -114,6 +126,55 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
+        <!-- BEGIN: version bumps to fix CVEs -->
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>${zookeeper.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>${snappy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-compress</artifactId>
+          <version>${commons.compress.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>io.airlift</groupId>
+          <artifactId>aircompressor</artifactId>
+          <version>${aircompressor.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.ivy</groupId>
+          <artifactId>ivy</artifactId>
+          <version>${ivy.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.parquet</groupId>
+          <artifactId>parquet-common</artifactId>
+          <version>${parquet.version}</version>
+        </dependency>
+        <!-- END: version bumps to fix CVEs -->
     </dependencies>
 
     <build>
