@@ -412,6 +412,15 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	
 	private void configureHiveSupport(SparkConf sparkConf, String hiveDataFolder) throws IOException {
 
+		// BD-1304: Loading JDBC drivers via Spark 2 Database and lazy loading the Hive metastore Derby JDBC driver,
+		// might result in a never ending JDBC driver search loop...
+		// Preload the derby JDBC driver class here, before running any Spark 2 database node
+		try {
+			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+		} catch (final ClassNotFoundException ex) {
+			LOG.warn("Unable to load Apache Derby JDBC EmbeddedDriver class.", ex);
+		}
+
 		final File hiveParentDir;
 		if (hiveDataFolder != null) {
 			hiveParentDir = new File(hiveDataFolder);
