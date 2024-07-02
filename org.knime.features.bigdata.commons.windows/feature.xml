@@ -41,13 +41,6 @@ The feature and the Software is subject to United States export laws and regulat
    </license>
 
    <plugin
-         id="org.knime.bigdata.commons.windows"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="org.knime.bigdata.hadoop.client.win32"
          download-size="0"
          install-size="0"
