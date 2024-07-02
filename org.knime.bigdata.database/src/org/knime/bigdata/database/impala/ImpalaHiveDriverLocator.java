@@ -48,8 +48,13 @@
  */
 package org.knime.bigdata.database.impala;
 
+import java.util.Optional;
+
 import org.knime.bigdata.database.hive.HiveDriverLocator;
+import org.knime.core.node.message.Message;
+import org.knime.core.node.message.MessageBuilder;
 import org.knime.database.DBType;
+import org.knime.database.driver.DBDriverLocator;
 
 /**
  * This class contains the Impala driver definition that use the open source hive driver.
@@ -57,6 +62,22 @@ import org.knime.database.DBType;
  * @author Sascha Wolke, KNIME GmbH
  */
 public class ImpalaHiveDriverLocator extends HiveDriverLocator {
+
+
+    /**Default message that can be used in legacy database driver locators.
+     * @since 5.3*/
+    private static final Message DEPRECATED_MESSAGE;
+
+    static {
+        final MessageBuilder builder = Message.builder();
+        builder.withSummary("Selected database driver no longer supported.");
+        builder.addTextIssue(
+            "This driver is based on the open-source Hive driver which is not optimized to work with Impala. "
+                + "It will be moved to a separate extension that requires manual installation with one of the next "
+                + "releases. Due to license restrictions, we are not allowed to distribute any other driver.");
+        builder.addResolutions("Register the official JDBC driver provided by your Impala vendor.");
+        DEPRECATED_MESSAGE = builder.build().get();
+    }
 
     /** Driver id. */
     public static final String IMPALA_HIVE_DRIVER_ID = "impalaHive";
@@ -68,12 +89,22 @@ public class ImpalaHiveDriverLocator extends HiveDriverLocator {
 
     @Override
     public String getDriverName() {
-        return "Apache Hive JDBC Driver (for Impala)";
+        return DBDriverLocator.appendDeprecatedName("Apache Hive JDBC Driver (for Impala)", isDeprecated());
     }
 
     @Override
     public DBType getDBType() {
         return Impala.DB_TYPE;
+    }
+
+    @Override
+    public boolean isDeprecated() {
+        return true;
+    }
+
+    @Override
+    public Optional<Message> getDeprecatedMessage() {
+        return Optional.of(DEPRECATED_MESSAGE);
     }
 
 }
