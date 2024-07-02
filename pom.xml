@@ -29,6 +29,7 @@
 
 		<module>org.knime.bigdata.commons</module>
 		<module>org.knime.bigdata.commons.windows</module>
+		<module>org.knime.bigdata.hadoop.client.win32</module>
 		<module>org.knime.bigdata.database</module>		
 		<module>org.knime.bigdata.databricks</module>
 		<module>org.knime.bigdata.databricks.driver/lib/fetch_jars</module>

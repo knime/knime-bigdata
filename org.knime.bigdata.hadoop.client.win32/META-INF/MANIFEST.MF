@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME Apache Hadoop native library (Windows)
+Bundle-SymbolicName: org.knime.bigdata.hadoop.client.win32;singleton:=true
+Bundle-Version: 5.3.0.qualifier
+Bundle-ClassPath: .
+Fragment-Host: org.apache.hadoop.client;bundle-version="[3.4.0,4.0.0)"
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-NativeCode: native/hadoop.dll;osname=win32;processor=x86_64,*
+Automatic-Module-Name: org.knime.bigdata.hadoop.client.win32
+

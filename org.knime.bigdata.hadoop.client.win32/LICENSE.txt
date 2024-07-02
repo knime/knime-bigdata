@@ -1,15 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<feature
-      id="org.knime.features.bigdata.commons.windows"
-      label="KNIME Extension for Big Data Commons on Windows"
-      version="5.3.0.qualifier"
-      provider-name="KNIME AG, Zurich, Switzerland">
-
-   <description>
-     Features require by Big Data Commons extension on Windows.
-   </description>
-
-   <license url="">
 Terms for License of Microsoft Redistributable Feature
 0. General
 ===========
@@ -38,20 +26,3 @@ This feature and the library is licensed to you, not sold. With this license agr
 5. Export Restrictions
 =======================
 The feature and the Software is subject to United States export laws and regulations. You must comply with all domestic and international export laws and regulations that apply to the feature and the Software. These laws include restrictions on destinations, end users and end use. For additional information, see www.microsoft.com/exporting
-   </license>
-
-   <plugin
-         id="org.knime.bigdata.commons.windows"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.knime.bigdata.hadoop.client.win32"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-</feature>
