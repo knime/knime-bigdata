@@ -116,6 +116,7 @@ try {
                     repositories: [
                         'knime-aws',
                         'knime-bigdata',
+                        'knime-kerberos',
                         'knime-cloud',
                         'knime-database',
                         'knime-datageneration',
