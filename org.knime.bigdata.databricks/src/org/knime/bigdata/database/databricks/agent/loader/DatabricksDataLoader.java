@@ -56,7 +56,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
+import org.knime.bigdata.database.loader.BigDataLoaderParameters;
 import org.knime.bigdata.database.loader.BigDataLoaderParameters2;
+import org.knime.bigdata.database.loader.BigDataLoaderRemoteFS;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
@@ -109,8 +111,25 @@ public class DatabricksDataLoader implements DBLoader {
         return m_sessionReference.get();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void load(final ExecutionMonitor exec, final Object parameters) throws Exception {
+        //we need this code for backward compatibility with the deprecated DB Loader implementation
+        final DBLoadTableFromFileParameters<?> loadParameters =
+            (DBLoadTableFromFileParameters<?>)requireNonNull(parameters, "parameters");
+        Object additionalSettings = loadParameters.getAdditionalSettings()
+            .orElseThrow(() -> new IllegalStateException("Missing file writer settings."));
+        if (additionalSettings instanceof BigDataLoaderParameters) {
+            //this is the deprecated DB Loader with the old parameters
+            BigDataLoaderRemoteFS deprecatedLoader = new BigDataLoaderRemoteFS(m_sessionReference);
+            deprecatedLoader.load(exec, loadParameters);
+        } else {
+            loadInternal(exec, parameters);
+        }
+    }
+
+    private void loadInternal(final ExecutionMonitor exec, final Object parameters)
+        throws SQLException, CanceledExecutionException {
         @SuppressWarnings("unchecked")
         final DBLoadTableFromFileParameters<BigDataLoaderParameters2> loadParameters =
             (DBLoadTableFromFileParameters<BigDataLoaderParameters2>)requireNonNull(parameters, "parameters");
