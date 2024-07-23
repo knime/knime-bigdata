@@ -4,11 +4,11 @@ Bundle-Name: KNIME Big Data Scripting
 Bundle-SymbolicName: org.knime.bigdata.scripting;singleton:=true
 Bundle-Version: 5.4.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Require-Bundle: org.knime.base;bundle-version="[5.3.0,6.0.0)",
-  org.knime.workbench.repository;bundle-version="[5.3.0,6.0.0)",
-  org.knime.bigdata.hive;bundle-version="[5.3.0,6.0.0)",
-  org.knime.python;bundle-version="[5.3.0,6.0.0)",
-  org.knime.base.filehandling;bundle-version="[5.3.0,6.0.0)"
+Require-Bundle: org.knime.base;bundle-version="[5.4.0,6.0.0)",
+  org.knime.workbench.repository;bundle-version="[5.4.0,6.0.0)",
+  org.knime.bigdata.hive;bundle-version="[5.4.0,6.0.0)",
+  org.knime.python;bundle-version="[5.4.0,6.0.0)",
+  org.knime.base.filehandling;bundle-version="[5.4.0,6.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
