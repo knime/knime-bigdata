@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.common.util.Base64Utility;
-import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.helpers.CastUtils;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
@@ -122,9 +121,7 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         final Duration connectionTimeout, final ResponseExceptionMapper<?> exceptionMapper) {
 
         final String baseUrl = deploymentUrl + "/api/";
-
         final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeout, connectionTimeout);
-        final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
 
         // Create the API Proxy
         final List<Object> provider = Arrays.asList(new JacksonJsonProvider(), exceptionMapper);
@@ -135,9 +132,6 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         config.getInInterceptors().add(new GZIPInInterceptor());
         // Note: Databricks use GZIP to encode downloads, but does not support GZIP encoded uploads!
         config.getHttpConduit().setClient(clientPolicy);
-        if (proxyAuthPolicy != null) {
-            config.getHttpConduit().setProxyAuthorization(proxyAuthPolicy);
-        }
 
         // Enable request logging:
         // config.getInInterceptors().add(new LoggingInInterceptor());

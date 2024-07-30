@@ -63,7 +63,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.common.util.Base64Utility;
-import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
@@ -139,7 +138,6 @@ public class KnoxHDFSClient extends AbstractRESTClient {
         final Duration receiveTimeoutMillis, final Duration connectionTimeoutMillis) {
 
         final HTTPClientPolicy clientPolicy = createClientPolicy(receiveTimeoutMillis, connectionTimeoutMillis);
-        final ProxyAuthorizationPolicy proxyAuthPolicy = configureProxyIfNecessary(baseUrl, clientPolicy);
 
         // Create the API Proxy
         final JacksonJsonProvider jsonProvider = new JacksonJsonProvider();
@@ -155,9 +153,6 @@ public class KnoxHDFSClient extends AbstractRESTClient {
         config.getRequestContext().put(org.apache.cxf.message.Message.MAINTAIN_SESSION, Boolean.TRUE);
         config.getInInterceptors().add(new GZIPInInterceptor());
         config.getHttpConduit().setClient(clientPolicy);
-        if (proxyAuthPolicy != null) {
-            config.getHttpConduit().setProxyAuthorization(proxyAuthPolicy);
-        }
         if (LOG.isDebugEnabled()) {
             config.getInInterceptors().add(new LoggingInInterceptor());
             config.getOutInterceptors().add(new LoggingOutInterceptor());

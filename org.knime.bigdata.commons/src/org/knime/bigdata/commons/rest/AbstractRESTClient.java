@@ -48,16 +48,10 @@
  */
 package org.knime.bigdata.commons.rest;
 
-import java.net.URI;
 import java.time.Duration;
 
-import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.apache.cxf.transports.http.configuration.ProxyServerType;
-import org.knime.core.eclipseUtil.EclipseProxyServiceInitializer;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.util.proxy.ProxyProtocol;
-import org.knime.core.util.proxy.search.GlobalProxySearch;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
@@ -99,45 +93,5 @@ public class AbstractRESTClient {
         clientPolicy.setReceiveTimeout(receiveTimeoutMillis.toMillis());
         clientPolicy.setConnectionTimeout(connectionTimeoutMillis.toMillis());
         return clientPolicy;
-    }
-
-    /**
-     * Configures HTTP proxy on given client policy and returns proxy authorization policy if required or
-     * <code>null</code>.
-     *
-     * @param url Base URL to configure proxy for
-     * @param clientPolicy Policy to apply proxy configuration to
-     * @return {@link ProxyAuthorizationPolicy} or <code>null</code> if no proxy is used or nor proxy authentication is
-     *         required
-     */
-    protected static ProxyAuthorizationPolicy configureProxyIfNecessary(final String url,
-            final HTTPClientPolicy clientPolicy) {
-
-        final var uri = URI.create(url);
-
-        EclipseProxyServiceInitializer.ensureInitialized();
-        final var proxyResult = GlobalProxySearch.getCurrentFor(uri);
-        if (proxyResult.isEmpty()) {
-            return null;
-        }
-        final var proxyData = proxyResult.get();
-        clientPolicy.setProxyServerType(
-            proxyData.protocol() == ProxyProtocol.SOCKS ? ProxyServerType.SOCKS : ProxyServerType.HTTP);
-        clientPolicy.setProxyServer(proxyData.host());
-        clientPolicy.setProxyServerPort(proxyData.intPort());
-
-        ProxyAuthorizationPolicy proxyAuthPolicy = null;
-        if (proxyData.useAuthentication()) {
-            proxyAuthPolicy = new ProxyAuthorizationPolicy();
-            proxyAuthPolicy.setUserName(proxyData.username());
-            proxyAuthPolicy.setPassword(proxyData.password());
-        }
-
-        LOG.debug(String.format(
-            "Using proxy for REST connection to %s: %s:%d (type: %s, proxyAuthentication: %b)",
-            url, clientPolicy.getProxyServer(), clientPolicy.getProxyServerPort(), clientPolicy.getProxyServerType(),
-            proxyAuthPolicy != null));
-
-        return proxyAuthPolicy;
     }
 }
