@@ -12,7 +12,6 @@ import java.time.Duration;
 import javax.net.ssl.HostnameVerifier;
 
 import org.apache.cxf.common.util.Base64Utility;
-import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transport.http.auth.HttpAuthSupplier;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
@@ -54,8 +53,6 @@ class WsRsRestClient extends AbstractRESTClient implements IRestClient {
 
     private final HttpAuthSupplier m_clientAuthSupplier;
 
-    private ProxyAuthorizationPolicy m_proxyAuthPolicy;
-
     public WsRsRestClient(final JobServerSparkContextConfig contextConfig) throws KeyManagementException,
         NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException, UnsupportedOperationException {
         // The JAX-RS interface is in a different plug-in than the CXF implementation. Therefore the interface classes
@@ -84,7 +81,6 @@ class WsRsRestClient extends AbstractRESTClient implements IRestClient {
         // Chunk transfer policy
         final long timeout = contextConfig.getReceiveTimeout().toMillis();
         m_clientPolicy = createClientPolicy(Duration.ofMillis(timeout), Duration.ofMillis(timeout));
-        m_proxyAuthPolicy = configureProxyIfNecessary(contextConfig.getJobServerUrl(), m_clientPolicy);
     }
 
     /**
@@ -106,10 +102,6 @@ class WsRsRestClient extends AbstractRESTClient implements IRestClient {
         Invocation.Builder builder = target.request();
         HTTPConduit conduit = org.apache.cxf.jaxrs.client.WebClient.getConfig(builder).getHttpConduit();
         conduit.setClient(m_clientPolicy);
-
-        if (m_proxyAuthPolicy != null) {
-            conduit.setProxyAuthorization(m_proxyAuthPolicy);
-        }
 
         if (m_clientAuthSupplier != null) {
             conduit.setAuthSupplier(m_clientAuthSupplier);
