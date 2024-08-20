@@ -61,17 +61,17 @@ import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.After;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
-import org.knime.core.webui.node.dialog.defaultdialog.rule.And;
-import org.knime.core.webui.node.dialog.defaultdialog.rule.ConstantSignal;
-import org.knime.core.webui.node.dialog.defaultdialog.rule.Effect;
-import org.knime.core.webui.node.dialog.defaultdialog.rule.Effect.EffectType;
-import org.knime.core.webui.node.dialog.defaultdialog.rule.OneOfEnumCondition;
-import org.knime.core.webui.node.dialog.defaultdialog.rule.Signal;
 import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.Credentials;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Effect;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Effect.EffectType;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Predicate;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.PredicateProvider;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Reference;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.ValueReference;
 import org.knime.credentials.base.CredentialPortObject;
 
 /**
@@ -85,17 +85,16 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     /**
      * Constant signal to indicate whether the user has added a credential port or not.
      */
-    public static final class CredentialInputNotConnectedSignal implements ConstantSignal {
+    static final class CredentialInputNotConnected implements PredicateProvider {
         @Override
-        public boolean applies(final DefaultNodeSettingsContext context) {
-            return Stream.of(context.getInPortTypes()).noneMatch(CredentialPortObject.TYPE::equals);
+        public Predicate init(final PredicateInitializer i) {
+            return i.getConstant(
+                context -> Stream.of(context.getInPortTypes()).noneMatch(CredentialPortObject.TYPE::equals));
         }
     }
 
     @Section(title = "Token")
-    @Effect(signals = {AuthType.IsToken.class, CredentialInputNotConnectedSignal.class}, //
-        operation = And.class, //
-        type = EffectType.SHOW)
+    @Effect(predicate = AuthType.IsTokenAuthTypeAndCredentialInputNotConnected.class, type = EffectType.SHOW)
     interface TokenSection {
     }
 
@@ -114,18 +113,22 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             + "<ul>"//
             + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
             + "</ul>")
-    @Signal(condition = AuthType.IsToken.class)
-    @Effect(signals = CredentialInputNotConnectedSignal.class, type = EffectType.SHOW)
+    @ValueReference(AuthTypeRef.class)
+    @Effect(predicate = CredentialInputNotConnected.class, type = EffectType.SHOW)
     AuthType m_authType = AuthType.TOKEN;
+
+    static final class AuthTypeRef implements Reference<AuthType> {
+    }
 
     enum AuthType {
             @Label("Personal access token")
             TOKEN;
 
-        static class IsToken extends OneOfEnumCondition<AuthType> {
+        static final class IsTokenAuthTypeAndCredentialInputNotConnected implements PredicateProvider {
             @Override
-            public AuthType[] oneOf() {
-                return new AuthType[]{TOKEN};
+            public Predicate init(final PredicateInitializer i) {
+                return i.getEnum(AuthTypeRef.class).isOneOf(AuthType.TOKEN)
+                    .and(i.getPredicate(CredentialInputNotConnected.class));
             }
         }
     }
