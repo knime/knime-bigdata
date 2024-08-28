@@ -50,7 +50,7 @@ package org.knime.bigdata.databricks.unity.filehandling.node;
 
 import java.io.IOException;
 
-import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnection;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnectionConfig;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider;
@@ -96,9 +96,9 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
             final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
             if (spec.isPresent()) {
                 try {
-                    final DatabricksWorkspaceAccessor workspaceAccessor =
-                        spec.toAccessor(DatabricksWorkspaceAccessor.class);
-                    final UnityFSConnectionConfig config = createFSConnectionConfig(workspaceAccessor, spec, settings);
+                    final DatabricksAccessTokenCredential credential =
+                        spec.resolveCredential(DatabricksAccessTokenCredential.class);
+                    final UnityFSConnectionConfig config = createFSConnectionConfig(credential, spec, settings);
                     toReturn = new PortObjectSpec[]{createSpec(config)};
                 } catch (final NoSuchCredentialException ex) {
                     throw new InvalidSettingsException(ex.getMessage(), ex);
@@ -108,11 +108,11 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
         return toReturn;
     }
 
-    private static UnityFSConnectionConfig createFSConnectionConfig(final DatabricksWorkspaceAccessor workspace,
+    private static UnityFSConnectionConfig createFSConnectionConfig(final DatabricksAccessTokenCredential credential,
         final DatabricksWorkspacePortObjectSpec spec, final UnityFileSystemConnectorSettings settings) {
 
         return UnityFSConnectionConfig.builder() //
-            .withWorkspace(workspace) //
+            .withCredential(credential) //
             .withWorkingDirectory(settings.m_workingDirectory) //
             .withConnectionTimeout(spec.getConnectionTimeout()) //
             .withReadTimeout(spec.getConnectionTimeout()) //
@@ -130,8 +130,9 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
         final UnityFileSystemConnectorSettings settings) throws Exception {
 
         final DatabricksWorkspacePortObjectSpec spec = ((DatabricksWorkspacePortObject)inObjects[0]).getSpec();
-        final DatabricksWorkspaceAccessor workspace = spec.toAccessor(DatabricksWorkspaceAccessor.class);
-        final UnityFSConnectionConfig config = createFSConnectionConfig(workspace, spec, settings);
+        final DatabricksAccessTokenCredential credential =
+            spec.resolveCredential(DatabricksAccessTokenCredential.class);
+        final UnityFSConnectionConfig config = createFSConnectionConfig(credential, spec, settings);
         m_fsConnection = new UnityFSConnection(config);
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
 

@@ -52,9 +52,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
@@ -73,6 +75,8 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
 import org.knime.credentials.base.CredentialPortObject;
+import org.knime.credentials.base.CredentialPortObjectSpec;
+import org.knime.credentials.base.CredentialType;
 
 /**
  * Node settings for the Databricks Workspace Connector node.
@@ -92,6 +96,16 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         }
     }
 
+    /**
+     * Constant signal to indicate whether the user has added a databricks credential port or not.
+     */
+    public static final class CredentialInputDatabricks implements ConstantSignal {
+        @Override
+        public boolean applies(final DefaultNodeSettingsContext context) {
+            return databricksPortAvailable(context.getPortObjectSpecs());
+        }
+    }
+
     @Section(title = "Token")
     @Effect(signals = {AuthType.IsToken.class, CredentialInputNotConnectedSignal.class}, //
         operation = And.class, //
@@ -107,6 +121,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     @Widget(title = "Databricks workspace URL", //
         description = "Full URL of the Databricks workspace, e.g. https://&lt;workspace&gt;.cloud.databricks.com/ "//
             + "or https://adb-&lt;workspace-id&gt;.&lt;random-number&gt;.azuredatabricks.net/ on Azure.")
+    @Effect(signals = CredentialInputDatabricks.class, type = EffectType.HIDE)
     String m_workspaceUrl = "";
 
     @Widget(title = "Authentication type", //
@@ -115,7 +130,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
             + "</ul>")
     @Signal(condition = AuthType.IsToken.class)
-    @Effect(signals = CredentialInputNotConnectedSignal.class, type = EffectType.SHOW)
+    @Effect(signals = CredentialInputNotConnectedSignal.class, type = EffectType.ENABLE)
     AuthType m_authType = AuthType.TOKEN;
 
     enum AuthType {
@@ -162,7 +177,14 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     }
 
     void validate(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+
         validateBasicSettings();
+        if (databricksPortAvailable(inSpecs)) {
+            //If a Databricks input port is available we can ignore all other settings
+            return;
+        }
+
+        validateWorkspaceURL();
 
         if (inSpecs != null && inSpecs.length > 0) {
             // if a credential input port is attached then usernamePassword and token don't matter
@@ -175,7 +197,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         }
     }
 
-    private void validateBasicSettings() throws InvalidSettingsException {
+    private void validateWorkspaceURL() throws InvalidSettingsException {
         if (StringUtils.isBlank(m_workspaceUrl)) {
             throw new InvalidSettingsException("Please specify a Databricks workspace URL");
         }
@@ -188,6 +210,9 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         } catch (URISyntaxException e) { // NOSONAR not rethrowing
             throw new InvalidSettingsException("The provided Databricks workspace URL is invalid");
         }
+    }
+
+    private void validateBasicSettings() throws InvalidSettingsException {
 
         if (m_connectionTimeout < 0) {
             throw new InvalidSettingsException("Connection timeout must be a positive number.");
@@ -196,5 +221,17 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         if (m_readTimeout < 0) {
             throw new InvalidSettingsException("Read timeout must be a positive number.");
         }
+    }
+
+    private static boolean databricksPortAvailable(final PortObjectSpec[] specs) {
+        if (specs == null || specs.length < 1 || !(specs[0] instanceof CredentialPortObjectSpec)) {
+            return false;
+        }
+        final CredentialPortObjectSpec credSpec = (CredentialPortObjectSpec)specs[0];
+        Optional<CredentialType> credentialType = credSpec.getCredentialType();
+        if (credentialType.isEmpty()) {
+            return false;
+        }
+        return DatabricksAccessTokenCredential.TYPE == credentialType.get();
     }
 }

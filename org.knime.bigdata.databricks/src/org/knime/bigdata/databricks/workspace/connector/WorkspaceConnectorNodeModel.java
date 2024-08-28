@@ -53,10 +53,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
-import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.scim.ScimAPI;
 import org.knime.bigdata.databricks.rest.scim.ScimUser;
@@ -85,6 +85,7 @@ import org.knime.filehandling.core.defaultnodesettings.ExceptionUtil;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
 
 /**
@@ -122,8 +123,7 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
     }
 
     private static CredentialType validateOnConfigure(final PortObjectSpec[] inSpecs,
-        final WorkspaceConnectorSettings settings)
-        throws InvalidSettingsException {
+        final WorkspaceConnectorSettings settings) throws InvalidSettingsException {
 
         settings.validate(inSpecs);
 
@@ -165,9 +165,10 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
             ingoingAccessToken = ingoingCred.getSpec().toAccessor(AccessTokenAccessor.class);
         }
 
-        final ScimUser scimUser;
+        ScimUser scimUser = null;
         try {
             scimUser = getCurrentDatabricksUser(settings, ingoingAccessToken);
+        } catch (NotFoundException e) { // NOSONAR ignore, this is a valid response for a service principal
         } catch (ForbiddenException | NotAuthorizedException | BadRequestException e) {
             throw KNIMEException.of(Message.fromSummary("Authentication failed. Please provide valid credentials."), e);
         } catch (ProcessingException e) {
@@ -188,23 +189,30 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
         return createCredentialInternal(settings, scimUser, ingoingAccessToken);
     }
 
-    private static Credential createCredentialInternal(final WorkspaceConnectorSettings settings,
+    private static DatabricksAccessTokenCredential createCredentialInternal(final WorkspaceConnectorSettings settings,
         final ScimUser scimUser, final AccessTokenAccessor maybeAccessToken) {
 
-        final Credential credential;
+        final DatabricksAccessTokenCredential credential;
+
+        final String userId = Optional.ofNullable(scimUser).map(u -> u.id).orElse(null);
+        final String displayName = Optional.ofNullable(scimUser).map(u -> u.displayName).orElse(null);
 
         if (maybeAccessToken != null) {
-            credential = new DatabricksAccessTokenCredential(//
-                URI.create(settings.m_workspaceUrl), //
-                maybeAccessToken, //
-                scimUser.id, //
-                scimUser.displayName);
+            if (maybeAccessToken instanceof DatabricksAccessTokenCredential) {
+                credential = (DatabricksAccessTokenCredential)maybeAccessToken;
+            } else {
+                credential = new DatabricksAccessTokenCredential(//
+                    URI.create(settings.m_workspaceUrl), //
+                    maybeAccessToken, //
+                    userId, //
+                    displayName);
+            }
         } else if (settings.m_authType == AuthType.TOKEN) {
             credential = new DatabricksAccessTokenCredential(//
                 URI.create(settings.m_workspaceUrl), //
                 settings.m_token.getPassword(), //
-                scimUser.id, //
-                scimUser.displayName);
+                userId, //
+                displayName);
         } else {
             throw new IllegalArgumentException("Usupported auth type: " + settings.m_authType);
         }
@@ -215,10 +223,10 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
     private static ScimUser getCurrentDatabricksUser(final WorkspaceConnectorSettings settings,
         final AccessTokenAccessor maybeAccessToken) throws IOException {
 
-        final DatabricksWorkspaceAccessor dummyAccessor =
-            (DatabricksWorkspaceAccessor)createCredentialInternal(settings, DUMMY_USER, maybeAccessToken);
+        final DatabricksAccessTokenCredential dummyCredential =
+            createCredentialInternal(settings, DUMMY_USER, maybeAccessToken);
 
-        final ScimAPI scimApi = DatabricksRESTClient.create(dummyAccessor, //
+        final ScimAPI scimApi = DatabricksRESTClient.create(dummyCredential, //
             ScimAPI.class, //
             Duration.ofSeconds(40), //
             Duration.ofSeconds(60));

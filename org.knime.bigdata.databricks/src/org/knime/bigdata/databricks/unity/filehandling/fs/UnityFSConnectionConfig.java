@@ -51,7 +51,7 @@ package org.knime.bigdata.databricks.unity.filehandling.fs;
 import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
@@ -65,7 +65,7 @@ import org.knime.filehandling.core.connections.meta.base.BaseFSConnectionConfig;
  */
 public final class UnityFSConnectionConfig extends BaseFSConnectionConfig {
 
-    private DatabricksWorkspaceAccessor m_workspace;
+    private DatabricksAccessTokenCredential m_credential;
 
     private Duration m_connectionTimeout;
 
@@ -78,12 +78,12 @@ public final class UnityFSConnectionConfig extends BaseFSConnectionConfig {
         super(workingDirectory, true);
     }
 
-    DatabricksWorkspaceAccessor getWorkspace() {
-        return m_workspace;
+    DatabricksAccessTokenCredential getCredential() {
+        return m_credential;
     }
 
     String getHost() {
-        return m_workspace.getDatabricksWorkspaceUrl().getHost();
+        return m_credential.getDatabricksWorkspaceUrl().getHost();
     }
 
     Duration getConnectionTimeout() {
@@ -109,7 +109,7 @@ public final class UnityFSConnectionConfig extends BaseFSConnectionConfig {
      */
     public static class Builder {
 
-        private DatabricksWorkspaceAccessor m_workspace;
+        private DatabricksAccessTokenCredential m_workspace;
 
         private String m_workingDirectory;
 
@@ -123,12 +123,12 @@ public final class UnityFSConnectionConfig extends BaseFSConnectionConfig {
         /**
          * Set the workspace accessor.
          *
-         * @param workspace A {@link DatabricksWorkspaceAccessor} which provides both the Databricks workspace URL as
-         *            well as credentials.
+         * @param workspace A {@link DatabricksAccessTokenCredential} which provides both the Databricks workspace URL
+         *            as well as credentials.
          *
          * @return current builder instance
          */
-        public Builder withWorkspace(final DatabricksWorkspaceAccessor workspace) {
+        public Builder withCredential(final DatabricksAccessTokenCredential workspace) {
             m_workspace = workspace;
             return this;
         }
@@ -178,7 +178,7 @@ public final class UnityFSConnectionConfig extends BaseFSConnectionConfig {
             CheckUtils.checkArgumentNotNull(m_readTimeout, "Read timeout required.");
 
             final UnityFSConnectionConfig config = new UnityFSConnectionConfig(m_workingDirectory);
-            config.m_workspace = m_workspace;
+            config.m_credential = m_workspace;
             config.m_connectionTimeout = m_connectionTimeout;
             config.m_readTimeout = m_readTimeout;
 

@@ -86,7 +86,7 @@ public class UnityFileSystem extends BaseFileSystem<UnityPath> {
     }
 
     private static <T> T createClient(final UnityFSConnectionConfig config, final Class<T> proxy) {
-        return DatabricksRESTClient.create(config.getWorkspace(), proxy, //
+        return DatabricksRESTClient.create(config.getCredential(), proxy, //
             config.getReadTimeout(), config.getConnectionTimeout());
     }
 
