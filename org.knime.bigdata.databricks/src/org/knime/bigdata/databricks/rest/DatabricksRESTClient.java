@@ -70,7 +70,7 @@ import org.apache.cxf.transport.http.asyncclient.AsyncHTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.knime.bigdata.commons.rest.AbstractRESTClient;
 import org.knime.bigdata.databricks.DatabricksPlugin;
-import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.rest.catalog.CatalogAPI;
 import org.knime.bigdata.databricks.rest.catalog.CatalogAPIWrapper;
 import org.knime.bigdata.databricks.rest.clusters.ClusterAPI;
@@ -197,14 +197,14 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      *
      * Note that errors in this client are handled with {@code ClientErrorException}.
      *
-     * @param accessor A {@link DatabricksWorkspaceAccessor} which provides both the Databricks workspace URL as well as
-     *            credentials.
+     * @param accessor A {@link DatabricksAccessTokenCredential} which provides both the Databricks workspace URL as
+     *            well as credentials.
      * @param proxy Interface to create proxy for
      * @param receiveTimeout Receive timeout
      * @param connectionTimeout connection timeout
      * @return client implementation for given proxy interface
      */
-    public static <T> T create(final DatabricksWorkspaceAccessor accessor, final Class<T> proxy,
+    public static <T> T create(final DatabricksAccessTokenCredential accessor, final Class<T> proxy,
         final Duration receiveTimeout, final Duration connectionTimeout) {
 
         final T proxyImpl = create(accessor.getDatabricksWorkspaceUrl().toString(), //
@@ -260,9 +260,9 @@ public class DatabricksRESTClient extends AbstractRESTClient {
 
     private static class DatabricksCredentialInterceptor extends AbstractPhaseInterceptor<Message> {
 
-        final DatabricksWorkspaceAccessor m_workspaceAccessor;
+        final DatabricksAccessTokenCredential m_workspaceAccessor;
 
-        DatabricksCredentialInterceptor(final DatabricksWorkspaceAccessor workspaceAccessor) {
+        DatabricksCredentialInterceptor(final DatabricksAccessTokenCredential workspaceAccessor) {
             super(Phase.SETUP);
             m_workspaceAccessor = workspaceAccessor;
         }

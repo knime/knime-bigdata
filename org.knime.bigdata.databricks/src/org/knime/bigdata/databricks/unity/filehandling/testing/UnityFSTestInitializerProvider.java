@@ -51,7 +51,6 @@ import java.time.Duration;
 import java.util.Map;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
-import org.knime.bigdata.databricks.credential.DatabricksWorkspaceAccessor;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnection;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnectionConfig;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider;
@@ -85,14 +84,14 @@ public class UnityFSTestInitializerProvider extends DefaultFSTestInitializerProv
             UnityFileSystem.PATH_SEPARATOR);
 
         return UnityFSConnectionConfig.builder() //
-            .withWorkspace(getWorkspace(configuration)) //
+            .withCredential(getWorkspace(configuration)) //
             .withWorkingDirectory(workDir) //
             .withConnectionTimeout(DEFAULT_TIMEOUT) //
             .withReadTimeout(DEFAULT_TIMEOUT) //
             .build();
     }
 
-    private DatabricksWorkspaceAccessor getWorkspace(final Map<String, String> configuration) {
+    private DatabricksAccessTokenCredential getWorkspace(final Map<String, String> configuration) {
         return new DatabricksAccessTokenCredential( //
             URI.create(getParameter(configuration, KEY_URL)), //
             getParameter(configuration, KEY_TOKEN), //

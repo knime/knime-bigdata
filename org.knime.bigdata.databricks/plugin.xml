@@ -47,10 +47,11 @@
   
   <extension point="org.knime.credentials.base.CredentialType">
     <credentialType
+      id="knime.DatabricksAccessTokenCredential"
+      name="Databricks access token"
       credentialClass="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential"
       credentialSerializerClass="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential$Serializer"
-      id="knime.DatabricksAccessTokenCredential"
-      name="Databricks access token">
+      secretConsumableParserProvider="org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredentialParserProvider">
     </credentialType>
   </extension>
   

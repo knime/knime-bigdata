@@ -66,13 +66,15 @@ import org.knime.credentials.base.CredentialTypeRegistry;
 import org.knime.credentials.base.NoOpCredentialSerializer;
 import org.knime.credentials.base.oauth.api.AccessTokenAccessor;
 import org.knime.credentials.base.oauth.api.AccessTokenCredential;
+import org.knime.credentials.base.oauth.api.HttpAuthorizationHeaderCredentialValue;
 
 /**
  * {@link Credential} that provides a Databricks access token (Bearer).
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class DatabricksAccessTokenCredential implements Credential, DatabricksWorkspaceAccessor, AccessTokenAccessor {
+public class DatabricksAccessTokenCredential
+    implements Credential, AccessTokenAccessor, HttpAuthorizationHeaderCredentialValue {
 
     private static final String TOKEN_TYPE_BEARER = "Bearer";
 
@@ -107,8 +109,8 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
      *
      * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
      * @param accessToken The Databricks personal access token.
-     * @param userId The technical Databricks user id.
-     * @param displayName The Databricks user display name.
+     * @param userId The technical Databricks user id. May be null in case of a service principal.
+     * @param displayName The Databricks user display name. May be null in case of a service principal.
      */
     public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl, final String accessToken,
         final String userId, final String displayName) {
@@ -135,7 +137,9 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
         m_displayName = displayName;
     }
 
-    @Override
+    /**
+     * @return the Databricks workspace URL
+     */
     public URI getDatabricksWorkspaceUrl() {
         return m_databricksWorkspaceUrl;
     }
@@ -150,14 +154,20 @@ public class DatabricksAccessTokenCredential implements Credential, DatabricksWo
         return m_wrappedAccessToken.getAccessToken(forceRefresh);
     }
 
-    @Override
-    public String getUserId() {
-        return m_userId;
+    /**
+     * @return the Databricks user ID, which is automatically provisioned by Databricks. The optional may be empty if a
+     *         service principal is being used.
+     */
+    public Optional<String> getUserId() {
+        return Optional.ofNullable(m_userId);
     }
 
-    @Override
-    public String getUserDisplayName() {
-        return m_displayName;
+    /**
+     * @return Concatenation of given and family names for the user (only for display purposes). The optional may be
+     *         empty if a service principal is being used.
+     */
+    public Optional<String> getUserDisplayName() {
+        return Optional.ofNullable(m_displayName);
     }
 
     @Override
