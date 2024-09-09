@@ -56,6 +56,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
@@ -85,8 +86,9 @@ public class DatabricksAccessTokenCredentialParserProvider
      * Zero-argument default constructor.
      */
     public DatabricksAccessTokenCredentialParserProvider() {
-        super("databricks_oauth2", DatabricksAccessTokenCredentialParserProvider::parse);
-        m_parsers.put("databricks_personal_access_token", DatabricksAccessTokenCredentialParserProvider::parse);
+        super(Map.of(//
+            "databricks_oauth2", DatabricksAccessTokenCredentialParserProvider::parse, //
+            "databricks_personal_access_token", DatabricksAccessTokenCredentialParserProvider::parse));
     }
 
     private static DatabricksAccessTokenCredential parse(final Supplier<JsonObject> consumableSupplier)
