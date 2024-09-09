@@ -206,8 +206,8 @@ public class DatabricksAccessTokenCredential
         return new CredentialPortViewData(List.of(new Section("Databricks Credentials", new String[][]{//
             {"Property", "Value"}, //
             {"Databricks workspace URL", m_databricksWorkspaceUrl.toString()}, //
-            {"Databricks user ID", m_userId}, //
-            {"Databricks user", m_displayName}, //
+            {"Databricks user ID", getUserId().orElse("n/a")}, //
+            {"Databricks user", getUserDisplayName().orElse("n/a")}, //
             {"Token", obfuscate("xxxxxxxxxxxxxxxxxxxxxxxx")}, // okay, this is just for show really...
             {"Token type", getTokenType()} //
         })));
