@@ -46,7 +46,7 @@ public class HadoopInitializer {
     private static final String HADOOP_HOME_SYSPROPERTY = "hadoop.home.dir";
 
     private static final String[] HADOOP_HOME_FILES = new String[] {
-        "winutils.exe", "hadoop.dll", "msvcr100.dll", "LICENSE.txt"
+        "winutils.exe", "LICENSE.txt"
     };
 
     private static boolean isInitialized = false;
