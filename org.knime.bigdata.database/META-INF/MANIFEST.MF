@@ -24,7 +24,7 @@ Require-Bundle: org.knime.core;bundle-version="[5.3.0,6.0.0)",
  org.knime.base;bundle-version="[5.3.0,6.0.0)",
  org.knime.cloud.core;bundle-version="[5.3.0,6.0.0)",
  org.knime.bigdata.filehandling;bundle-version="[5.3.0,6.0.0)",
- org.apache.parquet;bundle-version="[1.14.0,2.0.0)",
+ org.apache.parquet;bundle-version="[1.14.2,2.0.0)",
  org.knime.workflow.migration;bundle-version="[5.3.0,6.0.0)",
  org.knime.filehandling.core;bundle-version="[5.3.0,6.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
