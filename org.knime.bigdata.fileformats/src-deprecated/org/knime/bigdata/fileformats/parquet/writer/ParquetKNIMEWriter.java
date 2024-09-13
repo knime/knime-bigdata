@@ -44,7 +44,6 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -53,10 +52,14 @@ import org.apache.parquet.hadoop.ParquetFileWriter.Mode;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.apache.parquet.hadoop.api.WriteSupport;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.hadoop.util.HadoopOutputFile;
+import org.apache.parquet.io.OutputFile;
 import org.apache.parquet.schema.Type;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
+import org.knime.bigdata.fileformats.parquet.OutputFileWrapper;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
@@ -77,8 +80,8 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
     static final class DataRowParquetWriterBuilder extends ParquetWriter.Builder<DataRow, DataRowParquetWriterBuilder> {
         private final WriteSupport<DataRow> m_writeSupport;
 
-        DataRowParquetWriterBuilder(final File file, final WriteSupport<DataRow> writeSupport) {
-            super(new Path(file.getAbsolutePath()));
+        DataRowParquetWriterBuilder(final OutputFile outputFile, final WriteSupport<DataRow> writeSupport) {
+            super(outputFile);
             m_writeSupport = writeSupport;
         }
 
@@ -137,7 +140,13 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
 
         try {
             final boolean useLogicalTypes = false;
-            m_writer = new DataRowParquetWriterBuilder(new File(file.getURI()),
+
+            final OutputFile outputFile = HadoopOutputFile.fromPath(//
+                new Path(file.getURI()),//
+                ConfigurationFactory.createBaseConfiguration());
+            final OutputFile wrappedFile = new OutputFileWrapper(outputFile);
+
+            m_writer = new DataRowParquetWriterBuilder(wrappedFile,
                     new DataRowWriteSupport(spec.getName(), spec,
                             m_mappingConfig.getConsumptionPathsFor(spec), m_params, useLogicalTypes))
                     .withCompressionCodec(codec)
