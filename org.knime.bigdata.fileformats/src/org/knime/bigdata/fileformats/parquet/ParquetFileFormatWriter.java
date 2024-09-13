@@ -56,6 +56,8 @@ import org.apache.parquet.hadoop.ParquetFileWriter.Mode;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.apache.parquet.hadoop.api.WriteSupport;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.hadoop.util.HadoopOutputFile;
+import org.apache.parquet.io.OutputFile;
 import org.knime.bigdata.fileformats.node.writer2.FileFormatWriter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
 import org.knime.bigdata.fileformats.parquet.writer.DataRowWriteSupport;
@@ -126,8 +128,10 @@ public final class ParquetFileFormatWriter implements FileFormatWriter {
 
         final Configuration hadoopFileSystemConfig = NioFileSystemUtil.getConfiguration();
         final Path hadoopPath = NioFileSystemUtil.getHadoopPath(path, hadoopFileSystemConfig);
+
+        final OutputFile wrappedFile = new OutputFileWrapper(HadoopOutputFile.fromPath(hadoopPath, hadoopFileSystemConfig));
         try {
-            m_writer = new DataRowParquetWriterBuilder(hadoopPath,
+            m_writer = new DataRowParquetWriterBuilder(wrappedFile,
                 new DataRowWriteSupport(spec.getName(), spec, m_mappingConfig.getConsumptionPathsFor(spec),
                     m_params, useLogicalTypes)).withCompressionCodec(codec).withDictionaryEncoding(true)
                         .withRowGroupSize(rowGroupSize).withWriteMode(writeMode).build();
@@ -152,8 +156,8 @@ public final class ParquetFileFormatWriter implements FileFormatWriter {
         extends ParquetWriter.Builder<DataRow, ParquetFileFormatWriter.DataRowParquetWriterBuilder> {
         private final WriteSupport<DataRow> m_writeSupport;
 
-        private DataRowParquetWriterBuilder(final Path hadoop, final WriteSupport<DataRow> writeSupport) {
-            super(hadoop);
+        private DataRowParquetWriterBuilder(final OutputFile outputFile, final WriteSupport<DataRow> writeSupport) {
+            super(outputFile);
             m_writeSupport = writeSupport;
         }
 
