@@ -1,0 +1,7 @@
+autoEnabled=true
+bindingSuggestionsDisabled=false
+eclipse.preferences.version=1
+idePrefixKey=org.knime.bigdata.spark.local/libs
+projectKey=KNIME_knime-email
+serverId=SonarCloud/knime
+sqPrefixKey=org.knime.email.libs/lib
