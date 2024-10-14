@@ -111,12 +111,22 @@
             <option name="Database Dialect">
                 Choose the registered database dialect here.
             </option>
-            <option name="Driver Name">
-                Choose the registered database driver here. The node includes the Databricks JDBC Driver which can 
-                be downloaded <a href="https://www.databricks.com/spark/jdbc-drivers-download">here.</a>
-                <br/>
-                If you need to use a different version of the driver you can manually register a new driver 
-                via the KNIME preferences under "KNIME -> Databases" with Database type Databricks.
+            <option name="Database Driver">
+                <p>
+                Choose the <a href="https://en.wikipedia.org/wiki/JDBC_driver">JDBC driver</a> to connect to the 
+                database here. If you select "Use latest driver version available" upon execution the node will 
+                automatically use the driver with the latest (highest) driver version that is available for the 
+                current database type. This has the advantage that you do not need to touch the workflow after a 
+                driver update. However, the workflow might break in the rare case that the behavior of the driver 
+                e.g. type mapping changes with the newer version.
+                </p>
+                <p>
+                If this option is not enabled, you can select a specific version of the registered drivers via the 
+                drop-down list. Additional drivers downloaded from 
+                <a href="https://www.databricks.com/spark/jdbc-drivers-download">here</a> can be registered via 
+                KNIME's preference page "KNIME -> Databases". For more details on how to register a new driver see the
+                <a href="https://docs.knime.com/latest/db_extension_guide/index.html#register_jdbc">database documentation</a>.
+                </p>        
             </option>
         </tab>
         <tab name="DB Port: JDBC Parameters">
