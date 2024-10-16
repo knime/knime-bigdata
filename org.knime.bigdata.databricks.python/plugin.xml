@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.knime.python3.types.PythonPortObjectConverter">
+      <KnimeToPythonPortObjectConverter
+            JavaConverterClass="org.knime.bigdata.databricks.python.port.DatabricksWorkspacePythonPortObjectConverter"
+            PythonConverterClass="DatabricksWorkspacePortConverter"
+            PythonModule="src/main/python/ports.py">
+      </KnimeToPythonPortObjectConverter>
+   </extension>
+
+</plugin>
