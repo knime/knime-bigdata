@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Databricks Spark context and DBFS connector
 Bundle-SymbolicName: org.knime.bigdata.databricks;singleton:=true
-Bundle-Version: 5.3.2.qualifier
+Bundle-Version: 5.3.3.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.databricks.DatabricksPlugin
@@ -43,8 +43,8 @@ Require-Bundle: org.knime.base;bundle-version="[5.3.0,6.0.0)",
  org.apache.cxf.cxf-rt-transports-http-hc;bundle-version="[4.0.3,5.0.0)",
  org.knime.filehandling.core;bundle-version="[5.2.0,6.0.0)",
  org.knime.core.ui;bundle-version="[5.3.0,6.0.0)",
- org.knime.credentials.base;bundle-version="[5.3.0,6.0.0)",
- org.knime.credentials.base.oauth;bundle-version="[5.3.0,6.0.0)",
+ org.knime.credentials.base;bundle-version="[5.3.3,6.0.0)",
+ org.knime.credentials.base.oauth;bundle-version="[5.3.3,6.0.0)",
  org.apache.commons.lang;bundle-version="[2.6.0,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
