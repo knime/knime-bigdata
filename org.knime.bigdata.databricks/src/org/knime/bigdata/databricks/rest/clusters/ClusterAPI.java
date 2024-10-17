@@ -51,6 +51,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Response;
 
 /**
  * REST API definition of cluster API.
@@ -83,6 +84,17 @@ public interface ClusterAPI {
     @GET
     @Path("get")
     ClusterInfo getCluster(@QueryParam("cluster_id") String clusterId) throws IOException;
+
+    /**
+     * Retrieve the information for a cluster given its identifier.
+     *
+     * @param clusterId The cluster about which to retrieve information.
+     * @return informations about the cluster as response, with headers like the org id
+     * @throws IOException on failures
+     */
+    @GET
+    @Path("get")
+    Response getClusterResponse(@QueryParam("cluster_id") String clusterId) throws IOException;
 
     /**
      * Start a terminated Spark cluster given its ID. If the cluster is not in a TERMINATED state, nothing will happen.
