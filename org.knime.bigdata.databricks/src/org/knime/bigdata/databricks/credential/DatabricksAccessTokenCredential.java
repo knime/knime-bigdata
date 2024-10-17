@@ -94,6 +94,8 @@ public class DatabricksAccessTokenCredential
 
     private AccessTokenAccessor m_wrappedAccessToken;
 
+    private boolean m_isOAuth2 = true;
+
     private String m_userId;
 
     private String m_displayName;
@@ -109,13 +111,15 @@ public class DatabricksAccessTokenCredential
      *
      * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
      * @param accessToken The Databricks personal access token.
+     * @param isOAuth2 {@code true} if this is an oauth2 based token
      * @param userId The technical Databricks user id. May be null in case of a service principal.
      * @param displayName The Databricks user display name. May be null in case of a service principal.
      */
     public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl, final String accessToken,
-        final String userId, final String displayName) {
+        final boolean isOAuth2, final String userId, final String displayName) {
         this(databricksWorkspaceUrl,//
             new AccessTokenCredential(accessToken, null, TOKEN_TYPE_BEARER, null),//
+            isOAuth2, //
             userId,//
             displayName);
     }
@@ -125,14 +129,17 @@ public class DatabricksAccessTokenCredential
      *
      * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
      * @param accessTokenAccessor The Databricks personal access token.
+     * @param isOAuth2 {@code true} if this is an oauth2 based token
      * @param userId The technical Databricks user id.
      * @param displayName The Databricks user display name.
      */
     public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl,
-        final AccessTokenAccessor accessTokenAccessor, final String userId, final String displayName) {
+        final AccessTokenAccessor accessTokenAccessor, final boolean isOAuth2, final String userId,
+        final String displayName) {
 
         m_databricksWorkspaceUrl = databricksWorkspaceUrl;
         m_wrappedAccessToken = accessTokenAccessor;
+        m_isOAuth2 = isOAuth2;
         m_userId = userId;
         m_displayName = displayName;
     }
@@ -152,6 +159,13 @@ public class DatabricksAccessTokenCredential
     @Override
     public String getAccessToken(final boolean forceRefresh) throws IOException {
         return m_wrappedAccessToken.getAccessToken(forceRefresh);
+    }
+
+    /**
+     * @return {@code true} if this is an OAuth2 based token
+     */
+    public boolean isOAuth2() {
+        return m_isOAuth2;
     }
 
     /**

@@ -95,6 +95,7 @@ public class UnityFSTestInitializerProvider extends DefaultFSTestInitializerProv
         return new DatabricksAccessTokenCredential( //
             URI.create(getParameter(configuration, KEY_URL)), //
             getParameter(configuration, KEY_TOKEN), //
+            false, // not OAuth2 based
             null, // user id
             null); // display name
     }

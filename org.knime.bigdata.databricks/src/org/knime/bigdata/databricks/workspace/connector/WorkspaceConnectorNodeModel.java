@@ -204,6 +204,7 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
                 credential = new DatabricksAccessTokenCredential(//
                     URI.create(settings.m_workspaceUrl), //
                     maybeAccessToken, //
+                    true, // maybe OAuth2 based
                     userId, //
                     displayName);
             }
@@ -211,6 +212,7 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
             credential = new DatabricksAccessTokenCredential(//
                 URI.create(settings.m_workspaceUrl), //
                 settings.m_token.getPassword(), //
+                false, // not OAuth2 based
                 userId, //
                 displayName);
         } else {
