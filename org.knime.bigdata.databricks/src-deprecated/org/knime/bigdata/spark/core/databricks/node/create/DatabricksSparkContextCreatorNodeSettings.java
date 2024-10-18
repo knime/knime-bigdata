@@ -138,6 +138,11 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
     }
 
     @Override
+    public void validateDeeper() throws InvalidSettingsException {
+        validateDeeper(false);
+    }
+
+    @Override
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         super.validateSettings(settings);
         m_authentication.validateSettings(settings);

@@ -48,20 +48,40 @@
  */
 package org.knime.bigdata.dbfs.filehandling.node;
 
+import java.util.Optional;
+
+import org.knime.core.node.ConfigurableNodeFactory;
 import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.ports.PortsConfiguration;
+import org.knime.credentials.base.CredentialPortObject;
+import org.knime.filehandling.core.port.FileSystemPortObject;
 
 /**
  * Factory class for the DBFS Connector node.
  *
  * @author Alexander Bondaletov
  */
-public class DbfsConnectorNodeFactory extends NodeFactory<DbfsConnectorNodeModel> {
+public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnectorNodeModel> {
+
+    private static final String WORKSPACE_INPUT_NAME = "Databricks Workspace Connection";
+
+    private static final String DBFS_OUTPUT_NAME = "DBFS Connection";
 
     @Override
-    public DbfsConnectorNodeModel createNodeModel() {
-        return new DbfsConnectorNodeModel();
+    protected Optional<PortsConfigurationBuilder> createPortsConfigBuilder() {
+        final PortsConfigurationBuilder b = new PortsConfigurationBuilder();
+        b.addOptionalInputPortGroup(WORKSPACE_INPUT_NAME, CredentialPortObject.TYPE);
+        b.addFixedOutputPortGroup(DBFS_OUTPUT_NAME, FileSystemPortObject.TYPE);
+        return Optional.of(b);
+    }
+
+    @Override
+    public DbfsConnectorNodeModel createNodeModel(final NodeCreationConfiguration creationConfig) {
+        final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
+        final boolean useWorkspaceConnection = portsConfig.getInputPorts().length > 0;
+        return new DbfsConnectorNodeModel(portsConfig, useWorkspaceConnection);
     }
 
     @Override
@@ -81,8 +101,10 @@ public class DbfsConnectorNodeFactory extends NodeFactory<DbfsConnectorNodeModel
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new DbfsConnectorNodeDialog();
+    protected NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
+        final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
+        final boolean useWorkspaceConnection = portsConfig.getInputPorts().length > 0;
+        return new DbfsConnectorNodeDialog(useWorkspaceConnection);
     }
 
 }

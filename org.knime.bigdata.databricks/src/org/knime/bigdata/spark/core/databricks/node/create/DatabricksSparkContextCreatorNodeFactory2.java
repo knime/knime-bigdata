@@ -45,8 +45,17 @@
  */
 package org.knime.bigdata.spark.core.databricks.node.create;
 
-import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import java.util.Optional;
+
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.core.node.ConfigurableNodeFactory;
 import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeView;
+import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.ports.PortsConfiguration;
+import org.knime.credentials.base.CredentialPortObject;
+import org.knime.database.port.DBSessionPortObject;
+import org.knime.filehandling.core.port.FileSystemPortObject;
 
 /**
  * Databricks connector node factory.
@@ -54,18 +63,38 @@ import org.knime.core.node.NodeDialogPane;
  * @author Sascha Wolke, KNIME GmbH
  */
 public class DatabricksSparkContextCreatorNodeFactory2
-    extends DefaultSparkNodeFactory<DatabricksSparkContextCreatorNodeModel2> {
+    extends ConfigurableNodeFactory<DatabricksSparkContextCreatorNodeModel2> {
+
+    private static final String WORKSPACE_INPUT_NAME = "Databricks Workspace Connection";
+
+    private static final String DB_OUTPUT_NAME = "DB Connection";
+
+    private static final String DBFS_OUTPUT_NAME = "DBFS Connection";
+
+    private static final String SPARK_OUTPUT_NAME = "Spark Context";
 
     /**
      * Constructor.
      */
     public DatabricksSparkContextCreatorNodeFactory2() {
-        super("");
+        super();
     }
 
     @Override
-    public DatabricksSparkContextCreatorNodeModel2 createNodeModel() {
-        return new DatabricksSparkContextCreatorNodeModel2();
+    protected Optional<PortsConfigurationBuilder> createPortsConfigBuilder() {
+        final PortsConfigurationBuilder b = new PortsConfigurationBuilder();
+        b.addOptionalInputPortGroup(WORKSPACE_INPUT_NAME, CredentialPortObject.TYPE);
+        b.addFixedOutputPortGroup(DB_OUTPUT_NAME, DBSessionPortObject.TYPE);
+        b.addFixedOutputPortGroup(DBFS_OUTPUT_NAME, FileSystemPortObject.TYPE);
+        b.addFixedOutputPortGroup(SPARK_OUTPUT_NAME, SparkContextPortObject.TYPE);
+        return Optional.of(b);
+    }
+
+    @Override
+    protected DatabricksSparkContextCreatorNodeModel2 createNodeModel(final NodeCreationConfiguration creationConfig) {
+        final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
+        final boolean useWorkspaceConnection = portsConfig.getInputPorts().length > 0;
+        return new DatabricksSparkContextCreatorNodeModel2(portsConfig, useWorkspaceConnection);
     }
 
     @Override
@@ -74,12 +103,21 @@ public class DatabricksSparkContextCreatorNodeFactory2
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new DatabricksSparkContextCreatorNodeDialog2();
+    protected NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
+        final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
+        final boolean useWorkspaceConnection = portsConfig.getInputPorts().length > 0;
+        return new DatabricksSparkContextCreatorNodeDialog2(useWorkspaceConnection);
     }
 
     @Override
     protected int getNrNodeViews() {
         return 0;
     }
+
+    @Override
+    public NodeView<DatabricksSparkContextCreatorNodeModel2> createNodeView(final int viewIndex,
+        final DatabricksSparkContextCreatorNodeModel2 nodeModel) {
+        return null;
+    }
+
 }

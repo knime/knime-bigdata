@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+<knimeNode icon="icon.png" type="Source"
+    xmlns="http://knime.org/node/v4.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd">
     <name>Create Databricks Environment</name>
     
     <shortDescription>Creates a Databricks Environment connected to an existing Databricks cluster.</shortDescription>
@@ -169,6 +171,9 @@
         </tab>
     </fullDescription>
     <ports>
+    	<dynInPort insert-before="0" name="Databricks Workspace Connection" group-identifier="Databricks Workspace Connection">
+    		Databricks Workspace Connection, that can be connected to the Databricks Workspace Connector.
+   		</dynInPort>
     	<outPort index="0" name="DB Connection">
     		JDBC connection, that can be connected to the KNIME database nodes.
    		</outPort>

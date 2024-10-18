@@ -81,7 +81,7 @@ public class DatabricksSparkContextFileSystemConfig extends DatabricksSparkConte
      * @param sparkContextId
      * @param fileSystemId
      */
-    DatabricksSparkContextFileSystemConfig(final SparkVersion sparkVersion, final String clusterId,
+    public DatabricksSparkContextFileSystemConfig(final SparkVersion sparkVersion, final String clusterId,
         final DatabricksAccessTokenCredential credential, final String stagingAreaFolder,
         final boolean terminateClusterOnDestroy, final int connectionTimeoutSeconds, final int receiveTimeoutSeconds,
         final int jobCheckFrequencySeconds, final SparkContextID sparkContextId, final String fileSystemId) {

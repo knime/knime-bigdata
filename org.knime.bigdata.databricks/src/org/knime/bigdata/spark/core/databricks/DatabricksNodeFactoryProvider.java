@@ -46,7 +46,6 @@
 package org.knime.bigdata.spark.core.databricks;
 
 import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeFactory;
-import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeFactory2;
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 
@@ -61,8 +60,7 @@ public class DatabricksNodeFactoryProvider extends DefaultSparkNodeFactoryProvid
      * Default constructor.
      */
     public DatabricksNodeFactoryProvider() {
-        super(AllVersionCompatibilityChecker.INSTANCE, new DatabricksSparkContextCreatorNodeFactory(),
-            new DatabricksSparkContextCreatorNodeFactory2());
+        super(AllVersionCompatibilityChecker.INSTANCE, new DatabricksSparkContextCreatorNodeFactory());
     }
 
 }
