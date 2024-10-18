@@ -48,6 +48,8 @@
  */
 package org.knime.bigdata.dbfs.filehandling.fs;
 
+import static org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystemProvider.toIOException;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.DirectoryStream.Filter;
@@ -59,6 +61,8 @@ import org.knime.bigdata.databricks.rest.dbfs.FileInfo;
 import org.knime.bigdata.databricks.rest.dbfs.FileInfoList;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BasePathIterator;
+
+import jakarta.ws.rs.ClientErrorException;
 
 /**
  * Class to iterate through the files and folders in the path
@@ -85,6 +89,8 @@ class DbfsPathIterator extends BasePathIterator<DbfsPath> {
             Iterator<DbfsPath> iterator = Arrays.stream(files).map(this::toPath).iterator();
 
             setFirstPage(iterator);//NOSONAR
+        } catch (final ClientErrorException e) {
+            throw toIOException(path, e);
         }
     }
 
