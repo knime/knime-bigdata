@@ -52,6 +52,8 @@ import java.io.IOException;
 
 import org.knime.bigdata.databricks.rest.APIWrapper;
 
+import jakarta.ws.rs.core.Response;
+
 /**
  * Wrapper class for {@link ClusterAPI} that suppresses authentication popups and handles rate limits.
  *
@@ -76,6 +78,11 @@ public class ClusterAPIWrapper extends APIWrapper<ClusterAPI> implements Cluster
     @Override
     public ClusterInfo getCluster(final String clusterId) throws IOException {
         return invoke(() -> m_api.getCluster(clusterId));
+    }
+
+    @Override
+    public Response getClusterResponse(final String clusterId) throws IOException {
+        return invoke(() -> m_api.getClusterResponse(clusterId));
     }
 
     @Override
