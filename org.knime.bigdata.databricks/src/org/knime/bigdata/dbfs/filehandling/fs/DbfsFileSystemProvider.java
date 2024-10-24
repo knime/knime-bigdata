@@ -49,15 +49,16 @@
 package org.knime.bigdata.dbfs.filehandling.fs;
 
 import java.io.Closeable;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
@@ -81,6 +82,11 @@ import org.knime.bigdata.dbfs.filehandler.DBFSOutputStream;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.knime.filehandling.core.connections.base.BaseFileSystemProvider;
 import org.knime.filehandling.core.connections.base.attributes.BaseFileAttributes;
+
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * File system provider for the {@link DbfsFileSystem}.
@@ -127,19 +133,29 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
     @SuppressWarnings("resource")
     @Override
     protected InputStream newInputStreamInternal(final DbfsPath path, final OpenOption... options) throws IOException {
-        return new DBFSInputStream(path.toString(), path.getFileSystem().getClient());
+        try {
+            return new DBFSInputStream(path.toString(), path.getFileSystem().getClient());
+        } catch (final ClientErrorException e) {
+            throw toIOException(path, e);
+        }
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected OutputStream newOutputStreamInternal(final DbfsPath path, final OpenOption... options) throws IOException {
+    protected OutputStream newOutputStreamInternal(final DbfsPath path, final OpenOption... options)
+        throws IOException {
+
         final Set<OpenOption> opts = new HashSet<>(Arrays.asList(options));
 
-        if (opts.contains(StandardOpenOption.APPEND)) {
-            //Fallback to TempFileSeekableByteChannel because DBFSOutputStream doesn't support the APPEND mode
-            return Channels.newOutputStream(newByteChannel(path, opts));
-        } else {
-            return new DBFSOutputStream(path.toString(), path.getFileSystem().getClient(), true);
+        try {
+            if (opts.contains(StandardOpenOption.APPEND)) {
+                //Fallback to TempFileSeekableByteChannel because DBFSOutputStream doesn't support the APPEND mode
+                return Channels.newOutputStream(newByteChannel(path, opts));
+            } else {
+                return new DBFSOutputStream(path.toString(), path.getFileSystem().getClient(), true);
+            }
+        } catch (final ClientErrorException e) {
+            throw toIOException(path, e);
         }
     }
 
@@ -154,6 +170,8 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
     protected void createDirectoryInternal(final DbfsPath dir, final FileAttribute<?>... attrs) throws IOException {
         try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             dir.getFileSystem().getClient().mkdirs(Mkdir.create(dir.toString()));
+        } catch (final ClientErrorException e) {
+            throw toIOException(dir, e);
         }
     }
 
@@ -163,15 +181,24 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
         try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             FileInfo info = path.getFileSystem().getClient().getStatus(path.toString());
             return createBaseFileAttrs(info, path);
-        } catch (FileNotFoundException e) {
-            throw toNSFException(e, path.toString());
+        } catch (final ClientErrorException e) {
+            throw toIOException(path, e);
         }
     }
 
-    private static NoSuchFileException toNSFException(final FileNotFoundException cause, final String path) {
-        NoSuchFileException nsfe = new NoSuchFileException(path);
-        nsfe.initCause(cause);
-        return nsfe;
+    static IOException toIOException(final DbfsPath path, final ClientErrorException ex) {
+        final IOException result;
+
+        if (ex instanceof NotAuthorizedException || ex instanceof ForbiddenException) {
+            result = new AccessDeniedException(path.toString(), null, ex.getMessage());
+        } else if (ex instanceof NotFoundException) {
+            result = new NoSuchFileException(path.toString());
+        } else {
+            result = new FileSystemException(path.toString(), null, ex.getMessage());
+        }
+
+        result.initCause(ex);
+        return result;
     }
 
     /**
@@ -197,6 +224,8 @@ class DbfsFileSystemProvider extends BaseFileSystemProvider<DbfsPath, DbfsFileSy
         try (final Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
             DBFSAPI client = path.getFileSystem().getClient();
             client.delete(Delete.create(path.toString(), false));
+        } catch (final ClientErrorException e) {
+            throw toIOException(path, e);
         }
     }
 
