@@ -118,7 +118,16 @@ public class DatabricksClient {
         Duration receiveTimeout = Duration.ofSeconds(config.getReceiveTimeoutSeconds());
         Duration connectionTimeout = Duration.ofSeconds(config.getConnectionTimeoutSeconds());
 
-        if (config.useToken()) {
+        if (config.useCredential()) {
+            m_clusterAPI = DatabricksRESTClient.create(config.getCredential(), ClusterAPI.class, receiveTimeout,
+                connectionTimeout);
+            m_libraryAPI = DatabricksRESTClient.create(config.getCredential(), LibrariesAPI.class, receiveTimeout,
+                connectionTimeout);
+            m_contextsAPI = DatabricksRESTClient.create(config.getCredential(), ContextsAPI.class, receiveTimeout,
+                connectionTimeout);
+            m_commandsAPI = DatabricksRESTClient.create(config.getCredential(), CommandsAPI.class, receiveTimeout,
+                connectionTimeout);
+        } else if (config.useToken()) {
             m_clusterAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), ClusterAPI.class,
                 config.getAuthToken(), receiveTimeout, connectionTimeout);
             m_libraryAPI = DatabricksRESTClient.create(config.getDatabricksUrl(), LibrariesAPI.class,

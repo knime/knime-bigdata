@@ -431,7 +431,9 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
 
     private String createAuthenticationInfoString() {
         final DatabricksSparkContextConfig config = getConfiguration();
-        if (config.useToken()) {
+        if (config.useCredential()) {
+            return "Workspace Connection";
+        } else if (config.useToken()) {
             return "Token";
         } else {
             return String.format("User and password (user: %s)", config.getUser());

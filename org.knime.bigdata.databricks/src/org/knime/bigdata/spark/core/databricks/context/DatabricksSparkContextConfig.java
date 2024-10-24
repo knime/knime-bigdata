@@ -47,6 +47,7 @@ package org.knime.bigdata.spark.core.databricks.context;
 
 import java.util.Map;
 
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
@@ -60,13 +61,19 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  */
 public abstract class DatabricksSparkContextConfig implements SparkContextConfig {
 
+    private enum AuthMode {
+            CREDENTIAL, TOKEN, USERNAME_PASSWORD
+    }
+
+    private final AuthMode m_authMode;
+
+    private final DatabricksAccessTokenCredential m_credential;
+
     private final SparkVersion m_sparkVersion;
 
     private final String m_databricksUrl;
 
     private final String m_clusterId;
-
-    private final boolean m_useToken;
 
     private final String m_authToken;
 
@@ -85,6 +92,40 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
     private final int m_jobCheckFrequencySeconds;
 
     private final SparkContextID m_sparkContextId;
+
+    /**
+     * Constructor using a Workspace connector input connection as authentication.
+     *
+     * @param sparkVersion Spark version of the cluster
+     * @param clusterId ID if cluster
+     * @param credential the credential provider
+     * @param stagingAreaFolder Staging area in DBFS
+     * @param terminateClusterOnDestroy terminate cluster on context destroy
+     * @param connectionTimeoutSeconds Connection timeout
+     * @param receiveTimeoutSeconds Receive timeout
+     * @param jobCheckFrequencySeconds
+     * @param sparkContextId
+     */
+    DatabricksSparkContextConfig(final SparkVersion sparkVersion, final String clusterId,
+        final DatabricksAccessTokenCredential credential, final String stagingAreaFolder,
+        final boolean terminateClusterOnDestroy, final int connectionTimeoutSeconds, final int receiveTimeoutSeconds,
+        final int jobCheckFrequencySeconds, final SparkContextID sparkContextId) {
+
+        m_sparkVersion = sparkVersion;
+        m_databricksUrl = null;
+        m_clusterId = clusterId;
+        m_authMode = AuthMode.CREDENTIAL;
+        m_credential = credential;
+        m_authToken = null;
+        m_user = null;
+        m_password = null;
+        m_stagingAreaFolder = stagingAreaFolder;
+        m_terminateClusterOnDestroy = terminateClusterOnDestroy;
+        m_connectionTimeoutSeconds = connectionTimeoutSeconds;
+        m_receiveTimeoutSeconds = receiveTimeoutSeconds;
+        m_jobCheckFrequencySeconds = jobCheckFrequencySeconds;
+        m_sparkContextId = sparkContextId;
+    }
 
     /**
      * Constructor for token based authentication.
@@ -108,7 +149,8 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
         m_sparkVersion = sparkVersion;
         m_databricksUrl = databricksUrl;
         m_clusterId = clusterId;
-        m_useToken = true;
+        m_authMode = AuthMode.TOKEN;
+        m_credential = null;
         m_authToken = authToken;
         m_user = null;
         m_password = null;
@@ -143,7 +185,8 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
         m_sparkVersion = sparkVersion;
         m_databricksUrl = databricksUrl;
         m_clusterId = clusterId;
-        m_useToken = false;
+        m_authMode = AuthMode.USERNAME_PASSWORD;
+        m_credential = null;
         m_authToken = null;
         m_user = user;
         m_password = password;
@@ -204,6 +247,9 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
      * @return the http(s) URL for Databricks
      */
     public String getDatabricksUrl() {
+        if (useCredential()) {
+            return m_credential.getDatabricksWorkspaceUrl().toString();
+        }
         return m_databricksUrl;
     }
 
@@ -215,10 +261,25 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
     }
 
     /**
+     *
+     * @return {@code true} if {@link #getCredential()} should be used.
+     */
+    boolean useCredential() {
+        return m_authMode == AuthMode.CREDENTIAL;
+    }
+
+    /**
+     * @return the credential provider
+     */
+    DatabricksAccessTokenCredential getCredential() {
+        return m_credential;
+    }
+
+    /**
      * @return <code>true</code> if token should be used, <code>false</code> if username and password should be used
      */
     public boolean useToken() {
-        return m_useToken;
+        return m_authMode == AuthMode.TOKEN;
     }
 
     /**
@@ -286,6 +347,8 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((m_authMode == null) ? 0 : m_authMode.hashCode());
+        result = prime * result + ((m_credential == null) ? 0 : m_credential.hashCode());
         result = prime * result + ((m_authToken == null) ? 0 : m_authToken.hashCode());
         result = prime * result + ((m_clusterId == null) ? 0 : m_clusterId.hashCode());
         result = prime * result + m_connectionTimeoutSeconds;
@@ -297,7 +360,6 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
         result = prime * result + ((m_sparkVersion == null) ? 0 : m_sparkVersion.hashCode());
         result = prime * result + ((m_stagingAreaFolder == null) ? 0 : m_stagingAreaFolder.hashCode());
         result = prime * result + (m_terminateClusterOnDestroy ? 1231 : 1237);
-        result = prime * result + (m_useToken ? 1231 : 1237);
         result = prime * result + ((m_user == null) ? 0 : m_user.hashCode());
         return result;
     }
@@ -317,6 +379,20 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
             return false;
         }
         DatabricksSparkContextConfig other = (DatabricksSparkContextConfig)obj;
+        if (m_authMode == null) {
+            if (other.m_authMode != null) {
+                return false;
+            }
+        } else if (m_authMode != other.m_authMode) {
+            return false;
+        }
+        if (m_credential == null) {
+            if (other.m_credential != null) {
+                return false;
+            }
+        } else if (!m_credential.equals(other.m_credential)) {
+            return false;
+        }
         if (m_authToken == null) {
             if (other.m_authToken != null) {
                 return false;
@@ -376,9 +452,6 @@ public abstract class DatabricksSparkContextConfig implements SparkContextConfig
             return false;
         }
         if (m_terminateClusterOnDestroy != other.m_terminateClusterOnDestroy) {
-            return false;
-        }
-        if (m_useToken != other.m_useToken) {
             return false;
         }
         if (m_user == null) {

@@ -51,6 +51,7 @@ package org.knime.bigdata.spark.core.databricks.context;
 import java.util.Optional;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -65,6 +66,30 @@ import org.knime.filehandling.core.connections.FSConnectionRegistry;
 public class DatabricksSparkContextFileSystemConfig extends DatabricksSparkContextConfig {
 
     private final String m_fileSystemId;
+
+    /**
+     * Constructor for token based authentication.
+     *
+     * @param sparkVersion Spark version of the cluster
+     * @param clusterId ID if cluster
+     * @param credential the credential provider
+     * @param stagingAreaFolder Staging area in DBFS
+     * @param terminateClusterOnDestroy terminate cluster on context destroy
+     * @param connectionTimeoutSeconds Connection timeout
+     * @param receiveTimeoutSeconds Receive timeout
+     * @param jobCheckFrequencySeconds
+     * @param sparkContextId
+     * @param fileSystemId
+     */
+    public DatabricksSparkContextFileSystemConfig(final SparkVersion sparkVersion, final String clusterId,
+        final DatabricksAccessTokenCredential credential, final String stagingAreaFolder,
+        final boolean terminateClusterOnDestroy, final int connectionTimeoutSeconds, final int receiveTimeoutSeconds,
+        final int jobCheckFrequencySeconds, final SparkContextID sparkContextId, final String fileSystemId) {
+
+        super(sparkVersion, clusterId, credential, stagingAreaFolder, terminateClusterOnDestroy,
+            connectionTimeoutSeconds, receiveTimeoutSeconds, jobCheckFrequencySeconds, sparkContextId);
+        m_fileSystemId = fileSystemId;
+    }
 
     /**
      * Constructor for token based authentication.
