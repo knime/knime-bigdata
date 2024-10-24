@@ -52,6 +52,7 @@ import java.net.URI;
 import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.filehandling.core.connections.DefaultFSLocationSpec;
 import org.knime.filehandling.core.connections.FSCategory;
@@ -64,12 +65,16 @@ import org.knime.filehandling.core.connections.meta.base.BaseFSConnectionConfig;
  * @author Sascha Wolke, KNIME GmbH
  */
 public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
-    private String m_deploymentUrl;
 
-    /**
-     * If {@code true}, use token authentication or username/password otherwise.
-     */
-    private boolean m_useToken = true;
+    private enum AuthMode {
+            CREDENTIAL, TOKEN, USERNAME_PASSWORD
+    }
+
+    private AuthMode m_authMode;
+
+    private DatabricksAccessTokenCredential m_credential;
+
+    private String m_deploymentUrl;
 
     private String m_token;
 
@@ -89,18 +94,38 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
     }
 
     String getDeploymentUrl() {
+        if (m_authMode == AuthMode.CREDENTIAL) {
+            return m_credential.getDatabricksWorkspaceUrl().toString();
+        }
+
         return m_deploymentUrl;
     }
 
     String getHost() {
+        if (m_authMode == AuthMode.CREDENTIAL) {
+            return m_credential.getDatabricksWorkspaceUrl().getHost();
+        }
+
         return URI.create(m_deploymentUrl).getHost();
+    }
+
+    /**
+     *
+     * @return {@code true} if {@link #getCredential()} should be used.
+     */
+    boolean useCredential() {
+        return m_authMode == AuthMode.CREDENTIAL;
+    }
+
+    DatabricksAccessTokenCredential getCredential() {
+        return m_credential;
     }
 
     /**
      * @return {@code true} if token or {@code false} if username and password should be used
      */
     boolean useToken() {
-        return m_useToken;
+        return m_authMode == AuthMode.TOKEN;
     }
 
     String getToken() {
@@ -137,11 +162,13 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
      * @author Sascha Wolke, KNIME GmbH
      */
     public static class Builder {
-        private String m_deploymentUrl;
-
         private String m_workingDirectory;
 
-        private boolean m_useToken = true;
+        private AuthMode m_authMode;
+
+        private DatabricksAccessTokenCredential m_credential;
+
+        private String m_deploymentUrl;
 
         private String m_token;
 
@@ -179,13 +206,25 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
         }
 
         /**
+         * Use credential authentication.
+         *
+         * @param credential credential to use
+         * @return current builder instance
+         */
+        public Builder withCredential(final DatabricksAccessTokenCredential credential) {
+            m_authMode = AuthMode.CREDENTIAL;
+            m_credential = credential;
+            return this;
+        }
+
+        /**
          * Use token authentication.
          *
          * @param token authentication token to use
          * @return current builder instance
          */
         public Builder withToken(final String token) {
-            m_useToken = true;
+            m_authMode = AuthMode.TOKEN;
             m_token = token;
             return this;
         }
@@ -198,7 +237,7 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
          * @return current builder instance
          */
         public Builder withUserAndPassword(final String username, final String password) {
-            m_useToken = false;
+            m_authMode = AuthMode.USERNAME_PASSWORD;
             m_username = username;
             m_password = password;
             return this;
@@ -232,24 +271,29 @@ public final class DbfsFSConnectionConfig extends BaseFSConnectionConfig {
          * @return configuration instance
          */
         public DbfsFSConnectionConfig build() {
-            CheckUtils.checkArgument(StringUtils.isNotBlank(m_deploymentUrl), "Deployment URL must not be blank");
+            CheckUtils.checkArgumentNotNull(m_authMode, "Authentication details required.");
             CheckUtils.checkArgument(StringUtils.isNotBlank(m_workingDirectory), "Working directory must not be blank");
             CheckUtils.checkArgumentNotNull(m_connectionTimeout, "Connection timeout required.");
             CheckUtils.checkArgumentNotNull(m_readTimeout, "Read timeout required.");
 
             final DbfsFSConnectionConfig config = new DbfsFSConnectionConfig(m_workingDirectory);
-            config.m_deploymentUrl = m_deploymentUrl;
+            config.m_authMode = m_authMode;
             config.m_connectionTimeout = m_connectionTimeout;
             config.m_readTimeout = m_readTimeout;
 
-            if (m_useToken) {
+            if (m_authMode == AuthMode.CREDENTIAL) {
+                CheckUtils.checkArgumentNotNull(m_credential, "Credential must not be blank");
+                config.m_credential = m_credential;
+            } else if (m_authMode == AuthMode.TOKEN) {
+                CheckUtils.checkArgument(StringUtils.isNotBlank(m_deploymentUrl), "Deployment URL must not be blank");
                 CheckUtils.checkArgument(StringUtils.isNotBlank(m_token), "Token must not be blank");
-                config.m_useToken = true;
+                config.m_deploymentUrl = m_deploymentUrl;
                 config.m_token = m_token;
-            } else {
+            } else if (m_authMode == AuthMode.USERNAME_PASSWORD) {
+                CheckUtils.checkArgument(StringUtils.isNotBlank(m_deploymentUrl), "Deployment URL must not be blank");
                 CheckUtils.checkArgument(StringUtils.isNotBlank(m_username), "Username must not be blank");
                 CheckUtils.checkArgument(StringUtils.isNotBlank(m_password), "Password must not be blank");
-                config.m_useToken = false;
+                config.m_deploymentUrl = m_deploymentUrl;
                 config.m_username = m_username;
                 config.m_password = m_password;
             }
