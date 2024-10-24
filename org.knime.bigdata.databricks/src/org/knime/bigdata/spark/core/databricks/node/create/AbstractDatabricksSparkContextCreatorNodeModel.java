@@ -59,7 +59,6 @@ import java.util.UUID;
 
 import org.knime.bigdata.database.databricks.Databricks;
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.databricks.context.DatabricksClusterStatusProvider;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.knime.bigdata.spark.node.util.context.DestroyAndDisposeSparkContextTask;
@@ -91,6 +90,7 @@ import org.knime.database.session.DBSessionInformation;
 import org.knime.database.session.impl.DefaultDBSessionInformation;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingService;
+import org.knime.filehandling.core.util.CheckedExceptionSupplier;
 import org.knime.node.datatype.mapping.DataTypeMappingConfigurationData;
 
 /**
@@ -198,10 +198,10 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
     }
 
     DBSessionPortObject createDBPort(final ExecutionContext exec,
-        final DatabricksClusterStatusProvider clusterStatus)
+        final CheckedExceptionSupplier<DBConnectionController, InvalidSettingsException> controllerSupplier)
         throws InvalidSettingsException, CanceledExecutionException, SQLException {
 
-        m_sessionInfo = createSessionInfo(clusterStatus);
+        m_sessionInfo = createSessionInfo(controllerSupplier);
         final DBSession session = registerSession(exec);
         final DBType dbType = session.getDBType();
         final DBTypeMappingService<? extends DBSource, ? extends DBDestination> mappingService =
@@ -228,7 +228,8 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
      * @return the {@link DBSessionInformation} describing the session to be created and registered.
      * @throws InvalidSettingsException if any of the settings is not valid.
      */
-    private DBSessionInformation createSessionInfo(final DatabricksClusterStatusProvider clusterStatus)
+    private DBSessionInformation createSessionInfo(
+        final CheckedExceptionSupplier<DBConnectionController, InvalidSettingsException> controllerSupplier)
         throws InvalidSettingsException {
 
         final DBType dbType = DBTypeRegistry.getInstance().getRegisteredDBType(m_settings.getDBType())
@@ -237,20 +238,10 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
         final DBDriverWrapper driver = DBDriverRegistry.getInstance().getDriver(m_settings.getDriver())
             .orElseThrow(() -> new InvalidSettingsException("Unable to find DB driver: " + m_settings.getDriver()));
 
-        final DBConnectionController connectionController = createConnectionController(clusterStatus);
+        final DBConnectionController connectionController = controllerSupplier.get();
         return new DefaultDBSessionInformation(dbType, dialectId, new DBSessionID(), driver.getDriverDefinition(),
             connectionController, m_settings.getAttributeValues());
     }
-
-    /**
-     * Create the DB connection controller instance.
-     *
-     * @param clusterStatus cluster status provider
-     * @return {@link DBConnectionController} instance
-     * @throws InvalidSettingsException
-     */
-    protected abstract DBConnectionController
-        createConnectionController(final DatabricksClusterStatusProvider clusterStatus) throws InvalidSettingsException;
 
     @Override
     protected void onDisposeInternal() {

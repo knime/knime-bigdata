@@ -52,6 +52,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider;
@@ -63,10 +66,11 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.PortType;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
+import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
@@ -78,7 +82,7 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  */
 class DbfsConnectorNodeModel extends NodeModel {
 
-    private final DbfsConnectorNodeSettings m_settings = new DbfsConnectorNodeSettings();
+    private final DbfsConnectorNodeSettings m_settings;
 
     private String m_fsId;
     private DbfsFSConnection m_fsConnection;
@@ -86,20 +90,52 @@ class DbfsConnectorNodeModel extends NodeModel {
     /**
      * Creates new instance.
      */
-    protected DbfsConnectorNodeModel() {
-        super(new PortType[] {}, new PortType[] { FileSystemPortObject.TYPE });
+    DbfsConnectorNodeModel(final PortsConfiguration portsConfig, final boolean useWorkspaceConnection) {
+        super(portsConfig.getInputPorts(), portsConfig.getOutputPorts());
+        m_settings = new DbfsConnectorNodeSettings(useWorkspaceConnection);
     }
 
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final DbfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        return new PortObjectSpec[]{createSpec(config)};
+
+        final FileSystemPortObjectSpec fsPortSpec;
+        if (inSpecs != null && inSpecs.length > 0 && inSpecs[0] != null) {
+            if (!(inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec)) {
+                throw new InvalidSettingsException("Invalid input port, Databricks Workspace Connector required.");
+            }
+
+            final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
+            if (spec.isPresent()) {
+                try {
+                    final DatabricksAccessTokenCredential credential =
+                        spec.resolveCredential(DatabricksAccessTokenCredential.class);
+                    fsPortSpec = createSpec(m_settings.toFSConnectionConfig(spec, credential));
+                } catch (final NoSuchCredentialException ex) {
+                    throw new InvalidSettingsException(ex.getMessage(), ex);
+                }
+            } else {
+                fsPortSpec = null;
+            }
+        } else {
+            fsPortSpec = createSpec(m_settings.toFSConnectionConfig(getCredentialsProvider()));
+        }
+
+        return new PortObjectSpec[]{fsPortSpec};
     }
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final DbfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+        final DbfsFSConnectionConfig config;
+        if (inObjects != null && inObjects.length > 0 && inObjects[0] != null) {
+            final DatabricksWorkspacePortObjectSpec spec = ((DatabricksWorkspacePortObject)inObjects[0]).getSpec();
+            final DatabricksAccessTokenCredential credential =
+                spec.resolveCredential(DatabricksAccessTokenCredential.class);
+            config = m_settings.toFSConnectionConfig(spec, credential);
+        } else {
+            config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+        }
+
         m_fsConnection = new DbfsFSConnection(config);
         testConnection(m_fsConnection);
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);

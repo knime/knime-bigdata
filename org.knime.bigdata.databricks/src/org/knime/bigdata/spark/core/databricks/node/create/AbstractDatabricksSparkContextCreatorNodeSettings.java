@@ -365,11 +365,14 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
 
     @Override
     public String getDBUrl() throws InvalidSettingsException {
-        final Optional<DBDriverWrapper> driver = DBDriverRegistry.getInstance().getDriver(getDriver());
+        return getDBUrl(URI.create(getDatabricksInstanceURL()), getDriver());
+    }
+
+    static String getDBUrl(final URI uri, final String driverId) throws InvalidSettingsException {
+        final Optional<DBDriverWrapper> driver = DBDriverRegistry.getInstance().getDriver(driverId);
         if (!driver.isPresent()) {
             return null;
         }
-        final URI uri = URI.create(getDatabricksInstanceURL());
         final Map<String, String> variableValues = new HashMap<>();
         variableValues.put(VARIABLE_NAME_HOST, stripToEmpty(uri.getHost()));
         variableValues.put(VARIABLE_NAME_PORT, String.valueOf(uri.getPort() > 0 ? uri.getPort() : DEFAULT_PORT));
@@ -484,12 +487,20 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
      *
      * @throws InvalidSettingsException if the settings are invalid.
      */
-    public void validateDeeper() throws InvalidSettingsException {
+    protected abstract void validateDeeper() throws InvalidSettingsException;
+
+    /**
+     * Validate current settings values.
+     *
+     * @param useWorkspaceConnection {@code true} if workspace connection provides settings like workspace URL
+     * @throws InvalidSettingsException if the settings are invalid.
+     */
+    void validateDeeper(final boolean useWorkspaceConnection) throws InvalidSettingsException {
         final List<String> errors = new ArrayList<>();
 
-        if (StringUtils.isBlank(getDatabricksInstanceURL())) {
+        if (!useWorkspaceConnection && StringUtils.isBlank(getDatabricksInstanceURL())) {
             errors.add("The Databricks deployment URL must not be empty.");
-        } else {
+        } else if (!useWorkspaceConnection) {
             try {
                 final URL uri = new URL(getDatabricksInstanceURL());
 

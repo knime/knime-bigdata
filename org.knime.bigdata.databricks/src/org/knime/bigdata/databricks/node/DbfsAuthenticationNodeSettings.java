@@ -51,6 +51,7 @@ package org.knime.bigdata.databricks.node;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
@@ -63,6 +64,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ButtonGroupEnumInterface;
 import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.workflow.ICredentials;
 import org.knime.filehandling.core.defaultnodesettings.status.StatusMessage;
 
 /**
@@ -372,6 +374,38 @@ public class DbfsAuthenticationNodeSettings {
      */
     public SettingsModelPassword getTokenModel() {
         return m_token;
+    }
+
+    /**
+     * Add this authentication settings to given builder.
+     *
+     * @param builder the builder to add this authentication settings
+     * @param credentialsProvider provider of credential variables
+     */
+    public void addSettings(final DbfsFSConnectionConfig.Builder builder,
+        final CredentialsProvider credentialsProvider) {
+
+        if (getAuthType() == AuthType.TOKEN) {
+            final String token = useTokenCredentials() //
+                ? getCredentials(getTokenCredentialsName(), credentialsProvider).getPassword()
+                : getTokenModel().getStringValue();
+            builder.withToken(token);
+        } else {
+            if (useUserPassCredentials()) {
+                final ICredentials creds = getCredentials(getUserPassCredentialsName(), credentialsProvider);
+                builder.withUserAndPassword(creds.getLogin(), creds.getPassword());
+            } else {
+                builder.withUserAndPassword(getUserModel().getStringValue(), getPasswordModel().getStringValue());
+            }
+        }
+    }
+
+    private static ICredentials getCredentials(final String name, final CredentialsProvider credProvider) {
+        if (credProvider == null) {
+            throw new IllegalStateException("Credential provider is not available");
+        }
+
+        return credProvider.get(name);
     }
 
     /**

@@ -118,7 +118,7 @@ public class DatabricksClient {
         Duration receiveTimeout = Duration.ofSeconds(config.getReceiveTimeoutSeconds());
         Duration connectionTimeout = Duration.ofSeconds(config.getConnectionTimeoutSeconds());
 
-        if (config.useToken()) {
+        if (config.useCredential()) {
             m_clusterAPI = DatabricksRESTClient.create(config.getCredential(), ClusterAPI.class, receiveTimeout,
                 connectionTimeout);
             m_libraryAPI = DatabricksRESTClient.create(config.getCredential(), LibrariesAPI.class, receiveTimeout,
