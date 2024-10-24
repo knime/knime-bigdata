@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.knime.bigdata.database.databricks.TableAccessControllException;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
@@ -84,6 +85,8 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * High level client implementation for Databricks.
@@ -405,6 +408,21 @@ public class DatabricksClient {
      */
     boolean isClusterRunning() throws IOException {
         return m_clusterAPI.getCluster(m_config.getClusterId()).state == ClusterState.RUNNING;
+    }
+
+    /**
+     * Get the Databricks Org ID of the cluster.
+     *
+     * @return Org ID the cluster belongs to
+     * @throws KNIMESparkException on connection failures
+     */
+    Optional<String> getClusterOrdId() throws KNIMESparkException {
+        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups();
+                final Response resp = m_clusterAPI.getClusterResponse(m_config.getClusterId())) {
+            return Optional.ofNullable(resp.getHeaderString("x-databricks-org-id"));
+        } catch (IOException e) {
+            throw new KNIMESparkException("Unable to fetch cluster state: " + e.getMessage(), e);
+        }
     }
 
     /**

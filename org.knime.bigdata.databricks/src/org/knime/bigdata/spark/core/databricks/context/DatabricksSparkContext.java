@@ -209,6 +209,19 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
         m_databricksClient.startOrConnectCluster(exec);
     }
 
+    /**
+     * Get the Databricks Org ID the cluster belongs to.
+     *
+     * @return the Databricks Org ID the cluster belongs to
+     * @throws KNIMESparkException
+     * @throws CanceledExecutionException
+     */
+    public String getClusterOrgID() throws KNIMESparkException {
+        ensureDatabricksClient();
+        return m_databricksClient.getClusterOrdId()
+            .orElseThrow(() -> new KNIMESparkException("Unable to fetch cluster status and Org ID"));
+    }
+
     @Override
     protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         boolean contextWasCreated = false;
