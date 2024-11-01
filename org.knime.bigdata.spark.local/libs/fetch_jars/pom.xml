@@ -6,27 +6,25 @@
     <parent>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-parent_2.12</artifactId>
-        <version>3.5.1</version>
+        <version>3.5.3</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knime.bigdata</groupId>
     <artifactId>spark-local-fetch-jars</artifactId>
-    <version>3.5.1</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
+    <version>3.5.3</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
     <packaging>pom</packaging>
 
     <name>Jar fetcher for local Spark</name>
     <description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
     <properties>
-        <aircompressor.version>0.27</aircompressor.version>
         <avro.version>1.11.4</avro.version>
         <commons.compress.version>1.26.2</commons.compress.version>
         <gson.version>2.11.0</gson.version>
         <ivy.version>2.5.2</ivy.version>
         <parquet.version>1.14.1</parquet.version>
-        <snappy.version>1.1.10.5</snappy.version>
-        <spark.version>3.5.1</spark.version>
+        <spark.version>3.5.3</spark.version>
         <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
@@ -145,11 +143,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.xerial.snappy</groupId>
-            <artifactId>snappy-java</artifactId>
-            <version>${snappy.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
@@ -158,11 +151,6 @@
           <groupId>org.apache.commons</groupId>
           <artifactId>commons-compress</artifactId>
           <version>${commons.compress.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>io.airlift</groupId>
-          <artifactId>aircompressor</artifactId>
-          <version>${aircompressor.version}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.ivy</groupId>
