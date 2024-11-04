@@ -56,6 +56,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.database.loader.BigDataLoaderParameters;
 import org.knime.bigdata.database.loader.BigDataLoaderParameters2;
 import org.knime.bigdata.database.loader.BigDataLoaderRemoteFS;
@@ -152,7 +153,14 @@ public class DatabricksDataLoader implements DBLoader {
 
         // first create an unpartitioned table
         exec.setProgress(0, "Creating temporary table");
-        final DBTable tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName());
+
+        final String catalogName = loadParameters.getTable().getCatalogName();
+        final DBTable tempTable;
+        if (StringUtils.isBlank(catalogName)) {
+            tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName());
+        } else {
+            tempTable = new DefaultDBTable(tempTableName, loadParameters.getTable().getSchemaName(), catalogName);
+        }
 
         final SQLCommand createTableCmd = getDialect().dataDefinition().getCreateTableStatement(CreateTableParameters
             .builder(tempTable, columns, new DBUniqueConstraint[0]).build());
