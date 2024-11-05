@@ -51,6 +51,7 @@ import java.time.Duration;
 import java.util.Map;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenType;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnection;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSConnectionConfig;
 import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider;
@@ -95,6 +96,7 @@ public class UnityFSTestInitializerProvider extends DefaultFSTestInitializerProv
         return new DatabricksAccessTokenCredential( //
             URI.create(getParameter(configuration, KEY_URL)), //
             getParameter(configuration, KEY_TOKEN), //
+            DatabricksAccessTokenType.PERSONAL_ACCESS_TOKEN, //
             null, // user id
             null); // display name
     }

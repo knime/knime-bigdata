@@ -87,19 +87,30 @@ public class DatabricksAccessTokenCredentialParserProvider
      */
     public DatabricksAccessTokenCredentialParserProvider() {
         super(Map.of(//
-            "databricks_oauth2", DatabricksAccessTokenCredentialParserProvider::parse, //
-            "databricks_personal_access_token", DatabricksAccessTokenCredentialParserProvider::parse));
+            "databricks_oauth2", DatabricksAccessTokenCredentialParserProvider::parseOAuth2, //
+            "databricks_personal_access_token",
+            DatabricksAccessTokenCredentialParserProvider::parsePersonalAccessToken));
     }
 
-    private static DatabricksAccessTokenCredential parse(final Supplier<JsonObject> consumableSupplier)
+    private static DatabricksAccessTokenCredential parseOAuth2(final Supplier<JsonObject> consumableSupplier)
         throws UnparseableSecretConsumableException, IOException {
+        return parse(consumableSupplier, DatabricksAccessTokenType.OAUTH2);
+    }
+
+    private static DatabricksAccessTokenCredential parsePersonalAccessToken(
+        final Supplier<JsonObject> consumableSupplier) throws UnparseableSecretConsumableException, IOException {
+        return parse(consumableSupplier, DatabricksAccessTokenType.PERSONAL_ACCESS_TOKEN);
+    }
+
+    private static DatabricksAccessTokenCredential parse(final Supplier<JsonObject> consumableSupplier,
+        final DatabricksAccessTokenType type) throws UnparseableSecretConsumableException, IOException {
 
         final JsonObject consumable = fetchConsumable(consumableSupplier);
         final AccessTokenCredential accessTokenCredential = parseAccessTokenCredential(consumable, consumableSupplier);
 
         final DatabricksAccessTokenCredential naUserCredentials = new DatabricksAccessTokenCredential(//
             URI.create(getStringField(consumable, "workspaceUrl")), //
-            accessTokenCredential, "NA", "NA");
+            accessTokenCredential, type, "NA", "NA");
 
         //try to fetch the current user info from Databricks
         String userId = null;
@@ -122,6 +133,7 @@ public class DatabricksAccessTokenCredentialParserProvider
         return new DatabricksAccessTokenCredential(//
             URI.create(getStringField(consumable, "workspaceUrl")), //
             accessTokenCredential, //
+            type, //
             userId, //
             userName);
     }

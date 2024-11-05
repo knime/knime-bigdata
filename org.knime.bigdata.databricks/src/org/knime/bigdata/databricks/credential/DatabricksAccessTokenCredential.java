@@ -96,6 +96,8 @@ public class DatabricksAccessTokenCredential
 
     private AccessTokenAccessor m_wrappedAccessToken;
 
+    private DatabricksAccessTokenType m_databricksTokenType;
+
     private String m_userId;
 
     private String m_displayName;
@@ -111,13 +113,15 @@ public class DatabricksAccessTokenCredential
      *
      * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
      * @param accessToken The Databricks personal access token.
+     * @param type type of provided token
      * @param userId The technical Databricks user id. May be null in case of a service principal.
      * @param displayName The Databricks user display name. May be null in case of a service principal.
      */
     public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl, final String accessToken,
-        final String userId, final String displayName) {
+        final DatabricksAccessTokenType type, final String userId, final String displayName) {
         this(databricksWorkspaceUrl,//
             new AccessTokenCredential(accessToken, null, TOKEN_TYPE_BEARER, null),//
+            type, //
             userId,//
             displayName);
     }
@@ -127,14 +131,17 @@ public class DatabricksAccessTokenCredential
      *
      * @param databricksWorkspaceUrl The URL of the Databricks workspace to connect to.
      * @param accessTokenAccessor The Databricks personal access token.
+     * @param type type of provided token
      * @param userId The technical Databricks user id.
      * @param displayName The Databricks user display name.
      */
     public DatabricksAccessTokenCredential(final URI databricksWorkspaceUrl,
-        final AccessTokenAccessor accessTokenAccessor, final String userId, final String displayName) {
+        final AccessTokenAccessor accessTokenAccessor, final DatabricksAccessTokenType type, final String userId,
+        final String displayName) {
 
         m_databricksWorkspaceUrl = databricksWorkspaceUrl;
         m_wrappedAccessToken = accessTokenAccessor;
+        m_databricksTokenType = type;
         m_userId = userId;
         m_displayName = displayName;
     }
@@ -154,6 +161,13 @@ public class DatabricksAccessTokenCredential
     @Override
     public String getAccessToken(final boolean forceRefresh) throws IOException {
         return m_wrappedAccessToken.getAccessToken(forceRefresh);
+    }
+
+    /**
+     * @return the type of the provided token
+     */
+    public DatabricksAccessTokenType getDatabricksTokenType() {
+        return m_databricksTokenType;
     }
 
     /**

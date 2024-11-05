@@ -57,6 +57,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenType;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
 import org.knime.bigdata.databricks.rest.scim.ScimAPI;
 import org.knime.bigdata.databricks.rest.scim.ScimUser;
@@ -204,6 +205,7 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
                 credential = new DatabricksAccessTokenCredential(//
                     URI.create(settings.m_workspaceUrl), //
                     maybeAccessToken, //
+                    DatabricksAccessTokenType.OAUTH2, // unknown, guess OAuth2 based
                     userId, //
                     displayName);
             }
@@ -211,6 +213,7 @@ final class WorkspaceConnectorNodeModel extends WebUINodeModel<WorkspaceConnecto
             credential = new DatabricksAccessTokenCredential(//
                 URI.create(settings.m_workspaceUrl), //
                 settings.m_token.getPassword(), //
+                DatabricksAccessTokenType.PERSONAL_ACCESS_TOKEN, //
                 userId, //
                 displayName);
         } else {
