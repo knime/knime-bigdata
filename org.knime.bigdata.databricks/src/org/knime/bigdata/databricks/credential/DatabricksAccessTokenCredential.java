@@ -53,6 +53,8 @@ import static org.knime.credentials.base.CredentialPortViewUtil.obfuscate;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -202,6 +204,9 @@ public class DatabricksAccessTokenCredential
 
     @Override
     public CredentialPortViewData describe() {
+        final String expiresAfter = m_wrappedAccessToken.getExpiresAfter() //
+            .map(ts -> ts.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.RFC_1123_DATE_TIME)) //
+            .orElse("n/a");
 
         return new CredentialPortViewData(List.of(new Section("Databricks Credentials", new String[][]{//
             {"Property", "Value"}, //
@@ -209,7 +214,8 @@ public class DatabricksAccessTokenCredential
             {"Databricks user ID", getUserId().orElse("n/a")}, //
             {"Databricks user", getUserDisplayName().orElse("n/a")}, //
             {"Token", obfuscate("xxxxxxxxxxxxxxxxxxxxxxxx")}, // okay, this is just for show really...
-            {"Token type", getTokenType()} //
+            {"Token type", getTokenType()}, //
+            {"Expires after", expiresAfter}, //
         })));
     }
 }
