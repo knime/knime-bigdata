@@ -80,7 +80,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.bigdata.database.databricks.Databricks;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationDialog;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.bigdata.spark.core.databricks.DatabricksSparkContextProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
@@ -101,6 +104,7 @@ import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.ICredentials;
 import org.knime.core.node.workflow.VariableType;
 import org.knime.core.util.Pair;
+import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.database.VariableContext;
 import org.knime.database.agent.DBAgentFactory;
 import org.knime.database.agent.DBAgentRegistry;
@@ -181,21 +185,21 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
     private static final Predicate<Attribute<?>> PREDICATE_NOT_JDBC_PROPERTIES_ATTRIBUTE =
         PREDICATE_JDBC_PROPERTIES_ATTRIBUTE.negate();
 
-    private final DatabricksSparkContextCreatorNodeSettings2 m_settings =
-        new DatabricksSparkContextCreatorNodeSettings2();
+    private final boolean m_useWorkspaceConnector;
 
-    private final DialogComponentStringSelection m_sparkVersion = new DialogComponentStringSelection(
-        m_settings.getSparkVersionModel(), null, new DatabricksSparkContextProvider().getSupportedSparkVersions()
-            .stream().map(SparkVersion::getLabel).sorted(Collections.reverseOrder()).toArray(String[]::new));
+    private DatabricksWorkspacePortObjectSpec m_workspacePortSpec;
 
-    private final DialogComponentString m_databricksUrl =
-        new DialogComponentString(m_settings.getDatabricksInstanceURLModel(), null, true, 40);
+    private DatabricksAccessTokenCredential m_workspaceCredential;
 
-    private final DialogComponentString m_clusterId =
-        new DialogComponentString(m_settings.getClusterIdModel(), null, true, 40);
+    private final DatabricksSparkContextCreatorNodeSettings2 m_settings;
 
-    private final DialogComponentString m_workspaceId =
-        new DialogComponentString(m_settings.getWorkspaceIdModel(), null, false, 40);
+    private final DialogComponentStringSelection m_sparkVersion;
+
+    private final DialogComponentString m_databricksUrl;
+
+    private final DialogComponentString m_clusterId;
+
+    private final DialogComponentString m_workspaceId;
 
     private DbfsAuthenticationDialog m_authPanel;
 
@@ -209,25 +213,19 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
     private final WorkingDirectoryChooser m_workingDirChooser =
         new WorkingDirectoryChooser(WORKING_DIR_HISTORY_ID, this::createFSConnection);
 
-    private final DialogComponentBoolean m_createSparkContext = new DialogComponentBoolean(
-        m_settings.getCreateSparkContextModel(), "Create Spark context and enable Spark context port");
+    private final DialogComponentBoolean m_createSparkContext;
 
-    private final DialogComponentBoolean m_setStagingAreaFolder =
-        new DialogComponentBoolean(m_settings.getSetStagingAreaFolderModel(), "Set staging area for Spark jobs");
+    private final DialogComponentBoolean m_setStagingAreaFolder;
 
     private FileSelectionDialog m_stagingAreaFileSelection;
 
-    private final DialogComponentNumber m_connectionTimeout =
-        new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), null, 10, 6);
+    private final DialogComponentNumber m_connectionTimeout;
 
-    private final DialogComponentNumber m_receiveTimeout =
-        new DialogComponentNumber(m_settings.getReceiveTimeoutModel(), null, 10, 6);
+    private final DialogComponentNumber m_receiveTimeout;
 
-    private final DialogComponentNumber m_jobCheckFrequency = new DialogComponentNumber(
-        m_settings.getJobCheckFrequencyModel(), null, 1, 6);
+    private final DialogComponentNumber m_jobCheckFrequency;
 
-    private final DialogComponentBoolean m_terminateClusterOnDestroy =
-            new DialogComponentBoolean(m_settings.getTerminateClusterOnDestroyModel(), "Terminate cluster on context destroy");
+    private final DialogComponentBoolean m_terminateClusterOnDestroy;
 
     private final List<DialogComponent> m_dialogComponents = new ArrayList<>();
 
@@ -256,9 +254,29 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
     /**
      * Constructor.
      */
-    DatabricksSparkContextCreatorNodeDialog2() {
+    DatabricksSparkContextCreatorNodeDialog2(final boolean useWorkspaceConnector) {
+        m_useWorkspaceConnector = useWorkspaceConnector;
+        m_settings = new DatabricksSparkContextCreatorNodeSettings2(useWorkspaceConnector);
+
+        m_sparkVersion = new DialogComponentStringSelection(m_settings.getSparkVersionModel(), null,
+            new DatabricksSparkContextProvider().getSupportedSparkVersions().stream().map(SparkVersion::getLabel)
+                .sorted(Collections.reverseOrder()).toArray(String[]::new));
+        m_databricksUrl = new DialogComponentString(m_settings.getDatabricksInstanceURLModel(), null, true, 40);
+        m_clusterId = new DialogComponentString(m_settings.getClusterIdModel(), null, true, 40);
+        m_workspaceId = new DialogComponentString(m_settings.getWorkspaceIdModel(), null, false, 40);
+
         m_authPanel =
             new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this::getCredentialsProvider);
+
+        m_createSparkContext = new DialogComponentBoolean(m_settings.getCreateSparkContextModel(),
+            "Create Spark context and enable Spark context port");
+        m_setStagingAreaFolder =
+            new DialogComponentBoolean(m_settings.getSetStagingAreaFolderModel(), "Set staging area for Spark jobs");
+        m_connectionTimeout = new DialogComponentNumber(m_settings.getConnectionTimeoutModel(), null, 10, 6);
+        m_receiveTimeout = new DialogComponentNumber(m_settings.getReceiveTimeoutModel(), null, 10, 6);
+        m_jobCheckFrequency = new DialogComponentNumber(m_settings.getJobCheckFrequencyModel(), null, 1, 6);
+        m_terminateClusterOnDestroy = new DialogComponentBoolean(m_settings.getTerminateClusterOnDestroyModel(),
+            "Terminate cluster on context destroy");
 
         addTab("Settings", createSettingsTab());
         addTab("Advanced", createAdvancedTab());
@@ -308,6 +326,8 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         m_jdbcTabPanel.addTab(DialogComponentDataTypeMapping.TAB_KNIME_TO_EXTERNAL,
             m_knimeToExternalTypeMappingComponent.getComponentPanel());
 
+        m_workingDirChooser.setEnableBrowsing(false);
+
         refreshDataTypeMappingComponents();
     }
 
@@ -355,7 +375,7 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         m_stagingAreaFileSelection = new FileSelectionDialog( //
             STAGING_AREA_DIR_HISTORY_ID, //
             25, // history length
-            () -> null, //
+            this::createFSConnection, //
             DialogType.SAVE_DIALOG, //
             FileSelectionMode.DIRECTORIES_ONLY, //
             new String[0], //
@@ -378,8 +398,10 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        addDialogComponentToPanel("Connection timeout (seconds):", m_connectionTimeout, false, panel, gbc);
-        addDialogComponentToPanel("Read timeout (seconds):", m_receiveTimeout, false, panel, gbc);
+        if (!m_useWorkspaceConnector) {
+            addDialogComponentToPanel("Connection timeout (seconds):", m_connectionTimeout, false, panel, gbc);
+            addDialogComponentToPanel("Read timeout (seconds):", m_receiveTimeout, false, panel, gbc);
+        }
         addDialogComponentToPanel("Job status polling interval (seconds):", m_jobCheckFrequency, false, panel, gbc);
         return panel;
     }
@@ -393,8 +415,10 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         gbc.weightx = 1;
         panel.add(createConnectionPanel(), gbc);
         gbc.gridy++;
-        panel.add(createAuthPanel(), gbc);
-        gbc.gridy++;
+        if (!m_useWorkspaceConnector) {
+            panel.add(createAuthPanel(), gbc);
+            gbc.gridy++;
+        }
         panel.add(createFileSystemSettingsPanel(), gbc);
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
@@ -410,12 +434,13 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         gbc.gridx = gbc.gridy = 0;
 
         addDialogComponentToPanel("Spark version:", m_sparkVersion, true, panel, gbc);
-        addDialogComponentToPanel("Databricks URL:", m_databricksUrl, false, panel, gbc);
+        if (!m_useWorkspaceConnector) {
+            addDialogComponentToPanel("Databricks URL:", m_databricksUrl, false, panel, gbc);
+        }
         addDialogComponentToPanel("Cluster ID:", m_clusterId, false, panel, gbc);
-        addDialogComponentToPanel("Workspace ID:", m_workspaceId, false, panel, gbc);
-
-        // listen for updates to change DBFS connection for staging area browsing
-        m_databricksUrl.getModel().addChangeListener(this);
+        if (!m_useWorkspaceConnector) {
+            addDialogComponentToPanel("Workspace ID:", m_workspaceId, false, panel, gbc);
+        }
 
         return panel;
     }
@@ -627,22 +652,55 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
             m_stagingAreaFileSelection.setSelected(m_settings.getStagingAreaFolder());
             m_stagingAreaFileSelection.setEnabled(m_settings.isStagingAreaFolderSet());
             updateDBComponents(specs);
+
+            if (m_useWorkspaceConnector) {
+                loadWorkspaceConnectionInputPort(specs);
+            }
+
         } catch (final InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());
         }
     }
 
+    private void loadWorkspaceConnectionInputPort(final PortObjectSpec[] inSpecs) {
+        boolean enableBrowsing = false;
+
+        // try to load spec and credential
+        if (inSpecs != null && inSpecs.length > 0 && inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec) {
+            m_workspacePortSpec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
+            if (m_workspacePortSpec.isPresent()) {
+                try {
+                    m_workspaceCredential =
+                        m_workspacePortSpec.resolveCredential(DatabricksAccessTokenCredential.class);
+                    enableBrowsing = true;
+                } catch (final NoSuchCredentialException ex) { // NOSONAR
+                    // not available at this stage
+                }
+            }
+        }
+
+        m_workingDirChooser.setEnableBrowsing(enableBrowsing);
+        m_stagingAreaFileSelection.setEnableBrowsing(enableBrowsing);
+    }
+
     private FSConnection createFSConnection() throws IOException {
-        try {
-            return m_settings.createDatabricksFSConnection(getCredentialsProvider());
-        } catch (InvalidSettingsException e) {
-            throw new IOException("Unable to create DBFS connectin: " + e.getMessage(), e);
+        if (m_useWorkspaceConnector) {
+            return new DbfsFSConnection(
+                m_settings.createDbfsFSConnectionConfig(m_workspacePortSpec, m_workspaceCredential));
+        } else {
+            try {
+                return new DbfsFSConnection(m_settings.createDbfsFSConnectionConfig(getCredentialsProvider()));
+            } catch (InvalidSettingsException e) {
+                throw new IOException("Unable to create DBFS connectin: " + e.getMessage(), e);
+            }
         }
     }
 
     @Override
     public void onOpen() {
-        m_authPanel.onOpen();
+        if (!m_useWorkspaceConnector) {
+            m_authPanel.onOpen();
+        }
     }
 
     @Override

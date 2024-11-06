@@ -41,6 +41,10 @@
     </node>
     <node
           category-path="/toolintegration/spark"
+          factory-class="org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeFactory2">
+    </node>
+    <node
+          category-path="/toolintegration/spark"
           factory-class="org.knime.bigdata.databricks.workspace.connector.WorkspaceConnectorNodeFactory">
     </node>
   </extension>

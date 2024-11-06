@@ -48,26 +48,31 @@ package org.knime.bigdata.spark.core.databricks.node.create;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksClusterStatusProvider;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContext;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.inactive.InactiveBranchPortObject;
 import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.database.connection.DBConnectionController;
-import org.knime.database.port.DBSessionPortObject;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
@@ -88,10 +93,10 @@ public class DatabricksSparkContextCreatorNodeModel2
     /**
      * Constructor.
      */
-    DatabricksSparkContextCreatorNodeModel2() {
-        super(new PortType[0],
-            new PortType[]{DBSessionPortObject.TYPE, FileSystemPortObject.TYPE, SparkContextPortObject.TYPE},
-            new DatabricksSparkContextCreatorNodeSettings2());
+    DatabricksSparkContextCreatorNodeModel2(final PortsConfiguration portsConfig,
+        final boolean useWorkspaceConnection) {
+        super(portsConfig.getInputPorts(), portsConfig.getOutputPorts(),
+            new DatabricksSparkContextCreatorNodeSettings2(useWorkspaceConnection));
     }
 
     @Override
@@ -103,8 +108,34 @@ public class DatabricksSparkContextCreatorNodeModel2
         m_settings.validate(m_variableContext);
 
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        final FileSystemPortObjectSpec fsPortSpec = m_settings.createFileSystemSpec(m_fsId, getCredentialsProvider());
-        configureSparkContext(m_sparkContextId, m_fsId, m_settings, getCredentialsProvider());
+
+        final FileSystemPortObjectSpec fsPortSpec;
+        if (inSpecs != null && inSpecs.length > 0 && inSpecs[0] != null) {
+            if (!(inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec)) {
+                throw new InvalidSettingsException("Invalid input port, Databricks Workspace Connector required.");
+            }
+
+            final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
+            if (spec.isPresent()) {
+                try {
+                    final DatabricksAccessTokenCredential credential =
+                        spec.resolveCredential(DatabricksAccessTokenCredential.class);
+                    fsPortSpec = m_settings.createFileSystemSpec(m_fsId, //
+                        m_settings.createDbfsFSConnectionConfig(spec, credential));
+                    configureSparkContext(m_sparkContextId, //
+                        m_settings.createContextConfig(m_sparkContextId, m_fsId, spec, credential));
+                } catch (final NoSuchCredentialException ex) {
+                    throw new InvalidSettingsException(ex.getMessage(), ex);
+                }
+            } else {
+                fsPortSpec = null;
+            }
+        } else {
+            fsPortSpec = m_settings.createFileSystemSpec(m_fsId, //
+                m_settings.createDbfsFSConnectionConfig(getCredentialsProvider()));
+            configureSparkContext(m_sparkContextId, //
+                m_settings.createContextConfig(m_sparkContextId, m_fsId, getCredentialsProvider()));
+        }
 
         final PortObjectSpec sparkPortSpec;
         if (m_settings.isCreateSparkContextSet()) {
@@ -118,16 +149,39 @@ public class DatabricksSparkContextCreatorNodeModel2
 
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        final DatabricksWorkspacePortObjectSpec spec;
+        final DatabricksAccessTokenCredential credential;
+        if (inData != null && inData.length > 0 && inData[0] != null) {
+            spec = ((DatabricksWorkspacePortObject)inData[0]).getSpec();
+            credential = spec.resolveCredential(DatabricksAccessTokenCredential.class);
+        } else {
+            spec = null;
+            credential = null;
+        }
+
+        // connect file system
         exec.setProgress(0.1, "Connecting to Databricks File System");
-        m_fsConnection = m_settings.createDatabricksFSConnection(getCredentialsProvider());
+        final DbfsFSConnectionConfig fsConfig;
+        if (spec != null && credential != null) {
+            fsConfig = m_settings.createDbfsFSConnectionConfig(spec, credential);
+        } else {
+            fsConfig = m_settings.createDbfsFSConnectionConfig(getCredentialsProvider());
+        }
+        m_fsConnection = m_settings.createDatabricksFSConnection(fsConfig);
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
         testFileSystemConnection(m_fsConnection);
         final FileSystemPortObject fsPortObject =
-            new FileSystemPortObject(m_settings.createFileSystemSpec(m_fsId, getCredentialsProvider()));
+            new FileSystemPortObject(m_settings.createFileSystemSpec(m_fsId, fsConfig));
 
         // configure context
         exec.setProgress(0.2, "Configuring Databricks Spark context");
-        configureSparkContext(m_sparkContextId, m_fsId, m_settings, getCredentialsProvider());
+        if (spec != null && credential != null) {
+            configureSparkContext(m_sparkContextId, //
+                m_settings.createContextConfig(m_sparkContextId, m_fsId, spec, credential));
+        } else {
+            configureSparkContext(m_sparkContextId, //
+                m_settings.createContextConfig(m_sparkContextId, m_fsId, getCredentialsProvider()));
+        }
 
         // start cluster
         exec.setProgress(0.3, "Starting cluster on Databricks");
@@ -147,7 +201,13 @@ public class DatabricksSparkContextCreatorNodeModel2
 
         // open the JDBC connection AFTER starting the cluster, otherwise Databricks returns 503... (cluster starting)
         exec.setProgress(0.9, "Configuring Databricks DB connection");
-        final PortObject dbPortObject = createDBPort(exec, sparkContext.getClusterStatusHandler());
+        final PortObject dbPortObject = createDBPort(exec, () -> {
+            if (spec != null && credential != null) {
+                return createConnectionController(sparkContext, credential);
+            } else {
+                return createConnectionController(sparkContext);
+            }
+        });
 
         return new PortObject[]{dbPortObject, fsPortObject, sparkPortObject};
     }
@@ -166,35 +226,40 @@ public class DatabricksSparkContextCreatorNodeModel2
      * @param credentialsProvider credentials provider to use
      */
     private static void configureSparkContext(final SparkContextID sparkContextId,
-        final String fileSystemId, final DatabricksSparkContextCreatorNodeSettings2 settings,
-        final CredentialsProvider credentialsProvider) {
+        final DatabricksSparkContextConfig config) {
 
-        try {
-            final SparkContext<DatabricksSparkContextConfig> sparkContext =
-                SparkContextManager.getOrCreateSparkContext(sparkContextId);
-            final DatabricksSparkContextConfig config =
-                settings.createContextConfig(sparkContextId, fileSystemId, credentialsProvider);
+        final SparkContext<DatabricksSparkContextConfig> sparkContext =
+            SparkContextManager.getOrCreateSparkContext(sparkContextId);
 
-            final boolean configApplied = sparkContext.ensureConfigured(config, true);
-            if (!configApplied) {
-                // this should never ever happen
-                throw new RuntimeException("Failed to apply Spark context settings.");
-            }
-        } catch (final InvalidSettingsException e) {
+        final boolean configApplied = sparkContext.ensureConfigured(config, true);
+        if (!configApplied) {
             // this should never ever happen
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException("Failed to apply Spark context settings.");
         }
     }
 
     @Override
     protected void createDummyContext(final String previousContextID) {
-        final String dummyFileSystemId = "dummy-file-system-id";
-        configureSparkContext(new SparkContextID(previousContextID), dummyFileSystemId, m_settings,
-            getCredentialsProvider());
+        final SparkContextID sparkContextId = new SparkContextID(previousContextID);
+        final DatabricksSparkContextConfig config = m_settings.createDummyContextConfig(sparkContextId);
+        configureSparkContext(sparkContextId, config);
     }
 
-    @Override
-    protected DBConnectionController createConnectionController(final DatabricksClusterStatusProvider clusterStatus)
+    private DBConnectionController createConnectionController(final DatabricksSparkContext sparkContext,
+        final DatabricksAccessTokenCredential credential) throws InvalidSettingsException {
+
+        try {
+            final String url = m_settings.getDBUrl(credential);
+            final DatabricksClusterStatusProvider clusterStatus = sparkContext.getClusterStatusHandler();
+            final String clusterId = m_settings.getClusterId();
+            final String orgId = sparkContext.getClusterOrgID();
+            return ClusterDBControllerFactory.createController(url, clusterStatus, clusterId, orgId, credential);
+        } catch (KNIMESparkException ex) {
+            throw new InvalidSettingsException("Unable to lookup org id", ex);
+        }
+    }
+
+    private DBConnectionController createConnectionController(final DatabricksSparkContext sparkContext)
         throws InvalidSettingsException {
 
         final CredentialsProvider cp = getCredentialsProvider();
@@ -208,6 +273,7 @@ public class DatabricksSparkContextCreatorNodeModel2
             password = m_settings.getAuthenticationSettings().getPassword(cp);
         }
 
+        final DatabricksClusterStatusProvider clusterStatus = sparkContext.getClusterStatusHandler();
         return ClusterDBControllerFactory.create(m_settings.getDBUrl(), clusterStatus, m_settings.getClusterId(),
             m_settings.getWorkspaceId(), username, password);
     }

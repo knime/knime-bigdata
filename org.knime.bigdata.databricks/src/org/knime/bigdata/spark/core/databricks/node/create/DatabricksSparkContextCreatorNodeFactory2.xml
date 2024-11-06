@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+<knimeNode icon="icon.png" type="Source"
+	xmlns="http://knime.org/node/v5.3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v5.3 http://knime.org/node/v5.3.xsd">
     <name>Create Databricks Environment</name>
     
     <shortDescription>Creates a Databricks Environment connected to an existing Databricks cluster.</shortDescription>
@@ -143,7 +145,7 @@
                 and configuration guide which you can find in the <i>docs</i> directory of the 
                 <a href="https://www.databricks.com/spark/jdbc-drivers-download">driver package.</a>
              </description>
-             <option name=""></option>
+             <option name="Parameter table with name, type and value column"></option>
         </tab>
         <tab name="DB Port: Advanced">
             <description>
@@ -151,7 +153,7 @@
                 advanced SQL dialect settings or logging options. The available properties depend on the selected
                 database type and driver.
             </description>
-            <option name=""></option>
+            <option name="Database type and driver specific properties"></option>
         </tab>
         <tab name="DB Port: Input Type Mapping">
             <description>
@@ -179,6 +181,9 @@
         </tab>
     </fullDescription>
     <ports>
+    	<dynInPort insert-before="0" name="Databricks Workspace Connection" group-identifier="Databricks Workspace Connection">
+    		Databricks Workspace Connection, that can be connected to the Databricks Workspace Connector.
+   		</dynInPort>
     	<outPort index="0" name="DB Connection">
     		JDBC connection, that can be connected to the KNIME database nodes.
    		</outPort>

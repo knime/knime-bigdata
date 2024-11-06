@@ -131,7 +131,8 @@ public class DatabricksSparkContextCreatorNodeModel extends AbstractDatabricksSp
 
         // open the JDBC connection AFTER starting the cluster, otherwise Databricks returns 503... (cluster starting)
         exec.setProgress(0.9, "Configuring Databricks DB connection");
-        final PortObject dbPortObject = createDBPort(exec, sparkContext.getClusterStatusHandler());
+        final PortObject dbPortObject =
+            createDBPort(exec, () -> createConnectionController(sparkContext.getClusterStatusHandler()));
 
         return new PortObject[]{
             dbPortObject,
@@ -175,8 +176,7 @@ public class DatabricksSparkContextCreatorNodeModel extends AbstractDatabricksSp
             getCredentialsProvider());
     }
 
-    @Override
-    protected DBConnectionController createConnectionController(final DatabricksClusterStatusProvider clusterStatus)
+    private DBConnectionController createConnectionController(final DatabricksClusterStatusProvider clusterStatus)
         throws InvalidSettingsException {
 
         final String username = m_settings.getUsername(getCredentialsProvider());
