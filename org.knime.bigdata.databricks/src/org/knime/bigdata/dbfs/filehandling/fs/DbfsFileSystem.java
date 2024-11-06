@@ -89,7 +89,7 @@ public class DbfsFileSystem extends BaseFileSystem<DbfsPath> {
 
     private static DBFSAPI createClient(final DbfsFSConnectionConfig config) throws UnsupportedEncodingException {
         if (config.useCredential()) {
-            return DatabricksRESTClient.createLegacyExceptionMapper(config.getCredential(), DBFSAPI.class,
+            return DatabricksRESTClient.createWithLegacyExceptionMapper(config.getCredential(), DBFSAPI.class,
                 config.getReadTimeout(), config.getConnectionTimeout());
         } else if (config.useToken()) {
             return DatabricksRESTClient.create(config.getDeploymentUrl(), DBFSAPI.class, config.getToken(),

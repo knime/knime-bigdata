@@ -55,8 +55,10 @@ import java.net.URL;
 import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings.AuthType;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
@@ -85,6 +87,8 @@ public class DbfsConnectorNodeSettings {
 
     private static final int DEFAULT_TIMEOUT = 30;
 
+    private final boolean m_useWorkspaceConnection;
+
     private final SettingsModelString m_url;
 
     private final SettingsModelString m_workingDirectory;
@@ -96,7 +100,8 @@ public class DbfsConnectorNodeSettings {
     /**
      * Creates new instance.
      */
-    public DbfsConnectorNodeSettings() {
+    public DbfsConnectorNodeSettings(final boolean useWorkspaceConnection) {
+        m_useWorkspaceConnection = useWorkspaceConnection;
         m_url = new SettingsModelString(KEY_URL, "https://");
         m_workingDirectory = new SettingsModelString(KEY_WORKING_DIRECTORY, DbfsFileSystem.PATH_SEPARATOR);
         m_connectionTimeout =
@@ -214,14 +219,16 @@ public class DbfsConnectorNodeSettings {
      * @throws InvalidSettingsException
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_url.validateSettings(settings);
         m_workingDirectory.validateSettings(settings);
-        m_connectionTimeout.validateSettings(settings);
-        m_readTimeout.validateSettings(settings);
 
-        m_authSettings.validateSettings(settings);
+        if (!m_useWorkspaceConnection) {
+            m_url.validateSettings(settings);
+            m_connectionTimeout.validateSettings(settings);
+            m_readTimeout.validateSettings(settings);
+            m_authSettings.validateSettings(settings);
+        }
 
-        DbfsConnectorNodeSettings temp = new DbfsConnectorNodeSettings();
+        DbfsConnectorNodeSettings temp = new DbfsConnectorNodeSettings(m_useWorkspaceConnection);
         temp.loadSettingsForModel(settings);
         temp.validate();
     }
@@ -232,9 +239,11 @@ public class DbfsConnectorNodeSettings {
      * @throws InvalidSettingsException
      */
     public void validate() throws InvalidSettingsException {
-        if (StringUtils.isBlank(getDeploymentUrl())) {
+        if (!m_useWorkspaceConnection && StringUtils.isBlank(getDeploymentUrl())) {
             throw new InvalidSettingsException("The Databricks deployment URL must not be empty.");
-        } else {
+        }
+
+        if (!m_useWorkspaceConnection) {
             try {
                 final URL uri = new URL(getDeploymentUrl());
 
@@ -249,13 +258,13 @@ public class DbfsConnectorNodeSettings {
                 throw new InvalidSettingsException(
                     String.format("Invalid Databricks deployment URL: %s", e.getMessage()));
             }
+
+            m_authSettings.validate();
         }
 
         if (!m_workingDirectory.getStringValue().startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
             throw new InvalidSettingsException("Working directory must be an absolute path.");
         }
-
-        m_authSettings.validate();
     }
 
     /**
@@ -301,7 +310,7 @@ public class DbfsConnectorNodeSettings {
         final NodeSettings tempSettings = new NodeSettings("ignored");
         saveSettingsForModel(tempSettings);
 
-        final DbfsConnectorNodeSettings toReturn = new DbfsConnectorNodeSettings();
+        final DbfsConnectorNodeSettings toReturn = new DbfsConnectorNodeSettings(m_useWorkspaceConnection);
         try {
             toReturn.loadSettingsForModel(tempSettings);
         } catch (InvalidSettingsException ex) { // NOSONAR can never happen
@@ -311,12 +320,41 @@ public class DbfsConnectorNodeSettings {
     }
 
     /**
+     * Create file system config using a workspace connection.
+     *
+     * @param spec port spec with timeout settings
+     * @param credential credential to authenticate with
+     * @return file system settings
+     */
+    public DbfsFSConnectionConfig toFSConnectionConfig(final DatabricksWorkspacePortObjectSpec spec,
+        final DatabricksAccessTokenCredential credential) {
+
+        if (!m_useWorkspaceConnection) {
+            throw new IllegalArgumentException(
+                "Cannot create FS config, workspace connection required. This is a bug.");
+        }
+
+        final DbfsFSConnectionConfig.Builder builder = DbfsFSConnectionConfig.builder() //
+            .withCredential(credential) //
+            .withWorkingDirectory(getWorkingDirectory()) //
+            .withConnectionTimeout(spec.getConnectionTimeout()) //
+            .withReadTimeout(spec.getReadTimeout());
+
+        return builder.build();
+    }
+
+    /**
      * Convert this settings to a {@link DbfsFSConnectionConfig} instance.
      *
      * @param credentialsProvider provider of credential variables
      * @return a {@link DbfsFSConnectionConfig} using this settings
      */
     public DbfsFSConnectionConfig toFSConnectionConfig(final CredentialsProvider credentialsProvider) {
+        if (m_useWorkspaceConnection) {
+            throw new IllegalArgumentException(
+                "Cannot create FS config, unexpected workspace connection provided. This is a bug.");
+        }
+
         final DbfsFSConnectionConfig.Builder builder = DbfsFSConnectionConfig.builder() //
             .withDeploymentUrl(getDeploymentUrl()) //
             .withWorkingDirectory(getWorkingDirectory()) //

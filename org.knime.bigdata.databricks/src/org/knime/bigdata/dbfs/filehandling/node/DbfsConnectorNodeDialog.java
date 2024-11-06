@@ -60,7 +60,9 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationDialog;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -70,6 +72,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
 
@@ -80,6 +83,11 @@ import org.knime.filehandling.core.connections.base.ui.WorkingDirectoryChooser;
  */
 class DbfsConnectorNodeDialog extends NodeDialogPane {
 
+    private final boolean m_useWorkspaceConnector;
+
+    private DatabricksWorkspacePortObjectSpec m_workspacePortSpec;
+    private DatabricksAccessTokenCredential m_workspaceCredential;
+
     private final DbfsConnectorNodeSettings m_settings;
     private final WorkingDirectoryChooser m_workingDirChooser;
     private DbfsAuthenticationDialog m_authPanel;
@@ -87,28 +95,35 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
     /**
      * Creates new instance
      */
-    public DbfsConnectorNodeDialog() {
-        m_settings = new DbfsConnectorNodeSettings();
+    DbfsConnectorNodeDialog(final boolean useWorkspaceConnector) {
+        m_useWorkspaceConnector = useWorkspaceConnector;
+        m_settings = new DbfsConnectorNodeSettings(useWorkspaceConnector);
 
         m_authPanel =
             new DbfsAuthenticationDialog(m_settings.getAuthenticationSettings(), this::getCredentialsProvider);
         m_workingDirChooser = new WorkingDirectoryChooser("dbfs.workingDir", this::createFSConnection);
 
-        addTab("Settings", createSettingsTab());
-        addTab("Advanced", createAdvancedTab());
+        addTab("Settings", createSettingsTab(useWorkspaceConnector));
+
+        if (!useWorkspaceConnector) {
+            // advanced tab with timeout settings
+            addTab("Advanced", createAdvancedTab());
+        }
     }
 
-    private JComponent createSettingsTab() {
+    private JComponent createSettingsTab(final boolean useWorkspaceConnector) {
         final JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
-        panel.add(createDeploymentPanel(), gbc);
-        gbc.gridy++;
-        panel.add(createAuthPanel(), gbc);
-        gbc.gridy++;
+        if (!useWorkspaceConnector) {
+            panel.add(createDeploymentPanel(), gbc);
+            gbc.gridy++;
+            panel.add(createAuthPanel(), gbc);
+            gbc.gridy++;
+        }
         panel.add(createFilesystemPanel(), gbc);
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
@@ -198,7 +213,11 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
     }
 
     private FSConnection createFSConnection() throws IOException {
-        return new DbfsFSConnection(m_settings.toFSConnectionConfig(getCredentialsProvider()));
+        if (m_useWorkspaceConnector) {
+            return new DbfsFSConnection(m_settings.toFSConnectionConfig(m_workspacePortSpec, m_workspaceCredential));
+        } else {
+            return new DbfsFSConnection(m_settings.toFSConnectionConfig(getCredentialsProvider()));
+        }
     }
 
     @Override
@@ -219,13 +238,40 @@ class DbfsConnectorNodeDialog extends NodeDialogPane {
             m_authPanel.loadSettingsFrom(settings, specs);
             m_settings.loadSettingsForDialog(settings);
             m_workingDirChooser.setSelectedWorkingDirectory(m_settings.getWorkingDirectory());
+
+            if (m_useWorkspaceConnector) {
+                loadWorkspaceConnectionInputPort(specs);
+            }
+
         } catch (InvalidSettingsException ex) { // NOSONAR can be ignored
         }
     }
 
+    private void loadWorkspaceConnectionInputPort(final PortObjectSpec[] inSpecs) {
+        boolean enableBrowsing = false;
+
+        // try to load spec and credential
+        if (inSpecs != null && inSpecs.length > 0 && inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec) {
+            m_workspacePortSpec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
+            if (m_workspacePortSpec.isPresent()) {
+                try {
+                    m_workspaceCredential =
+                        m_workspacePortSpec.resolveCredential(DatabricksAccessTokenCredential.class);
+                    enableBrowsing = true;
+                } catch (final NoSuchCredentialException ex) { // NOSONAR
+                    // not available at this stage
+                }
+            }
+        }
+
+        m_workingDirChooser.setEnableBrowsing(enableBrowsing);
+    }
+
     @Override
     public void onOpen() {
-        m_authPanel.onOpen();
+        if (!m_useWorkspaceConnector) {
+            m_authPanel.onOpen();
+        }
     }
 
     @Override
