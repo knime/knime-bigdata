@@ -48,8 +48,13 @@
  */
 package org.knime.bigdata.spark.core.databricks.node.create;
 
+import java.io.IOException;
+
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.database.databricks.DatabricksOAuth2DBConnectionController;
 import org.knime.bigdata.database.databricks.DatabricksUserDBConnectionController;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
+import org.knime.bigdata.databricks.credential.DatabricksAccessTokenType;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksClusterStatusProvider;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.database.connection.DBConnectionController;
@@ -87,6 +92,45 @@ public final class ClusterDBControllerFactory {
 
         return new DatabricksUserDBConnectionController(jdbcUrl, httpPath, clusterStatus, description, user,
             password);
+    }
+
+    /**
+     * Create controller connected to a cluster.
+     *
+     * @param jdbcUrl driver specific JDBC URL
+     * @param clusterStatus cluster status provider
+     * @param clusterId unique cluster identifier
+     * @param workspaceId workspace identifier for Azure or 0
+     * @param credential the credential provider to use
+     * @throws InvalidSettingsException on unknown JDBC URL schema
+     * @return new controller instance
+     */
+    static DBConnectionController createController(final String jdbcUrl,
+        final DatabricksClusterStatusProvider clusterStatus, final String clusterId, final String workspaceId,
+        final DatabricksAccessTokenCredential credential) throws InvalidSettingsException {
+
+        final String httpPath = getHttpPath(clusterId, workspaceId);
+        final String description = createDescription(clusterId, workspaceId);
+
+        if (credential.getDatabricksTokenType() == DatabricksAccessTokenType.PERSONAL_ACCESS_TOKEN) {
+            final String user = "token";
+            final String password = getPersonalAccessToken(credential);
+
+            return new DatabricksUserDBConnectionController(jdbcUrl, httpPath, clusterStatus, description, user,
+                password);
+        }
+
+        return new DatabricksOAuth2DBConnectionController(jdbcUrl, httpPath, clusterStatus, description, credential);
+    }
+
+    private static String getPersonalAccessToken(final DatabricksAccessTokenCredential credential)
+        throws InvalidSettingsException {
+        try {
+            return credential.getAccessToken();
+        } catch (final IOException e) {
+            throw new InvalidSettingsException(
+                "Unable to load personal access token from input connection. Restart predecessor nodes.", e);
+        }
     }
 
     private static String createDescription(final String clusterId, final String workspaceId) {
