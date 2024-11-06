@@ -248,7 +248,7 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
     private DbfsFSConnectionConfig createDbfsFSConnectionConfig(final CredentialsProvider credentialsProvider)
         throws InvalidSettingsException {
 
-        final DbfsConnectorNodeSettings settings = new DbfsConnectorNodeSettings();
+        final DbfsConnectorNodeSettings settings = new DbfsConnectorNodeSettings(false);
         settings.getUrlModel().setStringValue(getDatabricksInstanceURL());
         settings.getWorkingDirectoryModel().setStringValue(getWorkingDirectory());
         settings.getConnectionTimeoutModel().setIntValue(getConnectionTimeout());

@@ -71,6 +71,10 @@
     </fullDescription>
     
     <ports>
+        <dynInPort insert-before="0" name="Databricks Workspace Connection" group-identifier="Databricks Workspace Connection">
+            Databricks Workspace Connection, that can be connected to the Databricks
+            Workspace Connector.
+        </dynInPort>
         <outPort index="0" name="Databricks File System Connection">
             Databricks File System Connection
         </outPort>
