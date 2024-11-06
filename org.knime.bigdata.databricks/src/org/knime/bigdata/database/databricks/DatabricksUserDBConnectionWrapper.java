@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.database.databricks;
 
+import java.io.IOException;
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -57,7 +58,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.knime.bigdata.spark.core.databricks.context.DatabricksClusterStatusProvider;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.core.node.NodeLogger;
 import org.knime.database.connection.wrappers.AbstractConnectionWrapper;
 
@@ -97,8 +97,8 @@ public class DatabricksUserDBConnectionWrapper extends AbstractConnectionWrapper
             } else {
                 LOG.info("Databricks cluster is not in running state, no JDBC connection close required.");
             }
-        } catch (KNIMESparkException e) {
-            LOG.warn("Unable to get Databricks cluster state, JDBC connection close failed");
+        } catch (final IOException e) {
+            LOG.warn("Unable to get Databricks cluster state, JDBC connection close ignored.", e);
         }
     }
 

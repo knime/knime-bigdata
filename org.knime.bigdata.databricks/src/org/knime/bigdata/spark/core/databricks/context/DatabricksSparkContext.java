@@ -429,7 +429,7 @@ public class DatabricksSparkContext extends SparkContext<DatabricksSparkContextC
      * @return cluster status provider of cluster running the spark context
      */
     public DatabricksClusterStatusProvider getClusterStatusHandler() {
-        return new DatabricksClusterStatusProvider(m_databricksClient);
+        return () -> m_databricksClient.isClusterRunning();
     }
 
     @Override

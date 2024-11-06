@@ -401,14 +401,10 @@ public class DatabricksClient {
      * Check if cluster is in {@link ClusterState#RUNNING} state.
      *
      * @return {@code true} if cluster is in {@link ClusterState#RUNNING} state.
-     * @throws KNIMESparkException on connection failures
+     * @throws IOException on connection failures
      */
-    boolean isClusterRunning() throws KNIMESparkException {
-        try (Closeable c = ThreadLocalHTTPAuthenticator.suppressAuthenticationPopups()) {
-            return m_clusterAPI.getCluster(m_config.getClusterId()).state == ClusterState.RUNNING;
-        } catch (IOException e) {
-            throw new KNIMESparkException("Unable to fetch cluster state: " + e.getMessage(), e);
-        }
+    boolean isClusterRunning() throws IOException {
+        return m_clusterAPI.getCluster(m_config.getClusterId()).state == ClusterState.RUNNING;
     }
 
     /**

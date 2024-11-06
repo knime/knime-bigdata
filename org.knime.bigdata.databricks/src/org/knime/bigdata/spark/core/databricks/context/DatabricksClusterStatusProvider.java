@@ -48,29 +48,24 @@
  */
 package org.knime.bigdata.spark.core.databricks.context;
 
+import java.io.IOException;
+
 import org.knime.bigdata.databricks.rest.clusters.ClusterState;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
  * Wrapper around a {@link DatabricksClient} to get the current cluster state.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksClusterStatusProvider {
-
-    private final DatabricksClient m_databricksClient;
-
-    DatabricksClusterStatusProvider(final DatabricksClient databricksClient) {
-        m_databricksClient = databricksClient;
-    }
+@FunctionalInterface
+public interface DatabricksClusterStatusProvider {
 
     /**
      * Check if cluster is in {@link ClusterState#RUNNING} state.
      *
      * @return {@code true} if cluster is in {@link ClusterState#RUNNING} state.
-     * @throws KNIMESparkException on connection failures
+     * @throws IOException on connection failures
      */
-    public boolean isClusterRunning() throws KNIMESparkException {
-        return m_databricksClient.isClusterRunning();
-    }
+    boolean isClusterRunning() throws IOException;
+
 }
