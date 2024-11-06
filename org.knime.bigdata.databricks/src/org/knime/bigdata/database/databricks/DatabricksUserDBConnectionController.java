@@ -125,6 +125,7 @@ public class DatabricksUserDBConnectionController extends UserDBConnectionContro
         final VariableContext variableContext, final ExecutionMonitor monitor)
         throws CanceledExecutionException, SQLException {
 
+        //set user+password
         final Properties props = super.prepareJdbcProperties(attributeValues, variableContext, monitor);
         final String jdbcUrl = getJdbcUrl();
 
@@ -132,13 +133,12 @@ public class DatabricksUserDBConnectionController extends UserDBConnectionContro
             props.put("transportMode", "http");
             props.put("ssl", "true");
             props.put("httpPath", m_httpPath);
-            // user+password gets already set by getNonURLProperties
+            // user+password are set by calling the super method
         } else if (isSimbaConnection(jdbcUrl)) {
             props.put("transportMode", "http");
             props.put("ssl", "1");
             props.put("httpPath", m_httpPath);
-            props.put("UID", m_user);
-            props.put("PWD", m_password);
+            // user+password are set by calling the super method
 
             if (!props.containsKey("AuthMech")) { // let the user overwrite this
                 props.put("AuthMech", "3");

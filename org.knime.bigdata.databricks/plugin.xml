@@ -47,6 +47,10 @@
           category-path="/toolintegration/spark"
           factory-class="org.knime.bigdata.databricks.workspace.connector.WorkspaceConnectorNodeFactory">
     </node>
+    <node
+          category-path="/toolintegration/spark"
+          factory-class="org.knime.bigdata.databricks.sqlwarehouse.SQLWarehouseConnectorNodeFactory">
+    </node>
   </extension>
   
   <extension point="org.knime.credentials.base.CredentialType">

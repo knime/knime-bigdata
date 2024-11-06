@@ -89,7 +89,13 @@ import org.knime.bigdata.databricks.rest.libraries.LibrariesAPI;
 import org.knime.bigdata.databricks.rest.libraries.LibrariesAPIWrapper;
 import org.knime.bigdata.databricks.rest.scim.ScimAPI;
 import org.knime.bigdata.databricks.rest.scim.ScimAPIWrapper;
+import org.knime.bigdata.databricks.rest.sql.SQLWarehouseAPI;
+import org.knime.bigdata.databricks.rest.sql.SQLWarehouseAPIWrapper;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.credentials.base.NoSuchCredentialException;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
@@ -247,6 +253,35 @@ public class DatabricksRESTClient extends AbstractRESTClient {
         return wrap(proxyImpl);
     }
 
+    /**
+     * Creates a service proxy for given Databricks REST API interface using a single Workspace connection input port.
+     *
+     * Note that errors in this client are handled with {@code ClientErrorException}.
+     *
+     * @param proxy Interface to create proxy for
+     * @param inSpecs the input specs with a single input port
+     * @return client implementation for given proxy interface
+     * @throws InvalidSettingsException if the input port is invalid
+     * @throws NoSuchCredentialException if the input port does not contain a {@link DatabricksAccessTokenCredential}
+     */
+    public static <T> T fromSingleWorkspaceInputPort(final Class<T> proxy, final PortObjectSpec[] inSpecs)
+        throws InvalidSettingsException, NoSuchCredentialException {
+
+        if (inSpecs.length == 0) {
+            throw new InvalidSettingsException("Missing input connection, Databricks Workspace Connector required.");
+        }
+
+        if (inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec) {
+            final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
+            final DatabricksAccessTokenCredential credential =
+                spec.resolveCredential(DatabricksAccessTokenCredential.class);
+            return create(credential, proxy, spec.getReadTimeout(), spec.getConnectionTimeout());
+
+        }
+
+        throw new InvalidSettingsException("Invalid input connection, Databricks Workspace Connector required.");
+    }
+
     @SuppressWarnings("unchecked")
     private static <T> T wrap(final T api) { // NOSONAR ignore to many returns
         if (api instanceof CatalogAPI) {
@@ -267,6 +302,8 @@ public class DatabricksRESTClient extends AbstractRESTClient {
             return (T)new LibrariesAPIWrapper((LibrariesAPI)api);
         } else if (api instanceof ScimAPI) {
             return (T)new ScimAPIWrapper((ScimAPI)api);
+        } else if (api instanceof SQLWarehouseAPI) {
+            return (T)new SQLWarehouseAPIWrapper((SQLWarehouseAPI)api);
         }
 
         throw new IllegalArgumentException("Unsupported API: " + api.getClass());
