@@ -67,9 +67,9 @@ import org.knime.database.connection.wrappers.AbstractConnectionWrapper;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksDBConnectionWrapper extends AbstractConnectionWrapper {
+public class DatabricksUserDBConnectionWrapper extends AbstractConnectionWrapper {
 
-    private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksDBConnectionWrapper.class);
+    private static final NodeLogger LOG = NodeLogger.getLogger(DatabricksUserDBConnectionWrapper.class);
 
     private final DatabricksClusterStatusProvider m_clusterStatus;
 
@@ -79,7 +79,7 @@ public class DatabricksDBConnectionWrapper extends AbstractConnectionWrapper {
      * @param connection connection to wrap
      * @param clusterStatus cluster status provider or {@code null} to ignore all {@link #close()} calls.
      */
-    protected DatabricksDBConnectionWrapper(final Connection connection, final DatabricksClusterStatusProvider clusterStatus) {
+    protected DatabricksUserDBConnectionWrapper(final Connection connection, final DatabricksClusterStatusProvider clusterStatus) {
         super(connection);
         m_clusterStatus = clusterStatus;
     }

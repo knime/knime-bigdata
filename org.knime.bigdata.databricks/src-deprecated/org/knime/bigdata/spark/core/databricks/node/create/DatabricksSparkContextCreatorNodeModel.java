@@ -48,7 +48,6 @@ package org.knime.bigdata.spark.core.databricks.node.create;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
-import org.knime.bigdata.database.databricks.DatabricksDBConnectionController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
@@ -182,8 +181,8 @@ public class DatabricksSparkContextCreatorNodeModel extends AbstractDatabricksSp
 
         final String username = m_settings.getUsername(getCredentialsProvider());
         final String password = m_settings.getPassword(getCredentialsProvider());
-        return new DatabricksDBConnectionController(m_settings.getDBUrl(), clusterStatus, m_settings.getClusterId(),
-            m_settings.getWorkspaceId(), username, password);
+        return ClusterDBControllerFactory.create(m_settings.getDBUrl(), clusterStatus,
+            m_settings.getClusterId(), m_settings.getWorkspaceId(), username, password);
     }
 
     @Override

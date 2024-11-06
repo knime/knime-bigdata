@@ -20,14 +20,15 @@
  */
 package org.knime.bigdata.database.databricks.testing;
 
-import static org.knime.bigdata.database.databricks.DatabricksDBConnectionController.getHttpPath;
+import static org.knime.bigdata.spark.core.databricks.node.create.ClusterDBControllerFactory.getHttpPath;
 
 import java.net.URI;
 import java.util.Map;
 
 import org.apache.hive.jdbc.HiveDriver;
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
-import org.knime.bigdata.database.databricks.DatabricksDBConnectionController;
+import org.knime.bigdata.database.databricks.DatabricksUserDBConnectionController;
+import org.knime.bigdata.spark.core.databricks.node.create.ClusterDBControllerFactory;
 import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
@@ -60,7 +61,7 @@ public class DatabricksTestingDatabaseConnectionSettingsFactory {
      *
      * @param jdbcUrl JDBC URL to use
      * @param flowVariables A map of flow variables that provide the Spark context settings.
-     * @return {@link DatabricksDBConnectionController}
+     * @return {@link DatabricksUserDBConnectionController}
      * @throws InvalidSettingsException on invalid flow variables
      */
     public static DBConnectionController createDBConnectionController(final String jdbcUrl,
@@ -69,8 +70,8 @@ public class DatabricksTestingDatabaseConnectionSettingsFactory {
             DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables);
         final String username = settings.getUsername(null);
         final String password = settings.getPassword(null);
-        return new DatabricksDBConnectionController(jdbcUrl, null, settings.getClusterId(), settings.getWorkspaceId(),
-            username, password);
+        return ClusterDBControllerFactory.create(jdbcUrl, null, settings.getClusterId(),
+            settings.getWorkspaceId(), username, password);
     }
 
     /**

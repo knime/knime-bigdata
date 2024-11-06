@@ -71,15 +71,17 @@ import org.knime.database.connection.UserDBConnectionController;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class DatabricksDBConnectionController extends UserDBConnectionController {
-
-    private static final String HTTP_PATH_FORMAT = "sql/protocolv1/o/%s/%s";
+public class DatabricksUserDBConnectionController extends UserDBConnectionController {
 
     private final DatabricksClusterStatusProvider m_clusterStatus;
-    private final String m_clusterId;
-    private final String m_workspaceId;
+
     private final String m_user;
+
     private final String m_password;
+
+    private final String m_httpPath;
+
+    private final String m_description;
 
     /**
      * Default constructor.
@@ -92,9 +94,9 @@ public class DatabricksDBConnectionController extends UserDBConnectionController
      * @param password password or token to use
      * @throws InvalidSettingsException on unknown JDBC URL schema
      */
-    public DatabricksDBConnectionController(final String jdbcUrl, final DatabricksClusterStatusProvider clusterStatus,
-        final String clusterId, final String workspaceId, final String user, final String password)
-        throws InvalidSettingsException {
+    public DatabricksUserDBConnectionController(final String jdbcUrl, final String httpPath,
+        final DatabricksClusterStatusProvider clusterStatus, final String description, final String user,
+        final String password) throws InvalidSettingsException {
 
         super(jdbcUrl, AuthenticationType.USER_PWD, user, password, null, null);
 
@@ -102,9 +104,9 @@ public class DatabricksDBConnectionController extends UserDBConnectionController
             throw new InvalidSettingsException("Unknown JDBC schema (only hive2 and spark supported)");
         }
 
+        m_httpPath = httpPath;
         m_clusterStatus = clusterStatus;
-        m_clusterId = clusterId;
-        m_workspaceId = workspaceId;
+        m_description = description;
         m_user = user;
         m_password = password;
     }
@@ -114,27 +116,27 @@ public class DatabricksDBConnectionController extends UserDBConnectionController
         final VariableContext variableContext, final ExecutionMonitor monitor)
         throws CanceledExecutionException, SQLException {
 
-        return new DatabricksDBConnectionWrapper(
+        return new DatabricksUserDBConnectionWrapper(
             super.createConnection(attributeValues, driver, variableContext, monitor), m_clusterStatus);
     }
 
     @Override
     protected Properties prepareJdbcProperties(final AttributeValueRepository attributeValues,
-        final VariableContext variableContext, final ExecutionMonitor monitor) throws CanceledExecutionException, SQLException {
+        final VariableContext variableContext, final ExecutionMonitor monitor)
+        throws CanceledExecutionException, SQLException {
 
-        final Properties props =  super.prepareJdbcProperties(attributeValues, variableContext, monitor);
+        final Properties props = super.prepareJdbcProperties(attributeValues, variableContext, monitor);
         final String jdbcUrl = getJdbcUrl();
-        final String httpPath = getHttpPath(m_clusterId, m_workspaceId);
 
         if (isHiveConnection(jdbcUrl)) {
             props.put("transportMode", "http");
             props.put("ssl", "true");
-            props.put("httpPath", httpPath);
+            props.put("httpPath", m_httpPath);
             // user+password gets already set by getNonURLProperties
         } else if (isSimbaConnection(jdbcUrl)) {
             props.put("transportMode", "http");
             props.put("ssl", "1");
-            props.put("httpPath", httpPath);
+            props.put("httpPath", m_httpPath);
             props.put("UID", m_user);
             props.put("PWD", m_password);
 
@@ -150,24 +152,10 @@ public class DatabricksDBConnectionController extends UserDBConnectionController
     public String getConnectionDescription() {
         final StringBuilder sb = new StringBuilder();
         sb.append(super.getConnectionDescription());
-        sb.append(", cluster=\"").append(m_clusterId).append('"');
-        if (!StringUtils.isBlank(m_workspaceId)) {
-            sb.append(", workspace=\"").append(m_workspaceId).append('"');
+        if (!StringUtils.isBlank(m_description)) {
+            sb.append(", ").append(m_description);
         }
         return sb.toString();
     }
 
-    /**
-     * Format httpPath parameter for Databricks JDBC URL.
-     * @param clusterId cluster ID or alias
-     * @param workspaceId workspace ID on Azure, empty or {@code null} on AWS
-     * @return httpPath parameter for JDBC URL
-     */
-    public static String getHttpPath(final String clusterId, final String workspaceId) {
-        if (StringUtils.isBlank(workspaceId)) {
-            return String.format(HTTP_PATH_FORMAT, 0, clusterId);
-        } else {
-            return String.format(HTTP_PATH_FORMAT, workspaceId, clusterId);
-        }
-    }
 }

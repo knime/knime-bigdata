@@ -48,7 +48,6 @@ package org.knime.bigdata.spark.core.databricks.node.create;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import org.knime.bigdata.database.databricks.DatabricksDBConnectionController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
@@ -209,7 +208,7 @@ public class DatabricksSparkContextCreatorNodeModel2
             password = m_settings.getAuthenticationSettings().getPassword(cp);
         }
 
-        return new DatabricksDBConnectionController(m_settings.getDBUrl(), clusterStatus, m_settings.getClusterId(),
+        return ClusterDBControllerFactory.create(m_settings.getDBUrl(), clusterStatus, m_settings.getClusterId(),
             m_settings.getWorkspaceId(), username, password);
     }
 
