@@ -78,7 +78,7 @@ public class DbfsFileSystem extends BaseFileSystem<DbfsPath> {
      * @param config The file system configuration.
      * @throws IOException
      */
-    protected DbfsFileSystem(final long cacheTTL, final DbfsFSConnectionConfig config) throws IOException {
+    DbfsFileSystem(final long cacheTTL, final DbfsFSConnectionConfig config) throws IOException {
         super(new DbfsFileSystemProvider(), //
             cacheTTL, //
             config.getWorkingDirectory(), //
@@ -88,7 +88,10 @@ public class DbfsFileSystem extends BaseFileSystem<DbfsPath> {
     }
 
     private static DBFSAPI createClient(final DbfsFSConnectionConfig config) throws UnsupportedEncodingException {
-        if (config.useToken()) {
+        if (config.useCredential()) {
+            return DatabricksRESTClient.createLegacyExceptionMapper(config.getCredential(), DBFSAPI.class,
+                config.getReadTimeout(), config.getConnectionTimeout());
+        } else if (config.useToken()) {
             return DatabricksRESTClient.create(config.getDeploymentUrl(), DBFSAPI.class, config.getToken(),
                 config.getReadTimeout(), config.getConnectionTimeout());
         } else {
