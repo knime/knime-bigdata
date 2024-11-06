@@ -195,6 +195,25 @@ public class DatabricksRESTClient extends AbstractRESTClient {
      * Creates a service proxy for given Databricks REST API interface using the URL and credentials of a @link
      * DatabricksWorkspaceAccessor}.
      *
+     * Note that errors in this client are handled with the legacy {@code IOException} mapper.
+     *
+     * @param accessor A {@link DatabricksAccessTokenCredential} which provides both the Databricks workspace URL as
+     *            well as credentials.
+     * @param proxy Interface to create proxy for
+     * @param receiveTimeout Receive timeout
+     * @param connectionTimeout connection timeout
+     * @return client implementation for given proxy interface
+     */
+    public static <T> T createLegacyExceptionMapper(final DatabricksAccessTokenCredential accessor,
+        final Class<T> proxy, final Duration receiveTimeout, final Duration connectionTimeout) {
+
+        return create(accessor, proxy, receiveTimeout, connectionTimeout, new DatabricksResponseIOExceptionMapper());
+    }
+
+    /**
+     * Creates a service proxy for given Databricks REST API interface using the URL and credentials of a @link
+     * DatabricksWorkspaceAccessor}.
+     *
      * Note that errors in this client are handled with {@code ClientErrorException}.
      *
      * @param accessor A {@link DatabricksAccessTokenCredential} which provides both the Databricks workspace URL as
@@ -207,11 +226,19 @@ public class DatabricksRESTClient extends AbstractRESTClient {
     public static <T> T create(final DatabricksAccessTokenCredential accessor, final Class<T> proxy,
         final Duration receiveTimeout, final Duration connectionTimeout) {
 
+        return create(accessor, proxy, receiveTimeout, connectionTimeout,
+            new DatabricksResponseClientErrorExceptionMapper());
+    }
+
+    private static <T> T create(final DatabricksAccessTokenCredential accessor, final Class<T> proxy,
+        final Duration receiveTimeout, final Duration connectionTimeout,
+        final ResponseExceptionMapper<?> exceptionMapper) {
+
         final T proxyImpl = create(accessor.getDatabricksWorkspaceUrl().toString(), //
             proxy, //
             receiveTimeout, //
             connectionTimeout, //
-            new DatabricksResponseClientErrorExceptionMapper());
+            exceptionMapper);
 
         WebClient.getConfig(proxyImpl)//
             .getOutInterceptors()//
