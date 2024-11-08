@@ -68,7 +68,7 @@
 			specSerializer="org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObjectSpec$Serializer">
 		</portType>
 		<portType
-			hidden="false"
+			hidden="true"
 			name="Spark Context (legacy com)"
 			objectClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObject"
 			objectSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObject$Serializer"
@@ -77,7 +77,7 @@
 		</portType>
 		<portType
 			color="#000000"
-			hidden="false"
+			hidden="true"
 			name="Spark Data (legacy com)"
 			objectClass="com.knime.bigdata.spark.core.port.data.SparkDataPortObject"
 			objectSerializer="com.knime.bigdata.spark.core.port.data.SparkDataPortObject$Serializer"
@@ -86,7 +86,7 @@
 		</portType>
 		<portType
 			color="#7DBDFF"
-			hidden="false"
+			hidden="true"
 			name="Spark Model (legacy com)"
 			objectClass="com.knime.bigdata.spark.core.port.model.SparkModelPortObject"
 			objectSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObject$Serializer"
@@ -95,7 +95,7 @@
 		</portType>
 		<portType
 			color="#000000"
-			hidden="false"
+			hidden="true"
 			name="Spark Data (legacy)"
 			objectClass="com.knime.bigdata.spark.port.data.SparkDataPortObject"
 			objectSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObject$Serializer"
@@ -104,7 +104,7 @@
 		</portType>
 		<portType
 			color="#7DBDFF"
-			hidden="false"
+			hidden="true"
 			name="Spark Model (legacy)"
 			objectClass="com.knime.bigdata.spark.port.model.SparkModelPortObject"
 			objectSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObject$Serializer"
@@ -112,7 +112,7 @@
 			specSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec$Serializer">
 		</portType>
 		<portType
-			hidden="false"
+			hidden="true"
 			name="Spark Context (legacy)"
 			objectClass="com.knime.bigdata.spark.port.context.SparkContextPortObject"
 			objectSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObject$Serializer"
