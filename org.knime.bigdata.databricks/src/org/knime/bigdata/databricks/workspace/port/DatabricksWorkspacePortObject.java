@@ -50,6 +50,8 @@ package org.knime.bigdata.databricks.workspace.port;
 
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.knime.core.webui.node.port.PortViewManager;
+import org.knime.core.webui.node.port.PortViewManager.PortViews;
 import org.knime.credentials.base.CredentialPortObject;
 
 /**
@@ -57,13 +59,24 @@ import org.knime.credentials.base.CredentialPortObject;
  *
  * @author Jannik Loescher, KNIME GmbH
  */
+@SuppressWarnings("restriction")
 public final class DatabricksWorkspacePortObject extends CredentialPortObject {
 
     /**
      * Port type.
      */
     @SuppressWarnings("hiding")
-    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(DatabricksWorkspacePortObject.class);
+    public static final PortType TYPE;
+
+    static {
+        TYPE = PortTypeRegistry.getInstance().getPortType(DatabricksWorkspacePortObject.class);
+
+        final PortViews credentialPOView = PortViewManager.getPortViews(CredentialPortObject.TYPE);
+        PortViewManager.registerPortViews(TYPE, //
+            credentialPOView.viewDescriptors(), //
+            credentialPOView.configuredIndices(), //
+            credentialPOView.executedIndices());
+    }
 
     /** Serializer as required by ext point definition. */
     public static final class Serializer extends AbstractSimplePortObjectSerializer<DatabricksWorkspacePortObject> {
