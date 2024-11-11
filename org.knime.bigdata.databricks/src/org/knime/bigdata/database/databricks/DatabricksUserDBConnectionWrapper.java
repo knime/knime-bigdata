@@ -79,7 +79,8 @@ public class DatabricksUserDBConnectionWrapper extends AbstractConnectionWrapper
      * @param connection connection to wrap
      * @param clusterStatus cluster status provider or {@code null} to ignore all {@link #close()} calls.
      */
-    protected DatabricksUserDBConnectionWrapper(final Connection connection, final DatabricksClusterStatusProvider clusterStatus) {
+    protected DatabricksUserDBConnectionWrapper(final Connection connection,
+        final DatabricksClusterStatusProvider clusterStatus) {
         super(connection);
         m_clusterStatus = clusterStatus;
     }
