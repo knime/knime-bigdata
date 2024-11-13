@@ -47,14 +47,14 @@ This Software is licensed to you, not sold. With this license agreement you rece
 
    <plugin
          id="org.knime.bigdata.databricks"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.knime.bigdata.database.databricks.driver"
-         download-size="0"
-         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.knime.bigdata.databricks.python"
          version="0.0.0"/>
 
 </feature>
