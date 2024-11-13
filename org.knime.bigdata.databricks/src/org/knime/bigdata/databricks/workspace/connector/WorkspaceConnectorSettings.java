@@ -51,14 +51,15 @@ package org.knime.bigdata.databricks.workspace.connector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.After;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
@@ -66,6 +67,9 @@ import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
 import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.Credentials;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage.MessageType;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage.SimpleTextMessageProvider;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Effect;
@@ -86,14 +90,17 @@ import org.knime.credentials.base.CredentialType;
 @SuppressWarnings("restriction")
 public class WorkspaceConnectorSettings implements DefaultNodeSettings {
 
+    private static boolean hasCredentialPort(final PortType[] types) {
+        return Arrays.stream(types).anyMatch(CredentialPortObject.TYPE::equals);
+    }
+
     /**
      * Constant signal to indicate whether the user has added a credential port or not.
      */
-    static final class CredentialInputNotConnected implements PredicateProvider {
+    static final class CredentialInputConnected implements PredicateProvider {
         @Override
         public Predicate init(final PredicateInitializer i) {
-            return i.getConstant(
-                context -> Stream.of(context.getInPortTypes()).noneMatch(CredentialPortObject.TYPE::equals));
+            return i.getConstant(context -> hasCredentialPort(context.getInPortTypes()));
         }
     }
 
@@ -107,6 +114,33 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
                 context -> databricksPortAvailable(context.getPortObjectSpecs()));
         }
     }
+
+    static final class AuthenticationManagedByPortMessage implements SimpleTextMessageProvider {
+
+        @Override
+        public boolean showMessage(final DefaultNodeSettingsContext context) {
+            return hasCredentialPort(context.getInPortTypes());
+        }
+
+        @Override
+        public String title() {
+            return "Authentication settings controlled by input port";
+        }
+
+        @Override
+        public String description() {
+            return "Remove the input port to change the settings";
+        }
+
+        @Override
+        public MessageType type() {
+            return MessageType.INFO;
+        }
+
+    }
+
+    @TextMessage(value = AuthenticationManagedByPortMessage.class)
+    Void m_authenticationManagedByPortText;
 
     @Section(title = "Token")
     @Effect(predicate =  AuthType.IsTokenAuthTypeAndCredentialInputNotConnected.class, type = EffectType.SHOW)
@@ -130,7 +164,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
             + "</ul>")
     @ValueReference(AuthTypeRef.class)
-    @Effect(predicate = CredentialInputNotConnected.class, type = EffectType.ENABLE)
+    @Effect(predicate = CredentialInputConnected.class, type = EffectType.DISABLE)
     AuthType m_authType = AuthType.TOKEN;
 
     static final class AuthTypeRef implements Reference<AuthType> {
@@ -144,7 +178,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
             @Override
             public Predicate init(final PredicateInitializer i) {
                 return i.getEnum(AuthTypeRef.class).isOneOf(AuthType.TOKEN)
-                    .and(i.getPredicate(CredentialInputNotConnected.class));
+                    .and(i.getPredicate(CredentialInputConnected.class).negate());
             }
         }
     }
