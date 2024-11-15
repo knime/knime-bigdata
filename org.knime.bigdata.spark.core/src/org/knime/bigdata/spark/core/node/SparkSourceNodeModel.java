@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -93,17 +94,17 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
 
     /**
      *
-     * @param inObjects an array of {@link PortObjectSpec} or {@link PortObject} instances
-     * @return A {@link SparkContextID} taken from the first inObject that is a {@link SparkProvider}, or the default context ID.
+     * @param in an array of {@link PortObjectSpec} or {@link PortObject} instances
+     * @return A {@link SparkContextID} taken from the first inObject that is a {@link SparkProvider}.
+     * @throws InvalidSettingsException if no input connection found that is a {@link SparkProvider}
      */
-    public static SparkContextID getContextID(final Object[] inObjects) {
-        SparkContextID toReturn = tryGetContextFromInputs(inObjects);
-        if (toReturn == null) {
-            toReturn = SparkContextManager.getDefaultSparkContextID();
+    public static SparkContextID getContextID(final Object[] in) throws InvalidSettingsException {
+        if (in != null && in.length > 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
+            return ((SparkContextProvider)in[in.length - 1]).getContextID();
         }
-        return toReturn;
-    }
 
+        throw new InvalidSettingsException("Spark input connection required");
+    }
 
     /**
      *
@@ -116,10 +117,4 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
         SparkContextManager.getOrCreateSparkContext(contextID).ensureOpened(true, exec);
     }
 
-    private static SparkContextID tryGetContextFromInputs(final Object[] in) {
-        if (in != null && in.length > 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
-            return ((SparkContextProvider)in[in.length - 1]).getContextID();
-        }
-        return null;
-    }
 }

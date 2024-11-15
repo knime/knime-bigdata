@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
@@ -246,7 +245,7 @@ public class PySparkNodeModel extends SparkNodeModel {
             }
         }
 
-        return SparkContextManager.getDefaultSparkContextID();
+        throw new InvalidSettingsException("Spark input connection required");
     }
 
     /**

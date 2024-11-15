@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.core.context;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
@@ -67,19 +66,6 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      * @return the highest Spark version supported by this Spark context provider.
      */
     SparkVersion getHighestSupportedSparkVersion();
-
-    /**
-     * This method creates a new instance of the "default" Spark context. The default Spark context is a deprecated
-     * concept, which is only required to keep some deprecated Spark nodes functioning. The default Spark context is
-     * configured via the Spark preference page.
-     *
-     * At any given time, there must only be one implementation of this interface that provides a default Spark context.
-     * All other implementation should return an empty {@link Optional}.
-     *
-     * @return an {@link Optional} for the default Spark context. If present, the context is always in state
-     *         {@link SparkContextStatus#CONFIGURED}.
-     */
-    Optional<SparkContext<T>> createDefaultSparkContextIfPossible();
 
     /**
      * Creates a new testing Spark context ID based on the given map of flow variables. Which flow variables are

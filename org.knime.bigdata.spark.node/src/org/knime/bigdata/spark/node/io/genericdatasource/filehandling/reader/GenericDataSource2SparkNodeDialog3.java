@@ -225,8 +225,13 @@ public class GenericDataSource2SparkNodeDialog3<T extends GenericDataSource2Spar
             m_uploadDriver.setSelected(m_settings.uploadDriver());
         }
 
-        m_contextId = SparkSourceNodeModel.getContextID(specs);
         m_previewPanel.reset();
+
+        try {
+            m_contextId = SparkSourceNodeModel.getContextID(specs);
+        } catch (final InvalidSettingsException e) { // NOSONAR
+            m_previewPanel.setDisabled("Spark context input connection required");
+        }
 
         if (!m_inputPathChooser.getSettingsModel().canCreateConnection()) {
             m_previewPanel.setDisabled("No file system connection available. Execute connector node.");

@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
@@ -60,19 +59,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
     private final boolean m_deleteObjectsOnDispose;
     private final boolean m_overrideSparkSettings;
     private final Map<String, String> m_customSparkSettings;
-
-
-    /**
-     * create spark context container with default values
-     */
-    public JobServerSparkContextConfig() {
-        this(KNIMEConfigContainer.getJobServerUrl(),
-            KNIMEConfigContainer.useAuthentication(), KNIMEConfigContainer.getUserName(), KNIMEConfigContainer.getPassword(),
-            KNIMEConfigContainer.getReceiveTimeout(), KNIMEConfigContainer.getJobCheckFrequency(),
-            KNIMEConfigContainer.getSparkVersion(), KNIMEConfigContainer.getSparkContext(), KNIMEConfigContainer.deleteSparkObjectsOnDispose(),
-            KNIMEConfigContainer.overrideSparkSettings(), KNIMEConfigContainer.getCustomSparkSettings());
-    }
-
 
     /**
      * @param jobServerUrl Spark job server url

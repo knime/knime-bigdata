@@ -70,11 +70,7 @@ public class SparkContextID {
      * @return a nice String representation of the Spark context information
      */
     public String toPrettyString() {
-        if (this.equals(SparkContextManager.getDefaultSparkContextID())) {
-            return SparkContextManager.getDefaultSparkContext().getID().toPrettyString();
-        } else {
-            return SparkContextProviderRegistry.getSparkContextProvider(getScheme()).toPrettyString(this);
-        }
+        return SparkContextProviderRegistry.getSparkContextProvider(getScheme()).toPrettyString(this);
     }
 
     @Override

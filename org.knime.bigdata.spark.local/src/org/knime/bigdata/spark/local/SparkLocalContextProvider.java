@@ -93,15 +93,6 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
         return String.format(String.format("Local Spark Context (%s)", uri.getHost()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<SparkContext<LocalSparkContextConfig>> createDefaultSparkContextIfPossible() {
-        // currently, local Spark never provides the default Spark context.
-        return Optional.empty();
-    }
-
     @Override
     public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
         throws InvalidSettingsException {

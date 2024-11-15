@@ -36,7 +36,6 @@ import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.base.node.jsnippet.util.field.InVar;
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.jar.JarPacker;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -255,7 +254,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
             }
         }
 
-        return SparkContextManager.getDefaultSparkContextID();
+        throw new InvalidSettingsException("Spark input connection required");
     }
 
     private Pair<String, File> compileSnippetCached(final SparkVersion sparkVersion)

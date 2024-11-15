@@ -113,7 +113,7 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
 
             @Override
             protected SparkDataTable prepareDataTable(final ExecutionMonitor exec) throws Exception {
-                if (m_connectionInfo != null) {
+                if (m_connectionInfo != null && m_contextId != null) {
                     final NodeSettings tmpSettings = new NodeSettings("preview");
                     saveSettingsTo(tmpSettings);
                     final GenericDataSource2SparkSettings prevSettings = m_settings.newInstance();
@@ -156,6 +156,8 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
+        m_previewPanel.reset();
+
         if (specs.length > 0 && specs[0] != null) {
             m_connectionInfo = ((ConnectionInformationPortObjectSpec) specs[0]).getConnectionInformation();
         }
@@ -168,8 +170,11 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
             m_uploadDriver.setSelected(m_settings.uploadDriver());
         }
 
-        m_contextId = SparkSourceNodeModel.getContextID(specs);
-        m_previewPanel.reset();
+        try {
+            m_contextId = SparkSourceNodeModel.getContextID(specs);
+        } catch (final InvalidSettingsException e) { // NOSONAR
+            m_previewPanel.setDisabled("Spark context input connection required");
+        }
     }
 
     @Override

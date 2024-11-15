@@ -47,7 +47,6 @@ package org.knime.bigdata.spark.core.databricks;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -147,15 +146,6 @@ public class DatabricksSparkContextProvider implements SparkContextProvider<Data
 
         final URI uri = contextID.asURI();
         return String.format("%s on Databricks cluster", uri.getHost());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<SparkContext<DatabricksSparkContextConfig>> createDefaultSparkContextIfPossible() {
-        // currently, the Databricks connector never provides the default Spark context.
-        return Optional.empty();
     }
 
     @Override

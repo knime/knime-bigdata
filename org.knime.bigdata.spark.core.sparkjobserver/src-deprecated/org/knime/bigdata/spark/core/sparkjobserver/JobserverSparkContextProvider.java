@@ -93,22 +93,6 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
             uri.getPort());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<SparkContext<JobServerSparkContextConfig>> createDefaultSparkContextIfPossible() {
-        // this implementation currently always creates a context, because this
-        // is the only context provider that can provide the default Spark
-        // context.
-
-        final JobServerSparkContextConfig defaultConfig = new JobServerSparkContextConfig();
-        final SparkContext<JobServerSparkContextConfig> defaultSparkContext =
-            new JobserverSparkContext(defaultConfig.getSparkContextID());
-        defaultSparkContext.ensureConfigured(defaultConfig, true);
-        return Optional.of(defaultSparkContext);
-    }
-
     @Override
     public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
         throws InvalidSettingsException {

@@ -136,15 +136,6 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<SparkContext<LivySparkContextConfig>> createDefaultSparkContextIfPossible() {
-        // currently, the Livy connector never provides the default Spark context.
-        return Optional.empty();
-    }
-
     @Override
     public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
         throws InvalidSettingsException {
