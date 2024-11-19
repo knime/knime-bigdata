@@ -3,6 +3,7 @@
    <feature id="org.knime.features.bigdata.connectors" >
           <category name="knime-bigdata" />
    </feature>
+   <feature id="org.knime.features.bigdata.connectors.deprecated" />
    <feature id="org.knime.features.bigdata.commons" >
           <category name="knime-bigdata" />
    </feature>

@@ -41,9 +41,6 @@
       <Driver
             locator="org.knime.bigdata.database.hive.HiveDriverLocator">
       </Driver>
-      <Driver
-            locator="org.knime.bigdata.database.impala.ImpalaHiveDriverLocator">
-      </Driver>
    </extension>
    <extension
          point="org.knime.database.Agent">

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<!--************************** DB Extensions **************************-->
+
+   <extension
+         point="org.knime.database.Driver">
+      <Driver
+            locator="org.knime.bigdata.database.impala.ImpalaHiveDriverLocator">
+      </Driver>
+   </extension>
+   <!-- ********************************** DB Aggregation Functions ********************************** -->
+   
+    
+   
+   
+     <!-- Loader node implementation -->
+
+     <!-- Node migration rules -->
+   	
+</plugin>
