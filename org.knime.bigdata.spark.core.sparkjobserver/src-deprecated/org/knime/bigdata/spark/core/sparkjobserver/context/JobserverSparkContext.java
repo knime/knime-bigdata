@@ -41,7 +41,6 @@ import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.sparkjobserver.request.CreateContextRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.DestroyContextRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.GetContextsRequest;
@@ -279,10 +278,6 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
         LOGGER.debug("Checking if remote context exists. Name: " + config.getContextName());
         final JsonArray contexts = new GetContextsRequest(getID(), config, m_restClient).send();
 
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Available remote contexts: " + contexts);
-        }
-
         boolean toReturn = false;
 
         for (int i = 0; i < contexts.size(); i++) {
@@ -328,9 +323,6 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
 
     private boolean createRemoteSparkContext() throws KNIMESparkException {
         LOGGER.debug("Creating new remote Spark context. Name: " + getConfiguration().getContextName());
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Context settings: " + getConfiguration());
-        }
 
         return new CreateContextRequest(getID(), getConfiguration(), m_restClient).send();
     }

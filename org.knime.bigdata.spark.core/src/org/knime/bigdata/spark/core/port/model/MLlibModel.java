@@ -32,7 +32,6 @@ import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.model.LegacyModelHelper;
 import org.knime.bigdata.spark.core.model.MLlibModelHelper;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.util.NonClosableInputStream;
@@ -238,14 +237,7 @@ public class MLlibModel extends SparkModel {
     private static MLlibModel loadLegacySparkModel(final PortObjectZipInputStream in)
         throws IOException, MissingSparkModelHelperException, ClassNotFoundException, InvalidSettingsException {
 
-        final SparkVersion sparkVersion;
-        if (KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_2)
-            || KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_3)) {
-            sparkVersion = KNIMEConfigContainer.getSparkVersion();
-        } else {
-            sparkVersion = SparkVersion.V_1_2;
-        }
-
+        final SparkVersion sparkVersion = SparkVersion.V_1_2;
         final LegacyModelHelper legacySparkModelHelper =
             ModelHelperRegistry.getModelHelper(LegacyModelHelper.LEGACY_MODEL_NAME, sparkVersion);
 

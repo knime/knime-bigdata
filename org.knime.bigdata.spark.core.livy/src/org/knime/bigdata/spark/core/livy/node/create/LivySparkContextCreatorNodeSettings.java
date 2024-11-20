@@ -43,7 +43,6 @@ import org.knime.bigdata.spark.core.livy.context.LivySparkContextConnInfoConfig;
 import org.knime.bigdata.spark.core.livy.context.LivySparkContextFileSystemConfig;
 import org.knime.bigdata.spark.core.livy.node.create.ui.KeyDescriptor;
 import org.knime.bigdata.spark.core.livy.node.create.ui.SettingsModelKeyValue;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings;
@@ -164,7 +163,7 @@ public class LivySparkContextCreatorNodeSettings {
     private final SettingsModelString m_stagingAreaFolder = new SettingsModelString("stagingAreaFolder", "");
 
     private final SettingsModelBoolean m_overrideSparkSettings =
-        new SettingsModelBoolean("overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
+        new SettingsModelBoolean("overrideSparkSettings", false);
 
     private final SettingsModelKeyValue m_customSparkSettings;
 

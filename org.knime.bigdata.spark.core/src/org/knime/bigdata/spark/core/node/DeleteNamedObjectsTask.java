@@ -29,7 +29,6 @@ import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -53,12 +52,6 @@ public class DeleteNamedObjectsTask implements Runnable {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void run() {
-        final long startTime = System.currentTimeMillis();
-
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Deleting Spark data objects: " + m_toDelete);
-        }
-
         for (final Entry<SparkContextID, String[]> e : m_toDelete.entrySet()) {
             final SparkContextID contextID = e.getKey();
             try {
@@ -74,12 +67,6 @@ public class DeleteNamedObjectsTask implements Runnable {
                 LOGGER.debug("Exception while deleting named Spark data objects for context: " + contextID
                     + " Exception: " + ex.getMessage());
             }
-        }
-
-        if (KNIMEConfigContainer.verboseLogging()) {
-            final long endTime = System.currentTimeMillis();
-            final long durationTime = endTime - startTime;
-            LOGGER.debug("Time deleting " + m_toDelete.size() + " Spark data object(s): " + durationTime + " ms");
         }
     }
 }

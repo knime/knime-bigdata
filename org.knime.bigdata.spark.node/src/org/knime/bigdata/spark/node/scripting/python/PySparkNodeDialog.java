@@ -59,7 +59,6 @@ import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.scripting.python.util.DefaultPySparkHelper;
@@ -161,12 +160,7 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane {
 
     private void setSparkVersion(final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs == null || specs.length < 1 || specs[0] == null) {
-            m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
-            if (!PySparkHelperRegistry.getInstance().supportsVersion(m_sparkVersion)) {
-                throw new NotConfigurableException(
-                    String.format("PySpark is not supported for Spark version %s.", m_sparkVersion));
-            }
-
+            throw new NotConfigurableException("Spark input connection required");
         } else {
             m_sparkVersion = SparkContextUtil.getSparkVersion(((SparkContextProvider)specs[0]).getContextID());
         }

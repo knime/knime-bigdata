@@ -54,7 +54,6 @@ import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.SparkSaveMode;
 import org.knime.core.data.DataTableSpec;
@@ -341,8 +340,9 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
      * Get spark version from port specs.
      * @param specs spark port spec with version or null
      * @return spark version from spec or default context
+     * @throws NotConfigurableException
      */
-    protected SparkVersion getSparkVersion(final PortObjectSpec[] specs) {
+    protected SparkVersion getSparkVersion(final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs != null) {
             for (PortObjectSpec spec : specs) {
                 if (spec != null && spec instanceof SparkContextProvider) {
@@ -351,6 +351,6 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
             }
         }
 
-        return KNIMEConfigContainer.getSparkVersion();
+        throw new NotConfigurableException("Spark input connection required");
     }
 }

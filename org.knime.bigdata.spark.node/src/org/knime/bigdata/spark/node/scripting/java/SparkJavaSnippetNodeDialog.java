@@ -106,7 +106,6 @@ import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.scripting.java.util.SparkJSnippet;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
@@ -613,8 +612,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
         final DataTableSpec tableSpec;
         final SparkVersion lastSparkVersion = m_sparkVersion;
         if (specs == null || specs.length < 1 || specs[0] == null) {
-            tableSpec = new DataTableSpec();
-            m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
+            throw new NotConfigurableException("Spark input connection required");
         } else {
             m_sparkVersion = SparkContextUtil.getSparkVersion(((SparkContextProvider)specs[0]).getContextID());
 

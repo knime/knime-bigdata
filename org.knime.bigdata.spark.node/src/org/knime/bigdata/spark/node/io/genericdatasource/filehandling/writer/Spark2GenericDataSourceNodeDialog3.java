@@ -46,7 +46,6 @@ import javax.swing.border.Border;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.FlowVariableModel;
@@ -334,8 +333,9 @@ public class Spark2GenericDataSourceNodeDialog3<T extends Spark2GenericDataSourc
      * Get spark version from port specs.
      * @param specs spark port spec with version or null
      * @return spark version from spec or default context
+     * @throws NotConfigurableException
      */
-    protected SparkVersion getSparkVersion(final PortObjectSpec[] specs) {
+    protected SparkVersion getSparkVersion(final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs != null) {
             for (PortObjectSpec spec : specs) {
                 if (spec instanceof SparkContextProvider) {
@@ -344,7 +344,7 @@ public class Spark2GenericDataSourceNodeDialog3<T extends Spark2GenericDataSourc
             }
         }
 
-        return KNIMEConfigContainer.getSparkVersion();
+        throw new NotConfigurableException("Spark input connection required");
     }
 
     @Override

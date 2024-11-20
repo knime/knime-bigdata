@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.core.node.NodeLogger;
 
 import jakarta.ws.rs.client.Entity;
@@ -36,10 +35,6 @@ public class RestClient {
      */
     public RestClient(final JobServerSparkContextConfig contextConfig)
         throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException {
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Create RestClient");
-            LOGGER.debug("Config: " + contextConfig);
-        }
         client = new WsRsRestClient(contextConfig);
     }
 
@@ -50,11 +45,6 @@ public class RestClient {
      * @return server response
      */
     public synchronized Response get(final String aPath) {
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Rest GET");
-            LOGGER.debug("Path: " + aPath);
-        }
-
         return client.get(aPath);
     }
 
@@ -67,13 +57,6 @@ public class RestClient {
      * @return server response
      */
     public synchronized <T> Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity) {
-
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Rest POST");
-            LOGGER.debug("Path: " + aPath);
-            LOGGER.debug("Args: " + Arrays.toString(aArgs));
-            LOGGER.debug("Entity: " + aEntity);
-        }
         return client.post(aPath, aArgs, aEntity);
     }
 
@@ -84,10 +67,6 @@ public class RestClient {
      * @return server response
      */
     public synchronized Response delete(final String aPath) {
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Rest delete");
-            LOGGER.debug("Path: " + aPath);
-        }
         return client.delete(aPath);
     }
 }
