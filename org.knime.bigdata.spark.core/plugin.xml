@@ -25,12 +25,6 @@
 	<extension-point id="SparkContextProvider" name="SparkContextProvider"
 		schema="schema/SparkContextProvider.exsd" />
 	<extension
-		point="org.eclipse.core.runtime.preferences">
-		<initializer
-			class="org.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer">
-		</initializer>
-	</extension>
-	<extension
 		point="org.knime.core.PortType">
 		<portType
 			hidden="false"

@@ -53,8 +53,6 @@ public class CommonConfigContainer {
 
     private boolean m_hiveSupported = false;
 
-    private boolean m_sparkSupported = false;
-
     /**The placeholder for the workflow user in the JDBC impersonation parameter.*/
     public static final String JDBC_IMPERSONATION_PLACEHOLDER = "{1}";
 
@@ -241,13 +239,6 @@ public class CommonConfigContainer {
     }
 
     /**
-     * @return the sparkSupported
-     */
-    public boolean isSparkSupported() {
-        return m_sparkSupported;
-    }
-
-    /**
      * @noreference This method should be used by other plugins than the hdfs file handling plugin
      */
     public void hdfsSupported() {
@@ -261,10 +252,4 @@ public class CommonConfigContainer {
         m_hiveSupported = true;
     }
 
-    /**
-     * @noreference This method should be used by other plugins than the hdfs file handling plugin
-     */
-    public void sparkSupported() {
-        m_sparkSupported = true;
-    }
 }

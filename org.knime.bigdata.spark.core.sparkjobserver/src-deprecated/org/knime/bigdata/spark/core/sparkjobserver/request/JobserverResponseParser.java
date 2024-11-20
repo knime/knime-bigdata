@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.sparkjobserver.request.ParsedResponse.FailureReason;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.JsonUtil;
@@ -61,9 +60,6 @@ public class JobserverResponseParser {
      */
     public static ParsedResponse parseResponse(final int httpStatusCode,
         final String stringResponse) {
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Rest response code:" + httpStatusCode + " value:" + stringResponse);
-        }
         final JsonStructure jsonResponse = tryToParseAsJson(stringResponse);
 
         if (isDefinitelyFailure(httpStatusCode, jsonResponse)) {

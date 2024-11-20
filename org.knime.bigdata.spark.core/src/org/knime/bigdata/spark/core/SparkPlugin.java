@@ -26,7 +26,6 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
 import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.osgi.framework.BundleContext;
@@ -50,7 +49,6 @@ public class SparkPlugin extends AbstractUIPlugin {
      */
     public SparkPlugin() {
         plugin = this;
-        CommonConfigContainer.getInstance().sparkSupported();
     }
 
     /**

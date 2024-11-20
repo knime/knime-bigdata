@@ -35,7 +35,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.node.util.context.create.time.TimeSettings;
@@ -231,7 +230,7 @@ public class LocalSparkContextSettings {
         LocalSparkContextSettings.OnDisposeAction.DELETE_DATA.getActionCommand());
 
     private final SettingsModelBoolean m_overrideSparkSettings =
-        new SettingsModelBoolean("overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
+        new SettingsModelBoolean("overrideSparkSettings", false);
 
     private final SettingsModelString m_customSparkSettings =
         new SettingsModelString("customSparkSettings", DEFAULT_CUSTOM_SPARK_SETTINGS);

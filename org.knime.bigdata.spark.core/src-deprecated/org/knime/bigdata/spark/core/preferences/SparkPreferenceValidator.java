@@ -23,7 +23,6 @@ package org.knime.bigdata.spark.core.preferences;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,38 +33,6 @@ import java.util.Map;
  * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
  */
 public class SparkPreferenceValidator {
-
-    /**
-     * @param jobServerUrl Spark job server url
-     * @param withAuthentication <code>true</code> for authentication
-     * @param username login username
-     * @param password login password
-     * @param receiveTimeout Spark job server REST receive timeout
-     * @param jobCheckFrequency job check frequency
-     * @param sparkVersion Spark version
-     * @param contextName context name
-     * @param deleteSparkObjectsOnDispose <code>true</code> if objects should be deleted on dispose
-     * @param overrideSettings <code>true</code> for custom Spark settings
-     * @param customSettings custom Spark settings
-     * @return null or error messages
-     */
-    public static String validate(final String jobServerUrl, final boolean withAuthentication, final String username,
-        final String password, final Duration receiveTimeout, final int jobCheckFrequency, final String sparkVersion,
-        final String contextName, final boolean deleteSparkObjectsOnDispose, final boolean overrideSettings,
-        final String customSettings) {
-
-        List<String> errors = new ArrayList<>();
-
-        validateRESTEndpointURL(jobServerUrl, errors, "jobserver");
-        validateSparkContextName(contextName, errors);
-        validateReceiveTimeout(receiveTimeout, errors);
-        validateCustomSparkSettings(overrideSettings, customSettings, errors);
-        if (withAuthentication) {
-            validateUsernameAndPassword(username, password, errors);
-        }
-
-        return mergeErrors(errors);
-    }
 
     public static void validateUsernameAndPassword(final String username,
         final String password, final List<String> errors) {
