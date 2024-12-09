@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Scripting
 Bundle-SymbolicName: org.knime.bigdata.scripting;singleton:=true
-Bundle-Version: 5.4.0.qualifier
+Bundle-Version: 5.5.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Require-Bundle: org.knime.base;bundle-version="[5.4.0,6.0.0)",
   org.knime.workbench.repository;bundle-version="[5.4.0,6.0.0)",
