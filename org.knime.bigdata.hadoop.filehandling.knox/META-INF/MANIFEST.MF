@@ -6,12 +6,12 @@ Bundle-Version: 5.5.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.knime.bigdata.hadoop.filehandling.knox.KnoxHadoopFilehandlingPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Require-Bundle: org.knime.workbench.repository;bundle-version="[5.4.0,6.0.0)",
- org.knime.core;bundle-version="[5.4.0,6.0.0)",
- org.knime.filehandling.core;bundle-version="[5.4.0,6.0.0)",
- org.knime.bigdata.filehandling.knox;bundle-version="[5.4.0,6.0.0)",
+Require-Bundle: org.knime.workbench.repository;bundle-version="[5.5.0,6.0.0)",
+ org.knime.core;bundle-version="[5.5.0,6.0.0)",
+ org.knime.filehandling.core;bundle-version="[5.5.0,6.0.0)",
+ org.knime.bigdata.filehandling.knox;bundle-version="[5.5.0,6.0.0)",
  org.eclipse.ui.workbench;bundle-version="[3.131.0,4.0.0)",
- org.knime.kerberos;bundle-version="[5.4.0,6.0.0)",
+ org.knime.kerberos;bundle-version="[5.5.0,6.0.0)",
  org.apache.hadoop.client;bundle-version="[3.4.0,4.0.0)",
  org.apache.commons.lang3;bundle-version="[3.3.1,4.0.0)",
  jakarta.ws.rs-api;bundle-version="[3.1.0,4.0.0)",
