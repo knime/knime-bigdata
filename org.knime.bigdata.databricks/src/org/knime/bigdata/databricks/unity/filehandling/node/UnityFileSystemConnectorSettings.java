@@ -69,7 +69,7 @@ public class UnityFileSystemConnectorSettings implements DefaultNodeSettings {
     }
 
     @Widget(title = "Working directory", //
-        description = "Specifies the <i>working directory</i> using the path syntax explained above."
+        description = "Specifies the <i>working directory</i> of the resulting file system connection."
             + " The working directory must be specified as an absolute path."
             + " A working directory allows downstream nodes to access files/folders using <i>relative</i> paths,"
             + " i.e. paths that do not have a leading slash."
