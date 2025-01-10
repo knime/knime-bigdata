@@ -32,12 +32,14 @@ import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.avro.Avro2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.csv.CSV2SparkNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.delta.Delta2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.json.Json2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.orc.Orc2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.parquet.Parquet2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.reader.text.Text2SparkNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.avro.Spark2AvroNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.csv.Spark2CSVNodeFactory3;
+import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.delta.Spark2DeltaNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.json.Spark2JsonNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.orc.Spark2OrcNodeFactory3;
 import org.knime.bigdata.spark.node.io.genericdatasource.filehandling.writer.parquet.Spark2ParquetNodeFactory3;
@@ -159,6 +161,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             // generic writer nodes
             new Avro2SparkNodeFactory3(),
             new CSV2SparkNodeFactory3(),
+            new Delta2SparkNodeFactory3(),
             new Json2SparkNodeFactory3(),
             new Orc2SparkNodeFactory3(),
             new Parquet2SparkNodeFactory3(),
@@ -167,6 +170,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             // generic writer nodes
             new Spark2AvroNodeFactory3(),
             new Spark2CSVNodeFactory3(),
+            new Spark2DeltaNodeFactory3(),
             new Spark2JsonNodeFactory3(),
             new Spark2OrcNodeFactory3(),
             new Spark2ParquetNodeFactory3(),
