@@ -6,7 +6,7 @@
       <KnimeToPythonPortObjectConverter
             JavaConverterClass="org.knime.bigdata.databricks.python.port.DatabricksWorkspacePythonPortObjectConverter"
             PythonConverterClass="DatabricksWorkspacePortConverter"
-            PythonModule="src/main/python/ports.py">
+            PythonModule="src/main/python/knime/ports/databricks/ports.py">
       </KnimeToPythonPortObjectConverter>
    </extension>
 
