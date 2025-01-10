@@ -3,11 +3,15 @@
 <plugin>
    <extension
          point="org.knime.python3.types.PythonPortObjectConverter">
-      <KnimeToPythonPortObjectConverter
-            JavaConverterClass="org.knime.bigdata.databricks.python.port.DatabricksWorkspacePythonPortObjectConverter"
-            PythonConverterClass="DatabricksWorkspacePortConverter"
-            PythonModule="src/main/python/ports.py">
-      </KnimeToPythonPortObjectConverter>
+      <Module
+            modulePath="src/main/python/"
+            moduleName="knime.ports.databricks">
+          <KnimeToPythonPortObjectConverter
+                JavaConverterClass="org.knime.bigdata.databricks.python.port.DatabricksWorkspacePythonPortObjectConverter"
+                PythonConverterClass="DatabricksWorkspacePortConverter"
+                >
+          </KnimeToPythonPortObjectConverter>
+      </Module>
    </extension>
 
 </plugin>
