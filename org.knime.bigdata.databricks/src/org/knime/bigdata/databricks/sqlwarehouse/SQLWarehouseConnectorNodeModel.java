@@ -147,6 +147,11 @@ public class SQLWarehouseConnectorNodeModel extends WebUINodeModel<SQLWarehouseC
         throws InvalidSettingsException {
 
         if (inSpecs[0] != null) {
+            if (!(inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec)) {
+                throw new InvalidSettingsException(
+                    "Incompatible input connection. Connect the Databricks Workspace Connector output port.");
+            }
+
             final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
             if (spec.isPresent()) {
                 try {

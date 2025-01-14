@@ -45,9 +45,9 @@
  */
 package org.knime.bigdata.databricks.sqlwarehouse;
 
-import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
 import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeFactory;
+import org.knime.credentials.base.CredentialPortObject;
 import org.knime.database.port.DBSessionPortObject;
 
 /**
@@ -71,7 +71,7 @@ public class SQLWarehouseConnectorNodeFactory extends WebUINodeFactory<SQLWareho
         .modelSettingsClass(SQLWarehouseConnectorSettings.class) //
         .nodeType(NodeType.Source)//
         .addInputPort("Databricks Workspace Connection", //
-            DatabricksWorkspacePortObject.TYPE, //
+            CredentialPortObject.TYPE, //
             "Databricks Workspace connection") //
         .addOutputPort("DB", DBSessionPortObject.TYPE, "Databricks DB connection") //
         .sinceVersion(5, 4, 0)//
