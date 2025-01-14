@@ -102,7 +102,8 @@ class DbfsConnectorNodeModel extends NodeModel {
         final FileSystemPortObjectSpec fsPortSpec;
         if (inSpecs != null && inSpecs.length > 0 && inSpecs[0] != null) {
             if (!(inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec)) {
-                throw new InvalidSettingsException("Invalid input port, Databricks Workspace Connector required.");
+                throw new InvalidSettingsException(
+                    "Incompatible input connection. Connect the Databricks Workspace Connector output port.");
             }
 
             final DatabricksWorkspacePortObjectSpec spec = (DatabricksWorkspacePortObjectSpec)inSpecs[0];
