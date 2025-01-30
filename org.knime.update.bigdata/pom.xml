@@ -12,6 +12,6 @@
   <name>org.knime.update.bigdata</name>
 
   <properties>
-    <revision>5.4.0</revision>
+    <revision>5.4.1</revision>
   </properties>
 </project>
