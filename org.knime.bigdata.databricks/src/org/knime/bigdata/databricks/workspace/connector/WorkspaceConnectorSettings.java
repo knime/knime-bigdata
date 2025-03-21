@@ -78,6 +78,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Predicate;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.PredicateProvider;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Reference;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.ValueReference;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.NumberInputWidgetValidation.MinValidation.IsNonNegativeValidation;
 import org.knime.credentials.base.CredentialPortObject;
 import org.knime.credentials.base.CredentialPortObjectSpec;
 import org.knime.credentials.base.CredentialType;
@@ -194,7 +195,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         description = "Timeout in seconds to establish a connection, or 0 for an infinite timeout.  "
             + " Used by this and downstream nodes connecting to Databricks.", //
         advanced = true)
-    @NumberInputWidget(min = 0)
+    @NumberInputWidget(validation = IsNonNegativeValidation.class)
     @Layout(ConnectionTimeoutsSection.class)
     int m_connectionTimeout = 30;
 
@@ -202,7 +203,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
         description = "Timeout in seconds to read data from an established connection,"
             + " or 0 for an infinite timeout. Used by this and downstream nodes connecting to Databricks.", //
         advanced = true)
-    @NumberInputWidget(min = 0)
+    @NumberInputWidget(validation = IsNonNegativeValidation.class)
     @Layout(ConnectionTimeoutsSection.class)
     int m_readTimeout = 30;
 
