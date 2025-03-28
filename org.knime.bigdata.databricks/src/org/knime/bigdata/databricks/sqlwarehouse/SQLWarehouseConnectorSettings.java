@@ -47,7 +47,7 @@ package org.knime.bigdata.databricks.sqlwarehouse;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.databricks.rest.DatabricksRESTClient;
@@ -60,11 +60,10 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.AsyncChoicesProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.ChoicesProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.ChoicesWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.IdAndText;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.ChoicesProvider;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.StringChoice;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.StringChoicesProvider;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.handler.WidgetHandlerException;
 
 /**
@@ -88,7 +87,7 @@ public class SQLWarehouseConnectorSettings implements DefaultNodeSettings {
         title = "Warehouse", //
         description = "Name of the SQL Warehouse to connect." //
     )
-    @ChoicesWidget(choices = WarehouseChoiceProvider.class)
+    @ChoicesProvider(WarehouseChoiceProvider.class)
     @Layout(MainSection.class)
     String m_warehouseId = "";
 
@@ -98,25 +97,27 @@ public class SQLWarehouseConnectorSettings implements DefaultNodeSettings {
         }
     }
 
-    private static final class WarehouseChoiceProvider implements ChoicesProvider, AsyncChoicesProvider {
+    private static final class WarehouseChoiceProvider implements StringChoicesProvider {
 
         @Override
-        public IdAndText[] choicesWithIdAndText(final DefaultNodeSettingsContext context) {
+        public void init(final StateProviderInitializer initializer) {
+            initializer.computeAfterOpenDialog();
+        }
+        
+        @Override
+        public List<StringChoice> computeState(final DefaultNodeSettingsContext context) {
             try {
                 final SQLWarehouseInfoList warehouseList = DatabricksRESTClient //
                     .fromSingleWorkspaceInputPort(SQLWarehouseAPI.class, context.getPortObjectSpecs()) //
                     .listWarehouses();
                 return Arrays.stream(warehouseList.warehouses) //
                     .sorted(COMPARATOR) //
-                    .map(i -> new IdAndText(i.id, i.name)) //
-                    .collect(Collectors.toList())
-                    .toArray(new IdAndText[0]);
+                    .map(i -> new StringChoice(i.id, i.name)) //
+                    .toList();
             } catch (final Exception e) { // NOSONAR catch all exceptions here
                 LOGGER.info("Unable to fetch Warehouse list.", e);
                 throw new WidgetHandlerException(e.getMessage());
             }
         }
-
     }
-
 }
