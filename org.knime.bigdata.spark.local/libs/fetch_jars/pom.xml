@@ -23,7 +23,7 @@
         <commons.compress.version>1.26.2</commons.compress.version>
         <gson.version>2.11.0</gson.version>
         <ivy.version>2.5.2</ivy.version>
-        <parquet.version>1.14.1</parquet.version>
+        <parquet.version>1.15.1</parquet.version>
         <spark.version>3.5.3</spark.version>
         <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
