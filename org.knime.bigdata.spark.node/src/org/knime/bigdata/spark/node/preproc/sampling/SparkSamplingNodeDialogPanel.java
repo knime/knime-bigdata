@@ -64,7 +64,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
-import org.knime.base.node.preproc.sample.SamplingNodeDialogPanel;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataValue;
@@ -79,7 +78,7 @@ import org.knime.core.node.util.ColumnSelectionComboxBox;
  * sampling method is absolute (how many rows) or relative (what percentage) and
  * also if to choose the rows random or take from top.
  *
- * @author Tobias Koetter, KNIME.com, copied from {@link SamplingNodeDialogPanel}
+ * @author Tobias Koetter, KNIME.com
  */
 public class SparkSamplingNodeDialogPanel extends JPanel {
     private static final long serialVersionUID = 1L;
