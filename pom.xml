@@ -23,6 +23,7 @@
 		<changelog.baseref>${changelog.baseref.bigdata}</changelog.baseref>
 		<ARTIFACTORY_LOGIN>${ARTIFACTORY_LOGIN}</ARTIFACTORY_LOGIN>
         <ARTIFACTORY_PASSWORD>${ARTIFACTORY_PASSWORD}</ARTIFACTORY_PASSWORD>
+		<spark.repo>https://${ARTIFACTORY_LOGIN}:${ARTIFACTORY_PASSWORD}@artifactory.knime.com:443/artifactory/generic-downloads/pyspark</spark.repo>
 	</properties>
 
 	<modules>
