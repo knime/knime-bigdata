@@ -1,5 +1,6 @@
 #!groovy
-def BN = (BRANCH_NAME == 'master' || BRANCH_NAME.startsWith('releases/')) ? BRANCH_NAME : 'releases/2025-07'
+// def BN = (BRANCH_NAME == 'master' || BRANCH_NAME.startsWith('releases/')) ? BRANCH_NAME : 'releases/2025-07'
+def BN = 'todo/fix-artifactory-auth'
 
 library "knime-pipeline@$BN"
 
