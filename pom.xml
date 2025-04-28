@@ -20,10 +20,7 @@
 		<feature-branch-extension.appendArtifactoryProperties>false</feature-branch-extension.appendArtifactoryProperties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<knime.sonar-env>Sonarcloud</knime.sonar-env>
-		<changelog.baseref>${changelog.baseref.bigdata}</changelog.baseref>
-		<ARTIFACTORY_LOGIN>${ARTIFACTORY_LOGIN}</ARTIFACTORY_LOGIN>
-        <ARTIFACTORY_PASSWORD>${ARTIFACTORY_PASSWORD}</ARTIFACTORY_PASSWORD>
-		<spark.repo>https://${ARTIFACTORY_LOGIN}:${ARTIFACTORY_PASSWORD}@artifactory.knime.com:443/artifactory/generic-downloads/pyspark</spark.repo>
+		<changelog.baseref>${changelog.baseref.bigdata}</changelog.baseref>		
 	</properties>
 
 	<modules>
