@@ -28,6 +28,9 @@
         <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
+        <ARTIFACTORY_LOGIN>${ARTIFACTORY_LOGIN}</ARTIFACTORY_LOGIN>
+        <ARTIFACTORY_PASSWORD>${ARTIFACTORY_PASSWORD}</ARTIFACTORY_PASSWORD>
+        <spark.repo>https://${ARTIFACTORY_LOGIN}:${ARTIFACTORY_PASSWORD}@artifactory.knime.com:443/artifactory/generic-downloads/pyspark</spark.repo>
     </properties>
 
 
@@ -195,7 +198,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target name="download">
-                                <get src="https://${env.ARTIFACTORY_LOGIN}:${env.ARTIFACTORY_PASSWORD}@artifactory.knime.com:443/artifactory/generic-downloads/pyspark/pyspark-${spark.version}.tar.gz" dest="target/tmp" />
+                                <get src="${spark.repo}/pyspark-${spark.version}.tar.gz" dest="target/tmp" />
                                 <!-- To not hammer the servers of apache, we mirror pyspark to our artifactory, this is the download url where to find the upstream version.-->
                                 <!-- https://archive.apache.org/dist/spark/spark-${spark.version}/pyspark-${spark.version}.tar.gz" -->
                                 <echo message="unpack zips" />
