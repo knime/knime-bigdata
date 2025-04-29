@@ -28,6 +28,9 @@
         <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
+        <artifactory.login>${env.ARTIFACTORY_LOGIN}</artifactory.login>
+        <artifactory.password>${env.ARTIFACTORY_PASSWORD}</artifactory.password>
+        <spark.repo>https://${artifactory.login}:${artifactory.password}@artifactory.knime.com:443/artifactory/generic-downloads/pyspark</spark.repo>
     </properties>
 
 
@@ -186,6 +189,28 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>download-pyspark</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <!-- To not hammer the servers of apache, we mirror pyspark to our artifactory, this is the download url where to find the upstream version.-->
+                            <!-- https://archive.apache.org/dist/spark/spark-${spark.version}/pyspark-${spark.version}.tar.gz" -->
+                            <url>${spark.repo}/pyspark-${spark.version}.tar.gz</url>
+                            <unpack>false</unpack>
+                            <outputDirectory>${project.build.directory}/tmp</outputDirectory>
+                            <checkSignature>false</checkSignature>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.0.0</version>
@@ -195,9 +220,6 @@
                         <phase>package</phase>
                         <configuration>
                             <target name="download">
-                                <get src="https://artifactory.knime.com:443/artifactory/generic-downloads/pyspark/pyspark-${spark.version}.tar.gz" dest="target/tmp" />
-                                <!-- To not hammer the servers of apache, we mirror pyspark to our artifactory, this is the download url where to find the upstream version.-->
-                                <!-- https://archive.apache.org/dist/spark/spark-${spark.version}/pyspark-${spark.version}.tar.gz" -->
                                 <echo message="unpack zips" />
                                 <untar src="target/tmp/pyspark-${spark.version}.tar.gz" dest="../" compression="gzip">
                                     <patternset>
