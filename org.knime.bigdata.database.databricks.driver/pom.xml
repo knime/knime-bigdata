@@ -11,7 +11,7 @@
 
     <properties>
         <parent.project.basedir>${project.basedir}/..</parent.project.basedir>
-        <revision>5.4.0</revision>
+        <revision>5.4.4</revision>
     </properties>
 
     <build>
