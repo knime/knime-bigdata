@@ -117,4 +117,16 @@ public class KNIMEFileSystemClient implements FileSystemClient {
     private FSPath getPath(final String filePath) {
         return m_rootPath.getFileSystem().getPath(filePath);
     }
+
+    @Override
+    public boolean delete(final String path) throws IOException {
+        try {
+            Files.delete(getPath(path));
+        } catch (final FileNotFoundException e) { // NOSONAR
+            return false;
+        }
+
+        return true;
+    }
+
 }

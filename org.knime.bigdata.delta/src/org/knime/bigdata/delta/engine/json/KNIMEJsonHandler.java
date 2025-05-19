@@ -49,7 +49,6 @@ import io.delta.kernel.data.Row;
 import io.delta.kernel.defaults.internal.data.DefaultJsonRow;
 import io.delta.kernel.defaults.internal.data.DefaultRowBasedColumnarBatch;
 import io.delta.kernel.defaults.internal.json.JsonUtils;
-import io.delta.kernel.defaults.internal.types.DataTypeParser;
 import io.delta.kernel.engine.JsonHandler;
 import io.delta.kernel.exceptions.KernelException;
 import io.delta.kernel.expressions.Predicate;
@@ -99,17 +98,6 @@ public class KNIMEJsonHandler implements JsonHandler {
             }
         }
         return new DefaultRowBasedColumnarBatch(outputSchema, rows);
-    }
-
-    @Override
-    public StructType deserializeStructType(final String structTypeJson) {
-        try {
-            // We don't expect Java BigDecimal anywhere in a Delta schema so we use the default
-            // JSON reader
-            return DataTypeParser.parseSchema(defaultObjectReader.readTree(structTypeJson));
-        } catch (JsonProcessingException ex) {
-            throw new RuntimeException(format("Could not parse JSON: %s", structTypeJson), ex);
-        }
     }
 
     @Override
