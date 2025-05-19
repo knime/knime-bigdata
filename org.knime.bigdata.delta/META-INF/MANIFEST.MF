@@ -24,9 +24,9 @@ Require-Bundle: org.knime.core;bundle-version="[5.4.0,6.0.0)",
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: knime-delta.jar,
- lib/delta-kernel-api-3.2.0.jar,
- lib/delta-kernel-defaults-3.2.0.jar,
- lib/delta-storage-3.2.0.jar,
+ lib/delta-kernel-api-3.3.1.jar,
+ lib/delta-kernel-defaults-3.3.1.jar,
+ lib/delta-storage-3.3.1.jar,
  lib/RoaringBitmap-0.9.25.jar,
  lib/shims-0.9.25.jar
 Automatic-Module-Name: org.knime.bigdata.delta

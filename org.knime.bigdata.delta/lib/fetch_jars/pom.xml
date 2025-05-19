@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.knime.bigdata.delta.sharing</groupId>
 	<artifactId>databricks-fetch-jars</artifactId>
-	<version>3.2.0</version>
+	<version>3.3.1</version>
 	<packaging>pom</packaging>
 
 	<name>Jar fetcher for Delta Kernel</name>
@@ -41,14 +41,42 @@
         <dependency>
           <groupId>io.delta</groupId>
           <artifactId>delta-kernel-api</artifactId>
-          <version>3.2.0</version>
+          <version>${project.version}</version>
+		  <exclusions>
+			<exclusion>
+				<groupId>org.slf4j</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+		  </exclusions>
         </dependency>
         
         <!-- Optional dependency -->
         <dependency>
           <groupId>io.delta</groupId>
           <artifactId>delta-kernel-defaults</artifactId>
-          <version>3.2.0</version>
+          <version>${project.version}</version>
+		  <exclusions>
+			<exclusion>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>org.apache.parquet</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+		  </exclusions>
         </dependency>
 	</dependencies>
 
