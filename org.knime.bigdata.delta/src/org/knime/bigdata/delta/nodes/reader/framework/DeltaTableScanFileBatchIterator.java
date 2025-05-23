@@ -44,38 +44,63 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2024-09-18 (Tobias): created
+ *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.util;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import java.util.Optional;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.NoSuchElementException;
 
-import org.knime.core.webui.node.dialog.defaultdialog.setting.filechooser.FileChooser;
-import org.knime.filehandling.core.connections.FSConnection;
-import org.knime.filehandling.core.defaultnodesettings.filechooser.AbstractFileChooserPathAccessor;
-import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.ReadPathAccessor;
-import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
-import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
+import io.delta.kernel.data.FilteredColumnarBatch;
+import io.delta.kernel.internal.util.Utils;
+import io.delta.kernel.utils.CloseableIterator;
 
 /**
- * Copied from org.knime.base.node.io.filehandling.webui
+ * Iterator that combines the batch iterators, return by scan file iterator, into a new iterator.
+ *
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@SuppressWarnings("restriction")
-public final class FileChooserPathAccessor extends AbstractFileChooserPathAccessor {
+public class DeltaTableScanFileBatchIterator implements Closeable {
 
-    /**
-     * Creates a new FileChooserAccessor for the provided location.</br>
-     * The settings are not validated in this constructor but instead if
-     * {@link ReadPathAccessor#getPaths(java.util.function.Consumer)} is called.
-     *
-     * @param fileChooser provided by the user
-     * @param portObjectConnection an optional connection of a connected {@link FileSystemPortObjectSpec}
-     */
-    public FileChooserPathAccessor(final FileChooser fileChooser, final Optional<FSConnection> portObjectConnection) { //NOSONAR
-        super(new FileChooserPathAccessorSettings(fileChooser.getFSLocation(),
-            new FilterSettings(FilterMode.FILE, false,
-                // FilterOptionsSettings not used at the moment with filter mode FILE.
-                null, false)),
-            portObjectConnection);
+    private final DeltaTableScanFileIterator m_scanFileIterator;
+
+    private CloseableIterator<FilteredColumnarBatch> m_currentBatchIterator;
+
+    DeltaTableScanFileBatchIterator(final DeltaTableScanFileIterator scanFileIterator) {
+        m_scanFileIterator = scanFileIterator;
     }
+
+    boolean hasNext() throws IOException {
+        if (m_currentBatchIterator != null && m_currentBatchIterator.hasNext()) {
+            return true;
+        }
+
+        // close current iterator
+        Utils.closeCloseables(m_currentBatchIterator);
+        m_currentBatchIterator = null;
+
+        // load next iterator
+        if (m_scanFileIterator.hasNext()) {
+            m_currentBatchIterator = m_scanFileIterator.next();
+            return m_currentBatchIterator.hasNext();
+        }
+
+        // no batches left
+        return false;
+    }
+
+    FilteredColumnarBatch next() {
+        if (m_currentBatchIterator != null) {
+            return m_currentBatchIterator.next();
+        } else {
+            throw new NoSuchElementException();
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        Utils.closeCloseables(m_currentBatchIterator);
+    }
+
 }

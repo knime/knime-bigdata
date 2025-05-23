@@ -46,40 +46,72 @@
  * History
  *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.nodes.reader;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import java.io.IOException;
+import java.util.OptionalLong;
+
+import org.knime.filehandling.core.node.table.reader.randomaccess.RandomAccessible;
+import org.knime.filehandling.core.node.table.reader.read.Read;
+
+import io.delta.kernel.internal.util.Utils;
 
 /**
- * Delta Table Reader node model.
+ * {@link Read} implementation that consumes a {@link DeltaTableRowIterator}.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+public final class DeltaTableRead implements Read<DeltaTableValue> {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
-    }
+    private final DeltaTableRandomAccessibleRow m_randomAccessibleRow;
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    private final DeltaTableRowIterator m_rowIterator;
+
+    private long m_rowsRead;
+
+    /**
+     * Default constructor.
+     *
+     * @param rowIterator iterator to consume
+     * @param columns number of columns
+     */
+    DeltaTableRead(final DeltaTableRowIterator rowIterator, final int columns) {
+        m_rowIterator = rowIterator;
+        m_randomAccessibleRow = new DeltaTableRandomAccessibleRow(columns);
+        m_rowsRead = 0;
     }
 
     @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    public RandomAccessible<DeltaTableValue> next() throws IOException {
+        if (m_rowIterator.hasNext()) {
+            final var row = m_rowIterator.next();
+            m_randomAccessibleRow.setRow(row);
+            return m_randomAccessibleRow;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public OptionalLong getMaxProgress() {
+        // TODO
+        return OptionalLong.empty();
+    }
+
+    @Override
+    public long getProgress() {
+        return m_rowsRead;
+    }
+
+    @Override
+    public boolean needsDecoration() {
+        return false;
+    }
+
+    @Override
+    public void close() throws IOException {
+        Utils.closeCloseables(m_rowIterator);
+        // TODO: close filesystem
     }
 
 }

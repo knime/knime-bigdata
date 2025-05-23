@@ -44,42 +44,56 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   May 8, 2024 (marcbux): created
  */
 package org.knime.bigdata.delta.nodes.reader;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.base.node.io.filehandling.webui.reader.CommonReaderTransformationSettings;
+import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.AdvancedSettings.FailOnUnsupportedColumnTypesRef;
+import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.AdvancedSettings.MaximumNumberOfRowsRef;
+import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.AdvancedSettings.SkipFirstDataRowsRef;
+import org.knime.core.webui.node.dialog.defaultdialog.layout.WidgetGroup.Modification;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.ValueProvider;
+import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
 
 /**
- * Delta Table Reader node model.
+ * Transformation settings of the delta table reader node.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+@SuppressWarnings("restriction")
+@Modification(DeltaTableReaderTransformationSettingsStateProviders.TransformationSettingsWidgetModification.class)
+final class DeltaTableReaderTransformationSettings
+    extends CommonReaderTransformationSettings<DeltaTableReaderTransformationSettings.ConfigIdSettings, String> {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    DeltaTableReaderTransformationSettings() {
+        super(new ConfigIdSettings());
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
-    }
+    static final class ConfigIdSettings
+        extends CommonReaderTransformationSettings.ConfigIdSettings<DeltaTableReaderNodeSettings> {
 
-    @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+        @ValueProvider(MaximumNumberOfRowsRef.class)
+        long m_maxRows;
+
+        @ValueProvider(SkipFirstDataRowsRef.class)
+        long m_skipFirstDataRows;
+
+        @ValueProvider(FailOnUnsupportedColumnTypesRef.class)
+        boolean m_failOnUnsupportedColumnTypes;
+
+        @Override
+        protected void applyToConfig(final DefaultTableReadConfig<DeltaTableReaderNodeSettings> config) {
+            config.setColumnHeaderIdx(-1);
+            config.setRowIDIdx(-1);
+            config.setSkipRows(m_skipFirstDataRows > 0);
+            config.setNumRowsToSkip(m_skipFirstDataRows);
+            config.setLimitRows(m_maxRows > 0);
+            config.setMaxRows(m_maxRows);
+
+            final var readerConfig = config.getReaderSpecificConfig();
+            readerConfig.setFailOnUnsupportedColumnTypes(m_failOnUnsupportedColumnTypes);
+        }
     }
 
 }

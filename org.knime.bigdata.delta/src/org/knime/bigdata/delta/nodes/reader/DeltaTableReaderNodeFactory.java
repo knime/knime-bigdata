@@ -44,7 +44,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2024-09-17 (Tobias): created
+ *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
 package org.knime.bigdata.delta.nodes.reader;
 
@@ -52,57 +52,73 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.xmlbeans.XmlException;
-import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.ConfigurableNodeFactory;
+import org.knime.bigdata.delta.nodes.reader.framework.DeltaTableReader;
+import org.knime.bigdata.delta.nodes.reader.framework.DeltaTableValue;
+import org.knime.bigdata.delta.nodes.reader.mapper.DeltaTableReadAdapterFactory;
+import org.knime.core.data.DataType;
 import org.knime.core.node.NodeDescription;
 import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeView;
 import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.url.URLConfiguration;
 import org.knime.core.webui.node.dialog.NodeDialog;
 import org.knime.core.webui.node.dialog.NodeDialogFactory;
 import org.knime.core.webui.node.dialog.NodeDialogManager;
 import org.knime.core.webui.node.dialog.SettingsType;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
-import org.knime.core.webui.node.impl.PortDescription;
+import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeFactory;
+import org.knime.filehandling.core.connections.FSLocationUtil;
+import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
+import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
+import org.knime.filehandling.core.node.table.reader.AbstractTableReaderNodeFactory;
+import org.knime.filehandling.core.node.table.reader.MultiTableReadFactory;
+import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
+import org.knime.filehandling.core.node.table.reader.TableReader;
+import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
+import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
+import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.filehandling.core.node.table.reader.preview.dialog.AbstractTableReaderNodeDialog;
+import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.xml.sax.SAXException;
 
 /**
+ * Factory for the Delta Table Reader node.
  *
- * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@SuppressWarnings("restriction")
-public class DeltaTableReaderNodeFactory extends ConfigurableNodeFactory<DeltaTableReaderNodeModel>
+@SuppressWarnings("restriction") // New Node UI is not yet API
+public final class DeltaTableReaderNodeFactory
+    extends AbstractTableReaderNodeFactory<DeltaTableReaderNodeSettings, DataType, DeltaTableValue>
     implements NodeDialogFactory {
 
-    /** The file system ports group id. */
-    protected static final String FS_CONNECT_GRP_ID = "File System Connection";
-
-    @Override
-    protected Optional<PortsConfigurationBuilder> createPortsConfigBuilder() { // only to make this visible to testing
-        PortsConfigurationBuilder b = new PortsConfigurationBuilder();
-        b.addOptionalInputPortGroup(FS_CONNECT_GRP_ID, FileSystemPortObject.TYPE);
-        b.addFixedOutputPortGroup("Delta table", BufferedDataTable.TYPE);
-        return Optional.of(b);
-    }
-
+    // TODO: description
     private static final String FULL_DESCRIPTION = """
-            This node reads files that have been written using the Table Writer node (which uses an internal format).
-            It retains all meta information such as domain, properties, colors, size.
-            """;
+            <p>Reader for Delta Tables.</p>
+            <p>
+            </p>""";
 
-    // TODO consider de-duplicating methods below
+    private static final String INPUT_PORT_GROUP = "File System Connection";
+
+    private static final String OUTPUT_PORT_GROUP = "Output Table";
+
+    private static final WebUINodeConfiguration CONFIG = WebUINodeConfiguration.builder()//
+        .name("Delta Table Reader (Labs)")//
+        .icon("./deltaread.png") //
+        .shortDescription("Read a Delta Table")//
+        .fullDescription(FULL_DESCRIPTION)//
+        .modelSettingsClass(DeltaTableReaderNodeSettings.class)//
+        .nodeType(NodeType.Source)//
+        .addInputPort(INPUT_PORT_GROUP, FileSystemPortObject.TYPE, "File system", true)//
+        .addOutputTable(OUTPUT_PORT_GROUP, "Delta Table") //
+        .sinceVersion(5, 5, 0).build();
+
     @Override
     protected NodeDescription createNodeDescription() throws SAXException, IOException, XmlException {
-        return WebUINodeFactory.createNodeDescription("Delta Table Reader (Labs)", "deltaread.png",
-            new PortDescription[]{
-                new PortDescription(FS_CONNECT_GRP_ID, FileSystemPortObject.TYPE, "The file system connection.", true)},
-            new PortDescription[]{
-                new PortDescription("Delta Table", BufferedDataTable.TYPE,
-                    "The table contained in the selected Delta table.")},
-            "Reads Delta tables from a Delta Share.", FULL_DESCRIPTION, DeltaTableReaderNodeSettings.class, null,
-            null, NodeType.Source, new String[]{"Delta", "Sharing", "Input", "Read"});
+        return WebUINodeFactory.createNodeDescription(CONFIG);
     }
 
     @Override
@@ -111,28 +127,75 @@ public class DeltaTableReaderNodeFactory extends ConfigurableNodeFactory<DeltaTa
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
-        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
+    protected TableReader<DeltaTableReaderNodeSettings, DataType, DeltaTableValue> createReader() {
+        return new DeltaTableReader(false);
     }
 
     @Override
-    protected DeltaTableReaderNodeModel createNodeModel(final NodeCreationConfiguration creationConfig) {
-        return new DeltaTableReaderNodeModel(creationConfig.getPortConfig().get());
-    }
-
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
-
-    @Override
-    public NodeView<DeltaTableReaderNodeModel> createNodeView(final int viewIndex,
-        final DeltaTableReaderNodeModel nodeModel) {
+    protected AbstractTableReaderNodeDialog<FSPath, DeltaTableReaderNodeSettings, DataType> createNodeDialogPane(
+        final NodeCreationConfiguration creationConfig,
+        final MultiTableReadFactory<FSPath, DeltaTableReaderNodeSettings, DataType> readFactory,
+        final ProductionPathProvider<DataType> defaultProductionPathFn) {
+        // not used
         return null;
     }
 
     @Override
-    protected boolean hasDialog() {
-        return true;
+    protected SourceSettings<FSPath> createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
+        final var settingsModel = new SettingsModelReaderFileChooser("file_selection",
+            nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
+            EnumConfig.create(FilterMode.FILE, FilterMode.FOLDER)); // TODO: why do we need to support a file here???
+        final Optional<? extends URLConfiguration> urlConfig = nodeCreationConfig.getURLConfig();
+        if (urlConfig.isPresent()) {
+            settingsModel
+                .setLocation(FSLocationUtil.createFromURL(urlConfig.get().getUrl().toString()));
+        }
+        return settingsModel;
+    }
+
+    @Override
+    protected ReadAdapterFactory<DataType, DeltaTableValue> getReadAdapterFactory() {
+        return DeltaTableReadAdapterFactory.INSTANCE;
+    }
+
+    @Override
+    protected String extractRowKey(final DeltaTableValue value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected TypeHierarchy<DataType, DataType> getTypeHierarchy() {
+        return DeltaTableReadAdapterFactory.TYPE_HIERARCHY;
+    }
+
+    @Override
+    protected ProductionPathProvider<DataType> createProductionPathProvider() {
+        return DeltaTableReadAdapterFactory.INSTANCE.createProductionPathProvider();
+    }
+
+    @Override
+    protected StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType>
+        createConfig(final NodeCreationConfiguration nodeCreationConfig) {
+        return new DeltaTableReaderMultiTableReadConfig(new DeltaTableReaderNodeSettings());
+    }
+
+    @Override
+    protected NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
+        // we do not want to use the dialog provided by the framework
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
+    }
+
+    @Override
+    public TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType>
+        createNodeModel(final NodeCreationConfiguration creationConfig) {
+        final var config = createConfig(creationConfig);
+        final var pathSettings = createPathSettings(creationConfig);
+        final var reader = createMultiTableReader();
+        final var portConfig = creationConfig.getPortConfig();
+        if (portConfig.isPresent()) {
+            return new DeltaTableReaderNodeModel(config, pathSettings, reader, portConfig.get());
+        } else {
+            return new DeltaTableReaderNodeModel(config, pathSettings, reader);
+        }
     }
 }

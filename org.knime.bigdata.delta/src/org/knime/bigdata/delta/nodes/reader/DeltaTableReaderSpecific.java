@@ -44,42 +44,52 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   Sep 20, 2024 (marcbux): created
  */
 package org.knime.bigdata.delta.nodes.reader;
 
+import org.knime.base.node.io.filehandling.webui.reader.ReaderSpecific;
+import org.knime.bigdata.delta.nodes.reader.framework.DeltaTableReader;
+import org.knime.bigdata.delta.nodes.reader.mapper.DeltaTableReadAdapterFactory;
 import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 
 /**
- * Delta Table Reader node model.
- *
- * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author Marc Bux, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+final class DeltaTableReaderSpecific {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    static final ProductionPathProvider<DataType> PRODUCTION_PATH_PROVIDER =
+        DeltaTableReadAdapterFactory.INSTANCE.createProductionPathProvider();
+
+    interface ProductionPathProviderAndTypeHierarchy
+        extends ReaderSpecific.ProductionPathProviderAndTypeHierarchy<DataType> {
+        @Override
+        default ProductionPathProvider<DataType> getProductionPathProvider() {
+            return PRODUCTION_PATH_PROVIDER;
+        }
+
+        @Override
+        default TypeHierarchy<DataType, DataType> getTypeHierarchy() {
+            return DeltaTableReadAdapterFactory.TYPE_HIERARCHY;
+        }
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    interface ConfigAndReader extends ReaderSpecific.ConfigAndReader<DeltaTableReaderNodeSettings, DataType> {
+        @SuppressWarnings("unchecked")
+        @Override
+        default DeltaTableReaderMultiTableReadConfig getMultiTableReadConfig() {
+            return new DeltaTableReaderMultiTableReadConfig(new DeltaTableReaderNodeSettings());
+        }
+
+        @Override
+        default DeltaTableReader getTableReader() {
+            return new DeltaTableReader(true);
+        }
     }
 
-    @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    private DeltaTableReaderSpecific() {
+        // Utility class
     }
-
 }

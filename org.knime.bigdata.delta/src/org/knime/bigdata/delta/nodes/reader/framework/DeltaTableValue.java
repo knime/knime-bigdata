@@ -46,40 +46,26 @@
  * History
  *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.nodes.reader;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import io.delta.kernel.data.Row;
 
 /**
- * Delta Table Reader node model.
+ * Column view that delegates to a delta {@link Row} of a {@link DeltaTableRandomAccessibleRow}.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+public abstract class DeltaTableValue {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    protected final DeltaTableRandomAccessibleRow m_randomAccessibleRow;
+
+    protected final int m_ordinal;
+
+    DeltaTableValue(final DeltaTableRandomAccessibleRow randomAccessibleRow, final int ordinal) {
+        m_randomAccessibleRow = randomAccessibleRow;
+        m_ordinal = ordinal;
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
-    }
-
-    @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
-    }
+    public abstract String stringValue();
 
 }

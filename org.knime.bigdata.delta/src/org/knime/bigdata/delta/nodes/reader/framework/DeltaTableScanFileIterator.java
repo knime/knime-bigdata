@@ -46,40 +46,82 @@
  * History
  *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.nodes.reader;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import static io.delta.kernel.internal.util.Utils.singletonCloseableIterator;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Optional;
+
+import io.delta.kernel.Scan;
+import io.delta.kernel.data.FilteredColumnarBatch;
+import io.delta.kernel.data.Row;
+import io.delta.kernel.engine.Engine;
+import io.delta.kernel.internal.InternalScanFileUtils;
+import io.delta.kernel.internal.util.Utils;
+import io.delta.kernel.types.StructType;
+import io.delta.kernel.utils.CloseableIterator;
 
 /**
- * Delta Table Reader node model.
+ * Iterator that consumes scan files and returns physical data batches.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+@SuppressWarnings("resource")
+public class DeltaTableScanFileIterator implements Closeable {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    private final Engine m_engine;
+
+    private final Row m_scanState;
+
+    private final StructType m_physicalReadSchema;
+
+    private final CloseableIterator<FilteredColumnarBatch> m_scanFilesIterator;
+
+    private CloseableIterator<Row> m_currentRowsIterator;
+
+    DeltaTableScanFileIterator(final Engine engine, final Row scanState,
+        final CloseableIterator<FilteredColumnarBatch> scanFilesIterator, final StructType physicalReadSchema) {
+
+        m_engine = engine;
+        m_scanState = scanState;
+        m_physicalReadSchema = physicalReadSchema;
+        m_scanFilesIterator = scanFilesIterator;
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    boolean hasNext() {
+        if (m_currentRowsIterator != null && m_currentRowsIterator.hasNext()) {
+            return true;
+        }
+
+        // close current rows iterator
+        Utils.closeCloseables(m_currentRowsIterator);
+        m_currentRowsIterator = null;
+
+        // load next iterator
+        if (m_scanFilesIterator.hasNext()) {
+            m_currentRowsIterator = m_scanFilesIterator.next().getRows();
+            return m_currentRowsIterator.hasNext();
+        }
+
+        // no batches left
+        return false;
+    }
+
+    CloseableIterator<FilteredColumnarBatch> next() throws IOException {
+        final var scanFileRow = m_currentRowsIterator.next();
+        final var fileStatus = InternalScanFileUtils.getAddFileStatus(scanFileRow);
+        final var physicalDataIter = m_engine.getParquetHandler().readParquetFiles( //
+            singletonCloseableIterator(fileStatus), //
+            m_physicalReadSchema, //
+            Optional.empty()); // filter
+        return Scan.transformPhysicalData(m_engine, m_scanState, scanFileRow, physicalDataIter);
     }
 
     @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    public void close() throws IOException {
+        Utils.closeCloseables(m_currentRowsIterator, m_scanFilesIterator);
     }
 
 }

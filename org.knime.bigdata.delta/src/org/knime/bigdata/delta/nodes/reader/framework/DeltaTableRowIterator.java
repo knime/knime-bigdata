@@ -46,40 +46,61 @@
  * History
  *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.nodes.reader;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.NoSuchElementException;
+
+import io.delta.kernel.data.Row;
+import io.delta.kernel.internal.util.Utils;
+import io.delta.kernel.utils.CloseableIterator;
 
 /**
- * Delta Table Reader node model.
+ * Iterator that returns the rows of a scan file batch iterator.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+public class DeltaTableRowIterator implements Closeable {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    private final DeltaTableScanFileBatchIterator m_batchIterator;
+
+    private CloseableIterator<Row> m_currentRowsIterator;
+
+    DeltaTableRowIterator(final DeltaTableScanFileBatchIterator batchIterator) {
+        m_batchIterator = batchIterator;
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    boolean hasNext() throws IOException {
+        if (m_currentRowsIterator != null && m_currentRowsIterator.hasNext()) {
+            return true;
+        }
+
+        // close current rows iterator
+        Utils.closeCloseables(m_currentRowsIterator);
+        m_currentRowsIterator = null;
+
+        // load next iterator
+        if (m_batchIterator.hasNext()) {
+            m_currentRowsIterator = m_batchIterator.next().getRows();
+            return m_currentRowsIterator.hasNext();
+        }
+
+        // no batches left
+        return false;
+    }
+
+    Row next() {
+        if (m_currentRowsIterator != null) {
+            return m_currentRowsIterator.next();
+        } else {
+            throw new NoSuchElementException();
+        }
     }
 
     @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    public void close() throws IOException {
+        Utils.closeCloseables(m_currentRowsIterator, m_batchIterator);
     }
 
 }

@@ -44,42 +44,30 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   2025-05-22 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.nodes.reader;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import io.delta.kernel.types.DoubleType;
 
 /**
- * Delta Table Reader node model.
+ * Value reader of {@link DoubleType}.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+public class DeltaTableDoubleValue extends DeltaTableValue {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    DeltaTableDoubleValue(final DeltaTableRandomAccessibleRow randomAccessibleRow, final int ordinal) {
+        super(randomAccessibleRow, ordinal);
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    public double doubleValue() {
+        return m_randomAccessibleRow.getRow().getDouble(m_ordinal);
     }
 
     @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    public String stringValue() {
+        return Double.toString(doubleValue());
     }
 
 }

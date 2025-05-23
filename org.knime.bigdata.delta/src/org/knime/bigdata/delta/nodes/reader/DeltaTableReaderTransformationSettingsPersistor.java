@@ -44,42 +44,39 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   May 15, 2024 (marcbux): created
  */
 package org.knime.bigdata.delta.nodes.reader;
 
+import org.knime.base.node.io.filehandling.webui.reader.CommonReaderTransformationSettingsPersistor;
+import org.knime.base.node.io.filehandling.webui.reader.DataTypeStringSerializer;
+import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderSpecific.ConfigAndReader;
+import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderSpecific.ProductionPathProviderAndTypeHierarchy;
+import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderTransformationSettings.ConfigIdSettings;
 import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDLoader;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.TableSpecConfigSerializer;
 
 /**
- * Delta Table Reader node model.
- *
- * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author Marc Bux, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+final class DeltaTableReaderTransformationSettingsPersistor extends CommonReaderTransformationSettingsPersistor<//
+        DeltaTableReaderNodeSettings, ConfigIdSettings, String, DataType, //
+        DeltaTableReaderTransformationSettings>
+    implements ProductionPathProviderAndTypeHierarchy, DataTypeStringSerializer, ConfigAndReader {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
-    }
-
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    @Override
+    protected DeltaTableReaderTransformationSettings createDefaultTransformationSettings() {
+        return new DeltaTableReaderTransformationSettings();
     }
 
     @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    protected TableSpecConfigSerializer<DataType> createTableSpecConfigSerializer(final ConfigIDLoader configIdLoader) {
+        return DeltaTableReaderConfigSerializer.INSTANCE.getTableSpecSerializer();
     }
 
+    @Override
+    protected String getConfigIdSettingsKey() {
+        return "delta_table_reader";
+    }
 }

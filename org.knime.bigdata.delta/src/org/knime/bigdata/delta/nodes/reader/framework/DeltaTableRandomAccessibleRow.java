@@ -46,40 +46,54 @@
  * History
  *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.delta.nodes.reader;
+package org.knime.bigdata.delta.nodes.reader.framework;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.filehandling.core.node.table.reader.randomaccess.AbstractRandomAccessible;
+
+import io.delta.kernel.data.Row;
 
 /**
- * Delta Table Reader node model.
+ * Reuseable random accessible implementation that delegates via a {@link DeltaTableValue} to a delta {@link Row}.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+public class DeltaTableRandomAccessibleRow extends AbstractRandomAccessible<DeltaTableValue> {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    private final DeltaTableValue[] m_valueViews;
+
+    private Row m_row;
+
+    //  m_valueViews = new DeltaTableValue[columns];
+    //  for (var i = 0; i < columns; i++) {
+    //      m_valueViews[i] = new DeltaTableValue(this, i);
+    //  }
+
+    DeltaTableRandomAccessibleRow(final int columns) {
+        // TODO: dynamic type mapping
+        m_valueViews = new DeltaTableValue[]{ //
+            new DeltaTableIntegerValue(this, 0), //
+            new DeltaTableStringValue(this, 1), //
+            new DeltaTableStringValue(this, 2), //
+            new DeltaTableDoubleValue(this, 3), //
+        };
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
+    void setRow(final Row row) {
+        m_row = row;
+    }
+
+    Row getRow() {
+        return m_row;
     }
 
     @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    public int size() {
+        return m_valueViews.length;
+    }
+
+    @Override
+    public DeltaTableValue get(final int idx) {
+        return m_valueViews[idx];
     }
 
 }

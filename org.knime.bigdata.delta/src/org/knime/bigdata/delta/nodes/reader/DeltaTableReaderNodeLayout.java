@@ -44,42 +44,32 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   2025-05-21 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ *   Mar 6, 2024 (marcbux): created
  */
 package org.knime.bigdata.delta.nodes.reader;
 
-import org.knime.core.data.DataType;
-import org.knime.core.node.context.ports.PortsConfiguration;
-import org.knime.filehandling.core.connections.FSPath;
-import org.knime.filehandling.core.node.table.reader.MultiTableReader;
-import org.knime.filehandling.core.node.table.reader.TableReaderNodeModel;
-import org.knime.filehandling.core.node.table.reader.config.StorableMultiTableReadConfig;
-import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.base.node.io.filehandling.webui.reader.CommonReaderLayout;
+import org.knime.core.webui.node.dialog.defaultdialog.layout.After;
+import org.knime.core.webui.node.dialog.defaultdialog.layout.Before;
+import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
 
 /**
- * Delta Table Reader node model.
- *
- * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author Marc Bux, KNIME GmbH, Berlin, Germany
  */
-final class DeltaTableReaderNodeModel extends TableReaderNodeModel<FSPath, DeltaTableReaderNodeSettings, DataType> {
+@SuppressWarnings({"restriction", "java:S1214"})
+interface DeltaTableReaderNodeLayout {
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader,
-        final PortsConfiguration portsConfiguration) {
-        super(config, pathSettings, reader, portsConfiguration);
+    @Section(title = "Table")
+    @After(CommonReaderLayout.File.class)
+    @Before(CommonReaderLayout.DataArea.class)
+    interface TableSection {
     }
 
-    DeltaTableReaderNodeModel(final StorableMultiTableReadConfig<DeltaTableReaderNodeSettings, DataType> config,
-        final SourceSettings<FSPath> pathSettings,
-        final MultiTableReader<FSPath, DeltaTableReaderNodeSettings, DataType> reader) {
-        super(config, pathSettings, reader);
-    }
-
-    @Override
-    protected void reset() {
-        // TODO reset/close hadoop filesystem in reader?
-        super.reset();
+    @Section(title = "Data Area", advanced = true)
+    @After(CommonReaderLayout.File.class)
+    @After(TableSection.class)
+    @Before(CommonReaderLayout.ColumnAndDataTypeDetection.class)
+    interface AdvancedDataAreaLayout {
     }
 
 }
