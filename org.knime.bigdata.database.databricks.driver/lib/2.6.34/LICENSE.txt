@@ -1,7 +1,7 @@
 JDBC ODBC driver license
 Driver Download Terms and Conditions
 
-1. By downloading this Databricks ODBC and/or JDBC driver (together, the ìDBC Driversî), you agree to be bound by these Terms and Conditions (the ìTermsî) (which are in addition to, and not in place of, any terms you have agreed to with Databricks regarding the Databricks services). If you do not agree to these Terms, do not download or use the DBC Drivers. If you are downloading and using the DBC Drivers on behalf of a company (such as your employer) or other legal entity, you represent and warrant that you have the authority to bind that company or other legal entity to these Terms. In that case, ìyouî and ìyourî will refer to that company or other legal entity.
+1. By downloading this Databricks ODBC and/or JDBC driver (together, the ‚ÄúDBC Drivers‚Äú), you agree to be bound by these Terms and Conditions (the ‚ÄúTerms‚Äú) (which are in addition to, and not in place of, any terms you have agreed to with Databricks regarding the Databricks services). If you do not agree to these Terms, do not download or use the DBC Drivers. If you are downloading and using the DBC Drivers on behalf of a company (such as your employer) or other legal entity, you represent and warrant that you have the authority to bind that company or other legal entity to these Terms. In that case, ‚Äúyou‚Äú and ‚Äúyour‚Äú will refer to that company or other legal entity.
 
 2. Supported environment: The DBC Drivers can be used on 32-bit and 64-bit Windows, Mac OSX and Linux operating environments.
 
@@ -9,7 +9,7 @@ Driver Download Terms and Conditions
 
 4. Redistribution and Sublicensing: You may redistribute and sublicense the DBC drivers on a standalone or embedded basis so long as all use is within compliance with these terms.
 
-5. DISCLAIMER; LIMITATION OF LIABILITY. THE DBC DRIVERS ARE PROVIDED ìAS-ISî AND WITH ALL FAULTS. DATABRICKS, ON BEHALF OF ITSELF AND ITS LICENSORS, SPECIFICALLY DISCLAIMS ALL WARRANTIES RELATING TO THE DBC DRIVERS, EXPRESS AND IMPLIED,INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES, CONDITIONS AND OTHER TERMS OF MERCHANTABILITY, SATISFACTORY QUALITY OR FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMNENT. DATABRICKS AND ITS LICENSORS TOTAL AGGREGATE LIABILITY RELATING TO OR ARISING OUT OF YOUR USE OF OR DATABRICKSí PROVISIONING OF THE DBC DRIVERS SHALL BE LIMITED TO ONE THOUSAND ($1,000) DOLLARS.
+5. DISCLAIMER; LIMITATION OF LIABILITY. THE DBC DRIVERS ARE PROVIDED ‚ÄúAS-IS‚Äù AND WITH ALL FAULTS. DATABRICKS, ON BEHALF OF ITSELF AND ITS LICENSORS, SPECIFICALLY DISCLAIMS ALL WARRANTIES RELATING TO THE DBC DRIVERS, EXPRESS AND IMPLIED,INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES, CONDITIONS AND OTHER TERMS OF MERCHANTABILITY, SATISFACTORY QUALITY OR FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMNENT. DATABRICKS AND ITS LICENSORS TOTAL AGGREGATE LIABILITY RELATING TO OR ARISING OUT OF YOUR USE OF OR DATABRICKS‚Äú PROVISIONING OF THE DBC DRIVERS SHALL BE LIMITED TO ONE THOUSAND ($1,000) DOLLARS.
 
 6. Contact Information: For any other usage, or if you have any questions about these terms, please contact Databricks.
 
@@ -20,3 +20,6 @@ Databricks on AWS: https://docs.databricks.com/user-guide/bi/jdbc-odbc-bi.html
 Azure Databricks: https://docs.microsoft.com/azure/databricks/integrations/bi/jdbc-odbc-bi
 
 Databricks on GCP: https://docs.gcp.databricks.com/integrations/bi/jdbc-odbc-bi.html
+
+
+Copied from https://www.databricks.com/legal/jdbc-odbc-driver-license

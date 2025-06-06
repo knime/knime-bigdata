@@ -3,8 +3,7 @@
 <plugin>
 	<extension
          point="org.knime.database.Driver">
-      <Driver
-            locator="org.knime.bigdata.database.databricks.driver.DatabricksDBDriverLocator">
-      </Driver>
+      <Driver locator="org.knime.bigdata.database.databricks.driver.v26.DatabricksDBDriverLocator" />
+      <Driver locator="org.knime.bigdata.database.databricks.driver.v273.DatabricksDBDriverLocator" />
    </extension>
 </plugin>

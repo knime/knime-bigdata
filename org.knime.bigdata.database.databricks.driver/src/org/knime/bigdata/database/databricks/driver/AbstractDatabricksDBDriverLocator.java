@@ -68,28 +68,20 @@ import org.knime.database.util.DerivableProperties;
 import org.knime.database.util.DerivableProperties.ValueType;
 
 /**
- * A driver locator class for the official Databricks JDBC Driver.
+ * Abstract driver locator implementations for Databricks drivers.
+ *
+ * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
  */
-public class DatabricksDBDriverLocator extends AbstractDriverLocator {
-
-    private static final String VERSION = "2.6.34";
-
-    /** Driver id. */
-    public static final String DRIVER_ID = "Databricks";
+public abstract class AbstractDatabricksDBDriverLocator extends AbstractDriverLocator {
 
     /**
      * The {@link AttributeCollection} {@linkplain #getAttributes() of} Hive drivers.
      */
-    public static final AttributeCollection ATTRIBUTES;
-
-    /**
-     * Attribute that contains the JDBC properties.
-     */
-    public static final Attribute<DerivableProperties> ATTRIBUTE_JDBC_PROPERTIES;
+    private static final AttributeCollection ATTRIBUTES;
 
     static {
-    	final AttributeCollection.Builder builder =
-                AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
+        final AttributeCollection.Builder builder =
+            AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
         //add the user agent entry to default JDBC parameters
         final DerivableProperties jdbcProperties = new DerivableProperties();
         //Used to set the user agent entry for all drivers shipped by us
@@ -107,20 +99,31 @@ public class DatabricksDBDriverLocator extends AbstractDriverLocator {
     }
 
     /**
-     * Constructor for {@link DatabricksDBDriverLocator}.
+     * Attribute that contains the JDBC properties.
      */
-    public DatabricksDBDriverLocator() {
+    public static final Attribute<DerivableProperties> ATTRIBUTE_JDBC_PROPERTIES;
+
+    private final String m_version;
+
+    /**
+     * Constructor.
+     *
+     * @param version the version of the driver
+     *
+     */
+    protected AbstractDatabricksDBDriverLocator(final String version) {
         super(ATTRIBUTES);
+        m_version = version;
     }
 
     @Override
     public String getDriverId() {
-        return DBDriverLocator.createDriverId(getDBType(), VERSION);
+        return DBDriverLocator.createDriverId(getDBType(), m_version);
     }
 
     @Override
     public String getDriverName() {
-        return "Driver for Databricks v. " + VERSION;
+        return "Driver for Databricks v. " + m_version;
     }
 
     @Override
@@ -140,6 +143,7 @@ public class DatabricksDBDriverLocator extends AbstractDriverLocator {
 
     @Override
     public Collection<String> getDriverPaths() {
-        return Collections.singleton("lib/" + VERSION + "/jdbc/databricks-jdbc-" + VERSION + ".jar");
+        return Collections.singleton("lib/" + m_version + "/databricks-jdbc-" + m_version + ".jar");
     }
+
 }

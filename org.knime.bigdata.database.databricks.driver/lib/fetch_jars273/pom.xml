@@ -2,14 +2,14 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.knime.bigdata.database.databricks.driver</groupId>
-	<artifactId>databricks-fetch-jars</artifactId>
-	<version>2.6.34</version>
+	<artifactId>databricks-fetch-jars273</artifactId>
+	<version>2.7.3</version>
 	<packaging>pom</packaging>
 
 	<name>Jar fetcher for Databricks JDBC Driver</name>
 	<description>
 	   Running the maven goal &quot;package&quot; on this maven project will fetch all jars required 
-	   for Databricks JDBC Driver and put them into the libs/2.6.32/jdbc directory.
+	   for Databricks JDBC Driver and put them into the libs/2.7.3/jdbc directory.
 	</description>
 
 

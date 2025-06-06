@@ -32,6 +32,7 @@
 		<module>org.knime.bigdata.database</module>		
 		<module>org.knime.bigdata.databricks</module>
 		<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars</module>
+		<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars273</module>
 		<module>org.knime.bigdata.database.databricks.driver</module>
 		<module>org.knime.bigdata.databricks.python</module>
 		<module>org.knime.bigdata.fileformats</module>
