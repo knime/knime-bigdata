@@ -4,7 +4,7 @@ Bundle-Name: Local Executor for Apache Spark
 Bundle-SymbolicName: org.knime.bigdata.spark.local;singleton:=true
 Bundle-Version: 5.5.0.qualifier
 Bundle-ClassPath: knime.jar,
- libs/spark-hive-thriftserver_2.12-3.5.3.jar
+ libs/spark-hive-thriftserver_2.12-3.5.6.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Bundle-Activator: org.knime.bigdata.spark.local.SparkLocalPlugin
 Export-Package: org.knime.bigdata.spark.local.db,
