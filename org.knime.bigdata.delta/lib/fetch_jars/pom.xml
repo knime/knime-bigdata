@@ -12,6 +12,9 @@
     for Delta Kernel and put them into the libs directory.
   </description>
 
+  <properties>
+    <parquet.version>1.15.2</parquet.version>
+  </properties>
 
   <!-- NOTE ABOUT DEALING WITH DEPENDENCIES:
   
@@ -77,7 +80,7 @@
     <dependency>
       <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-hadoop</artifactId>
-      <version>1.15.1</version>
+      <version>${parquet.version}</version>
       <exclusions>
         <exclusion>
           <groupId>com.github.luben</groupId>
