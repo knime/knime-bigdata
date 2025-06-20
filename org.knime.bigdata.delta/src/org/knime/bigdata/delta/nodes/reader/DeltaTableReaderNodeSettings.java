@@ -95,8 +95,18 @@ public final class DeltaTableReaderNodeSettings implements DefaultNodeSettings {
                 final var sourceWidget = group.find(FileSelectionRef.class);
                 sourceWidget.removeAnnotation(FileReaderWidget.class);
                 sourceWidget.addAnnotation(FolderSelectionWidget.class).modify();
+
+                final var origDescription = CommonReaderLayout.File.Source.DESCRIPTION;
+                final var newDescription = origDescription +
+                    """
+                    <br/>
+                    <b>Note:</b> When selecting a folder, make sure to select the root folder of the Delta Table
+                    which contains the <code>_delta_log</code> folder.
+                    """;
+                sourceWidget.modifyAnnotation(Widget.class).withProperty("description", newDescription).modify();
             }
         }
+
 
     }
 

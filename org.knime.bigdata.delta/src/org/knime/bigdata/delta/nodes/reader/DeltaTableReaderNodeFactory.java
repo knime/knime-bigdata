@@ -95,12 +95,20 @@ public final class DeltaTableReaderNodeFactory
     implements NodeDialogFactory {
 
     private static final String FULL_DESCRIPTION = """
-            <p>Reader for Delta Tables.</p>
             <p>
-            Use this node to read <a href="https://docs.delta.io">Delta Lake tables</a>.
-            It reads the latest table snapshot and optionally supports a Filesystem input port, such as OneLake.
-            Complex nested structures are not supported.
-            </p>""";
+            Reads <a href="https://docs.delta.io">Delta Lake tables</a> by loading the latest snapshot of the specified
+            table.
+            This node can optionally utilize a
+            <a href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html#connected-fs">file system input port,</a>
+            such as <a href="https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview">Microsoft Fabric OneLake</a>,
+            to access remote storage. It is designed for ease of use in reading tabular data from Delta Lake,
+            though it currently does not support complex nested structures.
+            </p>
+            <p>
+            <b>Note:</b> When selecting a folder, ensure you choose the root directory of the Delta Table,
+            which must contain the <code>_delta_log</code> folder.
+            </p>
+            """;
 
     private static final String INPUT_PORT_GROUP = "File System Connection";
 
