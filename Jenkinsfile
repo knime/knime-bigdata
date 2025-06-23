@@ -115,14 +115,16 @@ try {
                 dependencies: [
                     repositories: [
                         'knime-aws',
+                        'knime-azure',
                         'knime-bigdata',
-                        'knime-kerberos',
+                        'knime-bigdata-externals',
                         'knime-cloud',
                         'knime-database',
                         'knime-datageneration',
                         'knime-jep',
-                        'knime-streaming',
-                        'knime-bigdata-externals'
+                        'knime-kerberos',
+                        'knime-office365',
+                        'knime-streaming'
                     ]
                 ]
             )
