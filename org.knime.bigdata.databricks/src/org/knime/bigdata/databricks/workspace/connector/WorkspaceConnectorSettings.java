@@ -65,6 +65,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.layout.After;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
 import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
 import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.Credentials;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Advanced;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage;
@@ -148,7 +149,8 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     interface TokenSection {
     }
 
-    @Section(title = "Timeouts", advanced = true)
+    @Section(title = "Timeouts")
+    @Advanced
     @After(TokenSection.class)
     interface ConnectionTimeoutsSection {
     }
