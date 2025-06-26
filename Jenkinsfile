@@ -44,6 +44,7 @@ try {
                     dependencies: [
                         repositories: [
                             'knime-aws',
+                            'knime-azure',
                             'knime-bigdata-externals',
                             'knime-bigdata',
                             'knime-cloud',
