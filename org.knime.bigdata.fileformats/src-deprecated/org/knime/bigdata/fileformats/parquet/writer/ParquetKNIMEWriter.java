@@ -141,9 +141,12 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
         try {
             final boolean useLogicalTypes = false;
 
+            final var baseConfiguration = ConfigurationFactory.createBaseConfiguration();
+            // AP-24482 ensure that the file: file system is available
+            baseConfiguration.set("fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem");
             final OutputFile outputFile = HadoopOutputFile.fromPath(//
                 new Path(file.getURI()),//
-                ConfigurationFactory.createBaseConfiguration());
+                baseConfiguration);
             final OutputFile wrappedFile = new OutputFileWrapper(outputFile);
 
             m_writer = new DataRowParquetWriterBuilder(wrappedFile,
