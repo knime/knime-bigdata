@@ -1,0 +1,145 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.knime.bigdata.delta.sharing</groupId>
+  <artifactId>databricks-fetch-jars</artifactId>
+  <version>3.3.1</version>
+  <packaging>pom</packaging>
+
+  <name>Jar fetcher for Delta Kernel</name>
+  <description>
+    Running the maven goal &quot;package&quot; on this maven project will fetch all jars required 
+    for Delta Kernel and put them into the libs directory.
+  </description>
+
+  <properties>
+    <iceberg.version>1.9.1</iceberg.version>
+  </properties>
+
+  <!-- NOTE ABOUT DEALING WITH DEPENDENCIES:
+  
+    For *large* dependencies that are *already* part of KNIME we should avoid duplicating
+    them (for small dependencies it is usually not worth the hassle).
+    
+    *Large* in this context means: They contain a lot of classes (e.g. scala-library) or
+    they have a lot of transitive dependencies (e.g. hadoop), or both.
+    
+    How to avoid duplication?
+    
+    Option (1)
+      Exclude them via build>plugins>plugin(maven-dependency-plugin)>executions>configuration (see at the bottom
+      of this file).
+      Pro: This leaves the maven dependency tree intact (for browsing), but prevents them from being copied to the libs/ directory.
+      Contra: A lot of work when dependencies have themselves have a lot of transitive dependencies, because you need to
+              exclude them manually too, then.
+      
+    Option (2):
+      Exclude them via dependencies>dependency>exclusions.
+      Pro: Works well for dependencies that themselves have a lot of transitive dependencies.
+      Contra: Alters the maven dependency tree, which may be confusing.
+   -->
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.iceberg</groupId>
+      <artifactId>iceberg-core</artifactId>
+      <version>${iceberg.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.datatype</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.airlift</groupId>
+          <artifactId>aircompressor</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.roaringbitmap</groupId>
+          <artifactId>RoaringBitmap</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.iceberg</groupId>
+      <artifactId>iceberg-parquet</artifactId>
+      <version>${iceberg.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <!--
+        <exclusion>
+          <groupId>org.apache.parquet</groupId>
+          <artifactId>parquet-hadoop</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.parquet</groupId>
+          <artifactId>parquet-common</artifactId>
+        </exclusion>
+        -->
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.iceberg</groupId>
+      <artifactId>iceberg-data</artifactId>
+      <version>${iceberg.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.orc</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.2</version>
+        <executions>
+          <!-- Uncomment to also download the sources -->
+          <execution>
+            <id>copy-sources</id>
+            <configuration>
+              <classifier>sources</classifier>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>..</outputDirectory>
+            </configuration>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+          </execution>
+
+          <execution>
+            <id>copy-dependencies</id>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>..</outputDirectory>
+            </configuration>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

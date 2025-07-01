@@ -44,6 +44,8 @@
 		<module>org.knime.bigdata.hadoop.filehandling</module>
 		<module>org.knime.bigdata.hadoop.filehandling.knox</module>
 		<module>org.knime.bigdata.hive</module>
+		<module>org.knime.bigdata.iceberg/lib/fetch_jars</module>
+		<module>org.knime.bigdata.iceberg</module>
 		<module>org.knime.bigdata.impala</module>
 		<module>org.knime.bigdata.scripting</module>
 		<module>org.knime.bigdata.spark.core</module>
