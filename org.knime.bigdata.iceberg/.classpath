@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry exported="true" kind="lib" path="lib/avro-1.12.0.jar" sourcepath="lib/avro-1.12.0-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/caffeine-2.9.3.jar" sourcepath="lib/caffeine-2.9.3-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/checker-qual-3.19.0.jar" sourcepath="lib/checker-qual-3.19.0-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/commons-codec-1.17.0.jar" sourcepath="lib/commons-codec-1.17.0-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/commons-compress-1.26.2.jar" sourcepath="lib/commons-compress-1.26.2-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/commons-io-2.16.1.jar" sourcepath="lib/commons-io-2.16.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.14.0.jar" sourcepath="lib/commons-lang3-3.14.0-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/error_prone_annotations-2.10.0.jar" sourcepath="lib/error_prone_annotations-2.10.0-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/httpclient5-5.4.3.jar" sourcepath="lib/httpclient5-5.4.3-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/httpcore5-5.3.4.jar" sourcepath="lib/httpcore5-5.3.4-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/httpcore5-h2-5.3.4.jar" sourcepath="lib/httpcore5-h2-5.3.4-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/iceberg-api-1.9.1.jar" sourcepath="lib/iceberg-api-1.9.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/iceberg-bundled-guava-1.9.1.jar" sourcepath="lib/iceberg-bundled-guava-1.9.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/iceberg-common-1.9.1.jar" sourcepath="lib/iceberg-common-1.9.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/iceberg-core-1.9.1.jar" sourcepath="lib/iceberg-core-1.9.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/iceberg-data-1.9.1.jar" sourcepath="lib/iceberg-data-1.9.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/iceberg-parquet-1.9.1.jar" sourcepath="lib/iceberg-parquet-1.9.1-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/parquet-avro-1.15.2.jar" sourcepath="lib/parquet-avro-1.15.2-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/parquet-column-1.15.2.jar" sourcepath="lib/parquet-column-1.15.2-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/parquet-common-1.15.2.jar" sourcepath="lib/parquet-common-1.15.2-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/parquet-encoding-1.15.2.jar" sourcepath="lib/parquet-encoding-1.15.2-sources.jar"/>
+
+  <classpathentry exported="true" kind="lib" path="lib/parquet-format-structures-1.15.2.jar" sourcepath="lib/parquet-format-structures-1.15.2-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/parquet-hadoop-1.15.2.jar" sourcepath="lib/parquet-hadoop-1.15.2-sources.jar"/>
+  <classpathentry exported="true" kind="lib" path="lib/parquet-jackson-1.15.2.jar" sourcepath="lib/parquet-jackson-1.15.2-sources.jar"/>
+
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
