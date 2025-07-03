@@ -77,7 +77,8 @@ public class UnityFileSystemConnectorSettings implements DefaultNodeSettings {
     @Layout(FileSystemSection.class)
     String m_workingDirectory = "/";
 
-    void validate() throws InvalidSettingsException {
+    @Override
+    public void validate() throws InvalidSettingsException {
         if (StringUtils.isAllBlank(m_workingDirectory)) {
             throw new InvalidSettingsException("Please specify a working directory.");
         } else if (!m_workingDirectory.startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
