@@ -91,7 +91,8 @@ public class SQLWarehouseConnectorSettings implements DefaultNodeSettings {
     @Layout(MainSection.class)
     String m_warehouseId = "";
 
-    void validate() throws InvalidSettingsException {
+    @Override
+    public void validate() throws InvalidSettingsException {
         if (StringUtils.isAllBlank(m_warehouseId)) {
             throw new InvalidSettingsException("Please select a SQL Warehouse.");
         }
@@ -103,7 +104,7 @@ public class SQLWarehouseConnectorSettings implements DefaultNodeSettings {
         public void init(final StateProviderInitializer initializer) {
             initializer.computeAfterOpenDialog();
         }
-        
+
         @Override
         public List<StringChoice> computeState(final DefaultNodeSettingsContext context) {
             try {
