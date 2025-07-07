@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Databricks Spark context and DBFS connector
 Bundle-SymbolicName: org.knime.bigdata.databricks;singleton:=true
-Bundle-Version: 5.5.0.qualifier
+Bundle-Version: 5.6.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.databricks.DatabricksPlugin
