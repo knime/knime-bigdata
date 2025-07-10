@@ -63,10 +63,10 @@ import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.python3.types.port.converter.PortObjectConversionContext;
 import org.knime.python3.types.port.converter.PortObjectEncoder;
 import org.knime.python3.types.port.converter.PortObjectSpecConversionContext;
-import org.knime.python3.types.port.ir.EmptyIntermediateRepresentation;
+import org.knime.python3.types.port.ir.JavaEmptyIntermediateRepresentation;
+import org.knime.python3.types.port.ir.JavaStringIntermediateRepresentation;
 import org.knime.python3.types.port.ir.PortObjectIntermediateRepresentation;
 import org.knime.python3.types.port.ir.PortObjectSpecIntermediateRepresentation;
-import org.knime.python3.types.port.ir.StringIntermediateRepresentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -83,7 +83,7 @@ public final class DatabricksWorkspacePythonPortObjectConverter
     public PortObjectIntermediateRepresentation encodePortObject(
         final DatabricksWorkspacePortObject portObject,
         final PortObjectConversionContext context) {
-        return EmptyIntermediateRepresentation.INSTANCE;
+        return JavaEmptyIntermediateRepresentation.INSTANCE;
     }
 
     @Override
@@ -95,7 +95,7 @@ public final class DatabricksWorkspacePythonPortObjectConverter
         node.put("data", getXmlContent(spec));
         var credential = resolveCredential(spec);
         credential.ifPresent(c -> node.put("workspace_url", c.getDatabricksWorkspaceUrl().toString()));
-        return new StringIntermediateRepresentation(node.toString());
+        return new JavaStringIntermediateRepresentation(node.toString());
     }
 
     private static Optional<DatabricksAccessTokenCredential> resolveCredential(final DatabricksWorkspacePortObjectSpec spec) {
