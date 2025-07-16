@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.spark.legacy"
       label="KNIME Extension for Apache Spark (legacy)"
-      version="5.4.4.qualifier"
+      version="5.4.5.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>

@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.fileformats"
       label="KNIME Extension for Big Data File Formats"
-      version="5.4.4.qualifier"
+      version="5.4.5.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
