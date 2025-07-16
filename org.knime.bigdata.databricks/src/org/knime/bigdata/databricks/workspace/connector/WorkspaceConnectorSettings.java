@@ -61,28 +61,28 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.After;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
 import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.Credentials;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Advanced;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage.MessageType;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.TextMessage.SimpleTextMessageProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.credentials.PasswordWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Effect;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Effect.EffectType;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Predicate;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.PredicateProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.Reference;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.ValueReference;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.NumberInputWidgetValidation.MinValidation.IsNonNegativeValidation;
 import org.knime.credentials.base.CredentialPortObject;
 import org.knime.credentials.base.CredentialPortObjectSpec;
 import org.knime.credentials.base.CredentialType;
+import org.knime.node.parameters.Advanced;
+import org.knime.node.parameters.Widget;
+import org.knime.node.parameters.layout.After;
+import org.knime.node.parameters.layout.Layout;
+import org.knime.node.parameters.layout.Section;
+import org.knime.node.parameters.updates.Effect;
+import org.knime.node.parameters.updates.Predicate;
+import org.knime.node.parameters.updates.PredicateProvider;
+import org.knime.node.parameters.updates.Reference;
+import org.knime.node.parameters.updates.ValueReference;
+import org.knime.node.parameters.updates.Effect.EffectType;
+import org.knime.node.parameters.widget.choices.Label;
+import org.knime.node.parameters.widget.credentials.PasswordWidget;
+import org.knime.node.parameters.widget.message.TextMessage;
+import org.knime.node.parameters.widget.message.TextMessage.MessageType;
+import org.knime.node.parameters.widget.message.TextMessage.SimpleTextMessageProvider;
+import org.knime.node.parameters.widget.number.NumberInputWidget;
+import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsNonNegativeValidation;
 
 /**
  * Node settings for the Databricks Workspace Connector node.
@@ -90,7 +90,7 @@ import org.knime.credentials.base.CredentialType;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SuppressWarnings("restriction")
-public class WorkspaceConnectorSettings implements DefaultNodeSettings {
+public class WorkspaceConnectorSettings implements NodeParameters {
 
     private static boolean hasCredentialPort(final PortType[] types) {
         return Arrays.stream(types).anyMatch(CredentialPortObject.TYPE::equals);
@@ -120,7 +120,7 @@ public class WorkspaceConnectorSettings implements DefaultNodeSettings {
     static final class AuthenticationManagedByPortMessage implements SimpleTextMessageProvider {
 
         @Override
-        public boolean showMessage(final DefaultNodeSettingsContext context) {
+        public boolean showMessage(final NodeParametersInput context) {
             return hasCredentialPort(context.getInPortTypes());
         }
 
