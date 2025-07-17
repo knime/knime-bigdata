@@ -54,7 +54,7 @@ import org.knime.base.node.io.filehandling.webui.ReferenceStateProvider;
 import org.knime.base.node.io.filehandling.webui.reader.CommonReaderLayout;
 import org.knime.base.node.io.filehandling.webui.reader.CommonReaderNodeSettings;
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.Settings.MakeSourceFolderSelectionModifier;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
+import org.knime.node.parameters.NodeParameters;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileReaderWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FolderSelectionWidget;
 import org.knime.node.parameters.Widget;

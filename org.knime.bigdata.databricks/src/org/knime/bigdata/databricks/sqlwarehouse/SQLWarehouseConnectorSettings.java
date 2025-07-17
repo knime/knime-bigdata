@@ -57,7 +57,7 @@ import org.knime.bigdata.databricks.rest.sql.SQLWarehouseInfoList;
 import org.knime.core.data.sort.AlphanumericComparator;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
+import org.knime.node.parameters.NodeParameters;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.handler.WidgetHandlerException;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.layout.Layout;
