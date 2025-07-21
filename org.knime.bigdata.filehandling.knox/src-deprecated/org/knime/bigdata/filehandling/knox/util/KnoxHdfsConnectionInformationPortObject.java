@@ -57,30 +57,39 @@ import org.knime.core.node.port.PortType;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHdfsConnectionInformationPortObject extends ConnectionInformationPortObject {
 
     /**
      * @noreference This class is not intended to be referenced by clients.
+     * @deprecated
      */
+    @Deprecated
     public static final class Serializer
         extends AbstractSimplePortObjectSerializer<KnoxHdfsConnectionInformationPortObject> {
     }
 
     /**
      * The port type
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("hiding")
     public static final PortType TYPE = ConnectionInformationPortObject.TYPE;
 
     /**
      *  The optional type.
+     *  @deprecated
      */
+    @Deprecated
     @SuppressWarnings("hiding")
     public static final PortType TYPE_OPTIONAL = ConnectionInformationPortObject.TYPE_OPTIONAL;
 
     /**
      * @param connectionInformationPortObjectSpec {@link ConnectionInformationPortObjectSpec}
+     * @deprecated
      */
+    @Deprecated
     public KnoxHdfsConnectionInformationPortObject(
         final KnoxHdfsConnectionInformationPortObjectSpec connectionInformationPortObjectSpec) {
         super(connectionInformationPortObjectSpec);
@@ -88,7 +97,9 @@ public class KnoxHdfsConnectionInformationPortObject extends ConnectionInformati
 
     /**
      * No-argument constructor
+     * @deprecated
      */
+    @Deprecated
     public KnoxHdfsConnectionInformationPortObject() {
     }
 }

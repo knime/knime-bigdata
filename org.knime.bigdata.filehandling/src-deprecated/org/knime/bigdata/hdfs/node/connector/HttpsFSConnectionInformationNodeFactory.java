@@ -58,11 +58,14 @@ import org.knime.core.node.NodeView;
  *
  * @author Sascha Wolke, KNIME.com
  */
+@Deprecated
 public class HttpsFSConnectionInformationNodeFactory extends NodeFactory<ConnectionInformationNodeModel> {
 
     /**
-     *
+     * The constructor.
+     * @deprecated
      */
+    @Deprecated
     public HttpsFSConnectionInformationNodeFactory() {
         // TODO Auto-generated constructor stub
     }

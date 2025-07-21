@@ -41,6 +41,7 @@ import com.sun.ws.rs.ext.RuntimeDelegateImpl;
  * @author Tobias Koetter, KNIME GmbH
  * @author Bjoern Lohrmann, KNIME GmbH
  */
+@Deprecated
 public class FileHandlingPlugin extends AbstractUIPlugin {
 
     private static final NodeLogger LOG = NodeLogger.getLogger(FileHandlingPlugin.class);
@@ -52,7 +53,9 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
 
     /**
      * The constructor.
+     * @deprecated
      */
+    @Deprecated
     public FileHandlingPlugin() {
         plugin = this;
         CommonConfigContainer.getInstance().hdfsSupported();
@@ -102,14 +105,18 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
      * Returns the shared instance.
      *
      * @return The shared instance
+     * @deprecated
      */
+    @Deprecated
     public static FileHandlingPlugin getDefault() {
         return plugin;
     }
 
     /**
      * @return the absolute root path of this plugin
+     * @deprecated
      */
+    @Deprecated
     public String getPluginRootPath() {
         return m_pluginRootPath;
     }

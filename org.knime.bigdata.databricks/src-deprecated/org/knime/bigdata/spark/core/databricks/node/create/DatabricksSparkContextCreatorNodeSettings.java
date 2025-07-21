@@ -73,6 +73,7 @@ import org.knime.core.node.workflow.FlowVariable;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabricksSparkContextCreatorNodeSettings {
 
     final SettingsModelAuthentication m_authentication =
@@ -80,7 +81,10 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
 
     /**
      * Constructor.
+     *
+     * @deprecated
      */
+    @Deprecated
     DatabricksSparkContextCreatorNodeSettings() {
         super();
     }
@@ -92,7 +96,9 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
 
     /**
      * @return the settings model for the authentication
+     * @deprecated
      */
+    @Deprecated
     protected SettingsModelAuthentication getAuthenticationModel() {
         return m_authentication;
     }
@@ -101,7 +107,9 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
      * @param credentialsProvider to use
      * @return username for connection
      * @throws InvalidSettingsException on unknown authentication type
+     * @deprecated
      */
+    @Deprecated
     public String getUsername(final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
         if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
             return m_authentication.getUsername();
@@ -118,7 +126,9 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
      * @param credentialsProvider to use
      * @return password for connection
      * @throws InvalidSettingsException on unknown authentication type
+     * @deprecated
      */
+    @Deprecated
     public String getPassword(final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
         if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
             return m_authentication.getPassword();
@@ -160,7 +170,9 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
      * @param credentialsProvider credentials provider to use
      * @return a new {@link DatabricksSparkContextConfig} derived from the current settings.
      * @throws InvalidSettingsException on unknown authentication method or empty username or password
+     * @deprecated
      */
+    @Deprecated
     public DatabricksSparkContextConfig createContextConfig(final SparkContextID contextId,
         final ConnectionInformation connInfo, final CredentialsProvider credentialsProvider) throws InvalidSettingsException {
 
@@ -190,7 +202,9 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
      * @param credentialsProvider Provider for the credentials
      * @return The DBFS connection information object
      * @throws InvalidSettingsException
+     * @deprecated
      */
+    @Deprecated
     public ConnectionInformation createDBFSConnectionInformation(final CredentialsProvider credentialsProvider)
         throws InvalidSettingsException {
 
@@ -226,7 +240,9 @@ public class DatabricksSparkContextCreatorNodeSettings extends AbstractDatabrick
      * @param flowVariables variables to use
      * @return settings model
      * @throws InvalidSettingsException
+     * @deprecated
      */
+    @Deprecated
     public static DatabricksSparkContextCreatorNodeSettings
         fromFlowVariables(final Map<String, FlowVariable> flowVariables) throws InvalidSettingsException {
 

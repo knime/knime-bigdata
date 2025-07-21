@@ -60,11 +60,14 @@ import org.knime.core.node.ModelContentWO;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHdfsConnectionInformationPortObjectSpec extends ConnectionInformationPortObjectSpec {
 
     /**
      * @noreference This class is not intended to be referenced by clients.
+     * @deprecated
      */
+    @Deprecated
     public static final class Serializer
         extends AbstractSimplePortObjectSpecSerializer<KnoxHdfsConnectionInformationPortObjectSpec> { }
 
@@ -72,7 +75,9 @@ public class KnoxHdfsConnectionInformationPortObjectSpec extends ConnectionInfor
 
     /**
      * Empty constructor.
+     * @deprecated
      */
+    @Deprecated
     public KnoxHdfsConnectionInformationPortObjectSpec() {
     }
 
@@ -80,7 +85,9 @@ public class KnoxHdfsConnectionInformationPortObjectSpec extends ConnectionInfor
      * Creates a {@link ConnectionInformationPortObjectSpec}.
      *
      * @param connectionInformation {@link KnoxHDFSConnectionInformation} used for the connection.
+     * @deprecated
      */
+    @Deprecated
     public KnoxHdfsConnectionInformationPortObjectSpec(
         final KnoxHDFSConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;

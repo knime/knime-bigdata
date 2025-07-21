@@ -64,6 +64,7 @@ import org.knime.core.node.ExecutionContext;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
 
     private boolean m_fileInfoLoaded = false;
@@ -75,7 +76,9 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
      * @param uri The URI pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
+     * @deprecated
      */
+    @Deprecated
     protected DBFSRemoteFile(final URI uri, final ConnectionInformation connectionInformation,
         final ConnectionMonitor<DBFSConnection> connectionMonitor) {
         super(uri, connectionInformation, connectionMonitor);
@@ -88,7 +91,9 @@ public class DBFSRemoteFile extends RemoteFile<DBFSConnection> {
      * @param uri The URI pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
+     * @deprecated
      */
+    @Deprecated
     protected DBFSRemoteFile(final FileInfo fileInfo, final URI uri,
             final ConnectionInformation connectionInformation,
             final ConnectionMonitor<DBFSConnection> connectionMonitor) {

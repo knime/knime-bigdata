@@ -54,6 +54,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSConnectionNodeFactory extends NodeFactory<KnoxHDFSConnectionNodeModel> {
 
     @Override

@@ -52,6 +52,7 @@ import org.knime.core.util.MutableInteger;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class HDFSConnection extends Connection implements HDFSCompatibleConnection {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HDFSConnection.class);
     private FileSystem m_fs = null;
@@ -65,7 +66,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
 
     /**
      * @param connectionInformation the {@link ConnectionInformation}to use
+     * @deprecated
      */
+    @Deprecated
     public HDFSConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
 
@@ -109,7 +112,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
     /**
      * @param uri the {@link URI} to convert to a hdfs {@link Path}
      * @return the hdfs {@link Path} for the given {@link URI}
+     * @deprecated
      */
+    @Deprecated
     public Path getHDFSPath4URI(final URI uri) {
         return getHDFSPath4URI(m_connectionInformation, uri);
     }
@@ -118,7 +123,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param connectionInformation the {@link ConnectionInformation}
      * @param uri the {@link URI} to convert
      * @return the {@link Path}
+     * @deprecated
      */
+    @Deprecated
     public static Path getHDFSPath4URI(final ConnectionInformation connectionInformation, final URI uri) {
         final StringBuilder hdfsPath = new StringBuilder();
         if (uri.getScheme() != null) {
@@ -149,7 +156,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
     /**
      * @return the {@link FileSystem}
      * @throws IOException if the {@link FileSystem} cannot accessed
+     * @deprecated
      */
+    @Deprecated
     public synchronized FileSystem getFileSystem() throws IOException {
         if (!isOpen()) {
             open();
@@ -165,7 +174,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param src path
      * @param dst path
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized void copyFromLocalFile(final boolean delSrc, final boolean overwrite, final URI src,
         final URI dst) throws IOException {
         @SuppressWarnings("resource")
@@ -185,7 +196,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param useRawLocalFileSystem whether to use RawLocalFileSystem as local file system or not.
      *
      * @throws IOException - if any IO error
+     * @deprecated
      */
+    @Deprecated
     public synchronized void copyToLocalFile(final boolean delSrc, final URI src, final URI dst,
         final boolean useRawLocalFileSystem) throws IOException {
         @SuppressWarnings("resource")
@@ -201,7 +214,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
     * case of a file the recursive can be set to either true or false.
     * @return  true if delete is successful else false.
     * @throws IOException
+    * @deprecated
     */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized boolean delete(final URI f, final boolean recursive) throws IOException {
         final FileSystem fs = getFileSystem();
@@ -281,7 +296,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param dir the directory to create
      * @return <code>true</code> if the directory was successfully created
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized boolean mkDir(final URI dir) throws IOException {
         final FileSystem fs = getFileSystem();
@@ -292,7 +309,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param uri the {@link URI} to open
      * @return {@link FSDataInputStream} to read from
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized FSDataInputStream open(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
@@ -306,7 +325,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      *   the file will be overwritten, and if false an exception will be thrown.
      * @return the {@link FSDataOutputStream} to write to
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized FSDataOutputStream create(final URI f, final boolean overwrite)
         throws IOException {
@@ -318,7 +339,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param uri
      * @return <code>true</code> if the path exists
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @Override
     @SuppressWarnings("resource")
     public synchronized boolean exists(final URI uri) throws IOException {
@@ -330,7 +353,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param uri the {@link URI} to test
      * @return <code>true</code> if the {@link URI} belongs to a directory
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized boolean isDirectory(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
@@ -341,7 +366,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param uri the {@link URI} to get the {@link FileStatus} for
      * @return the {@link FileStatus} for the given {@link URI}
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized FileStatus getFileStatus(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
@@ -356,7 +383,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @return array of {@link FileStatus} objects that represent all files and directories within the given directory
      * @throws IOException if an exception occurred
      * @throws FileNotFoundException
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized FileStatus[] listFiles(final URI uri) throws FileNotFoundException, IOException {
         final FileSystem fs = getFileSystem();
@@ -367,7 +396,9 @@ public class HDFSConnection extends Connection implements HDFSCompatibleConnecti
      * @param uri the {@link URI} to get the ContentSummary for
      * @return the {@link ContentSummary} of the given URI
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public synchronized ContentSummary getContentSummary(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();

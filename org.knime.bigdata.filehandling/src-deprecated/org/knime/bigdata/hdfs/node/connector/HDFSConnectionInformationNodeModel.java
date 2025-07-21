@@ -41,6 +41,7 @@ import org.knime.core.node.port.PortObjectSpec;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class HDFSConnectionInformationNodeModel extends ConnectionInformationNodeModel {
 
     /**

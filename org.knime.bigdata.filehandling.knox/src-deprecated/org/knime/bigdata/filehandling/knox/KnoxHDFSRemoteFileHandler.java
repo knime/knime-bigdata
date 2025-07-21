@@ -59,6 +59,7 @@ import org.knime.core.node.util.CheckUtils;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public final class KnoxHDFSRemoteFileHandler implements RemoteFileHandler<KnoxHDFSConnection> {
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
@@ -73,7 +74,9 @@ public final class KnoxHDFSRemoteFileHandler implements RemoteFileHandler<KnoxHD
     /**
      * @param connectionInformation - Connection to check
      * @return <code>true</code> if this handler supports given connection.
+     * @deprecated
      */
+    @Deprecated
     public static boolean isSupportedConnection(final ConnectionInformation connectionInformation) {
         return KNOXHDFS_PROTOCOL.getName().equalsIgnoreCase(connectionInformation.getProtocol());
     }

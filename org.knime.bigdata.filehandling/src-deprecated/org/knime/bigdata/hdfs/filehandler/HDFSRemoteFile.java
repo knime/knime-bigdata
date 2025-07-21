@@ -37,6 +37,7 @@ import org.knime.base.filehandling.remote.files.RemoteFile;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class HDFSRemoteFile extends RemoteFile<HDFSConnection> {
 
     /**
@@ -44,7 +45,9 @@ public class HDFSRemoteFile extends RemoteFile<HDFSConnection> {
      * @param uri The uri pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
+     * @deprecated
      */
+    @Deprecated
     protected HDFSRemoteFile(final URI uri, final ConnectionInformation connectionInformation,
         final ConnectionMonitor<HDFSConnection> connectionMonitor) {
         super(uri, connectionInformation, connectionMonitor);
@@ -184,7 +187,9 @@ public class HDFSRemoteFile extends RemoteFile<HDFSConnection> {
     /**
      * @param unixSymbolicPermission  a Unix symbolic permission string e.g. "-rw-rw-rw-"
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public void setPermission(final String unixSymbolicPermission) throws IOException {
         getOpenedConnection().setPermission(getURI(), unixSymbolicPermission);
     }

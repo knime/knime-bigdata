@@ -66,6 +66,7 @@ import org.knime.core.node.port.PortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DBFSConnectionInformationNodeModel extends ConnectionInformationNodeModel {
 
     DBFSConnectionInformationNodeModel() {

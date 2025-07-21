@@ -72,13 +72,16 @@ import org.knime.core.node.port.PortType;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSConnectionNodeModel extends NodeModel {
 
     private final KnoxHDFSConnectionNodeSettings m_settings = new KnoxHDFSConnectionNodeSettings();
 
     /**
      * Default constructor.
+     * @deprecated
      */
+    @Deprecated
     protected KnoxHDFSConnectionNodeModel() {
         super(new PortType[] {}, new PortType[] { KnoxHdfsConnectionInformationPortObject.TYPE });
     }

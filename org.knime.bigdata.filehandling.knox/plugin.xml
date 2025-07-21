@@ -11,6 +11,7 @@
    <extension point="org.knime.workbench.repository.nodes">
      <node
          category-path="/io/filehandling/remote/connections"
+         deprecated="true"
          factory-class="org.knime.bigdata.filehandling.knox.node.connector.KnoxHDFSConnectionNodeFactory">
      </node>
    </extension>

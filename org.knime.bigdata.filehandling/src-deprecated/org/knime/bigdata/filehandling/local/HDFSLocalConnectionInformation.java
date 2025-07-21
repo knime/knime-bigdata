@@ -35,6 +35,7 @@ import org.knime.core.node.ModelContentRO;
  *
  * @author Ole Ostergaard, KNIME GmbH, Konstanz, Germany
  */
+@Deprecated
 public class HDFSLocalConnectionInformation extends ConnectionInformation {
 
     private static final long serialVersionUID = 1L;
@@ -43,7 +44,9 @@ public class HDFSLocalConnectionInformation extends ConnectionInformation {
 
     /**
      * @return the singleton instance of type {@link HDFSLocalConnectionInformation}.
+     * @deprecated
      */
+    @Deprecated
     public static synchronized ConnectionInformation getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new HDFSLocalConnectionInformation();
@@ -69,7 +72,9 @@ public class HDFSLocalConnectionInformation extends ConnectionInformation {
      *
      * @param model The {@link ModelContentRO} to load the settings from
      * @throws InvalidSettingsException
+     * @deprecated
      */
+    @Deprecated
     protected HDFSLocalConnectionInformation(final ModelContentRO model) throws InvalidSettingsException {
         super(model);
     }

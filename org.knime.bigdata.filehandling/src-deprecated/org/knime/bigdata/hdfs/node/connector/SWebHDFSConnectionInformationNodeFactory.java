@@ -59,6 +59,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
+@Deprecated
 public class SWebHDFSConnectionInformationNodeFactory extends NodeFactory<ConnectionInformationNodeModel> {
 
     /**

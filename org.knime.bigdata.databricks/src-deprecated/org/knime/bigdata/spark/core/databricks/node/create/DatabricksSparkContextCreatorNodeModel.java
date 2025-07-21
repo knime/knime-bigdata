@@ -74,11 +74,15 @@ import org.knime.database.port.DBSessionPortObject;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DatabricksSparkContextCreatorNodeModel extends AbstractDatabricksSparkContextCreatorNodeModel<DatabricksSparkContextCreatorNodeSettings> {
 
     /**
      * Constructor.
+     *
+     * @deprecated
      */
+    @Deprecated
     DatabricksSparkContextCreatorNodeModel() {
         super(new PortType[0], new PortType[]{DBSessionPortObject.TYPE, ConnectionInformationPortObject.TYPE,
             SparkContextPortObject.TYPE}, new DatabricksSparkContextCreatorNodeSettings());

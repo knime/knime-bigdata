@@ -70,6 +70,7 @@ import org.knime.core.util.ThreadLocalHTTPAuthenticator;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DBFSConnection extends Connection {
 
     private DBFSAPI m_dbfsApi;
@@ -78,7 +79,9 @@ public class DBFSConnection extends Connection {
 
     /**
      * @param connectionInformation the {@link ConnectionInformation} to use
+     * @deprecated
      */
+    @Deprecated
     public DBFSConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
 

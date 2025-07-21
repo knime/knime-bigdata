@@ -119,6 +119,7 @@ import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DatabricksSparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
 
     private static final DBTypeUI DB_TYPE = new DBTypeUI(Databricks.DB_TYPE);
@@ -230,7 +231,10 @@ public class DatabricksSparkContextCreatorNodeDialog extends NodeDialogPane impl
 
     /**
      * Constructor.
+     *
+     * @deprecated
      */
+    @Deprecated
     DatabricksSparkContextCreatorNodeDialog() {
         m_authentication.setPasswordOnlyLabel("Token:");
         addTab("General", createGeneralTab());

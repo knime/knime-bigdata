@@ -26,6 +26,7 @@ import org.knime.bigdata.commons.config.CommonConfigContainer;
  *
  * @author Sascha Wolke, KNIME.com
  */
+@Deprecated
 public class KeyStoreFactoryWrapper extends FileBasedKeyStoresFactory {
 
     @Override

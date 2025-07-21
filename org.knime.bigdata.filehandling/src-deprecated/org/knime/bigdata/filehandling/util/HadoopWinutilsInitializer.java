@@ -29,13 +29,16 @@ import org.knime.bigdata.commons.hadoop.HadoopInitializer;
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
+@Deprecated
 public class HadoopWinutilsInitializer {
 
     /**
      * TO BE REMOVED SOON, replaced by org.knime.bigdata.commons.hadoop.HadoopInitializer
      *
      * @throws IOException
+     * @deprecated
      */
+    @Deprecated
     public synchronized static void ensureInitialized() throws IOException {
         HadoopInitializer.ensureInitialized();
     }

@@ -61,6 +61,7 @@ import org.knime.core.node.workflow.FlowVariable;
  * @author Sascha Wolke, KNIME GmbH
  * @noreference This is testing code and its API is subject to change without notice.
  */
+@Deprecated
 public class TestingDBFSConnectionInformationFactory {
 
     /**
@@ -69,7 +70,9 @@ public class TestingDBFSConnectionInformationFactory {
      * @param flowVariables A map of flow variables that provide the Spark context settings.
      * @return a {@link ConnectionInformation} of the remote DBFS.
      * @throws InvalidSettingsException on invalid or missing flow variables
+     * @deprecated
      */
+    @Deprecated
     public static ConnectionInformation create(final Map<String, FlowVariable> flowVariables) throws InvalidSettingsException {
         return DatabricksSparkContextCreatorNodeSettings.fromFlowVariables(flowVariables)
             .createDBFSConnectionInformation(null);

@@ -72,6 +72,7 @@ import org.knime.core.node.port.PortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSConnectionNodeDialog extends NodeDialogPane {
 
     private final KnoxHDFSConnectionNodeSettings m_settings = new KnoxHDFSConnectionNodeSettings();
@@ -92,7 +93,9 @@ public class KnoxHDFSConnectionNodeDialog extends NodeDialogPane {
 
     /**
      * Default constructor.
+     * @deprecated
      */
+    @Deprecated
     KnoxHDFSConnectionNodeDialog() {
         m_dialogComponents.add(m_url);
         m_dialogComponents.add(m_auth);

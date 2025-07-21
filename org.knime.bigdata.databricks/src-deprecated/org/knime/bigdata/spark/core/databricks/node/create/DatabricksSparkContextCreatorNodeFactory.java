@@ -53,11 +53,15 @@ import org.knime.core.node.NodeDialogPane;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DatabricksSparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<DatabricksSparkContextCreatorNodeModel> {
 
     /**
      * Constructor.
+     *
+     * @deprecated
      */
+    @Deprecated
     public DatabricksSparkContextCreatorNodeFactory() {
         super("");
     }

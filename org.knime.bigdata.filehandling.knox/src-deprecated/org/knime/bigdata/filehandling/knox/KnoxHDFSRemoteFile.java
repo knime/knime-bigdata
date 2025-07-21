@@ -65,6 +65,7 @@ import org.knime.core.node.ExecutionContext;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
 
     private boolean m_fileInfoLoaded = false;
@@ -76,7 +77,9 @@ public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
      * @param uri The URI pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
+     * @deprecated
      */
+    @Deprecated
     protected KnoxHDFSRemoteFile(final URI uri, final KnoxHDFSConnectionInformation connectionInformation,
         final ConnectionMonitor<KnoxHDFSConnection> connectionMonitor) {
         super(uri, connectionInformation, connectionMonitor);
@@ -89,7 +92,9 @@ public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
      * @param uri The URI pointing to the file
      * @param connectionInformation Connection information to the file
      * @param connectionMonitor Monitor for the connection
+     * @deprecated
      */
+    @Deprecated
     protected KnoxHDFSRemoteFile(final FileStatus fileStatus, final URI uri,
             final ConnectionInformation connectionInformation,
             final ConnectionMonitor<KnoxHDFSConnection> connectionMonitor) {
@@ -148,7 +153,9 @@ public class KnoxHDFSRemoteFile extends RemoteFile<KnoxHDFSConnection> {
      * topologies with e.g. different authentication methods using the same username.
      *
      * @return unique connection identifier
+     * @deprecated
      */
+    @Deprecated
     @Override
     public String getIdentifier() {
         if (getConnectionInformation() == null) {

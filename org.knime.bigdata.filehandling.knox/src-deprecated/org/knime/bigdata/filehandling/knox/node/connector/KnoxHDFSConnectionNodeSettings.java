@@ -52,8 +52,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.filehandling.knox.KnoxHDFSRemoteFileHandler;
 import org.knime.bigdata.filehandling.knox.KnoxHDFSConnectionInformation;
+import org.knime.bigdata.filehandling.knox.KnoxHDFSRemoteFileHandler;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -69,6 +69,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSConnectionNodeSettings {
 
     private final SettingsModelString m_url = new SettingsModelString("url", "https://");
@@ -104,7 +105,9 @@ public class KnoxHDFSConnectionNodeSettings {
 
     /**
      * Save all the {@link SettingsModel}s to {@link NodeSettingsWO}.
+     * @deprecated
      */
+    @Deprecated
     void saveSettingsTo(final NodeSettingsWO settings) {
         m_url.saveSettingsTo(settings);
         m_auth.saveSettingsTo(settings);
@@ -114,7 +117,9 @@ public class KnoxHDFSConnectionNodeSettings {
 
     /**
      * Load all the {@link SettingsModel}s from {@link NodeSettingsRO}.
+     * @deprecated
      */
+    @Deprecated
     void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_url.loadSettingsFrom(settings);
         m_auth.loadSettingsFrom(settings);
@@ -124,7 +129,9 @@ public class KnoxHDFSConnectionNodeSettings {
 
     /**
      * Validate all the {@link SettingsModel}s from {@link NodeSettingsRO}.
+     * @deprecated
      */
+    @Deprecated
     void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_url.validateSettings(settings);
         m_auth.validateSettings(settings);
@@ -136,7 +143,9 @@ public class KnoxHDFSConnectionNodeSettings {
      * Validate the values for all the {@link SettingsModel}s
      *
      * @throws InvalidSettingsException When a setting is set inappropriately.
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("unused")
     public void validateValues() throws InvalidSettingsException {
         if (StringUtils.isBlank(m_url.getStringValue())) {
@@ -160,7 +169,9 @@ public class KnoxHDFSConnectionNodeSettings {
 
     /**
      * Create a {@link KnoxHDFSConnectionInformation} from this settings model.
+     * @deprecated
      */
+    @Deprecated
     KnoxHDFSConnectionInformation createConnectionInformation(final CredentialsProvider credentialsProvider) {
         final KnoxHDFSConnectionInformation info = new KnoxHDFSConnectionInformation();
         info.setProtocol(KnoxHDFSRemoteFileHandler.KNOXHDFS_PROTOCOL.getName());

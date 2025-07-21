@@ -35,6 +35,7 @@ import org.knime.core.node.workflow.FlowVariable;
  * @author Bjoern Lohrmann, KNIME GmbH
  * @noreference This is testing code and its API is subject to change without notice.
  */
+@Deprecated
 public class TestingConnectionInformationFactory {
 
     /**
@@ -44,7 +45,9 @@ public class TestingConnectionInformationFactory {
      * @param protocol The remote file protocol to use, e.g. {@link HDFSRemoteFileHandler#HTTPFS_PROTOCOL}.
      * @param flowVariables A map of flow variables that provide the connection settings.
      * @return a {@link ConnectionInformation}.
+     * @deprecated
      */
+    @Deprecated
     public static ConnectionInformation create(final Protocol protocol, final Map<String, FlowVariable> flowVariables) {
 
         final ConnectionInformation remoteFsConnectionInfo = new ConnectionInformation();

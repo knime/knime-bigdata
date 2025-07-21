@@ -25,6 +25,7 @@ package org.knime.bigdata.hdfs.filehandler;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public interface HDFSCompatibleConnectionInformation {
 
 }

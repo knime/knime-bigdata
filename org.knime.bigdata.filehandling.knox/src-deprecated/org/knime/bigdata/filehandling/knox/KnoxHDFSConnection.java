@@ -74,6 +74,7 @@ import org.knime.core.util.ThreadLocalHTTPAuthenticator;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConnection {
 
     private WebHDFSAPI m_client;
@@ -84,7 +85,9 @@ public class KnoxHDFSConnection extends Connection implements HDFSCompatibleConn
 
     /**
      * @param connectionInformation the {@link ConnectionInformation} to use
+     * @deprecated
      */
+    @Deprecated
     public KnoxHDFSConnection(final KnoxHDFSConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
         m_uploadExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "knox-webhdfs-uploader"));

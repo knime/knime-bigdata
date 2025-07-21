@@ -30,6 +30,7 @@ import org.knime.base.filehandling.remote.files.Connection;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public interface HDFSCompatibleConnection {
 
     /**
@@ -37,7 +38,9 @@ public interface HDFSCompatibleConnection {
      *
      * @return user's home directory.
      * @throws IOException
+     * @deprecated
      */
+    @Deprecated
     public URI getHomeDirectory() throws IOException;
 
     /**
@@ -46,7 +49,9 @@ public interface HDFSCompatibleConnection {
      * @param uri URI of path to check
      * @return {@code true} if path exists
      * @throws IOException
+     * @deprecated
      */
+    @Deprecated
     public boolean exists(final URI uri) throws IOException;
 
     /**
@@ -55,6 +60,8 @@ public interface HDFSCompatibleConnection {
      * @param uri URI of path to set permission on
      * @param unixSymbolicPermission Symbolic permission (e.g. {@code -rwxr-x---})
      * @throws IOException
+     * @deprecated
      */
+    @Deprecated
     public void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException;
 }

@@ -57,6 +57,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class DBFSConnectionInformationNodeFactory extends NodeFactory<ConnectionInformationNodeModel> {
 
     @Override

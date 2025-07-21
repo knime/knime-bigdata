@@ -36,6 +36,7 @@ import org.knime.base.filehandling.remote.files.RemoteFileHandler;
  *
  * @author Ole Ostergaard, KNIME GmbH, Konstanz, Germany
  */
+@Deprecated
 public final class HDFSLocalRemoteFileHandler implements RemoteFileHandler<HDFSLocalConnection> {
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}, this is used to register the {@link RemoteFileHandler}.*/
@@ -75,7 +76,9 @@ public final class HDFSLocalRemoteFileHandler implements RemoteFileHandler<HDFSL
      * Maps HttpFS into WebHDFS scheme.
      * @param scheme - Input scheme
      * @return Mapped scheme if required, input scheme otherwise.
+     * @deprecated
      */
+    @Deprecated
     public static String mapScheme(final String scheme) {
         if (scheme.equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
             return HDFSLocalRemoteFileHandler.TRUE_PROTOCOL.getName();
@@ -90,7 +93,9 @@ public final class HDFSLocalRemoteFileHandler implements RemoteFileHandler<HDFSL
     /**
      * @param connectionInformation - Connection to check
      * @return <code>true</code> if this handler supports given connection.
+     * @deprecated
      */
+    @Deprecated
     public static boolean isSupportedConnection(final ConnectionInformation connectionInformation) {
         return containsScheme(SUPPORTED_PROTOCOLS, connectionInformation.getProtocol());
     }

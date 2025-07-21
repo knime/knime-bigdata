@@ -45,6 +45,7 @@ import org.knime.core.node.NodeLogger;
  *
  * @author Ole Ostergaard, KNIME GmbH, Konstanz, Germany
  */
+@Deprecated
 public class HDFSLocalConnection extends Connection implements HDFSCompatibleConnection {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HDFSLocalConnection.class);
 
@@ -54,7 +55,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
 
     /**
      * @param connectionInformation the {@link ConnectionInformation}to use
+     * @deprecated
      */
+    @Deprecated
     public HDFSLocalConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
 
@@ -73,7 +76,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
     /**
      * @param uri the {@link URI} to convert to a hdfs {@link Path}
      * @return the hdfs {@link Path} for the given {@link URI}
+     * @deprecated
      */
+    @Deprecated
     public Path getHDFSPath4URI(final URI uri) {
         return getHDFSPath4URI(m_connectionInformation, uri);
     }
@@ -82,7 +87,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param connectionInformation the {@link ConnectionInformation}
      * @param uri the {@link URI} to convert
      * @return the {@link Path}
+     * @deprecated
      */
+    @Deprecated
     public static Path getHDFSPath4URI(final ConnectionInformation connectionInformation, final URI uri) {
         final StringBuilder hdfsPath = new StringBuilder();
         if (uri.getScheme() != null) {
@@ -102,7 +109,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
     /**
      * @return the {@link FileSystem}
      * @throws IOException if the {@link FileSystem} cannot accessed
+     * @deprecated
      */
+    @Deprecated
     public synchronized LocalFileSystem getFileSystem() throws IOException {
         if (!isOpen()) {
             open();
@@ -118,7 +127,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param src path
      * @param dst path
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized void copyFromLocalFile(final boolean delSrc, final boolean overwrite, final URI src,
         final URI dst) throws IOException {
         final LocalFileSystem fs = getFileSystem();
@@ -137,7 +148,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param useRawLocalFileSystem whether to use RawLocalFileSystem as local file system or not.
      *
      * @throws IOException - if any IO error
+     * @deprecated
      */
+    @Deprecated
     public synchronized void copyToLocalFile(final boolean delSrc, final URI src, final URI dst,
         final boolean useRawLocalFileSystem) throws IOException {
         final LocalFileSystem fs = getFileSystem();
@@ -152,7 +165,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
     * case of a file the recursive can be set to either true or false.
     * @return  true if delete is successful else false.
     * @throws IOException
+    * @deprecated
     */
+    @Deprecated
     public synchronized boolean delete(final URI f, final boolean recursive) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         return fs.delete(getHDFSPath4URI(f), recursive);
@@ -190,7 +205,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param dir the directory to create
      * @return <code>true</code> if the directory was successfully created
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized boolean mkDir(final URI dir) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         return fs.mkdirs(getHDFSPath4URI(dir));
@@ -200,7 +217,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param uri the {@link URI} to open
      * @return {@link FSDataInputStream} to read from
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized FSDataInputStream open(final URI uri) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         return fs.open(getHDFSPath4URI(uri));
@@ -213,7 +232,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      *   the file will be overwritten, and if false an exception will be thrown.
      * @return the {@link FSDataOutputStream} to write to
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized FSDataOutputStream create(final URI f, final boolean overwrite)
         throws IOException {
         final FileSystem fs = getFileSystem();
@@ -235,7 +256,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param uri the {@link URI} to test
      * @return <code>true</code> if the {@link URI} belongs to a directory
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized boolean isDirectory(final URI uri) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         return fs.isDirectory(getHDFSPath4URI(uri));
@@ -245,7 +268,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param uri the {@link URI} to get the {@link FileStatus} for
      * @return the {@link FileStatus} for the given {@link URI}
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized FileStatus getFileStatus(final URI uri) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         final FileStatus fileStatus = fs.getFileStatus(getHDFSPath4URI(uri));
@@ -259,7 +284,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @return array of {@link FileStatus} objects that represent all files and directories within the given directory
      * @throws IOException if an exception occurred
      * @throws FileNotFoundException
+     * @deprecated
      */
+    @Deprecated
     public synchronized FileStatus[] listFiles(final URI uri) throws FileNotFoundException, IOException {
         final LocalFileSystem fs = getFileSystem();
         return fs.listStatus(getHDFSPath4URI(uri));
@@ -269,7 +296,9 @@ public class HDFSLocalConnection extends Connection implements HDFSCompatibleCon
      * @param uri the {@link URI} to get the ContentSummary for
      * @return the {@link ContentSummary} of the given URI
      * @throws IOException if an exception occurs
+     * @deprecated
      */
+    @Deprecated
     public synchronized ContentSummary getContentSummary(final URI uri) throws IOException {
         final LocalFileSystem fs = getFileSystem();
         //returns the size of the file or the length of all files within the directory

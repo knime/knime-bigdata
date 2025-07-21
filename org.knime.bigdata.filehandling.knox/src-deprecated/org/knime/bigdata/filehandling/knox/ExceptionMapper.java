@@ -68,6 +68,7 @@ import jakarta.ws.rs.core.Response;
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
+@Deprecated
 public final class ExceptionMapper {
 
     private ExceptionMapper() {
@@ -78,7 +79,9 @@ public final class ExceptionMapper {
      *
      * @param e The exception that was thrown.
      * @return The exception to throw instead.
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("resource")
     public static IOException mapException(final Exception e) {
         String message = null;

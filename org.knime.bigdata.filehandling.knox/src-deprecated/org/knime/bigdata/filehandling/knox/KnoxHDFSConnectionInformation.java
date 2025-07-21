@@ -66,6 +66,7 @@ import org.knime.core.node.ModelContentWO;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public class KnoxHDFSConnectionInformation extends ConnectionInformation
     implements HDFSCompatibleConnectionInformation {
 
@@ -79,7 +80,9 @@ public class KnoxHDFSConnectionInformation extends ConnectionInformation
 
     /**
      * Parameterless constructor.
+     * @deprecated
      */
+    @Deprecated
     public KnoxHDFSConnectionInformation() {
         super();
     }
@@ -89,7 +92,9 @@ public class KnoxHDFSConnectionInformation extends ConnectionInformation
      *
      * @param model model to restore
      * @throws InvalidSettingsException if model contains invalid settings
+     * @deprecated
      */
+    @Deprecated
     protected KnoxHDFSConnectionInformation(final ModelContentRO model) throws InvalidSettingsException {
         super(model);
 
@@ -118,14 +123,18 @@ public class KnoxHDFSConnectionInformation extends ConnectionInformation
 
     /**
      * @return KNOX URL to use
+     * @deprecated
      */
+    @Deprecated
     URI getURL() {
         return m_url;
     }
 
     /**
      * @param url KNOX URL to use
+     * @deprecated
      */
+    @Deprecated
     public void setURL(final URI url) {
         m_url = url;
         setHost(m_url.getHost());
@@ -134,7 +143,9 @@ public class KnoxHDFSConnectionInformation extends ConnectionInformation
 
     /**
      * @return unique identifier of the connection using the URL and the configured username
+     * @deprecated
      */
+    @Deprecated
     String getIdentifier() {
         try {
             final Protocol protocol = KnoxHDFSRemoteFileHandler.KNOXHDFS_PROTOCOL;

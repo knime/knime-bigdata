@@ -58,6 +58,7 @@ import org.knime.base.filehandling.remote.files.RemoteFileHandler;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
+@Deprecated
 public final class DBFSRemoteFileHandler implements RemoteFileHandler<DBFSConnection> {
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
@@ -72,7 +73,9 @@ public final class DBFSRemoteFileHandler implements RemoteFileHandler<DBFSConnec
     /**
      * @param connectionInformation - Connection to check
      * @return <code>true</code> if this handler supports given connection.
+     * @deprecated
      */
+    @Deprecated
     public static boolean isSupportedConnection(final ConnectionInformation connectionInformation) {
         return DBFS_PROTOCOL.getName().equalsIgnoreCase(connectionInformation.getProtocol());
     }
