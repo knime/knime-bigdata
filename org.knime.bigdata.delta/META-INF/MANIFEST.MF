@@ -23,7 +23,7 @@ Require-Bundle: org.knime.core;bundle-version="[5.6.0,6.0.0)",
  org.apache.commons.lang3;bundle-version="[3.14.0,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: knime-delta.jar,
+Bundle-ClassPath: .,
  lib/delta-kernel-api-3.3.1.jar,
  lib/delta-kernel-defaults-3.3.1.jar,
  lib/delta-storage-3.3.1.jar,
