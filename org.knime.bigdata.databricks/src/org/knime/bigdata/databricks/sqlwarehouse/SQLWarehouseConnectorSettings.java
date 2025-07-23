@@ -57,14 +57,15 @@ import org.knime.bigdata.databricks.rest.sql.SQLWarehouseInfoList;
 import org.knime.core.data.sort.AlphanumericComparator;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.ChoicesProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.StringChoice;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.choices.StringChoicesProvider;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.handler.WidgetHandlerException;
+import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.NodeParametersInput;
+import org.knime.node.parameters.Widget;
+import org.knime.node.parameters.layout.Layout;
+import org.knime.node.parameters.layout.Section;
+import org.knime.node.parameters.widget.choices.ChoicesProvider;
+import org.knime.node.parameters.widget.choices.StringChoice;
+import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
 /**
  * Node settings for the Databricks SQL Warehouse Connector.
@@ -72,7 +73,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.handler.WidgetHandl
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
 @SuppressWarnings("restriction")
-public class SQLWarehouseConnectorSettings implements DefaultNodeSettings {
+public class SQLWarehouseConnectorSettings implements NodeParameters {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SQLWarehouseConnectorSettings.class);
 
@@ -106,10 +107,10 @@ public class SQLWarehouseConnectorSettings implements DefaultNodeSettings {
         }
 
         @Override
-        public List<StringChoice> computeState(final DefaultNodeSettingsContext context) {
+        public List<StringChoice> computeState(final NodeParametersInput context) {
             try {
                 final SQLWarehouseInfoList warehouseList = DatabricksRESTClient //
-                    .fromSingleWorkspaceInputPort(SQLWarehouseAPI.class, context.getPortObjectSpecs()) //
+                    .fromSingleWorkspaceInputPort(SQLWarehouseAPI.class, context.getInPortSpecs()) //
                     .listWarehouses();
                 return Arrays.stream(warehouseList.warehouses) //
                     .sorted(COMPARATOR) //

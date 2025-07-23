@@ -51,10 +51,10 @@ package org.knime.bigdata.databricks.unity.filehandling.node;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Section;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
+import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.Widget;
+import org.knime.node.parameters.layout.Layout;
+import org.knime.node.parameters.layout.Section;
 
 /**
  * Node settings for the Databricks Unity File System Connector.
@@ -62,7 +62,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
 @SuppressWarnings("restriction")
-public class UnityFileSystemConnectorSettings implements DefaultNodeSettings {
+public class UnityFileSystemConnectorSettings implements NodeParameters {
 
     @Section(title = "File System")
     interface FileSystemSection {

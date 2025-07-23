@@ -54,19 +54,20 @@ import org.knime.base.node.io.filehandling.webui.ReferenceStateProvider;
 import org.knime.base.node.io.filehandling.webui.reader.CommonReaderLayout;
 import org.knime.base.node.io.filehandling.webui.reader.CommonReaderNodeSettings;
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.Settings.MakeSourceFolderSelectionModifier;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileReaderWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FolderSelectionWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.Layout;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.WidgetGroup;
-import org.knime.core.webui.node.dialog.defaultdialog.persistence.api.Persist;
-import org.knime.core.webui.node.dialog.defaultdialog.persistence.api.Persistor;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Label;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.NumberInputWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.RadioButtonsWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Widget;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.ValueReference;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.NumberInputWidgetValidation.MinValidation.IsNonNegativeValidation;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification.WidgetGroupModifier;
+import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.Widget;
+import org.knime.node.parameters.layout.Layout;
+import org.knime.node.parameters.persistence.Persist;
+import org.knime.node.parameters.persistence.Persistor;
+import org.knime.node.parameters.updates.ValueReference;
+import org.knime.node.parameters.widget.choices.Label;
+import org.knime.node.parameters.widget.choices.RadioButtonsWidget;
+import org.knime.node.parameters.widget.number.NumberInputWidget;
+import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsNonNegativeValidation;
 
 /**
  * Settings store managing all configurations required for the delta table reader node.
@@ -74,7 +75,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.NumberIn
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
 @SuppressWarnings("restriction") // New Node UI is not yet API
-public final class DeltaTableReaderNodeSettings implements DefaultNodeSettings {
+public final class DeltaTableReaderNodeSettings implements NodeParameters {
 
     @Persist(configKey = "settings")
     Settings m_settings = new Settings();
@@ -89,7 +90,7 @@ public final class DeltaTableReaderNodeSettings implements DefaultNodeSettings {
     static final class Settings extends CommonReaderNodeSettings.BaseSettings {
 
         // Replace the file selection widget with a folder selection widget
-        static final class MakeSourceFolderSelectionModifier implements WidgetGroup.Modifier {
+        static final class MakeSourceFolderSelectionModifier implements Modification.Modifier {
             @Override
             public void modify(final WidgetGroupModifier group) {
                 final var sourceWidget = group.find(FileSelectionRef.class);
