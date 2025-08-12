@@ -17,7 +17,7 @@ properties([
 
 try {
     withEnv(["MAVEN_OPTS=-Xmx4G"]){
-        knimetools.defaultTychoBuild('org.knime.update.bigdata', 'maven && java17 && large')
+        knimetools.defaultTychoBuild('org.knime.update.bigdata', 'maven && java21 && large')
     }
 
 
