@@ -20,7 +20,7 @@ Require-Bundle: org.knime.workbench.repository;bundle-version="[5.6.0,6.0.0)",
  com.sun.jersey.client;bundle-version="[1.19.0,2.0.0)",
  javax.ws.rs.jsr311-api;bundle-version="[1.0.0,2.0.0)",
  org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
 Automatic-Module-Name: org.knime.bigdata.hadoop.filehandling
