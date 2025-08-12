@@ -6,7 +6,7 @@ Bundle-Version: 5.6.0.qualifier
 Bundle-ClassPath: .
 Fragment-Host: org.apache.hadoop.client;bundle-version="[3.4.1,4.0.0)"
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-NativeCode: native/hadoop.dll;osname=win32;processor=x86_64,*
 Automatic-Module-Name: org.knime.bigdata.hadoop.client.win32
 
