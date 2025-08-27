@@ -54,6 +54,8 @@ import org.knime.bigdata.database.databricks.agent.loader.DatabricksDataLoader;
 import org.knime.database.agent.AbstractDBAgentFactory;
 import org.knime.database.agent.DBAgentFactory;
 import org.knime.database.agent.binning.DBBinner;
+import org.knime.database.agent.ddl.DBStructureManipulator;
+import org.knime.database.agent.ddl.impl.DefaultDBStructureManipulator;
 import org.knime.database.agent.loader.DBLoader;
 import org.knime.database.agent.metadata.DBMetadataReader;
 import org.knime.database.agent.metadata.impl.DefaultDBMetadataReader;
@@ -84,16 +86,35 @@ public class DatabricksAgentFactory extends AbstractDBAgentFactory {
         SAMPLING_ATTRIBUTES = builder.build();
     }
 
+    private static final AttributeCollection STRUCTURE_MANIPULATION_ATTRIBUTES;
+    static {
+        final AttributeCollection.Builder builder =
+            AttributeCollection.builder(DefaultDBStructureManipulator.ATTRIBUTES);
+        builder.add(Accessibility.HIDDEN, DefaultDBStructureManipulator.ATTRIBUTE_CAPABILITY_FETCH_STATEMENT_RESULT,
+            false);
+        STRUCTURE_MANIPULATION_ATTRIBUTES = builder.build();
+    }
+
     /**
     * Constructs a {@link DatabricksAgentFactory}.
     */
     public DatabricksAgentFactory() {
+
+        // DON'T FORGET TO REGISTER NEW AGENTS ALSO IN PLUGIN.XML!
+
         putCreator(DBBinner.class, parameters -> new DatabricksCaseSupportedBinner(parameters.getSessionReference()));
+
         putCreator(DBLoader.class, parameters -> new DatabricksDataLoader(parameters.getSessionReference()));
+
         putAttributes(DBMetadataReader.class, METADATA_ATTRIBUTES);
         putCreator(DBMetadataReader.class, parameters -> new DefaultDBMetadataReader(parameters.getSessionReference()));
+
         putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
         putCreator(DBSampling.class, parameters -> new DatabricksSampling(parameters.getSessionReference()));
+
+        putAttributes(DBStructureManipulator.class, STRUCTURE_MANIPULATION_ATTRIBUTES);
+        putCreator(DBStructureManipulator.class,
+            parameters -> new DefaultDBStructureManipulator(parameters.getSessionReference()));
     }
 
 }

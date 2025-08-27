@@ -64,6 +64,10 @@
             dbTypes="hive"
             factory="org.knime.bigdata.database.hive.HiveAgentFactory"
             interface="org.knime.database.agent.sampling.DBSampling"/>
+      <Agent
+            dbTypes="hive"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.ddl.DBStructureManipulator"/>
 <!-- Impala -->         
       <Agent
             dbTypes="impala"
@@ -81,6 +85,10 @@
             dbTypes="impala"
             factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
             interface="org.knime.database.agent.sampling.DBSampling"/>
+      <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.ddl.DBStructureManipulator"/>
    </extension>
    <!-- ********************************** DB Aggregation Functions ********************************** -->
    
