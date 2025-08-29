@@ -27,7 +27,7 @@ try {
             def local_bd_tests = "(SparkLocal|SparkExecutor|SparkDatabase|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_3_5_higher|spark_all|ORC|Parquet|DeltaTable)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db).+"
 
     
-            def testPrefix = "BigDataTests/${BN == KNIMEConstants.NEXT_RELEASE_BRANCH ? 'master' : BN}".replaceAll('releases/', '')
+            def testPrefix = "BigDataTests/master"
             def testRegex = "/${testPrefix}/${local_bd_tests}"
 
             echo "${testRegex}"
@@ -109,7 +109,7 @@ try {
             
         },
         FileHandlingTests: {
-            def baseBranch = "${BN == KNIMEConstants.NEXT_RELEASE_BRANCH ? 'master' : BN}".replaceAll('releases/', '')
+            def baseBranch = "master"
             def fhTestflowsDir = "BigDataTests/${baseBranch}/File Handling v2"
             workflowTests.runFilehandlingTests (
                 testflowsDir: fhTestflowsDir,
