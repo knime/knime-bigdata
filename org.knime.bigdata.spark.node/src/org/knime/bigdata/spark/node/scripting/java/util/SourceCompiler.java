@@ -72,13 +72,7 @@ public class SourceCompiler {
         m_className = aClassName;
         m_javaCode = javaCode;
         m_classpath = classpath;
-
-        if (SparkVersion.V_2_2.compareTo(sparkVersion) <= 0) {
-            m_javaVersion = JavaCodeCompiler.JavaVersion.JAVA_8;
-        } else {
-            m_javaVersion = JavaCodeCompiler.JavaVersion.JAVA_7;
-        }
-
+        m_javaVersion = JavaCodeCompiler.JavaVersion.JAVA_8;
         m_bytecode = compile();
     }
 
