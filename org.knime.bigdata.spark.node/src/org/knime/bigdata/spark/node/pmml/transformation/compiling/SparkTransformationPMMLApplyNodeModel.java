@@ -106,21 +106,21 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
      */
     @Override
     public CompiledModelPortObject getCompiledPMMLModel(final ExecutionMonitor exec, final PortObject[] inObjects)
-            throws Exception {
-         final PMMLPortObject pmml = (PMMLPortObject)inObjects[0];
-         String doc = pmml.getPMMLValue().toString();
-         String code;
-         try {
-             code = PMMLTranslator.generateJava(doc, this, PACKAGE_NAME, MODEL_NAME);
-         } catch (TerminatingMessageException tme) {
-             throw new UnsupportedOperationException(tme.getMessage());
-         }
+        throws Exception {
+        final PMMLPortObject pmml = (PMMLPortObject)inObjects[0];
+        String doc = pmml.getPMMLValue().toString();
+        String code;
+        try {
+            code = PMMLTranslator.generateJava(doc, this, PACKAGE_NAME, MODEL_NAME);
+        } catch (TerminatingMessageException tme) {
+            throw new UnsupportedOperationException(tme.getMessage());
+        }
 
-         try {
-             return new CompiledModelPortObject(code, PACKAGE_NAME, MODEL_NAME, JavaCodeCompiler.JavaVersion.JAVA_7);
-         } catch (CompilationFailedException e) {
-             throw new InvalidSettingsException("The compilation of the generated code failed.\n" + e.getMessage());
-         }
+        try {
+            return new CompiledModelPortObject(code, PACKAGE_NAME, MODEL_NAME, JavaCodeCompiler.JavaVersion.JAVA_8);
+        } catch (CompilationFailedException e) {
+            throw new InvalidSettingsException("The compilation of the generated code failed.\n" + e.getMessage());
+        }
     }
 
     /**
