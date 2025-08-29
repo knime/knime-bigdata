@@ -82,7 +82,7 @@ implements MessageListener {
         try {
             final String code = PMMLTranslator.generateJava(doc, this, PACKAGE_NAME, MODEL_NAME);
             CompiledModelPortObject cm = new CompiledModelPortObject(code, PACKAGE_NAME, MODEL_NAME,
-                JavaCodeCompiler.JavaVersion.JAVA_7);
+                JavaCodeCompiler.JavaVersion.JAVA_8);
             return cm;
         } catch (TerminatingMessageException tme) {
             throw new UnsupportedOperationException(tme.getMessage());
