@@ -29,7 +29,7 @@ Require-Bundle: org.knime.bigdata.commons;bundle-version="3.6.0",
   org.knime.filehandling.core;bundle-version="[5.6.0,6.0.0)",
   org.apache.commons.lang3;bundle-version="[3.3.1,4.0.0)",
   org.knime.kerberos;bundle-version="[5.6.0,6.0.0)",
-  org.xerial.snappy.snappy-java;bundle-version="[1.1.7,2.0.0)"
+  org.xerial.snappy.snappy-java;bundle-version="[1.1.10,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
