@@ -128,6 +128,7 @@ try {
                         'knime-jep',
                         'knime-kerberos',
                         'knime-office365',
+                        'knime-scripting-editor',
                         'knime-streaming'
                     ]
                 ]
