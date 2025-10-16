@@ -74,6 +74,7 @@ try {
                             'knime-python-legacy',
                             'knime-rest',
                             'knime-reporting',
+                            'knime-scripting-editor',
                             'knime-sparkling-water',
                             'knime-stats',
                             'knime-streaming',
