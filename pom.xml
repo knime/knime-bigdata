@@ -96,6 +96,11 @@
 			<layout>p2</layout>
 			<url>${knime.core.ui.p2}</url>
 		</repository>
+        <repository>
+            <id>p2-knime-azure</id>
+            <layout>p2</layout>
+            <url>${knime.azure.p2}</url>
+        </repository>
 		<repository>
 			<id>p2-knime-credentials-base</id>
 			<layout>p2</layout>
