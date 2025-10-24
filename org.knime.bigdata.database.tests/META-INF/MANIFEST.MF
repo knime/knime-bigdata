@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Unit-Tests for org.knime.bigdata.database
+Bundle-SymbolicName: org.knime.bigdata.database.tests;singleton:=true
+Bundle-Version: 5.9.0.qualifier
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Fragment-Host: org.knime.bigdata.database;bundle-version="[5.9.0,6.0.0)"
+Require-Bundle: org.junit;bundle-version="[4.13.2,5.0.0)",
+ junit-jupiter-api;bundle-version="[5.9.2,6.0.0)",
+ org.knime.testing;bundle-version="[5.6.0,6.0.0)",
+ org.knime.core.ui.testing;bundle-version="[5.8.0,6.0.0)"
+Automatic-Module-Name: org.knime.bigdata.database.tests

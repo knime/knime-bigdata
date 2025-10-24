@@ -1,0 +1,180 @@
+{
+  "data" : {
+    "model" : {
+      "tableName" : {
+        "catalogName" : "",
+        "tableName" : ""
+      },
+      "targetFolder" : {
+        "file" : {
+          "path" : {
+            "fsCategory" : "LOCAL",
+            "path" : "",
+            "timeout" : 10000,
+            "context" : {
+              "fsToString" : "(LOCAL, )"
+            }
+          }
+        },
+        "createMissingFolders" : false
+      }
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "messageFileSystemManagedByPort" : {
+            "type" : "object"
+          },
+          "tableName" : {
+            "type" : "object",
+            "properties" : {
+              "catalogName" : {
+                "type" : "string",
+                "title" : "Database name",
+                "description" : "The name of the database (or catalogue) to use.",
+                "default" : ""
+              },
+              "schemaName" : {
+                "type" : "string",
+                "title" : "Schema name",
+                "description" : "The database schema to read the table from. If not provided, the default schema of the database will be used.\n"
+              },
+              "tableName" : {
+                "type" : "string",
+                "title" : "Table name",
+                "description" : "Name of the database table to read data from. Must match the table name as it appears in the selected schema.\n",
+                "default" : ""
+              }
+            },
+            "default" : {
+              "catalogName" : "",
+              "tableName" : ""
+            }
+          },
+          "targetFolder" : {
+            "type" : "object",
+            "properties" : {
+              "createMissingFolders" : {
+                "type" : "boolean",
+                "title" : "Create missing folders",
+                "description" : "If enabled, missing folders in the specified path will be created automatically.",
+                "default" : false
+              },
+              "file" : {
+                "type" : "object",
+                "properties" : {
+                  "path" : {
+                    "type" : "object",
+                    "default" : {
+                      "fsCategory" : "LOCAL",
+                      "path" : "",
+                      "timeout" : 10000,
+                      "context" : {
+                        "fsToString" : "(LOCAL, )"
+                      }
+                    }
+                  }
+                },
+                "title" : "Target Folder",
+                "description" : "The target folder in the file system connection where the files will be staged to.",
+                "default" : {
+                  "path" : {
+                    "fsCategory" : "LOCAL",
+                    "path" : "",
+                    "timeout" : 10000,
+                    "context" : {
+                      "fsToString" : "(LOCAL, )"
+                    }
+                  }
+                }
+              }
+            },
+            "default" : {
+              "file" : {
+                "path" : {
+                  "fsCategory" : "LOCAL",
+                  "path" : "",
+                  "timeout" : 10000,
+                  "context" : {
+                    "fsToString" : "(LOCAL, )"
+                  }
+                }
+              },
+              "createMissingFolders" : false
+            }
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/tableName",
+      "options" : {
+        "format" : "dbTableChooser",
+        "dbConnectionError" : "No database is currently connected. To proceed, connect a database to the input port, or re-execute any upstream connector nodes.",
+        "validateSchema" : true,
+        "validateTable" : true
+      }
+    }, {
+      "type" : "Control",
+      "id" : "#/properties/model/properties/messageFileSystemManagedByPort",
+      "options" : {
+        "format" : "textMessage"
+      },
+      "providedOptions" : [ "message" ]
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/targetFolder/properties/file",
+      "options" : {
+        "fileSystems" : [ "CONNECTED" ],
+        "isWriter" : true,
+        "selectionMode" : "FOLDER",
+        "format" : "fileChooser"
+      }
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/targetFolder/properties/createMissingFolders",
+      "options" : {
+        "format" : "checkbox"
+      }
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "tableName" : {
+            "configPaths" : [ [ "tableName", "table" ], [ "tableName", "schema" ], [ "tableName", "database" ] ]
+          },
+          "messageFileSystemManagedByPort" : { },
+          "targetFolder" : {
+            "type" : "object",
+            "properties" : {
+              "file" : {
+                "configPaths" : [ [ "path" ] ]
+              },
+              "createMissingFolders" : {
+                "configKey" : "create_missing_folders"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ ]
+  } ]
+}
