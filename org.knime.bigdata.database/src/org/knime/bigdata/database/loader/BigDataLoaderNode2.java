@@ -99,6 +99,7 @@ import org.knime.database.model.DBTable;
 import org.knime.database.model.impl.DefaultDBColumn;
 import org.knime.database.node.io.load.DBLoaderNode2;
 import org.knime.database.node.io.load.DBLoaderNode2Factory;
+import org.knime.database.node.io.load.DBLoaderParameters;
 import org.knime.database.node.io.load.ExecutionParameters;
 import org.knime.database.node.io.load.impl.fs.ConnectableCsvLoaderNodeSettings2;
 import org.knime.database.node.io.load.impl.fs.ConnectedCsvLoaderNodeComponents2;
@@ -466,4 +467,11 @@ public class BigDataLoaderNode2
             columnLists.getNormalColumns(), columnLists.getPartitionColumns());
         return columnLists;
     }
+
+    @Override
+    public Class<? extends DBLoaderParameters> getParametersClass() {
+        return BigDataLoaderNodeParameters.class;
+    }
+
+
 }
