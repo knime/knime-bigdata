@@ -55,7 +55,8 @@ import org.knime.base.node.io.filehandling.webui.reader.CommonReaderLayout;
 import org.knime.base.node.io.filehandling.webui.reader.CommonReaderNodeSettings;
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.Settings.MakeSourceFolderSelectionModifier;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileReaderWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FolderSelectionWidget;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification.WidgetGroupModifier;
 import org.knime.node.parameters.NodeParameters;
@@ -95,7 +96,8 @@ public final class DeltaTableReaderNodeSettings implements NodeParameters {
             public void modify(final WidgetGroupModifier group) {
                 final var sourceWidget = group.find(FileSelectionRef.class);
                 sourceWidget.removeAnnotation(FileReaderWidget.class);
-                sourceWidget.addAnnotation(FolderSelectionWidget.class).modify();
+                sourceWidget.addAnnotation(FileSelectionWidget.class).withValue(SingleFileSelectionMode.FOLDER)
+                    .modify();
 
                 final var origDescription = CommonReaderLayout.File.Source.DESCRIPTION;
                 final var newDescription = origDescription +
