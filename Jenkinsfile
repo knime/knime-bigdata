@@ -74,7 +74,6 @@ try {
                             'knime-python-legacy',
                             'knime-rest',
                             'knime-reporting',
-                            'knime-scripting-editor',
                             'knime-sparkling-water',
                             'knime-stats',
                             'knime-streaming',
@@ -128,7 +127,6 @@ try {
                         'knime-jep',
                         'knime-kerberos',
                         'knime-office365',
-                        'knime-scripting-editor',
                         'knime-streaming'
                     ]
                 ]
