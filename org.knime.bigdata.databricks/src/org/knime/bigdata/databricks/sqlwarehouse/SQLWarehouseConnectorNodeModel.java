@@ -164,7 +164,7 @@ public class SQLWarehouseConnectorNodeModel extends WebUINodeModel<SQLWarehouseC
         }
 
         if (getSettings().isPresent()) {
-            getSettings().get().validate();
+            getSettings().get().validateOnConfigure();
         } else {
             throw new InvalidSettingsException("Please select a SQL Warehouse in the configuration dialog.");
         }

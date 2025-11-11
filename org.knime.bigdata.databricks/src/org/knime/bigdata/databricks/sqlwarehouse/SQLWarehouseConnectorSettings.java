@@ -92,8 +92,7 @@ public class SQLWarehouseConnectorSettings implements NodeParameters {
     @Layout(MainSection.class)
     String m_warehouseId = "";
 
-    @Override
-    public void validate() throws InvalidSettingsException {
+    void validateOnConfigure() throws InvalidSettingsException {
         if (StringUtils.isAllBlank(m_warehouseId)) {
             throw new InvalidSettingsException("Please select a SQL Warehouse.");
         }
