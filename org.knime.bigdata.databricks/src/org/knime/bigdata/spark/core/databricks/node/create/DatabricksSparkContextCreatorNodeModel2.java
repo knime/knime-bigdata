@@ -73,6 +73,8 @@ import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.database.connection.DBConnectionController;
+import org.knime.database.driver.DBDriverRegistry;
+import org.knime.database.driver.DBDriverWrapper;
 import org.knime.filehandling.core.connections.FSConnection;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
@@ -85,6 +87,11 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  */
 public class DatabricksSparkContextCreatorNodeModel2
     extends AbstractDatabricksSparkContextCreatorNodeModel<DatabricksSparkContextCreatorNodeSettings2> {
+
+    /**
+     * Message when database driver was not found by id.
+     */
+    public static final String DATABASE_DRIVER_IS_NOT_FOUND = "Could not find the [%s] database driver.";
 
     private String m_fsId;
 
@@ -105,6 +112,12 @@ public class DatabricksSparkContextCreatorNodeModel2
 
         initializeTypeMapping();
         m_settings.validateDriverRegistered();
+        final String driverId = m_settings.getDriver();
+        final DBDriverWrapper driverWrapper = DBDriverRegistry.getInstance().getDriver(driverId)
+            .orElseThrow(() -> new InvalidSettingsException(String.format(DATABASE_DRIVER_IS_NOT_FOUND, driverId)));
+        if (driverWrapper.isDeprecated()) {
+            setWarning(driverWrapper.getDeprecatedMessage().get());
+        }
         m_settings.validate(m_variableContext);
 
         m_fsId = FSConnectionRegistry.getInstance().getKey();
