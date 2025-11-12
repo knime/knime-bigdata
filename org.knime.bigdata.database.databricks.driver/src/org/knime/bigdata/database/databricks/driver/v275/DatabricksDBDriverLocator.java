@@ -43,45 +43,19 @@
  * -------------------------------------------------------------------
  *
  */
-package org.knime.bigdata.database.databricks.driver.v273;
-
-import java.util.Optional;
+package org.knime.bigdata.database.databricks.driver.v275;
 
 import org.knime.bigdata.database.databricks.driver.AbstractDatabricksDBDriverLocator;
-import org.knime.core.node.message.Message;
-import org.knime.core.node.message.MessageBuilder;
 
 /**
  * A driver locator class for the official Databricks JDBC Driver.
  */
 public class DatabricksDBDriverLocator extends AbstractDatabricksDBDriverLocator {
 
-    private static final Message MESSAGE;
-
-    static {
-        final MessageBuilder builder = Message.builder();
-        builder.withSummary("Selected database driver is deprecated.");
-        builder.addTextIssue("This driver does not support Java 21 and will be moved to a "
-            + "separate extension that requires manual installation with one of the next releases.");
-        builder.addResolutions("Enable the 'Use latest driver version available' option in the node dialog.",
-            "Select a new version of the driver in the node dialog.");
-        MESSAGE = builder.build().get();
-    }
-
     /**
      * Constructor for {@link DatabricksDBDriverLocator}.
      */
     public DatabricksDBDriverLocator() {
-        super("2.7.3");
-    }
-
-    @Override
-    public Optional<Message> getDeprecatedMessage() {
-        return Optional.of(MESSAGE);
-    }
-
-    @Override
-    public boolean isDeprecated() {
-        return true;
+        super("2.7.5");
     }
 }
