@@ -112,7 +112,7 @@ try {
             
         },
         FileHandlingTests: {
-            def baseBranch = "${BN == KNIMEConstants.NEXT_RELEASE_BRANCH ? 'master' : BN}".replaceAll('releases/', '')
+            def baseBranch = "${BN == KNIMEConstants.NEXT_RELEASE_BRANCH || BN == 'releases/STS' || BN == 'releases/STS-next' ? 'master' : BN}".replaceAll('releases/', '')
             def fhTestflowsDir = "BigDataTests/${baseBranch}/File Handling v2"
             workflowTests.runFilehandlingTests (
                 testflowsDir: fhTestflowsDir,
