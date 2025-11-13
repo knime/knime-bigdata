@@ -8,7 +8,7 @@ Bundle-ClassPath: knime.jar,
   lib/knime-jobserver-utils-0.7.0.1-KNIME_spark-2.0.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.spark2_0.api
-Require-Bundle: org.knime.core;bundle-version="[5.6.0,6.0.0)",
+Require-Bundle: org.knime.core;bundle-version="[5.9.0,6.0.0)",
   org.knime.base;bundle-version="[5.6.0,6.0.0)",
   org.knime.bigdata.spark.core;bundle-version="[5.6.0,6.0.0)",
   org.knime.bigdata.spark.node;bundle-version="[5.6.0,6.0.0)",

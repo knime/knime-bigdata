@@ -4,9 +4,9 @@ Bundle-Name: KNIME Databricks database extension for Databricks' offical JDBC dr
 Bundle-SymbolicName: org.knime.bigdata.database.databricks.driver;singleton:=true
 Bundle-Version: 5.9.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Require-Bundle: org.knime.core;bundle-version="[5.6.0,6.0.0)",
- org.knime.database;bundle-version="[5.6.0,6.0.0)",
- org.knime.bigdata.databricks;bundle-version="[5.6.0,6.0.0)"
+Require-Bundle: org.knime.core;bundle-version="[5.9.0,6.0.0)",
+ org.knime.database;bundle-version="[5.9.0,6.0.0)",
+ org.knime.bigdata.databricks;bundle-version="[5.9.0,6.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Export-Package: org.knime.bigdata.database.databricks.driver

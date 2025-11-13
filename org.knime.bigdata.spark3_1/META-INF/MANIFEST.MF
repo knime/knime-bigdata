@@ -7,7 +7,7 @@ Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.spark3_1.api,
  org.knime.bigdata.spark3_1.base
-Require-Bundle: org.knime.core;bundle-version="[5.6.0,6.0.0)",
+Require-Bundle: org.knime.core;bundle-version="[5.9.0,6.0.0)",
   org.knime.base;bundle-version="[5.6.0,6.0.0)",
   org.knime.bigdata.databricks;bundle-version="[5.6.0,6.0.0)",
   org.knime.bigdata.spark.core;bundle-version="[5.6.0,6.0.0)",
