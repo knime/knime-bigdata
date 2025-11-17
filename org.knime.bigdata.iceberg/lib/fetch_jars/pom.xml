@@ -13,7 +13,7 @@
   </description>
 
   <properties>
-    <iceberg.version>1.9.1</iceberg.version>
+    <iceberg.version>1.10.0</iceberg.version>
   </properties>
 
   <!-- NOTE ABOUT DEALING WITH DEPENDENCIES:
