@@ -57,7 +57,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeSettings;
+import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersUtil;
 import org.knime.filehandling.core.node.table.ConfigSerializer;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDFactory;
@@ -132,7 +132,7 @@ enum IcebergReaderConfigSerializer implements ConfigSerializer<IcebergReaderMult
     public void loadInModel(final IcebergReaderMultiTableReadConfig config, final NodeSettingsRO settings)
             throws InvalidSettingsException {
 
-        final var read = DefaultNodeSettings.loadSettings(settings, IcebergReaderNodeSettings.class);
+        final var read = NodeParametersUtil.loadSettings(settings, IcebergReaderNodeSettings.class);
         config.loadValidatedSettingsFrom(read);
         if (config.saveTableSpecConfig() && settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             config.setTableSpecConfig(m_tableSpecSerializer.load(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG)));
@@ -144,7 +144,7 @@ enum IcebergReaderConfigSerializer implements ConfigSerializer<IcebergReaderMult
     @Override
     public void saveInModel(final IcebergReaderMultiTableReadConfig config, final NodeSettingsWO settings) {
         final var defaultSettings = new IcebergReaderNodeSettings();
-        DefaultNodeSettings.saveSettings(IcebergReaderNodeSettings.class, defaultSettings, settings);
+        NodeParametersUtil.saveSettings(IcebergReaderNodeSettings.class, defaultSettings, settings);
         if (config.saveTableSpecConfig() && config.hasTableSpecConfig()) {
             m_tableSpecSerializer.save(config.getTableSpecConfig(), settings.addNodeSettings(CFG_TABLE_SPEC_CONFIG));
         }
@@ -159,7 +159,7 @@ enum IcebergReaderConfigSerializer implements ConfigSerializer<IcebergReaderMult
     @Override
     public void validate(final IcebergReaderMultiTableReadConfig config, final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        DefaultNodeSettings.loadSettings(settings, IcebergReaderNodeSettings.class);
+        NodeParametersUtil.loadSettings(settings, IcebergReaderNodeSettings.class);
         if (settings.containsKey(CFG_TABLE_SPEC_CONFIG)) {
             m_tableSpecSerializer.load(settings.getNodeSettings(CFG_TABLE_SPEC_CONFIG));
         }

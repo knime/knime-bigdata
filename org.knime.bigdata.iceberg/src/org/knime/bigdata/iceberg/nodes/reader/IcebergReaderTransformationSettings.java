@@ -55,9 +55,9 @@ import org.knime.bigdata.iceberg.nodes.reader.IcebergReaderNodeSettings.Advanced
 import org.knime.bigdata.iceberg.nodes.reader.IcebergReaderNodeSettings.AdvancedSettings.OnUnsupportedColumnTypeOption;
 import org.knime.bigdata.iceberg.nodes.reader.IcebergReaderNodeSettings.AdvancedSettings.OnUnsupportedColumnTypesRef;
 import org.knime.bigdata.iceberg.nodes.reader.IcebergReaderNodeSettings.AdvancedSettings.SkipFirstDataRowsRef;
-import org.knime.core.webui.node.dialog.defaultdialog.layout.WidgetGroup.Modification;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.updates.ValueProvider;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
+import org.knime.node.parameters.updates.ValueProvider;
 
 /**
  * Transformation settings of the delta table reader node.
