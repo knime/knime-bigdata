@@ -297,14 +297,15 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
     }
 
     /**
-     * Create a Databricks file system connection spec from this settings.
+     * Create a Databricks file system connection spec from given config.
      *
      * @param fsId file system connection identifier
      * @param config the file system config
      * @return databricks file system port object spec
      * @throws InvalidSettingsException
      */
-    public FileSystemPortObjectSpec createFileSystemSpec(final String fsId, final DbfsFSConnectionConfig config) {
+    public static FileSystemPortObjectSpec createDbfsPortSpec(final String fsId,
+        final DbfsFSConnectionConfig config) {
         return new FileSystemPortObjectSpec( //
             DbfsFSDescriptorProvider.FS_TYPE.getTypeId(), //
             fsId, //
@@ -312,7 +313,7 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
     }
 
     /**
-     * Create a Databricks file system connection from this settings model.
+     * Create a Databricks file system connection from given config.
      *
      * @param config the file system config
      * @return The DBFS connection information object
@@ -320,7 +321,7 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
      * @throws IOException
      * @throws InvalidSettingsException
      */
-    public FSConnection createDatabricksFSConnection(final DbfsFSConnectionConfig config) throws IOException {
+    public static FSConnection createDbfsFSConnection(final DbfsFSConnectionConfig config) throws IOException {
         return new DbfsFSConnection(config);
     }
 

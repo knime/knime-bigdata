@@ -48,11 +48,15 @@
  */
 package org.knime.bigdata.dbfs.filehandling.testing;
 
+import static org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2.createDbfsFSConnection;
+import static org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2.createDbfsPortSpec;
+
 import java.io.IOException;
 import java.util.Map;
 
 import org.knime.bigdata.dbfs.filehandler.DBFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
+import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.workflow.FlowVariable;
@@ -81,9 +85,10 @@ public final class TestingDbfsFSConnectionFactory {
     public static FileSystemPortObjectSpec createFileSystemPortSpec(final String fsId,
         final Map<String, FlowVariable> flowVariables) throws InvalidSettingsException {
 
-        return DatabricksSparkContextCreatorNodeSettings2 //
+        final DbfsFSConnectionConfig config = DatabricksSparkContextCreatorNodeSettings2 //
             .fromFlowVariables(flowVariables) //
-            .createFileSystemSpec(fsId, null);
+            .createDbfsFSConnectionConfig(null);
+        return createDbfsPortSpec(fsId, config);
     }
 
     /**
@@ -97,8 +102,9 @@ public final class TestingDbfsFSConnectionFactory {
     public static FSConnection createFSConnection(final Map<String, FlowVariable> flowVariables)
         throws InvalidSettingsException, IOException {
 
-        return DatabricksSparkContextCreatorNodeSettings2 //
+        final DbfsFSConnectionConfig config = DatabricksSparkContextCreatorNodeSettings2 //
             .fromFlowVariables(flowVariables) //
-            .createDatabricksFSConnection(null);
+            .createDbfsFSConnectionConfig(null);
+        return createDbfsFSConnection(config);
     }
 }

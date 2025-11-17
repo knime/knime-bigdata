@@ -45,6 +45,9 @@
  */
 package org.knime.bigdata.spark.core.databricks.node.create;
 
+import static org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2.createDbfsFSConnection;
+import static org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2.createDbfsPortSpec;
+
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -134,7 +137,7 @@ public class DatabricksSparkContextCreatorNodeModel2
                 try {
                     final DatabricksAccessTokenCredential credential =
                         spec.resolveCredential(DatabricksAccessTokenCredential.class);
-                    fsPortSpec = m_settings.createFileSystemSpec(m_fsId, //
+                    fsPortSpec = createDbfsPortSpec(m_fsId, //
                         m_settings.createDbfsFSConnectionConfig(spec, credential));
                     configureSparkContext(m_sparkContextId, //
                         m_settings.createContextConfig(m_sparkContextId, m_fsId, spec, credential));
@@ -145,7 +148,7 @@ public class DatabricksSparkContextCreatorNodeModel2
                 fsPortSpec = null;
             }
         } else {
-            fsPortSpec = m_settings.createFileSystemSpec(m_fsId, //
+            fsPortSpec = createDbfsPortSpec(m_fsId, //
                 m_settings.createDbfsFSConnectionConfig(getCredentialsProvider()));
             configureSparkContext(m_sparkContextId, //
                 m_settings.createContextConfig(m_sparkContextId, m_fsId, getCredentialsProvider()));
@@ -181,11 +184,11 @@ public class DatabricksSparkContextCreatorNodeModel2
         } else {
             fsConfig = m_settings.createDbfsFSConnectionConfig(getCredentialsProvider());
         }
-        m_fsConnection = m_settings.createDatabricksFSConnection(fsConfig);
+        m_fsConnection = createDbfsFSConnection(fsConfig);
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
         testFileSystemConnection(m_fsConnection);
         final FileSystemPortObject fsPortObject =
-            new FileSystemPortObject(m_settings.createFileSystemSpec(m_fsId, fsConfig));
+            new FileSystemPortObject(createDbfsPortSpec(m_fsId, fsConfig));
 
         // configure context
         exec.setProgress(0.2, "Configuring Databricks Spark context");
