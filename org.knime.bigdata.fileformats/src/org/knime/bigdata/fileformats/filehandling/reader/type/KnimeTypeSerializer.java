@@ -42,46 +42,47 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   16 Dec 2025 (robin): created
  */
-package org.knime.bigdata.fileformats.filehandling.reader.parquet;
+package org.knime.bigdata.fileformats.filehandling.reader.type;
 
-import org.apache.parquet.schema.LogicalTypeAnnotation;
-import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
+import org.knime.base.node.io.filehandling.webui.reader2.ReaderSpecific.ExternalDataTypeParseException;
+import org.knime.base.node.io.filehandling.webui.reader2.ReaderSpecific.ExternalDataTypeSerializer;
 
 /**
- * Parquet table reader using {@link LogicalTypeAnnotation}.
+ * A serializer for {@link KnimeType} that serializes the type by encoding the depth of list types and the primitive
+ * type name. {@link BigDataTableReadConfigSerializer}.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
-public final class ParquetTableReader2 extends AbstractParquetTableReader {
+public interface KnimeTypeSerializer extends ExternalDataTypeSerializer<KnimeType> {
 
     @Override
-    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
-        return new ParquetRandomAccessibleReadSupport2(failOnUnsupportedColumnTypes(config));
-    }
-
-    @Override
-    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
-        final MessageType schema) {
-
-        final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
-        final boolean failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes(config);
-
-        for (Type field : schema.getFields()) {
-            ParquetTypeHelper.getParquetColumn(field, failOnUnsupportedColumnTypes).addColumnSpecs(specBuilder);
+    default String toSerializableType(final KnimeType externalType) {
+        int depth = 0;
+        var elementType = externalType;
+        for (; elementType.isList(); depth++) {
+            elementType = elementType.asListType().getElementType();
         }
-
-        return specBuilder.build();
+        return depth + "-" + elementType.asPrimitiveType().name();
     }
 
-    private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
-        return config.getReaderSpecificConfig().failOnUnsupportedColumnTypes();
+    @Override
+    default KnimeType toExternalType(final String serializedType) throws ExternalDataTypeParseException {
+        final String[] parts = serializedType.split("-", 2);
+        if (parts.length != 2) {
+            throw new ExternalDataTypeParseException(
+                "The serialized type does not have the expected format '<depth>-<primitiveType>'.");
+        }
+        final var depth = Integer.parseInt(parts[0]);
+        final var primitive = PrimitiveKnimeType.valueOf(parts[1]);
+        KnimeType knimeType = primitive;
+        for (int i = depth; i > 0; i--) {
+            knimeType = new ListKnimeType(knimeType);
+        }
+        return knimeType;
     }
 
 }
