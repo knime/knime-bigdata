@@ -45,43 +45,69 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.schema.LogicalTypeAnnotation;
-import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
+import java.util.Optional;
+
+import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.url.URLConfiguration;
+import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.NodeParametersInput;
+import org.knime.node.parameters.updates.ParameterReference;
+import org.knime.node.parameters.updates.ValueReference;
 
 /**
- * Parquet table reader using {@link LogicalTypeAnnotation}.
+ * Parameters of the Parquet Table Reader Node {@link ParquetTableReader3NodeFactory}.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
-public final class ParquetTableReader2 extends AbstractParquetTableReader {
+public final class ParquetTableReader3NodeParameters implements NodeParameters {
 
-    @Override
-    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
-        return new ParquetRandomAccessibleReadSupport2(failOnUnsupportedColumnTypes(config));
+    ParquetTableReader3NodeParameters(final NodeParametersInput input) {
+        this(input.getURLConfiguration());
     }
 
-    @Override
-    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
-        final MessageType schema) {
+    ParquetTableReader3NodeParameters(final NodeCreationConfiguration nodeCreationConfig) {
+        this(nodeCreationConfig.getURLConfig());
+    }
 
-        final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
-        final boolean failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes(config);
-
-        for (Type field : schema.getFields()) {
-            ParquetTypeHelper.getParquetColumn(field, failOnUnsupportedColumnTypes).addColumnSpecs(specBuilder);
+    private ParquetTableReader3NodeParameters(final Optional<? extends URLConfiguration> urlConfig) { // NOSONAR
+        if (urlConfig.isPresent()) {
+            m_parquetReaderParameters = new ParquetTableReader3Parameters(urlConfig.get().getUrl());
         }
-
-        return specBuilder.build();
     }
 
-    private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
-        return config.getReaderSpecificConfig().failOnUnsupportedColumnTypes();
+    ParquetTableReader3NodeParameters() {
+        // default constructor
+    }
+
+    static final class ParquetReaderParametersRef implements ParameterReference<ParquetTableReader3Parameters> {
+    }
+
+    @ValueReference(ParquetReaderParametersRef.class)
+    ParquetTableReader3Parameters m_parquetReaderParameters = new ParquetTableReader3Parameters();
+
+    ParquetTableReader3TransformationParameters m_transformationParameters =
+        new ParquetTableReader3TransformationParameters();
+
+    void saveToSource(final MultiFileSelectionPath sourceSettings) {
+        m_parquetReaderParameters.saveToSource(sourceSettings);
+    }
+
+    void saveToConfig(final BigDataMultiTableReadConfig config) {
+        final var configID = m_parquetReaderParameters.saveToConfig(config);
+        m_transformationParameters.saveToConfig(//
+            config, m_parquetReaderParameters.getSourcePath(), //
+            configID, //
+            m_parquetReaderParameters.getMultiFileParameters() //
+        );
+    }
+
+    @Override
+    public void validate() throws InvalidSettingsException {
+        m_parquetReaderParameters.validate();
+        m_transformationParameters.validate();
     }
 
 }
