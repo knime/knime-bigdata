@@ -42,46 +42,54 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.apache.parquet.schema.LogicalTypeAnnotation;
-import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.Type;
+import org.knime.base.node.io.filehandling.webui.reader2.ReaderSpecific;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataReadAdapterFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
+import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 
-/**
- * Parquet table reader using {@link LogicalTypeAnnotation}.
- *
- * @author Sascha Wolke, KNIME GmbH
- */
-public final class ParquetTableReader2 extends AbstractParquetTableReader {
+final class ParquetTableReader3Specific {
 
-    @Override
-    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
-        return new ParquetRandomAccessibleReadSupport2(failOnUnsupportedColumnTypes(config));
-    }
+    static final ProductionPathProvider<KnimeType> PRODUCTION_PATH_PROVIDER =
+        BigDataReadAdapterFactory.INSTANCE.createProductionPathProvider();
 
-    @Override
-    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
-        final MessageType schema) {
-
-        final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
-        final boolean failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes(config);
-
-        for (Type field : schema.getFields()) {
-            ParquetTypeHelper.getParquetColumn(field, failOnUnsupportedColumnTypes).addColumnSpecs(specBuilder);
+    interface ProductionPathProviderAndTypeHierarchy
+        extends ReaderSpecific.ProductionPathProviderAndTypeHierarchy<KnimeType> {
+        @Override
+        default ProductionPathProvider<KnimeType> getProductionPathProvider() {
+            return PRODUCTION_PATH_PROVIDER;
         }
 
-        return specBuilder.build();
+        @Override
+        default TypeHierarchy<KnimeType, KnimeType> getTypeHierarchy() {
+            return KnimeTypeHierarchies.TYPE_HIERARCHY;
+        }
     }
 
-    private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
-        return config.getReaderSpecificConfig().failOnUnsupportedColumnTypes();
+    interface ConfigAndReader
+        extends ReaderSpecific.ConfigAndReader<BigDataReaderConfig, KnimeType, BigDataMultiTableReadConfig> {
+
+        @Override
+        default BigDataMultiTableReadConfig createMultiTableReadConfig() {
+            return new BigDataMultiTableReadConfig();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        default ParquetTableReader2 createTableReader() {
+            return new ParquetTableReader2();
+        }
+
     }
 
+    private ParquetTableReader3Specific() {
+        // Utility class
+    }
 }
