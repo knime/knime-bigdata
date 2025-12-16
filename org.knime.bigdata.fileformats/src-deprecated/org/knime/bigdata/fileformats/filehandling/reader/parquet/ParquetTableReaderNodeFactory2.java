@@ -57,7 +57,9 @@ import org.knime.filehandling.core.node.table.reader.GenericTableReader;
  * Node factory for the Parquet Reader using {@link LogicalTypeAnnotation}.
  *
  * @author Sascha Wolke, KNIME GmbH
+ * @deprecated
  */
+@Deprecated(since = "5.10")
 public final class ParquetTableReaderNodeFactory2 extends AbstractBigDataTableReaderNodeFactory {
 
     private static final String[] FILE_SUFFIXES = {".parquet"};

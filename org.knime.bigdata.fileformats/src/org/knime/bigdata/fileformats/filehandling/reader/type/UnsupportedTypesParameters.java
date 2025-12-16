@@ -42,46 +42,61 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
  */
-package org.knime.bigdata.fileformats.filehandling.reader.parquet;
+package org.knime.bigdata.fileformats.filehandling.reader.type;
 
-import org.apache.parquet.schema.LogicalTypeAnnotation;
-import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
+import org.knime.base.node.io.filehandling.webui.ReferenceStateProvider;
+import org.knime.base.node.io.filehandling.webui.reader2.ReaderLayout;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
+import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.Widget;
+import org.knime.node.parameters.layout.Layout;
+import org.knime.node.parameters.updates.ValueReference;
+import org.knime.node.parameters.widget.choices.Label;
+import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 
 /**
- * Parquet table reader using {@link LogicalTypeAnnotation}.
+ * Parameters for handling unsupported column types in bigdata files.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
-public final class ParquetTableReader2 extends AbstractParquetTableReader {
+public final class UnsupportedTypesParameters implements NodeParameters {
 
-    @Override
-    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
-        return new ParquetRandomAccessibleReadSupport2(failOnUnsupportedColumnTypes(config));
+    /**
+     * Options for handling unsupported column types.
+     */
+    enum OnUnsupportedColumnTypeOption {
+            @Label(value = "Fail", //
+                description = "If set, the node fails on files with unsupported column types") //
+            FAIL, //
+            @Label(value = "Ignore column", //
+                description = "If set, the columns with unsupported column types are ignored.") //
+            IGNORE; //
     }
 
-    @Override
-    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
-        final MessageType schema) {
+    @Widget(title = "If there are unsupported types",
+        description = "Files can contain columns with types that are not supported by this node,"
+            + " for example complex nested types.")
+    @ValueSwitchWidget
+    @Layout(ReaderLayout.ColumnAndDataTypeDetection.class)
+    @ValueReference(OnUnsupportedColumnTypeRef.class)
+    OnUnsupportedColumnTypeOption m_onUnsupportedColumnType = OnUnsupportedColumnTypeOption.FAIL;
 
-        final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
-        final boolean failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes(config);
-
-        for (Type field : schema.getFields()) {
-            ParquetTypeHelper.getParquetColumn(field, failOnUnsupportedColumnTypes).addColumnSpecs(specBuilder);
-        }
-
-        return specBuilder.build();
+    /**
+     * Reference for the unsupported column type option.
+     */
+    public static final class OnUnsupportedColumnTypeRef extends ReferenceStateProvider<OnUnsupportedColumnTypeOption> {
     }
 
-    private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
-        return config.getReaderSpecificConfig().failOnUnsupportedColumnTypes();
+    /**
+     * Save the parameter to the config.
+     *
+     * @param config the config to save to
+     */
+    public void saveToConfig(final BigDataMultiTableReadConfig config) {
+        config.getReaderSpecificConfig()
+            .setFailOnUnsupportedColumnTypes(m_onUnsupportedColumnType == OnUnsupportedColumnTypeOption.FAIL);
     }
 
 }

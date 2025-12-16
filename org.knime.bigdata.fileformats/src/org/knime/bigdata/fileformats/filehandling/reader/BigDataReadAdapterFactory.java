@@ -63,7 +63,7 @@ import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-enum BigDataReadAdapterFactory implements ReadAdapterFactory<KnimeType, BigDataCell> {
+public enum BigDataReadAdapterFactory implements ReadAdapterFactory<KnimeType, BigDataCell> {
 
         INSTANCE;
 
@@ -85,7 +85,7 @@ enum BigDataReadAdapterFactory implements ReadAdapterFactory<KnimeType, BigDataC
         return KnimeTypeHierarchies.DEFAULT_TYPES.get(type);
     }
 
-    ProductionPathProvider<KnimeType> createProductionPathProvider() {
+    public ProductionPathProvider<KnimeType> createProductionPathProvider() {
         return new HierarchyAwareProductionPathProvider<>(REGISTRY,
                 KnimeTypeHierarchies.TYPE_HIERARCHY, this::getDefaultType, (t, p) -> true);
     }
