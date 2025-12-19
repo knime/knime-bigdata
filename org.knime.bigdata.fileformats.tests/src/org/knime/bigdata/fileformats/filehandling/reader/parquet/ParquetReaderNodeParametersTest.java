@@ -48,7 +48,6 @@ package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3NodeParameters;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.webui.node.dialog.SettingsType;
