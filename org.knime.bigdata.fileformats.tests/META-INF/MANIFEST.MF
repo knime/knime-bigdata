@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Unit-Tests for org.knime.bigdata.fileformats
+Bundle-SymbolicName: org.knime.bigdata.fileformats.tests;singleton:=true
+Bundle-Version: 5.10.0.qualifier
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
+Fragment-Host: org.knime.bigdata.fileformats;bundle-version="[5.10.0,6.0.0)"
+Require-Bundle: org.knime.core.ui.testing;bundle-version="[5.6.0,6.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Automatic-Module-Name: org.knime.bigdata.fileformats.tests
+Bundle-ClassPath: .
