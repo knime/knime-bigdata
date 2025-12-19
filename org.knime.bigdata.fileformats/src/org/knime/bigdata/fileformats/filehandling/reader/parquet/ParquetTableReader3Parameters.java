@@ -68,7 +68,7 @@ import org.knime.node.parameters.NodeParameters;
 final class ParquetTableReader3Parameters implements NodeParameters {
 
     ParquetTableReader3Parameters(final URL url) {
-        // No URL-dependent defaults needed for Parquet
+        m_multiFileSelectionParams = new MultiFileSelectionParameters(url);
     }
 
     ParquetTableReader3Parameters() {
