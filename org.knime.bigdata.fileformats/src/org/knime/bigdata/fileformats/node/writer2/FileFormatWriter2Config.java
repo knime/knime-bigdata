@@ -74,7 +74,7 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 /*
  * @author Christian Dietz, KNIME GmbH, Konstanz Germany
  */
-final class FileFormatWriter2Config<T> {
+public final class FileFormatWriter2Config<T> {
 
     /** name of the settings */
     public static final String CFG_TYPE_MAPPING_TAB = "type_mapping";
