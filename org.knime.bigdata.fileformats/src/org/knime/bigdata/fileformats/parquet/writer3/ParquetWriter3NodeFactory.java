@@ -42,19 +42,87 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
+import static org.knime.node.impl.description.PortDescription.dynamicPort;
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+
+import java.util.List;
+import java.util.Map;
+
 import org.knime.bigdata.fileformats.node.writer2.AbstractFileFormatWriter2NodeFactory;
 import org.knime.bigdata.fileformats.parquet.ParquetFormatFactory;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
+import org.knime.core.node.NodeDescription;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.NodeDialogManager;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
+import org.knime.node.impl.description.PortDescription;
 
 /**
  * <code>NodeFactory</code> for the "ParquetWriter" Node.
  *
  * @author Sascha Wolke, KNIME GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
+ * @author AI Migration Pipeline v1.2
  */
-public final class ParquetWriter3NodeFactory extends AbstractFileFormatWriter2NodeFactory {
+@SuppressWarnings("restriction")
+public final class ParquetWriter3NodeFactory extends AbstractFileFormatWriter2NodeFactory implements //
+    NodeDialogFactory, KaiNodeInterfaceFactory {
 
     @Override
     protected FileFormatFactory<?> getFileFormatFactory() {
         return new ParquetFormatFactory(true);
+    }
+
+    private static final String NODE_NAME = "Parquet Writer";
+
+    private static final String NODE_ICON = "./parquetwriter-icon.png";
+
+    private static final String SHORT_DESCRIPTION = "Writes KNIME tables into a Parquet File";
+
+    private static final String FULL_DESCRIPTION = """
+            <p> This node writes the KNIME data table into a Parquet file. Depending on the selected mode the node
+                writes a single file or splits up the data into several files which are stored in the specified
+                folder.
+                </p> <p> <i>This node can access a variety of different</i> <a
+                href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html#
+                analytics-platform-file-systems"><i>file systems.</i></a> <i>
+                More information about file handling in KNIME can be found in the official</i> <a
+                href="https://docs.knime.com/latest/analytics_platform_file_handling_guide/index.html">
+                <i>File Handling Guide.</i></a> </p>
+            """;
+
+    private static final List<PortDescription> INPUT_PORTS =
+        List.of(fixedPort("Data", "The data table that should be written."),
+            dynamicPort("File System Connection", "File system connection", "The file system connection."));
+
+    private static final List<PortDescription> OUTPUT_PORTS = List.of();
+
+    @Override
+    public NodeDialogPane createNodeDialogPane() {
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
+    }
+
+    @Override
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, ParquetWriter3NodeParameters.class);
+    }
+
+    @Override
+    public NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription(NODE_NAME, NODE_ICON, INPUT_PORTS, OUTPUT_PORTS,
+            SHORT_DESCRIPTION, FULL_DESCRIPTION, List.of(), ParquetWriter3NodeParameters.class, null, NodeType.Sink,
+            List.of(), null);
+    }
+
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, ParquetWriter3NodeParameters.class));
     }
 }
