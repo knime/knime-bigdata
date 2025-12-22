@@ -1,0 +1,2129 @@
+{
+  "data" : {
+    "model" : {
+      "outputLocation" : {
+        "file" : {
+          "path" : {
+            "fsCategory" : "LOCAL",
+            "path" : "/home/jochen/knime-workspace/compare/parquetfile2.parquet",
+            "timeout" : 10000,
+            "context" : {
+              "fsToString" : "(LOCAL, /home/jochen/knime-workspace/compare/parquetfile2.parquet)"
+            }
+          }
+        },
+        "createMissingFolders" : false,
+        "overwritePolicy" : "overwrite",
+        "mode" : "FILE"
+      },
+      "compression" : "UNCOMPRESSED",
+      "fileSize" : 1,
+      "fileNamePrefix" : "part_",
+      "chunkSize" : 1,
+      "mapping" : {
+        "byNameSettings" : [ {
+          "filterType" : "MANUAL",
+          "fromColName" : "Universe_0_0",
+          "fromColType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toColType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT"
+        }, {
+          "filterType" : "MANUAL",
+          "fromColName" : "Universe_0_1",
+          "fromColType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toColType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT"
+        }, {
+          "filterType" : "MANUAL",
+          "fromColName" : "Universe_1_0",
+          "fromColType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toColType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT"
+        }, {
+          "filterType" : "MANUAL",
+          "fromColName" : "Universe_1_1",
+          "fromColType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toColType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT"
+        }, {
+          "filterType" : "MANUAL",
+          "fromColName" : "Cluster Membership",
+          "fromColType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toColType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String);java.lang.String->ENUM (BINARY)"
+        } ],
+        "byTypeSettings" : [ {
+          "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BooleanValue,class java.lang.Boolean,Boolean);java.lang.Boolean->BOOLEAN"
+        }, {
+          "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.uri.URIDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+          "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(URIDataValue,class java.lang.String,String);java.lang.String->STRING (BINARY)"
+        } ]
+      }
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "chunkSize" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Within file row group size (MB)",
+            "description" : "Defines the maximum size of a row group within a file in megabyte. For more details see the <a href=\"https://parquet.apache.org/docs/\">Parquet documentation</a>.",
+            "default" : 128
+          },
+          "compression" : {
+            "oneOf" : [ {
+              "const" : "UNCOMPRESSED",
+              "title" : "Uncompressed"
+            }, {
+              "const" : "SNAPPY",
+              "title" : "SNAPPY"
+            }, {
+              "const" : "GZIP",
+              "title" : "GZIP"
+            }, {
+              "const" : "ZSTD",
+              "title" : "ZSTD"
+            } ],
+            "title" : "File Compression",
+            "description" : "The compression codec used to write the Parquet file.",
+            "default" : "UNCOMPRESSED"
+          },
+          "fileNamePrefix" : {
+            "type" : "string",
+            "title" : "File name prefix",
+            "description" : "The prefix to use for the file within the selected folder. A running index is appended starting with 0 e.g. part_00000.parquet, part_00001.parquet. This option is only available if the folder mode is selected.",
+            "default" : "part_"
+          },
+          "fileSize" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Split data into files of size (MB)",
+            "description" : "Splits up the input data into files of the specified maximum size in megabytes. This option is only available if the folder mode is selected.",
+            "default" : 1024
+          },
+          "mapping" : {
+            "type" : "object",
+            "properties" : {
+              "byNameSettings" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "filterType" : {
+                      "oneOf" : [ {
+                        "const" : "MANUAL",
+                        "title" : "Manual"
+                      }, {
+                        "const" : "REGEX",
+                        "title" : "Regex"
+                      } ],
+                      "title" : "Column selection type",
+                      "description" : "The option allows you to select how the column is matched.\n<ul>\n<li><b>Manual</b>: Use the exact name of the column</li>\n<li><b>Regex</b>: Allow regex expressions to select multiple columns</li>\n</ul>",
+                      "default" : "MANUAL"
+                    },
+                    "fromColName" : {
+                      "type" : "string",
+                      "title" : "Column name",
+                      "description" : "The column name or regex expression.",
+                      "default" : ""
+                    },
+                    "fromColType" : {
+                      "type" : "string",
+                      "title" : "KNIME type",
+                      "description" : "KNIME data type to map from."
+                    },
+                    "toColType" : {
+                      "type" : "string",
+                      "title" : "Mapping to",
+                      "description" : "Parquet data type to map to."
+                    }
+                  }
+                },
+                "title" : "Name",
+                "description" : "Columns that match the given name (or regular expression) and KNIME type will be mapped to the specified database type.\n",
+                "default" : [ ]
+              },
+              "byTypeSettings" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "fromType" : {
+                      "type" : "string",
+                      "title" : "KNIME type",
+                      "description" : "KNIME data type to map from."
+                    },
+                    "toType" : {
+                      "type" : "string",
+                      "title" : "Mapping to",
+                      "description" : "Parquet data type to map to."
+                    }
+                  }
+                },
+                "title" : "Type",
+                "description" : "Columns that match the given KNIME type will be mapped to the specified Parquet data type.",
+                "default" : [ ]
+              }
+            },
+            "default" : {
+              "byNameSettings" : [ ],
+              "byTypeSettings" : [ ]
+            }
+          },
+          "outputLocation" : {
+            "type" : "object",
+            "properties" : {
+              "createMissingFolders" : {
+                "type" : "boolean",
+                "title" : "Create missing folders",
+                "description" : "If enabled, missing folders in the specified path will be created automatically.",
+                "default" : false
+              },
+              "file" : {
+                "type" : "object",
+                "properties" : {
+                  "path" : {
+                    "type" : "object",
+                    "default" : {
+                      "fsCategory" : "LOCAL",
+                      "path" : "",
+                      "timeout" : 10000,
+                      "context" : {
+                        "fsToString" : "(LOCAL, )"
+                      }
+                    }
+                  }
+                },
+                "title" : "Output location",
+                "description" : "Select a file system and location where you want to store the file(s).",
+                "default" : {
+                  "path" : {
+                    "fsCategory" : "LOCAL",
+                    "path" : "",
+                    "timeout" : 10000,
+                    "context" : {
+                      "fsToString" : "(LOCAL, )"
+                    }
+                  }
+                }
+              },
+              "mode" : {
+                "oneOf" : [ {
+                  "const" : "FILE",
+                  "title" : "File"
+                }, {
+                  "const" : "FOLDER",
+                  "title" : "Folder"
+                } ],
+                "title" : "Mode",
+                "description" : "Depending on the selected mode the node writes the input data into a single file or splits it up into several files of the defined size which are then stored in the specified folder.",
+                "default" : "FILE"
+              },
+              "overwritePolicy" : {
+                "oneOf" : [ {
+                  "const" : "fail",
+                  "title" : "Fail"
+                }, {
+                  "const" : "overwrite",
+                  "title" : "Overwrite"
+                }, {
+                  "const" : "ignore",
+                  "title" : "Ignore"
+                }, {
+                  "const" : "append",
+                  "title" : "Append"
+                } ],
+                "title" : "If exists",
+                "description" : "Specify the behavior of the node in case the output file already exists.<ul><li><b>Fail</b>: Will issue an error during the node's execution (to prevent unintentional overwrite).</li><li><b>Overwrite</b>: Will replace any existing file.</li><li><b>Ignore</b>: Will ignore if a file already exists and continues the copying process.</li></ul>",
+                "default" : "overwrite"
+              }
+            },
+            "default" : {
+              "file" : {
+                "path" : {
+                  "fsCategory" : "LOCAL",
+                  "path" : "",
+                  "timeout" : 10000,
+                  "context" : {
+                    "fsToString" : "(LOCAL, )"
+                  }
+                }
+              },
+              "createMissingFolders" : false,
+              "overwritePolicy" : "overwrite",
+              "mode" : "FILE"
+            }
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "Settings",
+      "type" : "Section",
+      "description" : "General settings regarding the output file location and storage configuration.",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/outputLocation/properties/mode",
+        "options" : {
+          "format" : "valueSwitch"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/outputLocation/properties/file",
+        "options" : {
+          "fileExtension" : "parquet",
+          "isLocal" : true,
+          "isWriter" : true,
+          "selectionMode" : "FILE",
+          "spaceFSOptions" : {
+            "mountId" : "Local space"
+          },
+          "format" : "fileChooser"
+        },
+        "providedOptions" : [ "selectionMode" ]
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/outputLocation/properties/createMissingFolders",
+        "options" : {
+          "format" : "checkbox"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/outputLocation/properties/overwritePolicy",
+        "options" : {
+          "format" : "valueSwitch"
+        },
+        "providedOptions" : [ "possibleValues" ]
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/compression"
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/fileSize",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "Value too large to process without risking precision loss (> 9007199254740991).",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 9.007199254740991E15
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 1.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 1.0
+              }
+            }
+          }
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/outputLocation/properties/mode",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "FOLDER"
+              } ]
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/fileNamePrefix",
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/outputLocation/properties/mode",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "FOLDER"
+              } ]
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/chunkSize",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 1.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 1.0
+              }
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Type Mapping",
+      "type" : "SettingsSubPanelLayout",
+      "elements" : [ {
+        "label" : "Mapping by Name",
+        "type" : "Section",
+        "description" : "Define name-based mappings that apply to specific columns. ",
+        "elements" : [ {
+          "type" : "Control",
+          "scope" : "#/properties/model/properties/mapping/properties/byNameSettings",
+          "options" : {
+            "detail" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/filterType",
+              "options" : {
+                "format" : "valueSwitch"
+              }
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/fromColName"
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/fromColType",
+              "options" : {
+                "format" : "dropDown"
+              },
+              "providedOptions" : [ "possibleValues", "possibleValues" ]
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/toColType",
+              "options" : {
+                "format" : "dropDown"
+              },
+              "providedOptions" : [ "possibleValues" ]
+            } ],
+            "addButtonText" : "Add name",
+            "arrayElementTitle" : "Column name"
+          }
+        } ]
+      }, {
+        "label" : "Mapping by Type",
+        "type" : "Section",
+        "description" : "Define type mappings that apply to all columns of the specified KNIME type. These mappings are applied after the mappings defined in the 'Mapping by Name' section.\n",
+        "elements" : [ {
+          "type" : "Control",
+          "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings",
+          "options" : {
+            "detail" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/fromType",
+              "options" : {
+                "format" : "dropDown"
+              },
+              "providedOptions" : [ "possibleValues", "possibleValues" ]
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/toType",
+              "options" : {
+                "format" : "dropDown"
+              },
+              "providedOptions" : [ "possibleValues" ]
+            } ],
+            "addButtonText" : "Add type",
+            "arrayElementTitle" : "Type"
+          }
+        } ]
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "outputLocation" : {
+            "type" : "object",
+            "properties" : {
+              "file" : {
+                "configPaths" : [ [ "path" ] ]
+              },
+              "createMissingFolders" : {
+                "configKey" : "create_missing_folders"
+              },
+              "overwritePolicy" : {
+                "configKey" : "if_path_exists"
+              },
+              "mode" : {
+                "configKey" : "filter_mode",
+                "route" : [ "filter_mode" ]
+              }
+            },
+            "configKey" : "file_chooser_settings",
+            "route" : [ "settings" ]
+          },
+          "compression" : {
+            "configKey" : "file_compression",
+            "route" : [ "settings" ]
+          },
+          "fileSize" : {
+            "configKey" : "file_size",
+            "route" : [ "settings" ]
+          },
+          "fileNamePrefix" : {
+            "configKey" : "file_name_prefix",
+            "route" : [ "settings" ]
+          },
+          "chunkSize" : {
+            "configKey" : "within_file_chunk_size",
+            "route" : [ "settings" ]
+          },
+          "mapping" : {
+            "propertiesConfigPaths" : [ ],
+            "propertiesDeprecatedConfigKeys" : [ {
+              "deprecated" : [ [ "name_to_type_mapping_rules", "type_to_type_mapping_rules" ] ]
+            } ],
+            "configKey" : "input_type_mapping",
+            "route" : [ "type_mapping" ]
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Binary Object",
+        "type" : {
+          "id" : "org.knime.core.data.blob.BinaryObjectDataValue",
+          "text" : "Binary Object"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.DenseBitVectorCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Bit Vector",
+        "type" : {
+          "id" : "org.knime.core.data.vector.bitvector.BitVectorValue",
+          "text" : "Bit Vector"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.SparseBitVectorCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Bit Vector (Sparse)",
+        "type" : {
+          "id" : "org.knime.core.data.vector.bitvector.SparseBitVectorValue",
+          "text" : "Bit Vector (Sparse)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Boolean",
+        "type" : {
+          "id" : "org.knime.core.data.BooleanValue",
+          "text" : "Boolean"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Binary Object)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.SparseBitVectorCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Bit Vector (Sparse))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.DenseBitVectorCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Bit Vector)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Boolean)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date&time (Local))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date&time (Zoned))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Duration (Date-based))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Duration (Time-based))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCollectionCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (collection))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoLineCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (line))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiLineCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi line))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPointCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi point))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPolygonCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi polygon))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPointCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (point))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPolygonCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (polygon))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: HTML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.image.png.PNGImageCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Image (PNG))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.base.data.xml.SvgCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Image (SVG))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: JSON)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Model (PMML))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Molfile)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Float))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Integer))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Long Integer))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.bio.types.PdbCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: PDB)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SDF)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SMILES)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: String)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Time)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.uri.URIDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: URI)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: XML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date",
+        "type" : {
+          "id" : "org.knime.core.data.time.localdate.LocalDateValue",
+          "text" : "Date"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date&time (Local)",
+        "type" : {
+          "id" : "org.knime.core.data.time.localdatetime.LocalDateTimeValue",
+          "text" : "Date&time (Local)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date&time (Zoned)",
+        "type" : {
+          "id" : "org.knime.core.data.time.zoneddatetime.ZonedDateTimeValue",
+          "text" : "Date&time (Zoned)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Duration (Date-based)",
+        "type" : {
+          "id" : "org.knime.core.data.time.period.PeriodValue",
+          "text" : "Duration (Date-based)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Duration (Time-based)",
+        "type" : {
+          "id" : "org.knime.core.data.time.duration.DurationValue",
+          "text" : "Duration (Time-based)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoValue",
+          "text" : "Geo"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCollectionCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (collection)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoCollectionValue",
+          "text" : "Geo (collection)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoLineCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (line)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoLineValue",
+          "text" : "Geo (line)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiLineCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi line)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiLineValue",
+          "text" : "Geo (multi line)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPointCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi point)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiPointValue",
+          "text" : "Geo (multi point)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPolygonCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi polygon)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiPolygonValue",
+          "text" : "Geo (multi polygon)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPointCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (point)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoPointValue",
+          "text" : "Geo (point)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPolygonCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (polygon)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoPolygonValue",
+          "text" : "Geo (polygon)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "HTML",
+        "type" : {
+          "id" : "org.knime.core.data.html.HTMLValue",
+          "text" : "HTML"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.image.png.PNGImageCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Image (PNG)",
+        "type" : {
+          "id" : "org.knime.core.data.image.png.PNGImageValue",
+          "text" : "Image (PNG)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.base.data.xml.SvgCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Image (SVG)",
+        "type" : {
+          "id" : "org.knime.base.data.xml.SvgValue",
+          "text" : "Image (SVG)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "JSON",
+        "type" : {
+          "id" : "org.knime.core.data.json.JSONValue",
+          "text" : "JSON"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Model (PMML)",
+        "type" : {
+          "id" : "org.knime.core.data.xml.PMMLValue",
+          "text" : "Model (PMML)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Molfile",
+        "type" : {
+          "id" : "org.knime.chem.types.MolValue",
+          "text" : "Molfile"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Float)",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.IntValue",
+          "text" : "Number (Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Long Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.LongValue",
+          "text" : "Number (Long Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.bio.types.PdbCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "PDB",
+        "type" : {
+          "id" : "org.knime.bio.types.PdbValue",
+          "text" : "PDB"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SDF",
+        "type" : {
+          "id" : "org.knime.chem.types.SdfValue",
+          "text" : "SDF"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SMILES",
+        "type" : {
+          "id" : "org.knime.chem.types.SmilesValue",
+          "text" : "SMILES"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "String",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Time",
+        "type" : {
+          "id" : "org.knime.core.data.time.localtime.LocalTimeValue",
+          "text" : "Time"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.uri.URIDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "URI",
+        "type" : {
+          "id" : "org.knime.core.data.uri.URIDataValue",
+          "text" : "URI"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/toColType",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ 0 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->DOUBLE",
+        "text" : "→ Double → DOUBLE"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT",
+        "text" : "→ Double → FLOAT"
+      } ]
+    }, {
+      "indices" : [ 1 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->DOUBLE",
+        "text" : "→ Double → DOUBLE"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT",
+        "text" : "→ Double → FLOAT"
+      } ]
+    }, {
+      "indices" : [ 2 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->DOUBLE",
+        "text" : "→ Double → DOUBLE"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT",
+        "text" : "→ Double → FLOAT"
+      } ]
+    }, {
+      "indices" : [ 3 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->DOUBLE",
+        "text" : "→ Double → DOUBLE"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT",
+        "text" : "→ Double → FLOAT"
+      } ]
+    }, {
+      "indices" : [ 4 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String);java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String);java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String);java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String);java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings/items/properties/fromType",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ 0 ],
+      "value" : [ {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Binary Object",
+        "type" : {
+          "id" : "org.knime.core.data.blob.BinaryObjectDataValue",
+          "text" : "Binary Object"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.DenseBitVectorCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Bit Vector",
+        "type" : {
+          "id" : "org.knime.core.data.vector.bitvector.BitVectorValue",
+          "text" : "Bit Vector"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.SparseBitVectorCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Bit Vector (Sparse)",
+        "type" : {
+          "id" : "org.knime.core.data.vector.bitvector.SparseBitVectorValue",
+          "text" : "Bit Vector (Sparse)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Boolean",
+        "type" : {
+          "id" : "org.knime.core.data.BooleanValue",
+          "text" : "Boolean"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Binary Object)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.SparseBitVectorCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Bit Vector (Sparse))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.DenseBitVectorCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Bit Vector)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Boolean)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date&time (Local))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date&time (Zoned))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Duration (Date-based))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Duration (Time-based))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCollectionCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (collection))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoLineCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (line))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiLineCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi line))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPointCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi point))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPolygonCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi polygon))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPointCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (point))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPolygonCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (polygon))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: HTML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.image.png.PNGImageCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Image (PNG))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.base.data.xml.SvgCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Image (SVG))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: JSON)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Model (PMML))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Molfile)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Float))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Integer))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Long Integer))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.bio.types.PdbCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: PDB)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SDF)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SMILES)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: String)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Time)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.uri.URIDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: URI)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: XML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date",
+        "type" : {
+          "id" : "org.knime.core.data.time.localdate.LocalDateValue",
+          "text" : "Date"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date&time (Local)",
+        "type" : {
+          "id" : "org.knime.core.data.time.localdatetime.LocalDateTimeValue",
+          "text" : "Date&time (Local)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date&time (Zoned)",
+        "type" : {
+          "id" : "org.knime.core.data.time.zoneddatetime.ZonedDateTimeValue",
+          "text" : "Date&time (Zoned)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Duration (Date-based)",
+        "type" : {
+          "id" : "org.knime.core.data.time.period.PeriodValue",
+          "text" : "Duration (Date-based)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Duration (Time-based)",
+        "type" : {
+          "id" : "org.knime.core.data.time.duration.DurationValue",
+          "text" : "Duration (Time-based)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoValue",
+          "text" : "Geo"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCollectionCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (collection)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoCollectionValue",
+          "text" : "Geo (collection)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoLineCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (line)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoLineValue",
+          "text" : "Geo (line)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiLineCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi line)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiLineValue",
+          "text" : "Geo (multi line)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPointCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi point)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiPointValue",
+          "text" : "Geo (multi point)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPolygonCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi polygon)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiPolygonValue",
+          "text" : "Geo (multi polygon)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPointCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (point)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoPointValue",
+          "text" : "Geo (point)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPolygonCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (polygon)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoPolygonValue",
+          "text" : "Geo (polygon)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "HTML",
+        "type" : {
+          "id" : "org.knime.core.data.html.HTMLValue",
+          "text" : "HTML"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.image.png.PNGImageCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Image (PNG)",
+        "type" : {
+          "id" : "org.knime.core.data.image.png.PNGImageValue",
+          "text" : "Image (PNG)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.base.data.xml.SvgCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Image (SVG)",
+        "type" : {
+          "id" : "org.knime.base.data.xml.SvgValue",
+          "text" : "Image (SVG)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "JSON",
+        "type" : {
+          "id" : "org.knime.core.data.json.JSONValue",
+          "text" : "JSON"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Model (PMML)",
+        "type" : {
+          "id" : "org.knime.core.data.xml.PMMLValue",
+          "text" : "Model (PMML)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Molfile",
+        "type" : {
+          "id" : "org.knime.chem.types.MolValue",
+          "text" : "Molfile"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Float)",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.IntValue",
+          "text" : "Number (Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Long Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.LongValue",
+          "text" : "Number (Long Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.bio.types.PdbCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "PDB",
+        "type" : {
+          "id" : "org.knime.bio.types.PdbValue",
+          "text" : "PDB"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SDF",
+        "type" : {
+          "id" : "org.knime.chem.types.SdfValue",
+          "text" : "SDF"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SMILES",
+        "type" : {
+          "id" : "org.knime.chem.types.SmilesValue",
+          "text" : "SMILES"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "String",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Time",
+        "type" : {
+          "id" : "org.knime.core.data.time.localtime.LocalTimeValue",
+          "text" : "Time"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    }, {
+      "indices" : [ 1 ],
+      "value" : [ {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Binary Object",
+        "type" : {
+          "id" : "org.knime.core.data.blob.BinaryObjectDataValue",
+          "text" : "Binary Object"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.DenseBitVectorCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Bit Vector",
+        "type" : {
+          "id" : "org.knime.core.data.vector.bitvector.BitVectorValue",
+          "text" : "Bit Vector"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.SparseBitVectorCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Bit Vector (Sparse)",
+        "type" : {
+          "id" : "org.knime.core.data.vector.bitvector.SparseBitVectorValue",
+          "text" : "Bit Vector (Sparse)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Binary Object)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.SparseBitVectorCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Bit Vector (Sparse))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.vector.bitvector.DenseBitVectorCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Bit Vector)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Boolean)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date&time (Local))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date&time (Zoned))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Date)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Duration (Date-based))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Duration (Time-based))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCollectionCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (collection))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoLineCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (line))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiLineCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi line))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPointCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi point))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPolygonCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (multi polygon))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPointCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (point))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPolygonCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo (polygon))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Geo)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: HTML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.image.png.PNGImageCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Image (PNG))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.base.data.xml.SvgCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Image (SVG))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: JSON)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Model (PMML))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Molfile)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Float))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Integer))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Number (Long Integer))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.bio.types.PdbCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: PDB)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SDF)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SMILES)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: String)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Time)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.uri.URIDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: URI)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: XML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date",
+        "type" : {
+          "id" : "org.knime.core.data.time.localdate.LocalDateValue",
+          "text" : "Date"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date&time (Local)",
+        "type" : {
+          "id" : "org.knime.core.data.time.localdatetime.LocalDateTimeValue",
+          "text" : "Date&time (Local)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Date&time (Zoned)",
+        "type" : {
+          "id" : "org.knime.core.data.time.zoneddatetime.ZonedDateTimeValue",
+          "text" : "Date&time (Zoned)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Duration (Date-based)",
+        "type" : {
+          "id" : "org.knime.core.data.time.period.PeriodValue",
+          "text" : "Duration (Date-based)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Duration (Time-based)",
+        "type" : {
+          "id" : "org.knime.core.data.time.duration.DurationValue",
+          "text" : "Duration (Time-based)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoValue",
+          "text" : "Geo"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoCollectionCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (collection)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoCollectionValue",
+          "text" : "Geo (collection)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoLineCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (line)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoLineValue",
+          "text" : "Geo (line)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiLineCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi line)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiLineValue",
+          "text" : "Geo (multi line)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPointCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi point)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiPointValue",
+          "text" : "Geo (multi point)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoMultiPolygonCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (multi polygon)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoMultiPolygonValue",
+          "text" : "Geo (multi polygon)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPointCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (point)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoPointValue",
+          "text" : "Geo (point)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.geospatial.core.data.cell.GeoPolygonCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Geo (polygon)",
+        "type" : {
+          "id" : "org.knime.geospatial.core.data.GeoPolygonValue",
+          "text" : "Geo (polygon)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "HTML",
+        "type" : {
+          "id" : "org.knime.core.data.html.HTMLValue",
+          "text" : "HTML"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.image.png.PNGImageCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Image (PNG)",
+        "type" : {
+          "id" : "org.knime.core.data.image.png.PNGImageValue",
+          "text" : "Image (PNG)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.base.data.xml.SvgCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Image (SVG)",
+        "type" : {
+          "id" : "org.knime.base.data.xml.SvgValue",
+          "text" : "Image (SVG)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "JSON",
+        "type" : {
+          "id" : "org.knime.core.data.json.JSONValue",
+          "text" : "JSON"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Model (PMML)",
+        "type" : {
+          "id" : "org.knime.core.data.xml.PMMLValue",
+          "text" : "Model (PMML)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Molfile",
+        "type" : {
+          "id" : "org.knime.chem.types.MolValue",
+          "text" : "Molfile"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Float)",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.IntValue",
+          "text" : "Number (Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Long Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.LongValue",
+          "text" : "Number (Long Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.bio.types.PdbCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "PDB",
+        "type" : {
+          "id" : "org.knime.bio.types.PdbValue",
+          "text" : "PDB"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SDF",
+        "type" : {
+          "id" : "org.knime.chem.types.SdfValue",
+          "text" : "SDF"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SMILES",
+        "type" : {
+          "id" : "org.knime.chem.types.SmilesValue",
+          "text" : "SMILES"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "String",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Time",
+        "type" : {
+          "id" : "org.knime.core.data.time.localtime.LocalTimeValue",
+          "text" : "Time"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.uri.URIDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "URI",
+        "type" : {
+          "id" : "org.knime.core.data.uri.URIDataValue",
+          "text" : "URI"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings/items/properties/toType",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ 0 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BooleanValue,class java.lang.Boolean,Boolean);java.lang.Boolean->BOOLEAN",
+        "text" : "→ Boolean → BOOLEAN"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->DOUBLE",
+        "text" : "→ Double → DOUBLE"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->FLOAT",
+        "text" : "→ Double → FLOAT"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INT32",
+        "text" : "→ Integer → INT32"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (16 bit, signed, INT32)",
+        "text" : "→ Integer → INTEGER (16 bit, signed, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (16 bit, unsigned, INT32)",
+        "text" : "→ Integer → INTEGER (16 bit, unsigned, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (32 bit, signed, INT32)",
+        "text" : "→ Integer → INTEGER (32 bit, signed, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (32 bit, unsigned, INT32)",
+        "text" : "→ Integer → INTEGER (32 bit, unsigned, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (64 bit, signed, INT64)",
+        "text" : "→ Integer → INTEGER (64 bit, signed, INT64)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (64 bit, unsigned, INT64)",
+        "text" : "→ Integer → INTEGER (64 bit, unsigned, INT64)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (8 bit, signed, INT32)",
+        "text" : "→ Integer → INTEGER (8 bit, signed, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->INTEGER (8 bit, unsigned, INT32)",
+        "text" : "→ Integer → INTEGER (8 bit, unsigned, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INT64",
+        "text" : "→ Long → INT64"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (16 bit, signed, INT32)",
+        "text" : "→ Long → INTEGER (16 bit, signed, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (16 bit, unsigned, INT32)",
+        "text" : "→ Long → INTEGER (16 bit, unsigned, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (32 bit, signed, INT32)",
+        "text" : "→ Long → INTEGER (32 bit, signed, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (32 bit, unsigned, INT32)",
+        "text" : "→ Long → INTEGER (32 bit, unsigned, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (64 bit, signed, INT64)",
+        "text" : "→ Long → INTEGER (64 bit, signed, INT64)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (64 bit, unsigned, INT64)",
+        "text" : "→ Long → INTEGER (64 bit, unsigned, INT64)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (8 bit, signed, INT32)",
+        "text" : "→ Long → INTEGER (8 bit, signed, INT32)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->INTEGER (8 bit, unsigned, INT32)",
+        "text" : "→ Long → INTEGER (8 bit, unsigned, INT32)"
+      } ]
+    }, {
+      "indices" : [ 1 ],
+      "value" : [ {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(URIDataValue,class java.lang.String,String);java.lang.String->ENUM (BINARY)",
+        "text" : "→ String → ENUM (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(URIDataValue,class java.lang.String,String);java.lang.String->JSON (BINARY)",
+        "text" : "→ String → JSON (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(URIDataValue,class java.lang.String,String);java.lang.String->STRING (BINARY)",
+        "text" : "→ String → STRING (BINARY)"
+      }, {
+        "id" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(URIDataValue,class java.lang.String,String);java.lang.String->UUID (FIXED_LEN_BYTE_ARRAY)",
+        "text" : "→ String → UUID (FIXED_LEN_BYTE_ARRAY)"
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/outputLocation/properties/file",
+    "providedOptionName" : "selectionMode",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : "FILE"
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/outputLocation/properties/overwritePolicy",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "fail",
+        "text" : "Fail"
+      }, {
+        "id" : "overwrite",
+        "text" : "Overwrite"
+      } ]
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColName"
+    },
+    "dependencies" : [ "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColName", "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType"
+    },
+    "dependencies" : [ "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColName", "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings"
+    },
+    "dependencies" : [ "#/properties/model/properties/mapping/properties/byTypeSettings", "#/properties/model/properties/mapping/properties/byTypeSettings/items/properties/fromType" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings/items/properties/fromType"
+    },
+    "dependencies" : [ "#/properties/model/properties/mapping/properties/byTypeSettings", "#/properties/model/properties/mapping/properties/byTypeSettings/items/properties/fromType" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/outputLocation/properties/mode"
+    },
+    "dependencies" : [ "#/properties/model/properties/outputLocation/properties/mode" ]
+  } ]
+}
