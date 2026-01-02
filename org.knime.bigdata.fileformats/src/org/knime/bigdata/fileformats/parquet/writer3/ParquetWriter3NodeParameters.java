@@ -51,6 +51,9 @@ import java.util.List;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.file.MultiFileSelectionMode;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.Widget;
@@ -58,8 +61,11 @@ import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
 import org.knime.node.parameters.persistence.NodeParametersPersistor;
+import org.knime.node.parameters.persistence.Persist;
 import org.knime.node.parameters.persistence.Persistor;
+import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
+import org.knime.node.parameters.widget.choices.EnumChoicesProvider;
 import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 import org.knime.node.parameters.widget.number.NumberInputWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsPositiveIntegerValidation;
@@ -89,13 +95,10 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     interface TypeMappingSection {
     }
 
-    // Note: The file chooser settings and type mapping need custom persistors
-    // because they use SettingsModelWriterFileChooser and SettingsModelDataTypeMapping
-    // which are not directly supported by the new UI framework
-
-    @Persistor(FileChooserPersistor.class)
+    @Persist(configKey = "file_chooser_settings")
+    @Modification(OutputFileModification.class)
     @Layout(SettingsSection.class)
-    FileChooserSettings m_fileChooser = new FileChooserSettings();
+    LegacyFileWriterWithOverwritePolicyOptions m_outputLocation = new LegacyFileWriterWithOverwritePolicyOptions();
 
     @Widget(title = "File Compression",
             description = "The compression codec used to write the Parquet file.")
@@ -134,13 +137,6 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     TypeMappingSettings m_typeMapping = new TypeMappingSettings();
 
     /**
-     * File chooser settings wrapper
-     */
-    static class FileChooserSettings implements NodeParameters {
-        // This will be handled by the custom persistor
-    }
-
-    /**
      * Type mapping settings wrapper
      */
     static class TypeMappingSettings implements NodeParameters {
@@ -163,24 +159,55 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     }
 
     /**
-     * Custom persistor for file chooser settings that delegates to SettingsModelWriterFileChooser
+     * Modification to customize the file writer widget
      */
-    static class FileChooserPersistor implements NodeParametersPersistor<FileChooserSettings> {
+    static final class OutputFileModification implements LegacyFileWriterWithOverwritePolicyOptions.Modifier {
 
         @Override
-        public FileChooserSettings load(final NodeSettingsRO settings) throws InvalidSettingsException {
-            // File chooser settings are loaded by the model directly
-            return new FileChooserSettings();
+        public void modify(final Modification.WidgetGroupModifier group) {
+            final var fileSelection = findFileSelection(group);
+            
+            // Remove FileWriterWidget and add FileSelectionWidget to support both file and folder modes
+            fileSelection
+                .removeAnnotation(org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileWriterWidget.class);
+            fileSelection
+                .addAnnotation(FileSelectionWidget.class)
+                .withValue(new MultiFileSelectionMode[] {
+                    MultiFileSelectionMode.FILE,
+                    MultiFileSelectionMode.FOLDER
+                })
+                .modify();
+            
+            fileSelection
+                .modifyAnnotation(Widget.class)
+                .withProperty("title", "Output location")
+                .withProperty("description", 
+                    "Select a file system and location where you want to store the file. "
+                    + "<br/><b>Mode:</b> Choose between writing to a single file or splitting the data into multiple files in a folder. "
+                    + "When writing to a folder, the data is split into files of the specified size with the configured prefix.")
+                .modify();
+
+            final var overwritePolicy = findOverwritePolicy(group);
+            overwritePolicy
+                .addAnnotation(ChoicesProvider.class)
+                .withProperty("value", OverwritePolicyChoicesProvider.class)
+                .modify();
         }
+    }
+
+    /**
+     * Choices provider for overwrite policy that only allows FAIL and OVERWRITE
+     */
+    private static final class OverwritePolicyChoicesProvider
+        implements EnumChoicesProvider<LegacyFileWriterWithOverwritePolicyOptions.OverwritePolicy> {
 
         @Override
-        public void save(final FileChooserSettings obj, final NodeSettingsWO settings) {
-            // File chooser settings are saved by the model directly
-        }
-
-        @Override
-        public String[][] getConfigPaths() {
-            return new String[][] { { "file_chooser_settings" } };
+        public List<LegacyFileWriterWithOverwritePolicyOptions.OverwritePolicy>
+            choices(final NodeParametersInput context) {
+            return List.of(
+                LegacyFileWriterWithOverwritePolicyOptions.OverwritePolicy.fail,
+                LegacyFileWriterWithOverwritePolicyOptions.OverwritePolicy.overwrite
+            );
         }
     }
 
