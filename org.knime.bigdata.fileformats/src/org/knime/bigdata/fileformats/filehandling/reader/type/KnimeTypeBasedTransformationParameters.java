@@ -42,46 +42,20 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   16 Dec 2025 (robin): created
  */
-package org.knime.bigdata.fileformats.filehandling.reader.parquet;
+package org.knime.bigdata.fileformats.filehandling.reader.type;
 
-import org.apache.parquet.schema.LogicalTypeAnnotation;
-import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
-import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec.TypedReaderTableSpecBuilder;
+import org.knime.base.node.io.filehandling.webui.reader2.TransformationParameters;
 
 /**
- * Parquet table reader using {@link LogicalTypeAnnotation}.
+ * The base class for transformation parameters whose external data types are based on {@link KnimeType}s.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
-public final class ParquetTableReader2 extends AbstractParquetTableReader {
-
-    @Override
-    protected AbstractParquetRandomAccessibleReadSupport createReadSupport(final TableReadConfig<BigDataReaderConfig> config) {
-        return new ParquetRandomAccessibleReadSupport2(failOnUnsupportedColumnTypes(config));
-    }
-
-    @Override
-    protected TypedReaderTableSpec<KnimeType> convertToSpec(final TableReadConfig<BigDataReaderConfig> config,
-        final MessageType schema) {
-
-        final TypedReaderTableSpecBuilder<KnimeType> specBuilder = new TypedReaderTableSpecBuilder<>();
-        final boolean failOnUnsupportedColumnTypes = failOnUnsupportedColumnTypes(config);
-
-        for (Type field : schema.getFields()) {
-            ParquetTypeHelper.getParquetColumn(field, failOnUnsupportedColumnTypes).addColumnSpecs(specBuilder);
-        }
-
-        return specBuilder.build();
-    }
-
-    private static boolean failOnUnsupportedColumnTypes(final TableReadConfig<BigDataReaderConfig> config) {
-        return config.getReaderSpecificConfig().failOnUnsupportedColumnTypes();
-    }
+public abstract class KnimeTypeBasedTransformationParameters extends TransformationParameters<KnimeType>
+    implements KnimeTypeSerializer {
 
 }

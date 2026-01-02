@@ -92,6 +92,7 @@
 			<modules>
 				<module>org.knime.bigdata.database</module>
 				<module>org.knime.bigdata.database.tests</module>
+				<module>org.knime.bigdata.fileformats.tests</module>
 			</modules>
 		</profile>
 	</profiles>
