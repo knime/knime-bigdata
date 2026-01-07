@@ -52,17 +52,18 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.MultiFileSelectionMode;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.Advanced;
 import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.Widget;
+import org.knime.node.parameters.layout.After;
 import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
 import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.node.parameters.persistence.Persist;
-import org.knime.node.parameters.persistence.Persistor;
 import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.EnumChoicesProvider;
@@ -88,12 +89,19 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     interface SettingsSection {
     }
 
-    /**
-     * Type Mapping section
-     */
-    @Section(title = "Type Mapping", description = "Change the KNIME to Parquet type mapping configuration for subsequent nodes by selecting a Parquet type to the given KNIME Type. The dialog allows you to add new or change existing type mapping rules.")
-    interface TypeMappingSection {
-    }
+//    /**
+//     * Type Mapping by Name section
+//     */
+//    @Section(title = "Type Mapping by Name", description = "Change the KNIME to Parquet type mapping by name configuration for subsequent nodes by selecting a Parquet type to the given KNIME Type. The dialog allows you to add new or change existing type mapping rules.")
+//    interface TypeMappingByNameSection {
+//    }
+//
+//    /**
+//     * Type Mapping by Type section
+//     */
+//    @Section(title = "Type Mapping by Type", description = "Change the KNIME to Parquet type mapping by type configuration for subsequent nodes by selecting a Parquet type to the given KNIME Type. The dialog allows you to add new or change existing type mapping rules.")
+//    interface TypeMappingByTypeSection {
+//    }
 
     @Persist(configKey = "file_chooser_settings")
     @Modification(OutputFileModification.class)
@@ -132,16 +140,19 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @Layout(SettingsSection.class)
     int m_chunkSize = 128; // Default from ParquetWriter.DEFAULT_BLOCK_SIZE / TO_BYTE
 
-    @Persistor(TypeMappingPersistor.class)
-    @Layout(TypeMappingSection.class)
-    TypeMappingSettings m_typeMapping = new TypeMappingSettings();
-
-    /**
-     * Type mapping settings wrapper
-     */
-    static class TypeMappingSettings implements NodeParameters {
-        // This will be handled by the custom persistor
-    }
+//    @Persistor(TypeMappingByNamePersistor.class)
+//    @Layout(TypeMappingByNameSection.class)
+//    @Widget(title = "Mapping by Name", description = "Type mapping by name")
+//    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add type mapping by name",
+//            showSortButtons = false)
+//    TypeMappingByName[] m_typeMappingByName = new TypeMappingByName[0];
+//
+//    @Persistor(TypeMappingByTypePersistor.class)
+//    @Layout(TypeMappingByTypeSection.class)
+//    @Widget(title = "Mapping by Type", description = "Type mapping by type")
+//    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add type mapping by type",
+//            showSortButtons = false)
+//    TypeMappingByType[] m_typeMappingByType = new TypeMappingByType[0];
 
     /**
      * Choices provider for compression codecs
@@ -166,22 +177,19 @@ class ParquetWriter3NodeParameters implements NodeParameters {
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
             final var fileSelection = findFileSelection(group);
-            
+
             // Remove FileWriterWidget and add FileSelectionWidget to support both file and folder modes
             fileSelection
                 .removeAnnotation(org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileWriterWidget.class);
             fileSelection
                 .addAnnotation(FileSelectionWidget.class)
-                .withValue(new MultiFileSelectionMode[] {
-                    MultiFileSelectionMode.FILE,
-                    MultiFileSelectionMode.FOLDER
-                })
+                .withValue(SingleFileSelectionMode.FILE)
                 .modify();
-            
+
             fileSelection
                 .modifyAnnotation(Widget.class)
                 .withProperty("title", "Output location")
-                .withProperty("description", 
+                .withProperty("description",
                     "Select a file system and location where you want to store the file. "
                     + "<br/><b>Mode:</b> Choose between writing to a single file or splitting the data into multiple files in a folder. "
                     + "When writing to a folder, the data is split into files of the specified size with the configured prefix.")
@@ -212,24 +220,55 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     }
 
     /**
-     * Custom persistor for type mapping settings that delegates to SettingsModelDataTypeMapping
+     * Custom persistor for type mapping by name settings that delegates to SettingsModelDataTypeMapping
      */
-    static class TypeMappingPersistor implements NodeParametersPersistor<TypeMappingSettings> {
+//    static class TypeMappingByNamePersistor implements NodeParametersPersistor<TypeMappingByName> {
+//
+//        @Override
+//        public TypeMappingByName load(final NodeSettingsRO settings) throws InvalidSettingsException {
+//            // Type mapping settings are loaded by the model directly
+//            return new TypeMappingByName();
+//        }
+//
+//        @Override
+//        public void save(final TypeMappingByName obj, final NodeSettingsWO settings) {
+//            // Type mapping settings are saved by the model directly
+//        }
+//
+//        @Override
+//        public String[][] getConfigPaths() {
+//            return new String[][] { { "input_type_mapping" } };
+//        }
+//    }
 
-        @Override
-        public TypeMappingSettings load(final NodeSettingsRO settings) throws InvalidSettingsException {
-            // Type mapping settings are loaded by the model directly
-            return new TypeMappingSettings();
-        }
+    /**
+     * Custom persistor for type mapping by type settings that delegates to SettingsModelDataTypeMapping
+     */
+//    static class TypeMappingByTypePersistor implements NodeParametersPersistor<TypeMappingByType> {
+//
+//        @Override
+//        public TypeMappingByType load(final NodeSettingsRO settings) throws InvalidSettingsException {
+//            // Type mapping settings are loaded by the model directly
+//            return new TypeMappingByType();
+//        }
+//
+//        @Override
+//        public void save(final TypeMappingByType obj, final NodeSettingsWO settings) {
+//            // Type mapping settings are saved by the model directly
+//        }
+//
+//        @Override
+//        public String[][] getConfigPaths() {
+//            return new String[][] { { "input_type_mapping" } };
+//        }
+//    }
 
-        @Override
-        public void save(final TypeMappingSettings obj, final NodeSettingsWO settings) {
-            // Type mapping settings are saved by the model directly
-        }
-
-        @Override
-        public String[][] getConfigPaths() {
-            return new String[][] { { "input_type_mapping" } };
-        }
+    @Section(title = "Output Type Mapping", sideDrawer = true)
+    @Advanced
+    @After(SettingsSection.class)
+    interface OutputMappingSection {
     }
+
+    @Layout(OutputMappingSection.class)
+    DBOutputTypeMappingParameters m_outputMapping = new DBOutputTypeMappingParameters();
 }
