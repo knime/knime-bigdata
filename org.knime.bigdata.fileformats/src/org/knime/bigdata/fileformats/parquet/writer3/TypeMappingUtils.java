@@ -73,9 +73,9 @@ import org.knime.node.parameters.widget.choices.StringChoicesProvider;
  * @author Martin Sillye, TNG Technology Consulting GmbH
  */
 @SuppressWarnings("restriction")
-public final class DBTypeMappingUtils {
+public final class TypeMappingUtils {
 
-    private DBTypeMappingUtils() {
+    private TypeMappingUtils() {
         // Utils class
     }
 

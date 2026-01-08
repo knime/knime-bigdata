@@ -52,13 +52,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
-import org.knime.bigdata.fileformats.parquet.writer3.DBOutputTypeMapping.ByNameOutputMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.DBOutputTypeMapping.ByNameOutputMappingSettings.ByNameOutputMappingModification;
-import org.knime.bigdata.fileformats.parquet.writer3.DBOutputTypeMapping.ByTypeOutputMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.DBOutputTypeMapping.ByTypeOutputMappingSettings.ByTypeOutputMappingModification;
-import org.knime.bigdata.fileformats.parquet.writer3.DBOutputTypeMapping.ByTypeOutputMappingSettings.DynamicKnimeTypeChoicesProvider;
-import org.knime.bigdata.fileformats.parquet.writer3.DBOutputTypeMapping.KnimeTypeChoicesProvider;
-import org.knime.bigdata.fileformats.parquet.writer3.DBTypeMappingUtils.ToDBTypeChoicesProvider;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameOutputMappingSettings;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameOutputMappingSettings.ByNameOutputMappingModification;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeOutputMappingSettings;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeOutputMappingSettings.ByTypeOutputMappingModification;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeOutputMappingSettings.DynamicKnimeTypeChoicesProvider;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.KnimeTypeChoicesProvider;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ToDBTypeChoicesProvider;
 import org.knime.core.data.DataType;
 import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
@@ -83,44 +83,44 @@ import org.knime.node.parameters.widget.choices.StringChoicesProvider;
  * @author Paul Baernreuther
  */
 @SuppressWarnings("javadoc")
-public final class DBOutputTypeMappingParameters implements NodeParameters {
+public final class TypeMappingParameters implements NodeParameters {
 
-    @Section(title = "Output mapping by name (Excluding Defaults)")
+    @Section(title = "Mapping by Name")
     interface MappingByName {
     }
 
-    @Section(title = "Output mapping by type (Excluding Defaults)")
-    @After(DBOutputTypeMappingParameters.MappingByName.class)
+    @Section(title = "Mapping by Type")
+    @After(TypeMappingParameters.MappingByName.class)
     interface MappingByType {
     }
 
     /**
-     * Output mapping settings by name.
+     * Mpping settings by name.
      */
     @Widget(title = "Name", description = """
             Columns that match the given name (or regular expression) and KNIME type will be mapped to the \
             specified database type.
             """)
     @ArrayWidget(addButtonText = "Add name", elementTitle = "Column name")
-    @Layout(DBOutputTypeMappingParameters.MappingByName.class)
-    @Modification(DBOutputTypeMappingParameters.ByNameModification.class)
+    @Layout(TypeMappingParameters.MappingByName.class)
+    @Modification(TypeMappingParameters.ByNameModification.class)
     public ByNameOutputMappingSettings[] m_byNameSettings = new ByNameOutputMappingSettings[0];
 
     static final class ByNameModification extends ByNameOutputMappingModification {
 
         @Override
         protected Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider() {
-            return Optional.of(DBOutputTypeMappingParameters.ByNameKnimeTypeChoicesProvider.class);
+            return Optional.of(TypeMappingParameters.ByNameKnimeTypeChoicesProvider.class);
         }
 
         @Override
         protected Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider() {
-            return Optional.of(DBOutputTypeMappingParameters.ToDBTypeByNameChoicesProvider.class);
+            return Optional.of(TypeMappingParameters.ToDBTypeByNameChoicesProvider.class);
         }
 
         @Override
         protected Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider() {
-            return Optional.of(DBOutputTypeMappingParameters.ToNameProvider.class);
+            return Optional.of(TypeMappingParameters.ToNameProvider.class);
         }
 
     }
@@ -138,7 +138,7 @@ public final class DBOutputTypeMappingParameters implements NodeParameters {
     }
 
     static final class ToDBTypeByNameChoicesProvider extends
-        DBOutputTypeMappingParameters.AbstractToDBTypeChoicesProvider<ByNameOutputMappingSettings.FromColTypeRef> {
+        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByNameOutputMappingSettings.FromColTypeRef> {
 
         ToDBTypeByNameChoicesProvider() {
             super(ByNameOutputMappingSettings.FromColTypeRef.class);
@@ -178,31 +178,31 @@ public final class DBOutputTypeMappingParameters implements NodeParameters {
     }
 
     /**
-     * Output mapping settings by type.
+     * Mapping settings by type.
      */
     @Widget(title = "Type",
         description = "Columns that match the given KNIME type will be mapped to the specified database type.")
     @ArrayWidget(addButtonText = "Add type", elementTitle = "Type")
-    @ValueReference(DBOutputTypeMappingParameters.ByTypeRef.class)
-    @Layout(DBOutputTypeMappingParameters.MappingByType.class)
-    @Modification(DBOutputTypeMappingParameters.ByTypeModification.class)
+    @ValueReference(TypeMappingParameters.ByTypeRef.class)
+    @Layout(TypeMappingParameters.MappingByType.class)
+    @Modification(TypeMappingParameters.ByTypeModification.class)
     public ByTypeOutputMappingSettings[] m_byTypeSettings = new ByTypeOutputMappingSettings[0];
 
     static final class ByTypeModification extends ByTypeOutputMappingModification {
 
         @Override
         protected Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider() {
-            return Optional.of(DBOutputTypeMappingParameters.ByTypeDynamicKnimeTypeChoicesProvider.class);
+            return Optional.of(TypeMappingParameters.ByTypeDynamicKnimeTypeChoicesProvider.class);
         }
 
         @Override
         protected Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider() {
-            return Optional.of(DBOutputTypeMappingParameters.ToDBTypeByTypeChoicesProvider.class);
+            return Optional.of(TypeMappingParameters.ToDBTypeByTypeChoicesProvider.class);
         }
 
         @Override
         protected Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider() {
-            return Optional.of(DBOutputTypeMappingParameters.ToTypeProvider.class);
+            return Optional.of(TypeMappingParameters.ToTypeProvider.class);
         }
 
     }
@@ -215,7 +215,7 @@ public final class DBOutputTypeMappingParameters implements NodeParameters {
 
         @Override
         public void init(final StateProviderInitializer initializer) {
-            m_array = initializer.computeFromValueSupplier(DBOutputTypeMappingParameters.ByTypeRef.class);
+            m_array = initializer.computeFromValueSupplier(TypeMappingParameters.ByTypeRef.class);
             super.init(initializer);
         }
 
@@ -227,7 +227,7 @@ public final class DBOutputTypeMappingParameters implements NodeParameters {
     }
 
     static final class ToDBTypeByTypeChoicesProvider extends
-        DBOutputTypeMappingParameters.AbstractToDBTypeChoicesProvider<ByTypeOutputMappingSettings.FromColTypeRef> {
+        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByTypeOutputMappingSettings.FromColTypeRef> {
         ToDBTypeByTypeChoicesProvider() {
             super(ByTypeOutputMappingSettings.FromColTypeRef.class);
         }

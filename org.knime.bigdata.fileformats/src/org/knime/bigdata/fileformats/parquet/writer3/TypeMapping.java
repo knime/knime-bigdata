@@ -65,8 +65,8 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification.Widget
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.datatype.mapping.DataTypeMappingService;
-import org.knime.bigdata.fileformats.parquet.writer3.DBTypeMappingUtils.ConsumptionPathPersistor;
-import org.knime.bigdata.fileformats.parquet.writer3.DBTypeMappingUtils.FilterType;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ConsumptionPathPersistor;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.FilterType;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.WidgetGroup;
@@ -87,9 +87,9 @@ import org.knime.node.parameters.widget.text.TextInputWidget;
  * @author Martin Sillye, TNG Technology Consulting GmbH
  */
 @SuppressWarnings({"restriction", "javadoc"})
-public final class DBOutputTypeMapping {
+public final class TypeMapping {
 
-    private DBOutputTypeMapping() {
+    private TypeMapping() {
         // Utility class
     }
 
