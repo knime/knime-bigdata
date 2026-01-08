@@ -44,7 +44,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Jun 25, 2025 (Martin Sillye, TNG Technology Consulting GmbH): created
+ *   Jan 8, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
@@ -84,7 +84,7 @@ import org.knime.node.parameters.widget.text.TextInputWidget;
 
 /**
  *
- * @author Martin Sillye, TNG Technology Consulting GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @SuppressWarnings({"restriction", "javadoc"})
 public final class TypeMapping {
@@ -93,38 +93,7 @@ public final class TypeMapping {
         // Utility class
     }
 
-    public abstract static class KnimeTypeChoicesProvider implements DataTypeChoicesProvider {
-
-        @Override
-        public void init(final StateProviderInitializer initializer) {
-            initializer.computeBeforeOpenDialog();
-        }
-
-        @Override
-        public List<DataType> choices(final NodeParametersInput context) {
-            // Get types from input table spec
-            final var inSpec = context.getInPortSpec(0);
-            if (inSpec.isPresent() && inSpec.get() instanceof DataTableSpec spec) {
-                // Collect unique data types from all columns in the input table
-                final var types = spec.stream()
-                    .map(DataColumnSpec::getType)
-                    .distinct()
-                    .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
-                    .toList();
-                if (!types.isEmpty()) {
-                    return types;
-                }
-            }
-            
-            // Fallback: if no input spec or empty spec, show all supported types
-            final var mappingService = ParquetLogicalTypeMappingService.getInstance();
-            return mappingService.getKnimeSourceTypes().stream()
-                .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
-                .toList();
-        }
-    }
-
-    interface OutputMappingSettings extends WidgetGroup, Persistable {
+    interface MappingSettings extends WidgetGroup, Persistable {
         /**
          * @return the fromType
          */
@@ -152,13 +121,13 @@ public final class TypeMapping {
         }
     }
 
-    public static final class ByNameOutputMappingSettings implements OutputMappingSettings {
+    public static final class ByNameMappingSettings implements MappingSettings {
 
-        ByNameOutputMappingSettings() {
+        ByNameMappingSettings() {
 
         }
 
-        public ByNameOutputMappingSettings(final FilterType filterType, final String fromColName,
+        public ByNameMappingSettings(final FilterType filterType, final String fromColName,
             final DataType fromColType, final String toColType) {
             this.m_filterType = filterType;
             this.m_fromColName = fromColName;
@@ -177,7 +146,7 @@ public final class TypeMapping {
         String m_fromColName = "";
 
         @Widget(title = "Source type", description = "Datatype to map from.")
-        @ValueReference(ByNameOutputMappingSettings.FromColTypeRef.class)
+        @ValueReference(ByNameMappingSettings.FromColTypeRef.class)
         @Modification.WidgetReference(FromColTypeRef.class)
         DataType m_fromColType;
 
@@ -217,12 +186,7 @@ public final class TypeMapping {
             return m_toColType;
         }
 
-        /**
-         * Use this Modifier to set up the ByNameOutputMappingSettings.
-         *
-         * @author Martin Sillye, TNG Technology Consulting GmbH
-         */
-        public abstract static class ByNameOutputMappingModification implements Modification.Modifier {
+        public abstract static class ByNameMappingModification implements Modification.Modifier {
 
             @Override
             public void modify(final WidgetGroupModifier group) {
@@ -242,38 +206,29 @@ public final class TypeMapping {
                 }
             }
 
-            /**
-             * @return optionally a StringChoicesProvider to the Database type (fromColType) field.
-             */
             protected abstract Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider();
 
-            /**
-             * @return optionally a StringChoicesProvider to the Mapping to (toColType) field.
-             */
             protected abstract Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider();
 
-            /**
-             * @return optionally a StateProvider to be used as ValueProvider on the Mapping to (toColType) field.
-             */
             protected abstract Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider();
 
         }
 
     }
 
-    public static final class ByTypeOutputMappingSettings implements OutputMappingSettings {
+    public static final class ByTypeMappingSettings implements MappingSettings {
 
-        ByTypeOutputMappingSettings() {
+        ByTypeMappingSettings() {
 
         }
 
-        public ByTypeOutputMappingSettings(final DataType fromType, final String toType) {
+        public ByTypeMappingSettings(final DataType fromType, final String toType) {
             this.m_fromType = fromType;
             this.m_toType = toType;
         }
 
         @Widget(title = "KNIME type", description = "Datatype to map from.")
-        @ValueReference(ByTypeOutputMappingSettings.FromColTypeRef.class)
+        @ValueReference(ByTypeMappingSettings.FromColTypeRef.class)
         @Modification.WidgetReference(FromColTypeRef.class)
         DataType m_fromType;
 
@@ -301,12 +256,7 @@ public final class TypeMapping {
             return m_toType;
         }
 
-        /**
-         * Use this Modifier to set up the ByTypeOutputMappingSettings.
-         *
-         * @author Martin Sillye, TNG Technology Consulting GmbH
-         */
-        public abstract static class ByTypeOutputMappingModification implements Modification.Modifier {
+        public abstract static class ByTypeMappingModification implements Modification.Modifier {
 
             @Override
             public void modify(final WidgetGroupModifier group) {
@@ -326,28 +276,14 @@ public final class TypeMapping {
                 }
             }
 
-            /**
-             * @return optionally a StringChoicesProvider to the From type (fromType) field.
-             */
             protected abstract Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider();
 
-            /**
-             * @return optionally a StringChoicesProvider to the To type (toType) field.
-             */
             protected abstract Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider();
 
-            /**
-             * @return optionally a StateProvider to be used as ValueProvider on the To type (toType) field.
-             */
             protected abstract Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider();
 
         }
 
-        //TODO Should be removed when UIEXT-1596 is Done
-        /**
-         *
-         * @author Martin Sillye, TNG Technology Consulting GmbH
-         */
         public abstract static class DynamicKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
 
             private Supplier<DataType> m_fromType;
@@ -371,10 +307,7 @@ public final class TypeMapping {
                     .toList();
             }
 
-            /**
-             * @return an array of ByTypeOutputMappingSettings
-             */
-            protected abstract ByTypeOutputMappingSettings[] getByTypeOutputSettings();
+            protected abstract ByTypeMappingSettings[] getByTypeOutputSettings();
         }
 
     }

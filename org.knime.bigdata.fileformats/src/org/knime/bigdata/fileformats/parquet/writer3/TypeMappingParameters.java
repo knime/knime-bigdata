@@ -48,17 +48,19 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameOutputMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameOutputMappingSettings.ByNameOutputMappingModification;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeOutputMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeOutputMappingSettings.ByTypeOutputMappingModification;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeOutputMappingSettings.DynamicKnimeTypeChoicesProvider;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.KnimeTypeChoicesProvider;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameMappingSettings;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameMappingSettings.ByNameMappingModification;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings.ByTypeMappingModification;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings.DynamicKnimeTypeChoicesProvider;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ToDBTypeChoicesProvider;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
@@ -76,11 +78,11 @@ import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
 import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
 /**
- * Settings for output column type mapping used to overwrite default mappings.
+ * Settings for column type mapping used to overwrite default mappings.
  *
  * These are currently used by all manipulator nodes and with that hard-coded to use the second input port.
  *
- * @author Paul Baernreuther
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @SuppressWarnings("javadoc")
 public final class TypeMappingParameters implements NodeParameters {
@@ -95,7 +97,7 @@ public final class TypeMappingParameters implements NodeParameters {
     }
 
     /**
-     * Mpping settings by name.
+     * Mapping settings by name.
      */
     @Widget(title = "Name", description = """
             Columns that match the given name (or regular expression) and KNIME type will be mapped to the \
@@ -104,9 +106,9 @@ public final class TypeMappingParameters implements NodeParameters {
     @ArrayWidget(addButtonText = "Add name", elementTitle = "Column name")
     @Layout(TypeMappingParameters.MappingByName.class)
     @Modification(TypeMappingParameters.ByNameModification.class)
-    public ByNameOutputMappingSettings[] m_byNameSettings = new ByNameOutputMappingSettings[0];
+    public ByNameMappingSettings[] m_byNameSettings = new ByNameMappingSettings[0];
 
-    static final class ByNameModification extends ByNameOutputMappingModification {
+    static final class ByNameModification extends ByNameMappingModification {
 
         @Override
         protected Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider() {
@@ -125,11 +127,38 @@ public final class TypeMappingParameters implements NodeParameters {
 
     }
 
-    static final class ByNameKnimeTypeChoicesProvider extends KnimeTypeChoicesProvider {
-        // Inherits init() and choices() from KnimeTypeChoicesProvider
+   private static final class ByNameKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
+
+        @Override
+        public void init(final StateProviderInitializer initializer) {
+            initializer.computeBeforeOpenDialog();
+        }
+
+        @Override
+        public List<DataType> choices(final NodeParametersInput context) {
+            // Get types from input table spec
+            final var inSpec = context.getInPortSpec(0);
+            if (inSpec.isPresent() && inSpec.get() instanceof DataTableSpec spec) {
+                // Collect unique data types from all columns in the input table
+                final var types = spec.stream()
+                        .map(DataColumnSpec::getType)
+                        .distinct()
+                        .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
+                        .toList();
+                if (!types.isEmpty()) {
+                    return types;
+                }
+            }
+
+            // Fallback: if no input spec or empty spec, show all supported types
+            final var mappingService = ParquetLogicalTypeMappingService.getInstance();
+            return mappingService.getKnimeSourceTypes().stream()
+                    .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
+                    .toList();
+        }
     }
 
-    abstract static class AbstractToDBTypeChoicesProvider<R extends ParameterReference<DataType>>
+    abstract private static class AbstractToDBTypeChoicesProvider<R extends ParameterReference<DataType>>
             extends ToDBTypeChoicesProvider<R> {
 
         protected AbstractToDBTypeChoicesProvider(final Class<R> ref) {
@@ -137,15 +166,15 @@ public final class TypeMappingParameters implements NodeParameters {
         }
     }
 
-    static final class ToDBTypeByNameChoicesProvider extends
-        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByNameOutputMappingSettings.FromColTypeRef> {
+    private static final class ToDBTypeByNameChoicesProvider extends
+        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByNameMappingSettings.FromColTypeRef> {
 
         ToDBTypeByNameChoicesProvider() {
-            super(ByNameOutputMappingSettings.FromColTypeRef.class);
+            super(ByNameMappingSettings.FromColTypeRef.class);
         }
     }
 
-    static final class ToNameProvider implements StateProvider<String> {
+    private static final class ToNameProvider implements StateProvider<String> {
 
         private Supplier<String> m_fromColumn;
 
@@ -153,8 +182,8 @@ public final class TypeMappingParameters implements NodeParameters {
 
         @Override
         public void init(final StateProviderInitializer initializer) {
-            m_fromColumn = initializer.computeFromValueSupplier(ByNameOutputMappingSettings.FromColRef.class);
-            m_fromType = initializer.computeFromValueSupplier(ByNameOutputMappingSettings.FromColTypeRef.class);
+            m_fromColumn = initializer.computeFromValueSupplier(ByNameMappingSettings.FromColRef.class);
+            m_fromType = initializer.computeFromValueSupplier(ByNameMappingSettings.FromColTypeRef.class);
             initializer.computeBeforeOpenDialog();
         }
 
@@ -177,18 +206,15 @@ public final class TypeMappingParameters implements NodeParameters {
 
     }
 
-    /**
-     * Mapping settings by type.
-     */
     @Widget(title = "Type",
         description = "Columns that match the given KNIME type will be mapped to the specified database type.")
     @ArrayWidget(addButtonText = "Add type", elementTitle = "Type")
     @ValueReference(TypeMappingParameters.ByTypeRef.class)
     @Layout(TypeMappingParameters.MappingByType.class)
     @Modification(TypeMappingParameters.ByTypeModification.class)
-    public ByTypeOutputMappingSettings[] m_byTypeSettings = new ByTypeOutputMappingSettings[0];
+    public ByTypeMappingSettings[] m_byTypeSettings = new ByTypeMappingSettings[0];
 
-    static final class ByTypeModification extends ByTypeOutputMappingModification {
+    private static final class ByTypeModification extends ByTypeMappingModification {
 
         @Override
         protected Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider() {
@@ -207,11 +233,11 @@ public final class TypeMappingParameters implements NodeParameters {
 
     }
 
-    interface ByTypeRef extends ParameterReference<ByTypeOutputMappingSettings[]> {}
+    interface ByTypeRef extends ParameterReference<ByTypeMappingSettings[]> {}
 
-    static final class ByTypeDynamicKnimeTypeChoicesProvider extends DynamicKnimeTypeChoicesProvider{
+    private static final class ByTypeDynamicKnimeTypeChoicesProvider extends DynamicKnimeTypeChoicesProvider{
 
-        private Supplier<ByTypeOutputMappingSettings[]> m_array;
+        private Supplier<ByTypeMappingSettings[]> m_array;
 
         @Override
         public void init(final StateProviderInitializer initializer) {
@@ -220,26 +246,26 @@ public final class TypeMappingParameters implements NodeParameters {
         }
 
         @Override
-        protected ByTypeOutputMappingSettings[] getByTypeOutputSettings() {
+        protected ByTypeMappingSettings[] getByTypeOutputSettings() {
             return m_array.get();
         }
 
     }
 
-    static final class ToDBTypeByTypeChoicesProvider extends
-        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByTypeOutputMappingSettings.FromColTypeRef> {
+    private static final class ToDBTypeByTypeChoicesProvider extends
+        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByTypeMappingSettings.FromColTypeRef> {
         ToDBTypeByTypeChoicesProvider() {
-            super(ByTypeOutputMappingSettings.FromColTypeRef.class);
+            super(ByTypeMappingSettings.FromColTypeRef.class);
         }
     }
 
-    static final class ToTypeProvider implements StateProvider<String> {
+    private static final class ToTypeProvider implements StateProvider<String> {
 
         private Supplier<DataType> m_fromType;
 
         @Override
         public void init(final StateProviderInitializer initializer) {
-            m_fromType = initializer.computeFromValueSupplier(ByTypeOutputMappingSettings.FromColTypeRef.class);
+            m_fromType = initializer.computeFromValueSupplier(ByTypeMappingSettings.FromColTypeRef.class);
             initializer.computeBeforeOpenDialog();
         }
 

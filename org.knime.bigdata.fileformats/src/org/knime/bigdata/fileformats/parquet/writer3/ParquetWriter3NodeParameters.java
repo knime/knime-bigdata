@@ -236,9 +236,9 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @Section(title = "Type Mapping", sideDrawer = true)
     @Advanced
     @After(SettingsSection.class)
-    interface OutputMappingSection {
+    interface MappingSection {
     }
 
-    @Layout(OutputMappingSection.class)
-    TypeMappingParameters m_outputMapping = new TypeMappingParameters();
+    @Layout(MappingSection.class)
+    TypeMappingParameters m_mapping = new TypeMappingParameters();
 }

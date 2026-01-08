@@ -44,7 +44,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Jun 25, 2025 (Martin Sillye, TNG Technology Consulting GmbH): created
+ *   Jan 8, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
@@ -70,7 +70,7 @@ import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
 /**
  *
- * @author Martin Sillye, TNG Technology Consulting GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @SuppressWarnings("restriction")
 public final class TypeMappingUtils {
@@ -81,7 +81,7 @@ public final class TypeMappingUtils {
 
     /**
      *
-     * @author Martin Sillye, TNG Technology Consulting GmbH
+     * @author Jochen Reißinger, TNG Technology Consulting GmbH
      */
     public enum FilterType {
             /**
@@ -96,7 +96,7 @@ public final class TypeMappingUtils {
             REGEX
     }
 
-    abstract static class ToTypeChoicesProvider<T1, T2 extends ParameterReference<T1>>
+    abstract private static class ToTypeChoicesProvider<T1, T2 extends ParameterReference<T1>>
         implements StringChoicesProvider {
 
         ToTypeChoicesProvider(final Class<T2> ref) {
@@ -126,32 +126,7 @@ public final class TypeMappingUtils {
             DataTypeMappingService<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> mappingService, T1 fromColType);
     }
 
-    abstract static class ToKnimeTypeChoicesProvider<T extends ParameterReference<String>>
-        extends ToTypeChoicesProvider<String, T> {
-
-        ToKnimeTypeChoicesProvider(final Class<T> ref) {
-            super(ref);
-        }
-
-        @Override
-        protected List<StringChoice> getChoices(
-            final DataTypeMappingService<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination>
-            mappingService,
-            final String fromColType) {
-            final ParquetType parquetType = mappingService.convertStringToExternalType(fromColType);
-
-            return mappingService.getProductionPathsFor(parquetType).stream()
-                .sorted((p1, p2) -> p1.toString().compareTo(p2.toString()))
-                .map(path -> new StringChoice(
-                    String.format("%s;%s", path.getProducerFactory().getIdentifier(),
-                        path.getConverterFactory().getIdentifier()),
-                    "\u2192 " + path.getConverterFactory().getSourceType().getSimpleName() + " \u2192 "
-                        + path.getDestinationType().getName()))
-                .toList();
-        }
-    }
-
-    public abstract static class ToDBTypeChoicesProvider<T extends ParameterReference<DataType>>
+    abstract static class ToDBTypeChoicesProvider<T extends ParameterReference<DataType>>
         extends ToTypeChoicesProvider<DataType, T> {
 
         /**
@@ -175,7 +150,7 @@ public final class TypeMappingUtils {
         }
     }
 
-    abstract static class PathPersistor implements NodeParametersPersistor<String> {
+    abstract private static class PathPersistor implements NodeParametersPersistor<String> {
 
         PathPersistor(final String fromKey, final String toKey) {
             this.m_fromKey = fromKey;
@@ -212,9 +187,9 @@ public final class TypeMappingUtils {
     }
     /**
      *
-     * @author Martin Sillye, TNG Technology Consulting GmbH
+     * @author Jochen Reißinger, TNG Technology Consulting GmbH
      */
-    public static final class ConsumptionPathPersistor extends PathPersistor {
+    static final class ConsumptionPathPersistor extends PathPersistor {
 
         ConsumptionPathPersistor() {
             super(CONVERTER_FACTORY, CONSUMER_FACTORY);
