@@ -79,7 +79,7 @@ import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
 /**
  * Settings for column type mapping used to overwrite default mappings.
- *
+ * <p>
  * These are currently used by all manipulator nodes and with that hard-coded to use the second input port.
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
@@ -127,7 +127,7 @@ public final class TypeMappingParameters implements NodeParameters {
 
     }
 
-   private static final class ByNameKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
+    private static final class ByNameKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
 
         @Override
         public void init(final StateProviderInitializer initializer) {
@@ -158,16 +158,8 @@ public final class TypeMappingParameters implements NodeParameters {
         }
     }
 
-    abstract private static class AbstractToDBTypeChoicesProvider<R extends ParameterReference<DataType>>
-            extends ToDBTypeChoicesProvider<R> {
-
-        protected AbstractToDBTypeChoicesProvider(final Class<R> ref) {
-            super(ref);
-        }
-    }
-
     private static final class ToDBTypeByNameChoicesProvider extends
-        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByNameMappingSettings.FromColTypeRef> {
+            ToDBTypeChoicesProvider<ByNameMappingSettings.FromColTypeRef> {
 
         ToDBTypeByNameChoicesProvider() {
             super(ByNameMappingSettings.FromColTypeRef.class);
@@ -201,13 +193,13 @@ public final class TypeMappingParameters implements NodeParameters {
                 return "";
             }
             return String.format("%s;%s", path.get().getConverterFactory().getIdentifier(),
-                path.get().getConsumerFactory().getIdentifier());
+                    path.get().getConsumerFactory().getIdentifier());
         }
 
     }
 
     @Widget(title = "Type",
-        description = "Columns that match the given KNIME type will be mapped to the specified database type.")
+            description = "Columns that match the given KNIME type will be mapped to the specified database type.")
     @ArrayWidget(addButtonText = "Add type", elementTitle = "Type")
     @ValueReference(TypeMappingParameters.ByTypeRef.class)
     @Layout(TypeMappingParameters.MappingByType.class)
@@ -233,9 +225,10 @@ public final class TypeMappingParameters implements NodeParameters {
 
     }
 
-    interface ByTypeRef extends ParameterReference<ByTypeMappingSettings[]> {}
+    interface ByTypeRef extends ParameterReference<ByTypeMappingSettings[]> {
+    }
 
-    private static final class ByTypeDynamicKnimeTypeChoicesProvider extends DynamicKnimeTypeChoicesProvider{
+    private static final class ByTypeDynamicKnimeTypeChoicesProvider extends DynamicKnimeTypeChoicesProvider {
 
         private Supplier<ByTypeMappingSettings[]> m_array;
 
@@ -253,7 +246,7 @@ public final class TypeMappingParameters implements NodeParameters {
     }
 
     private static final class ToDBTypeByTypeChoicesProvider extends
-        TypeMappingParameters.AbstractToDBTypeChoicesProvider<ByTypeMappingSettings.FromColTypeRef> {
+            ToDBTypeChoicesProvider<ByTypeMappingSettings.FromColTypeRef> {
         ToDBTypeByTypeChoicesProvider() {
             super(ByTypeMappingSettings.FromColTypeRef.class);
         }
@@ -282,7 +275,7 @@ public final class TypeMappingParameters implements NodeParameters {
                 return "";
             }
             return String.format("%s;%s", path.get().getConverterFactory().getIdentifier(),
-                path.get().getConsumerFactory().getIdentifier());
+                    path.get().getConsumerFactory().getIdentifier());
         }
 
     }

@@ -52,15 +52,11 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeDestination;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
-import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeSource;
-import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.core.data.DataType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.node.parameters.updates.ParameterReference;
@@ -96,16 +92,24 @@ public final class TypeMappingUtils {
             REGEX
     }
 
-    abstract private static class ToTypeChoicesProvider<T1, T2 extends ParameterReference<T1>>
+    /**
+     * Base class for choices providers that provide Parquet type mapping choices based on a KNIME DataType.
+     * 
+     * @param <T> the ParameterReference type for the DataType field
+     * @author Jochen Reißinger, TNG Technology Consulting GmbH
+     */
+    abstract static class ToDBTypeChoicesProvider<T extends ParameterReference<DataType>>
         implements StringChoicesProvider {
 
-        ToTypeChoicesProvider(final Class<T2> ref) {
+        private final Class<T> m_ref;
+        private Supplier<DataType> m_fromColType;
+
+        /**
+         * @param ref {@link ParameterReference} class for the From type field.
+         */
+        protected ToDBTypeChoicesProvider(final Class<T> ref) {
             this.m_ref = ref;
         }
-
-        private Supplier<T1> m_fromColType;
-
-        private Class<T2> m_ref;
 
         @Override
         public void init(final StateProviderInitializer initializer) {
@@ -115,31 +119,12 @@ public final class TypeMappingUtils {
 
         @Override
         public List<StringChoice> computeState(final NodeParametersInput context) {
-            if (this.m_fromColType.get() == null) {
+            final DataType dataType = this.m_fromColType.get();
+            if (dataType == null) {
                 return List.of();
             }
             final var mappingService = ParquetLogicalTypeMappingService.getInstance();
-            return getChoices(mappingService, this.m_fromColType.get());
-        }
-
-        protected abstract List<StringChoice> getChoices(
-            DataTypeMappingService<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> mappingService, T1 fromColType);
-    }
-
-    abstract static class ToDBTypeChoicesProvider<T extends ParameterReference<DataType>>
-        extends ToTypeChoicesProvider<DataType, T> {
-
-        /**
-         * @param ref {@link ParameterReference} class for the From type field.
-         */
-        protected ToDBTypeChoicesProvider(final Class<T> ref) {
-            super(ref);
-        }
-
-        @Override
-        protected List<StringChoice> getChoices(final DataTypeMappingService<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> mappingService,
-            final DataType fromColType) {
-            return mappingService.getConsumptionPathsFor(fromColType).stream()
+            return mappingService.getConsumptionPathsFor(dataType).stream()
                 .sorted((p1, p2) -> p1.toString().compareTo(p2.toString()))
                 .map(path -> new StringChoice(
                     String.format("%s;%s", path.getConverterFactory().getIdentifier(),
