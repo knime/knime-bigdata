@@ -48,25 +48,16 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ConsumptionPathPersistor;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.FilterType;
 import org.knime.core.data.DataType;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
-import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.WidgetGroup;
 import org.knime.node.parameters.persistence.Persistable;
 import org.knime.node.parameters.persistence.Persistor;
 import org.knime.node.parameters.updates.ParameterReference;
-import org.knime.node.parameters.updates.StateProvider;
 import org.knime.node.parameters.updates.ValueReference;
-import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 import org.knime.node.parameters.widget.text.TextInputWidget;
 
@@ -197,32 +188,6 @@ public final class TypeMapping {
         @Override
         public String getToType() {
             return m_toType;
-        }
-
-        public abstract static class DynamicKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
-
-            private Supplier<DataType> m_fromType;
-
-            @Override
-            public void init(final StateProviderInitializer initializer) {
-                this.m_fromType = initializer.computeFromValueSupplier(FromColTypeRef.class);
-                initializer.computeBeforeOpenDialog();
-            }
-
-            @Override
-            public List<DataType> choices(final NodeParametersInput context) {
-                final var mappingService = ParquetLogicalTypeMappingService.getInstance();
-                final var existingTypes = Arrays.stream(getByTypeOutputSettings())
-                    .map(setting -> setting.m_fromType)
-                    .filter(type -> type != null && !type.equals(this.m_fromType.get()))
-                    .collect(Collectors.toSet());
-                return mappingService.getKnimeSourceTypes().stream()
-                    .filter(type -> !existingTypes.contains(type))
-                    .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
-                    .toList();
-            }
-
-            protected abstract ByTypeMappingSettings[] getByTypeOutputSettings();
         }
 
     }

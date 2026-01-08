@@ -48,14 +48,14 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameMappingSettings;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings.DynamicKnimeTypeChoicesProvider;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ToDBTypeChoicesProvider;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
@@ -75,7 +75,6 @@ import org.knime.node.parameters.updates.ValueProvider;
 import org.knime.node.parameters.updates.ValueReference;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
-import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
 /**
  * Settings for column type mapping used to overwrite default mappings.
@@ -234,19 +233,29 @@ public final class TypeMappingParameters implements NodeParameters {
     interface ByTypeRef extends ParameterReference<ByTypeMappingSettings[]> {
     }
 
-    private static final class ByTypeDynamicKnimeTypeChoicesProvider extends DynamicKnimeTypeChoicesProvider {
+    private static final class ByTypeDynamicKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
 
+        private Supplier<DataType> m_fromType;
         private Supplier<ByTypeMappingSettings[]> m_array;
 
         @Override
         public void init(final StateProviderInitializer initializer) {
-            m_array = initializer.computeFromValueSupplier(TypeMappingParameters.ByTypeRef.class);
-            super.init(initializer);
+            this.m_fromType = initializer.computeFromValueSupplier(ByTypeMappingSettings.FromColTypeRef.class);
+            this.m_array = initializer.computeFromValueSupplier(TypeMappingParameters.ByTypeRef.class);
+            initializer.computeBeforeOpenDialog();
         }
 
         @Override
-        protected ByTypeMappingSettings[] getByTypeOutputSettings() {
-            return m_array.get();
+        public List<DataType> choices(final NodeParametersInput context) {
+            final var mappingService = ParquetLogicalTypeMappingService.getInstance();
+            final var existingTypes = Arrays.stream(m_array.get())
+                .map(setting -> setting.m_fromType)
+                .filter(type -> type != null && !type.equals(this.m_fromType.get()))
+                .collect(Collectors.toSet());
+            return mappingService.getKnimeSourceTypes().stream()
+                .filter(type -> !existingTypes.contains(type))
+                .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
+                .toList();
         }
 
     }
