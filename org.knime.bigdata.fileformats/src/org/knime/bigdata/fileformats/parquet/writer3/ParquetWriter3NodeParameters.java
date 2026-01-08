@@ -47,12 +47,12 @@
 package org.knime.bigdata.fileformats.parquet.writer3;
 
 import java.util.List;
+import java.util.function.Supplier;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.widget.PersistWithin;
+import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.node.parameters.Advanced;
 import org.knime.node.parameters.NodeParameters;
@@ -62,12 +62,15 @@ import org.knime.node.parameters.layout.After;
 import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
-import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.node.parameters.persistence.Persist;
 import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions;
+import org.knime.node.parameters.updates.ParameterReference;
+import org.knime.node.parameters.updates.StateProvider;
+import org.knime.node.parameters.updates.ValueReference;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.EnumChoicesProvider;
 import org.knime.node.parameters.widget.choices.StringChoicesProvider;
+import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsPositiveIntegerValidation;
 import org.knime.node.parameters.widget.text.TextInputWidget;
@@ -104,13 +107,23 @@ class ParquetWriter3NodeParameters implements NodeParameters {
 //    }
 
     @Persist(configKey = "file_chooser_settings")
+    @PersistWithin("settings")
     @Modification(OutputFileModification.class)
     @Layout(SettingsSection.class)
     LegacyFileWriterWithOverwritePolicyOptions m_outputLocation = new LegacyFileWriterWithOverwritePolicyOptions();
 
+    @Widget(title = "File mode", description = "false = file mode, true = folder mode")
+    @ValueSwitchWidget
+    @Layout(SettingsSection.class)
+    @Persist(configKey = "filter_mode")
+    @PersistWithin({"settings", "file_chooser_settings", "filter_mode"})
+    @ValueReference(FilterModeReference.class)
+    SingleFileSelectionMode m_singleFileSelectionMode = SingleFileSelectionMode.FILE;
+
     @Widget(title = "File Compression",
             description = "The compression codec used to write the Parquet file.")
     @org.knime.node.parameters.persistence.Persist(configKey = "file_compression")
+    @PersistWithin("settings")
     @ChoicesProvider(CompressionChoicesProvider.class)
     @Layout(SettingsSection.class)
     String m_compression = "UNCOMPRESSED";
@@ -120,6 +133,7 @@ class ParquetWriter3NodeParameters implements NodeParameters {
                 + "This option is only available if the folder mode is selected.")
     @NumberInputWidget(minValidation = IsPositiveIntegerValidation.class)
     @org.knime.node.parameters.persistence.Persist(configKey = "file_size")
+    @PersistWithin("settings")
     @Layout(SettingsSection.class)
     long m_fileSize = 1024;
 
@@ -129,6 +143,7 @@ class ParquetWriter3NodeParameters implements NodeParameters {
                 + "the folder mode is selected.")
     @TextInputWidget
     @org.knime.node.parameters.persistence.Persist(configKey = "file_name_prefix")
+    @PersistWithin("settings")
     @Layout(SettingsSection.class)
     String m_fileNamePrefix = "part_";
 
@@ -137,6 +152,7 @@ class ParquetWriter3NodeParameters implements NodeParameters {
                 + "the <a href=\"https://parquet.apache.org/docs/\">Parquet documentation</a>.")
     @NumberInputWidget(minValidation = IsPositiveIntegerValidation.class)
     @org.knime.node.parameters.persistence.Persist(configKey = "within_file_chunk_size")
+    @PersistWithin("settings")
     @Layout(SettingsSection.class)
     int m_chunkSize = 128; // Default from ParquetWriter.DEFAULT_BLOCK_SIZE / TO_BYTE
 
@@ -153,6 +169,8 @@ class ParquetWriter3NodeParameters implements NodeParameters {
 //    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add type mapping by type",
 //            showSortButtons = false)
 //    TypeMappingByType[] m_typeMappingByType = new TypeMappingByType[0];
+
+    static final class FilterModeReference implements ParameterReference<SingleFileSelectionMode> {}
 
     /**
      * Choices provider for compression codecs
@@ -183,7 +201,7 @@ class ParquetWriter3NodeParameters implements NodeParameters {
                 .removeAnnotation(org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileWriterWidget.class);
             fileSelection
                 .addAnnotation(FileSelectionWidget.class)
-                .withValue(SingleFileSelectionMode.FILE)
+                .withProperty("singleFileSelectionModeProvider", ParquetWriter3FileSelectionModeProvider.class)
                 .modify();
 
             fileSelection
@@ -200,6 +218,30 @@ class ParquetWriter3NodeParameters implements NodeParameters {
                 .addAnnotation(ChoicesProvider.class)
                 .withProperty("value", OverwritePolicyChoicesProvider.class)
                 .modify();
+        }
+    }
+
+    private static final class ParquetWriter3FileSelectionModeProvider
+        implements StateProvider<SingleFileSelectionMode>{
+
+        private Supplier<SingleFileSelectionMode> m_modeSupplier;
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void init(final StateProviderInitializer initializer) {
+            initializer.computeBeforeOpenDialog();
+            m_modeSupplier = initializer.computeFromValueSupplier(FilterModeReference.class);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SingleFileSelectionMode computeState(final NodeParametersInput parametersInput)
+            throws StateComputationFailureException {
+            return m_modeSupplier.get();
         }
     }
 
