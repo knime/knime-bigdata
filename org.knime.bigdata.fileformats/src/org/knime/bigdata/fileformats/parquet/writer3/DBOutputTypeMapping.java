@@ -96,7 +96,27 @@ public final class DBOutputTypeMapping {
     public abstract static class KnimeTypeChoicesProvider implements DataTypeChoicesProvider {
 
         @Override
+        public void init(final StateProviderInitializer initializer) {
+            initializer.computeBeforeOpenDialog();
+        }
+
+        @Override
         public List<DataType> choices(final NodeParametersInput context) {
+            // Get types from input table spec
+            final var inSpec = context.getInPortSpec(0);
+            if (inSpec.isPresent() && inSpec.get() instanceof DataTableSpec spec) {
+                // Collect unique data types from all columns in the input table
+                final var types = spec.stream()
+                    .map(DataColumnSpec::getType)
+                    .distinct()
+                    .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
+                    .toList();
+                if (!types.isEmpty()) {
+                    return types;
+                }
+            }
+            
+            // Fallback: if no input spec or empty spec, show all supported types
             final var mappingService = ParquetLogicalTypeMappingService.getInstance();
             return mappingService.getKnimeSourceTypes().stream()
                 .sorted((t1, t2) -> t1.toPrettyString().compareTo(t2.toPrettyString()))
