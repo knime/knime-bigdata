@@ -175,61 +175,6 @@ public final class DBTypeMappingUtils {
         }
     }
 
-    /**
-     * Generate the dataType configuration from the out mapping settings.
-     *
-     * @param mappingService the database type mapping service
-     * @param nameSettings type mapping rules sorted by column name
-     * @param typeSettings type mapping rules sorted by data type
-     * @return the type mapping configuration
-     * @throws InvalidSettingsException if the mapping service can't be used create the ConsumptionPath
-     * @since 5.7
-     */
-//    public static DataTypeMappingConfiguration<SQLType> createOutputMapping( //
-//        final DBTypeMappingService<? extends DBSource, ? extends DBDestination> mappingService, //
-//        final ByNameOutputMappingSettings[] nameSettings, //
-//        final ByTypeOutputMappingSettings[] typeSettings //
-//    ) throws InvalidSettingsException {
-//        final var mapping = mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
-//        for (int i = 0; i < nameSettings.length; i++) {
-//            final var dataType = nameSettings[i].getFromType();
-//            mapping.addRule(nameSettings[i].getFromColName(), nameSettings[i].getFilterType() == FilterType.REGEX,
-//                dataType, nameSettings[i].getConsumptionPath(mappingService));
-//        }
-//        for (int i = 0; i < typeSettings.length; i++) {
-//            final var dataType = typeSettings[i].getFromType();
-//            mapping.addRule(dataType, typeSettings[i].getConsumptionPath(mappingService));
-//        }
-//
-//        return mapping;
-//    }
-//
-//    /**
-//     * Generate the dataType configuration from the input mapping settings.
-//     *
-//     * @param mappingService the database type mapping service
-//     * @param nameSettings type mapping rules sorted by column name
-//     * @param typeSettings type mapping rules sorted by data type
-//     * @return the type mapping configuration
-//     * @throws InvalidSettingsException if the mapping service can't be used create the ProductionPath
-//     * @since 5.7
-//     */
-//    public static DataTypeMappingConfiguration<SQLType> createInputMapping( //
-//        final DBTypeMappingService<? extends DBSource, ? extends DBDestination> mappingService, //
-//        final ByNameInputMappingSettings[] nameSettings, //
-//        final ByTypeInputMappingSettings[] typeSettings //
-//    ) throws InvalidSettingsException {
-//        final var mapping = mappingService.createMappingConfiguration(DataTypeMappingDirection.EXTERNAL_TO_KNIME);
-//        for (int i = 0; i < nameSettings.length; i++) {
-//            mapping.addRule(nameSettings[i].getFromColName(), nameSettings[i].getFilterType() == FilterType.REGEX,
-//                nameSettings[i].getProductionPath(mappingService));
-//        }
-//        for (int i = 0; i < typeSettings.length; i++) {
-//            mapping.addRule(typeSettings[i].getProductionPath(mappingService));
-//        }
-//        return mapping;
-//    }
-
     abstract static class PathPersistor implements NodeParametersPersistor<String> {
 
         PathPersistor(final String fromKey, final String toKey) {

@@ -92,20 +92,6 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     interface SettingsSection {
     }
 
-//    /**
-//     * Type Mapping by Name section
-//     */
-//    @Section(title = "Type Mapping by Name", description = "Change the KNIME to Parquet type mapping by name configuration for subsequent nodes by selecting a Parquet type to the given KNIME Type. The dialog allows you to add new or change existing type mapping rules.")
-//    interface TypeMappingByNameSection {
-//    }
-//
-//    /**
-//     * Type Mapping by Type section
-//     */
-//    @Section(title = "Type Mapping by Type", description = "Change the KNIME to Parquet type mapping by type configuration for subsequent nodes by selecting a Parquet type to the given KNIME Type. The dialog allows you to add new or change existing type mapping rules.")
-//    interface TypeMappingByTypeSection {
-//    }
-
     @Persist(configKey = "file_chooser_settings")
     @PersistWithin("settings")
     @Modification(OutputFileModification.class)
@@ -155,20 +141,6 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @PersistWithin("settings")
     @Layout(SettingsSection.class)
     int m_chunkSize = 128; // Default from ParquetWriter.DEFAULT_BLOCK_SIZE / TO_BYTE
-
-//    @Persistor(TypeMappingByNamePersistor.class)
-//    @Layout(TypeMappingByNameSection.class)
-//    @Widget(title = "Mapping by Name", description = "Type mapping by name")
-//    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add type mapping by name",
-//            showSortButtons = false)
-//    TypeMappingByName[] m_typeMappingByName = new TypeMappingByName[0];
-//
-//    @Persistor(TypeMappingByTypePersistor.class)
-//    @Layout(TypeMappingByTypeSection.class)
-//    @Widget(title = "Mapping by Type", description = "Type mapping by type")
-//    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add type mapping by type",
-//            showSortButtons = false)
-//    TypeMappingByType[] m_typeMappingByType = new TypeMappingByType[0];
 
     static final class FilterModeReference implements ParameterReference<SingleFileSelectionMode> {}
 
@@ -260,50 +232,6 @@ class ParquetWriter3NodeParameters implements NodeParameters {
             );
         }
     }
-
-    /**
-     * Custom persistor for type mapping by name settings that delegates to SettingsModelDataTypeMapping
-     */
-//    static class TypeMappingByNamePersistor implements NodeParametersPersistor<TypeMappingByName> {
-//
-//        @Override
-//        public TypeMappingByName load(final NodeSettingsRO settings) throws InvalidSettingsException {
-//            // Type mapping settings are loaded by the model directly
-//            return new TypeMappingByName();
-//        }
-//
-//        @Override
-//        public void save(final TypeMappingByName obj, final NodeSettingsWO settings) {
-//            // Type mapping settings are saved by the model directly
-//        }
-//
-//        @Override
-//        public String[][] getConfigPaths() {
-//            return new String[][] { { "input_type_mapping" } };
-//        }
-//    }
-
-    /**
-     * Custom persistor for type mapping by type settings that delegates to SettingsModelDataTypeMapping
-     */
-//    static class TypeMappingByTypePersistor implements NodeParametersPersistor<TypeMappingByType> {
-//
-//        @Override
-//        public TypeMappingByType load(final NodeSettingsRO settings) throws InvalidSettingsException {
-//            // Type mapping settings are loaded by the model directly
-//            return new TypeMappingByType();
-//        }
-//
-//        @Override
-//        public void save(final TypeMappingByType obj, final NodeSettingsWO settings) {
-//            // Type mapping settings are saved by the model directly
-//        }
-//
-//        @Override
-//        public String[][] getConfigPaths() {
-//            return new String[][] { { "input_type_mapping" } };
-//        }
-//    }
 
     @Section(title = "Output Type Mapping", sideDrawer = true)
     @Advanced

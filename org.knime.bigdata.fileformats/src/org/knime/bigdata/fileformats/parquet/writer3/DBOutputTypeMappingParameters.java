@@ -94,25 +94,6 @@ public final class DBOutputTypeMappingParameters implements NodeParameters {
     interface MappingByType {
     }
 
-//    static final class DBTypeProvider implements StateProvider<Optional<DBType>> {
-//
-//        @Override
-//        public void init(final StateProviderInitializer initializer) {
-//            initializer.computeBeforeOpenDialog();
-//        }
-//
-//        @Override
-//        public Optional<DBType> computeState(final NodeParametersInput context)
-//            throws StateComputationFailureException {
-//            final var spec = context.getInPortSpec(1);
-//            if (spec.isPresent() && spec.get() instanceof DBSessionPortObjectSpec dbSpec && dbSpec.isSessionExists()) {
-//                return Optional.of(dbSpec.getDBSession().getDBType());
-//            }
-//            return Optional.empty();
-//        }
-//
-//    }
-
     /**
      * Output mapping settings by name.
      */
@@ -145,20 +126,7 @@ public final class DBOutputTypeMappingParameters implements NodeParameters {
     }
 
     static final class ByNameKnimeTypeChoicesProvider extends KnimeTypeChoicesProvider {
-
-//        private Supplier<Optional<DBType>> m_dbType;
-//
-//        @Override
-//        public void init(final StateProviderInitializer initializer) {
-//            m_dbType = initializer.computeFromProvidedState(DBOutputTypeMappingParameters.DBTypeProvider.class);
-//            super.init(initializer);
-//        }
-//
-//        @Override
-//        protected Optional<DBType> getDBType(final NodeParametersInput context) {
-//            return m_dbType.get();
-//        }
-
+        // Inherits init() and choices() from KnimeTypeChoicesProvider
     }
 
     abstract static class AbstractToDBTypeChoicesProvider<R extends ParameterReference<DataType>>
