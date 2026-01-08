@@ -54,9 +54,7 @@ import java.util.function.Supplier;
 
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByNameMappingSettings.ByNameMappingModification;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings;
-import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings.ByTypeMappingModification;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMapping.ByTypeMappingSettings.DynamicKnimeTypeChoicesProvider;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ToDBTypeChoicesProvider;
 import org.knime.core.data.DataColumnSpec;
@@ -73,7 +71,9 @@ import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.StateProvider;
+import org.knime.node.parameters.updates.ValueProvider;
 import org.knime.node.parameters.updates.ValueReference;
+import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
 import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
@@ -108,21 +108,24 @@ public final class TypeMappingParameters implements NodeParameters {
     @Modification(TypeMappingParameters.ByNameModification.class)
     public ByNameMappingSettings[] m_byNameSettings = new ByNameMappingSettings[0];
 
-    static final class ByNameModification extends ByNameMappingModification {
+    static final class ByNameModification implements Modification.Modifier {
 
         @Override
-        protected Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider() {
-            return Optional.of(TypeMappingParameters.ByNameKnimeTypeChoicesProvider.class);
-        }
+        public void modify(final Modification.WidgetGroupModifier group) {
+            group.find(ByNameMappingSettings.FromColTypeRef.class)
+                .addAnnotation(ChoicesProvider.class)
+                .withValue(TypeMappingParameters.ByNameKnimeTypeChoicesProvider.class)
+                .modify();
 
-        @Override
-        protected Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider() {
-            return Optional.of(TypeMappingParameters.ToDBTypeByNameChoicesProvider.class);
-        }
+            group.find(ByNameMappingSettings.ToColTypeRef.class)
+                .addAnnotation(ChoicesProvider.class)
+                .withValue(TypeMappingParameters.ToDBTypeByNameChoicesProvider.class)
+                .modify();
 
-        @Override
-        protected Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider() {
-            return Optional.of(TypeMappingParameters.ToNameProvider.class);
+            group.find(ByNameMappingSettings.ToColTypeRef.class)
+                .addAnnotation(ValueProvider.class)
+                .withValue(TypeMappingParameters.ToNameProvider.class)
+                .modify();
         }
 
     }
@@ -206,21 +209,24 @@ public final class TypeMappingParameters implements NodeParameters {
     @Modification(TypeMappingParameters.ByTypeModification.class)
     public ByTypeMappingSettings[] m_byTypeSettings = new ByTypeMappingSettings[0];
 
-    private static final class ByTypeModification extends ByTypeMappingModification {
+    private static final class ByTypeModification implements Modification.Modifier {
 
         @Override
-        protected Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider() {
-            return Optional.of(TypeMappingParameters.ByTypeDynamicKnimeTypeChoicesProvider.class);
-        }
+        public void modify(final Modification.WidgetGroupModifier group) {
+            group.find(ByTypeMappingSettings.FromColTypeRef.class)
+                .addAnnotation(ChoicesProvider.class)
+                .withValue(TypeMappingParameters.ByTypeDynamicKnimeTypeChoicesProvider.class)
+                .modify();
 
-        @Override
-        protected Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider() {
-            return Optional.of(TypeMappingParameters.ToDBTypeByTypeChoicesProvider.class);
-        }
+            group.find(ByTypeMappingSettings.ToColTypeRef.class)
+                .addAnnotation(ChoicesProvider.class)
+                .withValue(TypeMappingParameters.ToDBTypeByTypeChoicesProvider.class)
+                .modify();
 
-        @Override
-        protected Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider() {
-            return Optional.of(TypeMappingParameters.ToTypeProvider.class);
+            group.find(ByTypeMappingSettings.ToColTypeRef.class)
+                .addAnnotation(ValueProvider.class)
+                .withValue(TypeMappingParameters.ToTypeProvider.class)
+                .modify();
         }
 
     }

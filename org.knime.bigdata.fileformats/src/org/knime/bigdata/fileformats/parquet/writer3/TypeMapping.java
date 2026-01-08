@@ -50,23 +50,14 @@ package org.knime.bigdata.fileformats.parquet.writer3;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.knime.core.data.DataType;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.convert.map.ConsumptionPath;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification.WidgetGroupModifier;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
-import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
-import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ConsumptionPathPersistor;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.FilterType;
+import org.knime.core.data.DataType;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.WidgetGroup;
@@ -74,11 +65,8 @@ import org.knime.node.parameters.persistence.Persistable;
 import org.knime.node.parameters.persistence.Persistor;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.StateProvider;
-import org.knime.node.parameters.updates.ValueProvider;
 import org.knime.node.parameters.updates.ValueReference;
-import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
-import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 import org.knime.node.parameters.widget.text.TextInputWidget;
 
@@ -90,7 +78,6 @@ import org.knime.node.parameters.widget.text.TextInputWidget;
 public final class TypeMapping {
 
     private TypeMapping() {
-        // Utility class
     }
 
     interface MappingSettings extends WidgetGroup, Persistable {
@@ -103,22 +90,6 @@ public final class TypeMapping {
          * @return the toType
          */
         String getToType();
-
-        /**
-         * Converts the string representation of a consumption path to the actual {@link ConsumptionPath}.
-         *
-         * @param mappingService
-         * @return the consumption path
-         * @throws InvalidSettingsException if consumption path is not found
-         */
-        default ConsumptionPath getConsumptionPath() throws InvalidSettingsException {
-            final var mappingService = ParquetLogicalTypeMappingService.getInstance();
-            return mappingService.getConsumptionPathsFor(getFromType()).stream()
-                .filter(cpath -> String.format("%s;%s", cpath.getConverterFactory().getIdentifier(),
-                    cpath.getConsumerFactory().getIdentifier()).equals(getToType()))
-                .findFirst().orElseThrow(
-                    () -> new InvalidSettingsException(String.format("No consumption path found for %s", getToType())));
-        }
     }
 
     public static final class ByNameMappingSettings implements MappingSettings {
@@ -186,34 +157,6 @@ public final class TypeMapping {
             return m_toColType;
         }
 
-        public abstract static class ByNameMappingModification implements Modification.Modifier {
-
-            @Override
-            public void modify(final WidgetGroupModifier group) {
-                final var fromChoices = getFromColTypeChoicesProvider();
-                if (fromChoices.isPresent()) {
-                    group.find(FromColTypeRef.class).addAnnotation(ChoicesProvider.class).withValue(fromChoices.get())
-                        .modify();
-                }
-                final var toChoices = getToColTypeChoicesProvider();
-                if (toChoices.isPresent()) {
-                    group.find(ToColTypeRef.class).addAnnotation(ChoicesProvider.class).withValue(toChoices.get())
-                        .modify();
-                }
-                final var toValue = getToColTypeValueProvider();
-                if (toValue.isPresent()) {
-                    group.find(ToColTypeRef.class).addAnnotation(ValueProvider.class).withValue(toValue.get()).modify();
-                }
-            }
-
-            protected abstract Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider();
-
-            protected abstract Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider();
-
-            protected abstract Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider();
-
-        }
-
     }
 
     public static final class ByTypeMappingSettings implements MappingSettings {
@@ -254,34 +197,6 @@ public final class TypeMapping {
         @Override
         public String getToType() {
             return m_toType;
-        }
-
-        public abstract static class ByTypeMappingModification implements Modification.Modifier {
-
-            @Override
-            public void modify(final WidgetGroupModifier group) {
-                final var fromChoices = getFromColTypeChoicesProvider();
-                if (fromChoices.isPresent()) {
-                    group.find(FromColTypeRef.class).addAnnotation(ChoicesProvider.class).withValue(fromChoices.get())
-                        .modify();
-                }
-                final var toChoices = getToColTypeChoicesProvider();
-                if (toChoices.isPresent()) {
-                    group.find(ToColTypeRef.class).addAnnotation(ChoicesProvider.class).withValue(toChoices.get())
-                        .modify();
-                }
-                final var toValue = getToColTypeValueProvider();
-                if (toValue.isPresent()) {
-                    group.find(ToColTypeRef.class).addAnnotation(ValueProvider.class).withValue(toValue.get()).modify();
-                }
-            }
-
-            protected abstract Optional<Class<? extends DataTypeChoicesProvider>> getFromColTypeChoicesProvider();
-
-            protected abstract Optional<Class<? extends StringChoicesProvider>> getToColTypeChoicesProvider();
-
-            protected abstract Optional<Class<? extends StateProvider<String>>> getToColTypeValueProvider();
-
         }
 
         public abstract static class DynamicKnimeTypeChoicesProvider implements DataTypeChoicesProvider {
