@@ -351,7 +351,7 @@ public final class TypeMappingParameters implements NodeParameters {
             return byNameList.toArray(new ByNameMappingSettings[0]);
         }
 
-        private void loadNameBasedRule(final NodeSettingsRO ruleSettings,
+        private static void loadNameBasedRule(final NodeSettingsRO ruleSettings,
             final java.util.ArrayList<ByNameMappingSettings> byNameList) throws InvalidSettingsException {
             final var knimeType = TypeMappingParameters.loadKnimeType(ruleSettings);
             if (knimeType == null) {
@@ -437,7 +437,7 @@ public final class TypeMappingParameters implements NodeParameters {
             return byTypeList.toArray(new ByTypeMappingSettings[0]);
         }
 
-        private void loadTypeBasedRule(final NodeSettingsRO ruleSettings,
+        private static void loadTypeBasedRule(final NodeSettingsRO ruleSettings,
             final ArrayList<ByTypeMappingSettings> byTypeList) throws InvalidSettingsException {
             final var knimeType = TypeMappingParameters.loadKnimeType(ruleSettings);
             if (knimeType == null) {
