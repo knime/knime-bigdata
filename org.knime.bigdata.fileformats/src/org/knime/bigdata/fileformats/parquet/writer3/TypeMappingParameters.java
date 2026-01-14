@@ -50,6 +50,7 @@ package org.knime.bigdata.fileformats.parquet.writer3;
 
 import static org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.CFG_CONSUMER_PATH;
 import static org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.CFG_CONVERTER_PATH;
+import static org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.formatStringPair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -486,10 +487,6 @@ public final class TypeMappingParameters implements NodeParameters {
         public String[][] getConfigPaths() {
             return new String[][]{new String[]{CFG_TYPE_TO_TYPE_RULES}};
         }
-    }
-
-    private static String formatStringPair(final String first, final String second) {
-        return first + ";" + second;
     }
 
 }

@@ -162,4 +162,8 @@ public final class TypeMappingUtils {
     static final String CFG_CONSUMER_PATH = "consumption_path_consumer";
 
     static final String CFG_CONVERTER_PATH = "consumption_path_converter";
+
+    static String formatStringPair(final String first, final String second) {
+        return first + ";" + second;
+    }
 }
