@@ -51,6 +51,7 @@ package org.knime.bigdata.fileformats.parquet.writer3;
 import static org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.CFG_CONSUMER_PATH;
 import static org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.CFG_CONVERTER_PATH;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingSettings.ByNameMappingSettings;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingSettings.ByTypeMappingSettings;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.FilterType;
 import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ParquetTypeChoicesProvider;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
@@ -87,7 +89,6 @@ import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @SuppressWarnings("javadoc")
-@Persistor(TypeMappingParameters.TypeMappingPersistor.class)
 public final class TypeMappingParameters implements NodeParameters {
 
     @Section(title = "Mapping by Name")
@@ -106,6 +107,7 @@ public final class TypeMappingParameters implements NodeParameters {
     @ArrayWidget(addButtonText = "Add name", elementTitle = "Column name")
     @Layout(TypeMappingParameters.MappingByName.class)
     @Modification(TypeMappingParameters.ByNameModification.class)
+    @Persistor(ByNameMappingPersistor.class)
     ByNameMappingSettings[] m_byNameSettings = new ByNameMappingSettings[0];
 
     private static final class ByNameModification implements Modification.Modifier {
@@ -179,6 +181,7 @@ public final class TypeMappingParameters implements NodeParameters {
     @ValueReference(TypeMappingParameters.ByTypeRef.class)
     @Layout(TypeMappingParameters.MappingByType.class)
     @Modification(TypeMappingParameters.ByTypeModification.class)
+    @Persistor(ByTypeMappingPersistor.class)
     ByTypeMappingSettings[] m_byTypeSettings = new ByTypeMappingSettings[0];
 
     private static final class ByTypeModification implements Modification.Modifier {
@@ -259,29 +262,80 @@ public final class TypeMappingParameters implements NodeParameters {
 
     }
 
-    private static final class TypeMappingPersistor implements NodeParametersPersistor<TypeMappingParameters> {
+    // Shared constants and methods for persistors
+    private static final String CFG_NAME = "name";
+
+    private static final String CFG_REGEX = "regex";
+
+    private static final String CFG_TYPE = "type";
+
+    private static final String CFG_CELL_CLASS = "cell_class";
+
+    private static DataType loadKnimeType(final NodeSettingsRO ruleSettings) throws InvalidSettingsException {
+        final var typeSettings = ruleSettings.getNodeSettings(CFG_TYPE);
+        final var cellClassName = typeSettings.getString(CFG_CELL_CLASS);
+
+        try {
+            @SuppressWarnings("unchecked")
+            final Class<? extends org.knime.core.data.DataCell> cellClass =
+                (Class<? extends org.knime.core.data.DataCell>)Class.forName(cellClassName);
+
+            if (typeSettings.containsKey("collection_element_type")) {
+                final var elementTypeSettings = typeSettings.getNodeSettings("collection_element_type");
+                final var elementCellClassName = elementTypeSettings.getString(CFG_CELL_CLASS);
+                @SuppressWarnings("unchecked")
+                final Class<? extends org.knime.core.data.DataCell> elementCellClass =
+                    (Class<? extends org.knime.core.data.DataCell>)Class.forName(elementCellClassName);
+                final var elementType = DataType.getType(elementCellClass);
+                return DataType.getType(cellClass, elementType);
+            } else {
+                return DataType.getType(cellClass);
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("Skipping type mapping rule: Cell class not found: " + cellClassName);
+            return null;
+        }
+    }
+
+    private static void saveRuleCommonFields(final NodeSettingsWO ruleSettings, final DataType knimeType,
+        final ConsumptionPath path) {
+
+        final var typeSettings = ruleSettings.addNodeSettings(CFG_TYPE);
+        if (knimeType.isCollectionType() && knimeType.getCollectionElementType() != null) {
+            final var elementType = knimeType.getCollectionElementType();
+            final var elementTypeSettings = typeSettings.addNodeSettings("collection_element_type");
+            elementTypeSettings.addString(CFG_CELL_CLASS, elementType.getCellClass().getName());
+        }
+        typeSettings.addString(CFG_CELL_CLASS, knimeType.getCellClass().getName());
+
+        ruleSettings.addString("intermediate_type", path.getConverterFactory().getDestinationType().getName());
+
+        final var consumer = path.getConsumerFactory();
+        ruleSettings.addString("external_type", consumer.getDestinationType().toString());
+
+        final var converter = path.getConverterFactory();
+        ruleSettings.addString(CFG_CONVERTER_PATH, converter.getIdentifier());
+        ruleSettings.addString(CFG_CONVERTER_PATH + "_src", converter.getSourceType().getName());
+        ruleSettings.addString(CFG_CONVERTER_PATH + "_dst", converter.getDestinationType().getName());
+        ruleSettings.addString(CFG_CONVERTER_PATH + "_name", converter.getName());
+        ruleSettings.addNodeSettings(CFG_CONVERTER_PATH + "_config");
+
+        ruleSettings.addString(CFG_CONSUMER_PATH, consumer.getIdentifier());
+        ruleSettings.addString(CFG_CONSUMER_PATH + "_src", consumer.getSourceType().getName());
+        ruleSettings.addString(CFG_CONSUMER_PATH + "_dst", consumer.getDestinationType().toString());
+        ruleSettings.addString(CFG_CONSUMER_PATH + "_name", consumer.getName());
+        ruleSettings.addNodeSettings(CFG_CONSUMER_PATH + "_config");
+    }
+
+    private static final class ByNameMappingPersistor implements NodeParametersPersistor<ByNameMappingSettings[]> {
 
         private static final String CFG_NAME_TO_TYPE_RULES = "name_to_type_mapping_rules";
 
         private static final String CFG_NAME_TO_TYPE_RULE = "name_to_type_mapping_rule_";
 
-        private static final String CFG_TYPE_TO_TYPE_RULES = "type_to_type_mapping_rules";
-
-        private static final String CFG_TYPE_TO_TYPE_RULE = "type_to_type_mapping_rule_";
-
-        private static final String CFG_NAME = "name";
-
-        private static final String CFG_REGEX = "regex";
-
-        private static final String CFG_TYPE = "type";
-
-        private static final String CFG_CELL_CLASS = "cell_class";
-
         @Override
-        public TypeMappingParameters load(final NodeSettingsRO settings) throws InvalidSettingsException {
-            final var params = new TypeMappingParameters();
+        public ByNameMappingSettings[] load(final NodeSettingsRO settings) throws InvalidSettingsException {
             final var byNameList = new java.util.ArrayList<ByNameMappingSettings>();
-            final var byTypeList = new java.util.ArrayList<ByTypeMappingSettings>();
 
             if (settings.containsKey(CFG_NAME_TO_TYPE_RULES)) {
                 final var rulesSettings = settings.getNodeSettings(CFG_NAME_TO_TYPE_RULES);
@@ -293,89 +347,35 @@ public final class TypeMappingParameters implements NodeParameters {
                 }
             }
 
-            if (settings.containsKey(CFG_TYPE_TO_TYPE_RULES)) {
-                final var rulesSettings = settings.getNodeSettings(CFG_TYPE_TO_TYPE_RULES);
-                int index = 0;
-                while (rulesSettings.containsKey(CFG_TYPE_TO_TYPE_RULE + index)) {
-                    final var ruleSettings = rulesSettings.getNodeSettings(CFG_TYPE_TO_TYPE_RULE + index);
-                    loadTypeBasedRule(ruleSettings, byTypeList);
-                    index++;
-                }
-            }
-
-            params.m_byNameSettings = byNameList.toArray(new ByNameMappingSettings[0]);
-            params.m_byTypeSettings = byTypeList.toArray(new ByTypeMappingSettings[0]);
-
-            return params;
+            return byNameList.toArray(new ByNameMappingSettings[0]);
         }
 
         private void loadNameBasedRule(final NodeSettingsRO ruleSettings,
             final java.util.ArrayList<ByNameMappingSettings> byNameList) throws InvalidSettingsException {
-            final var knimeType = loadKnimeType(ruleSettings);
+            final var knimeType = TypeMappingParameters.loadKnimeType(ruleSettings);
             if (knimeType == null) {
                 return;
             }
 
             final var converterPath = ruleSettings.getString(CFG_CONVERTER_PATH);
             final var consumerPath = ruleSettings.getString(CFG_CONSUMER_PATH);
-            final var fullPath = formatStringPair(converterPath, consumerPath);
+            final var fullPath = String.format("%s;%s", converterPath, consumerPath);
 
             final var columnName = ruleSettings.getString(CFG_NAME);
             final var isRegex = ruleSettings.getBoolean(CFG_REGEX, false);
 
-            final var filterType = isRegex ? TypeMappingUtils.FilterType.REGEX : TypeMappingUtils.FilterType.MANUAL;
+            final var filterType = isRegex ? FilterType.REGEX : FilterType.MANUAL;
             final var byNameSetting = new ByNameMappingSettings(filterType, columnName, knimeType, fullPath);
             byNameList.add(byNameSetting);
         }
 
-        private void loadTypeBasedRule(final NodeSettingsRO ruleSettings,
-            final java.util.ArrayList<ByTypeMappingSettings> byTypeList) throws InvalidSettingsException {
-            final var knimeType = loadKnimeType(ruleSettings);
-            if (knimeType == null) {
-                return;
-            }
-
-            final var converterPath = ruleSettings.getString(CFG_CONVERTER_PATH);
-            final var consumerPath = ruleSettings.getString(CFG_CONSUMER_PATH);
-            final var fullPath = formatStringPair(converterPath, consumerPath);
-
-            final var byTypeSetting = new ByTypeMappingSettings(knimeType, fullPath);
-            byTypeList.add(byTypeSetting);
-        }
-
-        private static DataType loadKnimeType(final NodeSettingsRO ruleSettings) throws InvalidSettingsException {
-            final var typeSettings = ruleSettings.getNodeSettings(CFG_TYPE);
-            final var cellClassName = typeSettings.getString(CFG_CELL_CLASS);
-
-            try {
-                @SuppressWarnings("unchecked")
-                final Class<? extends org.knime.core.data.DataCell> cellClass =
-                    (Class<? extends org.knime.core.data.DataCell>)Class.forName(cellClassName);
-
-                if (typeSettings.containsKey("collection_element_type")) {
-                    final var elementTypeSettings = typeSettings.getNodeSettings("collection_element_type");
-                    final var elementCellClassName = elementTypeSettings.getString(CFG_CELL_CLASS);
-                    @SuppressWarnings("unchecked")
-                    final Class<? extends org.knime.core.data.DataCell> elementCellClass =
-                        (Class<? extends org.knime.core.data.DataCell>)Class.forName(elementCellClassName);
-                    final var elementType = DataType.getType(elementCellClass);
-                    return DataType.getType(cellClass, elementType);
-                } else {
-                    return DataType.getType(cellClass);
-                }
-            } catch (ClassNotFoundException e) {
-                System.err.println("Skipping type mapping rule: Cell class not found: " + cellClassName);
-                return null;
-            }
-        }
-
         @Override
-        public void save(final TypeMappingParameters obj, final NodeSettingsWO settings) {
+        public void save(final ByNameMappingSettings[] obj, final NodeSettingsWO settings) {
             final var mappingService = ParquetLogicalTypeMappingService.getInstance();
 
             final var nameRulesSettings = settings.addNodeSettings(CFG_NAME_TO_TYPE_RULES);
             int nameRuleIndex = 0;
-            for (final var byNameSetting : obj.m_byNameSettings) {
+            for (final var byNameSetting : obj) {
                 if (byNameSetting.m_fromColType == null || byNameSetting.m_toColType == null) {
                     continue;
                 }
@@ -395,16 +395,69 @@ public final class TypeMappingParameters implements NodeParameters {
                 final var ruleSettings = nameRulesSettings.addNodeSettings(CFG_NAME_TO_TYPE_RULE + nameRuleIndex);
 
                 ruleSettings.addString(CFG_NAME, byNameSetting.m_fromColName);
-                ruleSettings.addBoolean(CFG_REGEX, byNameSetting.m_filterType == TypeMappingUtils.FilterType.REGEX);
+                ruleSettings.addBoolean(CFG_REGEX, byNameSetting.m_filterType == FilterType.REGEX);
 
                 saveRuleCommonFields(ruleSettings, byNameSetting.m_fromColType, path);
 
                 nameRuleIndex++;
             }
+        }
+
+        @Override
+        public String[][] getConfigPaths() {
+            return new String[][]{new String[]{CFG_NAME_TO_TYPE_RULES}};
+        }
+    }
+
+    private static final class ByTypeMappingPersistor implements NodeParametersPersistor<ByTypeMappingSettings[]> {
+
+        private static final String CFG_TYPE_TO_TYPE_RULES = "type_to_type_mapping_rules";
+
+        private static final String CFG_TYPE_TO_TYPE_RULE = "type_to_type_mapping_rule_";
+
+        private static final String CFG_TYPE = "type";
+
+        private static final String CFG_CELL_CLASS = "cell_class";
+
+        @Override
+        public ByTypeMappingSettings[] load(final NodeSettingsRO settings) throws InvalidSettingsException {
+            final var byTypeList = new ArrayList<ByTypeMappingSettings>();
+
+            if (settings.containsKey(CFG_TYPE_TO_TYPE_RULES)) {
+                final var rulesSettings = settings.getNodeSettings(CFG_TYPE_TO_TYPE_RULES);
+                int index = 0;
+                while (rulesSettings.containsKey(CFG_TYPE_TO_TYPE_RULE + index)) {
+                    final var ruleSettings = rulesSettings.getNodeSettings(CFG_TYPE_TO_TYPE_RULE + index);
+                    loadTypeBasedRule(ruleSettings, byTypeList);
+                    index++;
+                }
+            }
+
+            return byTypeList.toArray(new ByTypeMappingSettings[0]);
+        }
+
+        private void loadTypeBasedRule(final NodeSettingsRO ruleSettings,
+            final ArrayList<ByTypeMappingSettings> byTypeList) throws InvalidSettingsException {
+            final var knimeType = TypeMappingParameters.loadKnimeType(ruleSettings);
+            if (knimeType == null) {
+                return;
+            }
+
+            final var converterPath = ruleSettings.getString(CFG_CONVERTER_PATH);
+            final var consumerPath = ruleSettings.getString(CFG_CONSUMER_PATH);
+            final var fullPath = formatStringPair(converterPath, consumerPath);
+
+            final var byTypeSetting = new ByTypeMappingSettings(knimeType, fullPath);
+            byTypeList.add(byTypeSetting);
+        }
+
+        @Override
+        public void save(final ByTypeMappingSettings[] obj, final NodeSettingsWO settings) {
+            final var mappingService = ParquetLogicalTypeMappingService.getInstance();
 
             final var typeRulesSettings = settings.addNodeSettings(CFG_TYPE_TO_TYPE_RULES);
             int typeRuleIndex = 0;
-            for (final var byTypeSetting : obj.m_byTypeSettings) {
+            for (final var byTypeSetting : obj) {
                 if (byTypeSetting.m_fromType == null || byTypeSetting.m_toType == null) {
                     continue;
                 }
@@ -429,44 +482,14 @@ public final class TypeMappingParameters implements NodeParameters {
             }
         }
 
-        private static void saveRuleCommonFields(final NodeSettingsWO ruleSettings, final DataType knimeType,
-            final ConsumptionPath path) {
-
-            final var typeSettings = ruleSettings.addNodeSettings(CFG_TYPE);
-            if (knimeType.isCollectionType() && knimeType.getCollectionElementType() != null) {
-                final var elementType = knimeType.getCollectionElementType();
-                final var elementTypeSettings = typeSettings.addNodeSettings("collection_element_type");
-                elementTypeSettings.addString(CFG_CELL_CLASS, elementType.getCellClass().getName());
-            }
-            typeSettings.addString(CFG_CELL_CLASS, knimeType.getCellClass().getName());
-
-            ruleSettings.addString("intermediate_type", path.getConverterFactory().getDestinationType().getName());
-
-            final var consumer = path.getConsumerFactory();
-            ruleSettings.addString("external_type", consumer.getDestinationType().toString());
-
-            final var converter = path.getConverterFactory();
-            ruleSettings.addString(CFG_CONVERTER_PATH, converter.getIdentifier());
-            ruleSettings.addString(CFG_CONVERTER_PATH + "_src", converter.getSourceType().getName());
-            ruleSettings.addString(CFG_CONVERTER_PATH + "_dst", converter.getDestinationType().getName());
-            ruleSettings.addString(CFG_CONVERTER_PATH + "_name", converter.getName());
-            ruleSettings.addNodeSettings(CFG_CONVERTER_PATH + "_config");
-
-            ruleSettings.addString(CFG_CONSUMER_PATH, consumer.getIdentifier());
-            ruleSettings.addString(CFG_CONSUMER_PATH + "_src", consumer.getSourceType().getName());
-            ruleSettings.addString(CFG_CONSUMER_PATH + "_dst", consumer.getDestinationType().toString());
-            ruleSettings.addString(CFG_CONSUMER_PATH + "_name", consumer.getName());
-            ruleSettings.addNodeSettings(CFG_CONSUMER_PATH + "_config");
-        }
-
         @Override
         public String[][] getConfigPaths() {
-            // Return empty because @Persist on the field already handles the "input_type_mapping" key
-            return new String[0][];
+            return new String[][]{new String[]{CFG_TYPE_TO_TYPE_RULES}};
         }
     }
 
     private static String formatStringPair(final String first, final String second) {
-        return first + ";" + second;    }
+        return first + ";" + second;
+    }
 
 }

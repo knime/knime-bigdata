@@ -54,6 +54,7 @@ import org.knime.core.data.DataType;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.WidgetGroup;
+import org.knime.node.parameters.persistence.Persist;
 import org.knime.node.parameters.persistence.Persistable;
 import org.knime.node.parameters.persistence.Persistor;
 import org.knime.node.parameters.updates.ParameterReference;
@@ -89,20 +90,24 @@ public final class TypeMappingSettings {
         @Widget(title = "Column selection type",
             description = "The option allows you to select how the column is matched.")
         @ValueSwitchWidget
+        @Persist(configKey = "filterType")
         FilterType m_filterType = FilterType.MANUAL;
 
         @Widget(title = "Column name", description = "The column name or regex expression.")
         @ValueReference(FromColRef.class)
+        @Persist(configKey = "fromColName")
         String m_fromColName = "";
 
         @Widget(title = "Source type", description = "KNIME Datatype to map from.")
         @ValueReference(ByNameMappingSettings.FromColTypeRef.class)
         @Modification.WidgetReference(FromColTypeRef.class)
+        @Persist(configKey = "fromColType")
         DataType m_fromColType;
 
         @Widget(title = "Mapping", description = "Parquet Datatype to map to.")
         @Persistor(ConsumptionPathPersistor.class)
         @Modification.WidgetReference(ToColTypeRef.class)
+        @Persist(configKey = "toColType")
         String m_toColType;
 
         interface FromColRef extends ParameterReference<String> {
@@ -129,12 +134,14 @@ public final class TypeMappingSettings {
         @Widget(title = "KNIME type", description = "Datatype to map from.")
         @ValueReference(ByTypeMappingSettings.FromColTypeRef.class)
         @Modification.WidgetReference(FromColTypeRef.class)
+        @Persist(configKey = "fromType")
         DataType m_fromType;
 
         @Widget(title = "Mapping", description = "Datatype to map to.")
         @Persistor(ConsumptionPathPersistor.class)
         @ValueReference(ToColTypeRef.class)
         @Modification.WidgetReference(ToColTypeRef.class)
+        @Persist(configKey = "toType")
         String m_toType;
 
         interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
