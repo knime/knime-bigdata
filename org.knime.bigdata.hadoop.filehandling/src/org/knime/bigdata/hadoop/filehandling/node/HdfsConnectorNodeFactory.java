@@ -45,21 +45,35 @@
  */
 package org.knime.bigdata.hadoop.filehandling.node;
 
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+
+import java.util.List;
+import java.util.Map;
+
+import org.knime.core.node.NodeDescription;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.NodeDialogManager;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
+import org.knime.node.impl.description.PortDescription;
 
 /**
  * Factory class for HDFS Connection Node.
  *
- * @author Sascha Wolke, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author AI Migration Pipeline v1.2
  */
-public class HdfsConnectorNodeFactory extends NodeFactory<HdfsConnectorNodeModel> {
+@SuppressWarnings("restriction")
+public class HdfsConnectorNodeFactory extends NodeFactory<HdfsConnectorNodeModel> implements NodeDialogFactory, KaiNodeInterfaceFactory {
 
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new HdfsConnectorNodeDialog();
-    }
 
     @Override
     public HdfsConnectorNodeModel createNodeModel() {
@@ -80,5 +94,59 @@ public class HdfsConnectorNodeFactory extends NodeFactory<HdfsConnectorNodeModel
     @Override
     protected boolean hasDialog() {
         return true;
+    }
+    private static final String NODE_NAME = "HDFS Connector";
+    private static final String NODE_ICON = "./file_system_connector.png";
+    private static final String SHORT_DESCRIPTION = """
+            Creates a Hadoop Distributed File System (HDFS) connection in order to read/write files in downstream
+                nodes.
+            """;
+    private static final String FULL_DESCRIPTION = """
+            <p>This node connects to a Hadoop Distributed File System using HDFS, WebHDFS or HTTPFS. The resulting
+                output port allows downstream nodes to access the <i>files</i> of the remote file system, e.g. to read
+                or write, or to perform other file system operations (browse/list files, copy, move, ...). </p>
+                <p><b>Path syntax:</b> Paths for HDFS are specified with a UNIX-like syntax, /myfolder/myfile. An
+                absolute for HDFS consists of: <ol> <li>A leading slash ("/").</li> <li>Followed by the path to the file
+                ("myfolder/myfile" in the above example).</li> </ol> </p> <p><b>SSL:</b> This node uses the JVM SSL
+                settings.</p>
+            """;
+    private static final List<PortDescription> INPUT_PORTS = List.of();
+    private static final List<PortDescription> OUTPUT_PORTS = List.of(
+            fixedPort("HDFS File System Connection", """
+                HDFS File System Connection.
+                """)
+    );
+
+    @Override
+    public NodeDialogPane createNodeDialogPane() {
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
+    }
+
+    @Override
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, HdfsConnectorNodeParameters.class);
+    }
+
+    @Override
+    public NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription( //
+            NODE_NAME, //
+            NODE_ICON, //
+            INPUT_PORTS, //
+            OUTPUT_PORTS, //
+            SHORT_DESCRIPTION, //
+            FULL_DESCRIPTION, //
+            List.of(), //
+            HdfsConnectorNodeParameters.class, //
+            null, //
+            NodeType.Source, //
+            List.of(), //
+            null //
+        );
+    }
+
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, HdfsConnectorNodeParameters.class));
     }
 }
