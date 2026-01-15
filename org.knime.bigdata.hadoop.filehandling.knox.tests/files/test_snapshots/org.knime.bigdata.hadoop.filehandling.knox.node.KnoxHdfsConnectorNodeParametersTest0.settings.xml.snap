@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="test">
+    <entry key="url" type="xstring" value="https://server:8443/gateway/default"/>
+    <config key="auth">
+        <entry key="type" type="xstring" value="user_pwd"/>
+        <config key="user_pwd">
+            <entry key="user" type="xstring" value="some-user"/>
+            <entry key="password" type="xpassword" value="02DQAAAGMq_QxveL1vZ0EBjybGv8ra6zgxj41386lTWnOs"/>
+            <entry key="use_credentials" type="xboolean" value="false"/>
+            <entry key="credentials" type="xstring" isnull="true" value=""/>
+        </config>
+    </config>
+    <entry key="workingDirectory" type="xstring" value="/"/>
+    <entry key="connectionTimeout" type="xint" value="30"/>
+    <entry key="receiveTimeout" type="xint" value="30"/>
+</config>

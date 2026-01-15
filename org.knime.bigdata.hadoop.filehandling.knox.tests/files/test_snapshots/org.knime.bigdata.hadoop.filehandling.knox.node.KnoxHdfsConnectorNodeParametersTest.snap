@@ -1,0 +1,347 @@
+{
+  "data" : {
+    "model" : {
+      "url" : "https://server:8443/gateway/default",
+      "authentication" : {
+        "type" : "USERNAME_PASSWORD",
+        "userPwdAuth" : {
+          "userPassword" : {
+            "isHiddenPassword" : false,
+            "isHiddenSecondFactor" : false,
+            "username" : "jenkins"
+          },
+          "useCredentials" : false
+        }
+      },
+      "workingDirectory" : "/",
+      "connectionTimeout" : 30,
+      "receiveTimeout" : 30
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "oneOf" : [ {
+                  "const" : "USERNAME_PASSWORD",
+                  "title" : "Username & password"
+                }, {
+                  "const" : "CREDENTIALS",
+                  "title" : "Use credentials"
+                } ],
+                "title" : "Authentication method",
+                "description" : "Specify the authentication method to use.\n<ul>\n<li><b>Username &amp; password</b>: Authenticate with a username and password. Either enter a username and password, in which case the password will be persistently stored (in encrypted form) with the workflow. Or select \"Use credentials\" and a choose a credentials flow variable to supply the username and password.</li>\n<li><b>Use credentials</b>: Authenticate with a username and password stored in a credentials flow variable.\n</li>\n</ul>",
+                "default" : "USERNAME_PASSWORD"
+              },
+              "userPwdAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentialsFlowVarName" : {
+                    "type" : "string",
+                    "title" : "Use credentials",
+                    "description" : "Use credentials from a flow variable."
+                  },
+                  "useCredentials" : {
+                    "type" : "boolean",
+                    "default" : false
+                  },
+                  "userPassword" : {
+                    "type" : "object",
+                    "properties" : {
+                      "password" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "secondFactor" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "username" : {
+                        "type" : "string",
+                        "default" : ""
+                      }
+                    },
+                    "title" : "Username & password",
+                    "description" : "Authentication settings for username and password. Select \"Use credentials\" as authentication method to provide the username and password via a credentials flow variable.\n",
+                    "default" : {
+                      "isHiddenPassword" : false,
+                      "isHiddenSecondFactor" : false,
+                      "username" : "jenkins"
+                    }
+                  }
+                },
+                "default" : {
+                  "userPassword" : {
+                    "isHiddenPassword" : false,
+                    "isHiddenSecondFactor" : false,
+                    "username" : "jenkins"
+                  },
+                  "useCredentials" : false
+                }
+              }
+            },
+            "default" : {
+              "type" : "USERNAME_PASSWORD",
+              "userPwdAuth" : {
+                "userPassword" : {
+                  "isHiddenPassword" : false,
+                  "isHiddenSecondFactor" : false,
+                  "username" : "jenkins"
+                },
+                "useCredentials" : false
+              }
+            }
+          },
+          "connectionTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Connection timeout (seconds)",
+            "description" : "Timeout in seconds to establish a connection, or 0 for an infinite timeout.",
+            "default" : 30
+          },
+          "receiveTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Read timeout (seconds)",
+            "description" : "Timeout in seconds to read data from the connection, or 0 for an infinite timeout.",
+            "default" : 30
+          },
+          "url" : {
+            "type" : "string",
+            "title" : "URL",
+            "description" : "KNOX URL including cluster name, for example <tt>https://&lt;server&gt;:8443/gateway/&lt;default&gt;</tt> (replace &lt;server&gt; with the fully qualified hostname and &lt;default&gt; with your cluster name). The protocol should be <i>https</i> and port <i>8443</i> on most deployments.",
+            "default" : "https://server:8443/gateway/default"
+          },
+          "workingDirectory" : {
+            "type" : "string",
+            "title" : "Working directory",
+            "description" : "Specify the working directory of the resulting file system connection, using the UNIX-like path syntax. The working directory must be specified as an absolute path (starting with \"/\"). A working directory allows downstream nodes to access files/folders using relative paths, i.e. paths that do not have a leading slash. The default working directory is the root \"/\".",
+            "default" : "/"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "Connection",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/url",
+        "options" : {
+          "validation" : {
+            "minLength" : {
+              "errorMessage" : "The field cannot be empty (it must contain at least one character).",
+              "parameters" : {
+                "minLength" : 1
+              }
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Authentication",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/type"
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/userPwdAuth/properties/userPassword",
+        "options" : {
+          "passwordLabel" : "Password",
+          "usernameLabel" : "Username",
+          "format" : "credentials"
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/authentication/properties/type",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "USERNAME_PASSWORD"
+              } ]
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/userPwdAuth/properties/credentialsFlowVarName",
+        "options" : {
+          "format" : "dropDown"
+        },
+        "providedOptions" : [ "possibleValues" ],
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/authentication/properties/type",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "CREDENTIALS"
+              } ]
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "File System",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/workingDirectory",
+        "options" : {
+          "selectionMode" : "FOLDER",
+          "format" : "stringFileChooser"
+        },
+        "providedOptions" : [ "fileSystemId" ]
+      } ]
+    }, {
+      "label" : "Advanced",
+      "type" : "Section",
+      "options" : {
+        "isAdvanced" : true
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/connectionTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/receiveTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "url" : {
+            "configKey" : "url"
+          },
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "configPaths" : [ [ "type" ], [ "user_pwd", "use_credentials" ] ]
+              },
+              "userPwdAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "userPassword" : {
+                    "configPaths" : [ [ "user" ] ]
+                  },
+                  "useCredentials" : {
+                    "configKey" : "use_credentials"
+                  },
+                  "credentialsFlowVarName" : {
+                    "configKey" : "credentials"
+                  }
+                },
+                "configKey" : "user_pwd"
+              }
+            },
+            "configKey" : "auth"
+          },
+          "workingDirectory" : {
+            "configKey" : "workingDirectory"
+          },
+          "connectionTimeout" : {
+            "configKey" : "connectionTimeout"
+          },
+          "receiveTimeout" : {
+            "configKey" : "receiveTimeout"
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/authentication/properties/userPwdAuth/properties/credentialsFlowVarName",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ ]
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/authentication"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/authentication/properties/type"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication/properties/type" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/connectionTimeout"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/receiveTimeout"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/url"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/workingDirectory"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  } ]
+}
