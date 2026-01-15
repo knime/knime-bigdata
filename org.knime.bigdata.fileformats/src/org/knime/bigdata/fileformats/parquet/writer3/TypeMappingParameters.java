@@ -336,7 +336,7 @@ public final class TypeMappingParameters implements NodeParameters {
 
         @Override
         public ByNameMappingSettings[] load(final NodeSettingsRO settings) throws InvalidSettingsException {
-            final var byNameList = new java.util.ArrayList<ByNameMappingSettings>();
+            final var byNameList = new ArrayList<ByNameMappingSettings>();
 
             if (settings.containsKey(CFG_NAME_TO_TYPE_RULES)) {
                 final var rulesSettings = settings.getNodeSettings(CFG_NAME_TO_TYPE_RULES);
@@ -352,7 +352,7 @@ public final class TypeMappingParameters implements NodeParameters {
         }
 
         private static void loadNameBasedRule(final NodeSettingsRO ruleSettings,
-            final java.util.ArrayList<ByNameMappingSettings> byNameList) throws InvalidSettingsException {
+            final ArrayList<ByNameMappingSettings> byNameList) throws InvalidSettingsException {
             final var knimeType = TypeMappingParameters.loadKnimeType(ruleSettings);
             if (knimeType == null) {
                 return;
@@ -415,10 +415,6 @@ public final class TypeMappingParameters implements NodeParameters {
         private static final String CFG_TYPE_TO_TYPE_RULES = "type_to_type_mapping_rules";
 
         private static final String CFG_TYPE_TO_TYPE_RULE = "type_to_type_mapping_rule_";
-
-        private static final String CFG_TYPE = "type";
-
-        private static final String CFG_CELL_CLASS = "cell_class";
 
         @Override
         public ByTypeMappingSettings[] load(final NodeSettingsRO settings) throws InvalidSettingsException {
