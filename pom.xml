@@ -37,6 +37,7 @@
 				<module>org.knime.bigdata.hadoop.client.win32</module>
 				<module>org.knime.bigdata.database</module>
 				<module>org.knime.bigdata.databricks</module>
+				<module>org.knime.bigdata.databricks.tests</module>
 				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars</module>
 				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars273</module>
 				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars275</module>
