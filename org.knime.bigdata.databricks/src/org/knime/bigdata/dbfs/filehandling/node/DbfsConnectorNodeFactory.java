@@ -57,13 +57,32 @@ import org.knime.core.node.context.NodeCreationConfiguration;
 import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.credentials.base.CredentialPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObject;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.NodeDialogManager;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
+import org.knime.core.node.NodeFactory.NodeType;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
+import org.knime.core.node.NodeDescription;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
+import java.util.Map;
+import org.knime.node.impl.description.PortDescription;
+import java.util.List;
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+import static org.knime.node.impl.description.PortDescription.dynamicPort;
 
 /**
  * Factory class for the DBFS Connector node.
  *
  * @author Alexander Bondaletov
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author AI Migration Pipeline v1.2
  */
-public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnectorNodeModel> {
+@SuppressWarnings("restriction")
+public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnectorNodeModel> implements NodeDialogFactory, KaiNodeInterfaceFactory {
 
     private static final String WORKSPACE_INPUT_NAME = "Databricks Workspace Connection";
 
@@ -99,12 +118,63 @@ public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnec
     protected boolean hasDialog() {
         return true;
     }
+    private static final String NODE_NAME = "Databricks File System Connector";
+    private static final String NODE_ICON = "./file_system_connector.png";
+    private static final String SHORT_DESCRIPTION = """
+            Connects to Databricks File System (DBFS) in order to read/write files in downstream nodes.
+            """;
+    private static final String FULL_DESCRIPTION = """
+            <p> This node connects to the Databricks File System (DBFS) of a Databricks deployment. The resulting
+                output port allows downstream nodes to access DBFS as a file system, e.g. to read or write files and
+                folders, or to perform other file system operations (browse/list files, copy, move, ...). </p>
+                <p><b>Path syntax:</b> Paths for DBFS are specified with a UNIX-like syntax, for example
+                <tt>/myfolder/file.csv</tt>, which is an absolute path that consists of: <ol> <li>A leading slash
+                (<tt>/</tt>).</li> <li>The name of a folder (<tt>myfolder</tt>), followed by a slash.</li> <li>Followed
+                by the name of a file (<tt>file.csv</tt>).</li> </ol> </p>
+            """;
+    private static final List<PortDescription> INPUT_PORTS = List.of(
+            dynamicPort("Databricks Workspace Connection", "Databricks Workspace Connection", """
+                Databricks Workspace Connection, that can be connected to the Databricks Workspace Connector.
+                """)
+    );
+    private static final List<PortDescription> OUTPUT_PORTS = List.of(
+            fixedPort("Databricks File System Connection", """
+                Databricks File System Connection
+                """)
+    );
 
     @Override
-    protected NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
-        final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
-        final boolean useWorkspaceConnection = portsConfig.getInputPorts().length > 0;
-        return new DbfsConnectorNodeDialog(useWorkspaceConnection);
+    public NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
     }
+
+    @Override
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, DbfsConnectorNodeParameters.class);
+    }
+
+    @Override
+    public NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription( //
+            NODE_NAME, //
+            NODE_ICON, //
+            INPUT_PORTS, //
+            OUTPUT_PORTS, //
+            SHORT_DESCRIPTION, //
+            FULL_DESCRIPTION, //
+            List.of(), //
+            DbfsConnectorNodeParameters.class, //
+            null, //
+            NodeType.Source, //
+            List.of(), //
+            null //
+        );
+    }
+
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, DbfsConnectorNodeParameters.class));
+    }
+
 
 }
