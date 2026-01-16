@@ -145,30 +145,36 @@ public class WorkspaceConnectorSettings implements NodeParameters {
     @TextMessage(value = AuthenticationManagedByPortMessage.class)
     Void m_authenticationManagedByPortText;
 
-    @Section(title = "Token")
-    @Effect(predicate =  AuthType.IsTokenAuthTypeAndCredentialInputNotConnected.class, type = EffectType.SHOW)
-    interface TokenSection {
+    @Section(title = "Connection")
+    @Effect(predicate = CredentialInputDatabricks.class, type = EffectType.HIDE)
+    interface ConnectionSection {
+    }
+
+    @Section(title = "Authentication")
+    @After(ConnectionSection.class)
+    interface AuthenticationSection {
     }
 
     @Section(title = "Timeouts")
     @Advanced
-    @After(TokenSection.class)
-    interface ConnectionTimeoutsSection {
+    @After(AuthenticationSection.class)
+    interface TimeoutsSection {
     }
 
     @Widget(title = "Databricks workspace URL", //
         description = "Full URL of the Databricks workspace, e.g. https://&lt;workspace&gt;.cloud.databricks.com/ "//
             + "or https://adb-&lt;workspace-id&gt;.&lt;random-number&gt;.azuredatabricks.net/ on Azure.")
-    @Effect(predicate = CredentialInputDatabricks.class, type = EffectType.HIDE)
+    @Layout(ConnectionSection.class)
     String m_workspaceUrl = "";
 
-    @Widget(title = "Authentication type", //
-        description = "Authentication type to use. The following types are supported:\n"//
+    @Widget(title = "Authentication method", //
+        description = "Specify the authentication method to use. The following types are supported:\n"//
             + "<ul>"//
             + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
             + "</ul>")
     @ValueReference(AuthTypeRef.class)
     @Effect(predicate = CredentialInputConnected.class, type = EffectType.DISABLE)
+    @Layout(AuthenticationSection.class)
     AuthType m_authType = AuthType.TOKEN;
 
     static final class AuthTypeRef implements ParameterReference<AuthType> {
@@ -191,7 +197,8 @@ public class WorkspaceConnectorSettings implements NodeParameters {
         description = "The Databricks personal access token to use. The value\"\n"
             + " entered here will be stored in weakly encrypted form with the workflow.")
     @PasswordWidget(passwordLabel = "Token")
-    @Layout(TokenSection.class)
+    @Effect(predicate = AuthType.IsTokenAuthTypeAndCredentialInputNotConnected.class, type = EffectType.SHOW)
+    @Layout(AuthenticationSection.class)
     Credentials m_token = new Credentials();
 
     @Widget(title = "Connection timeout (seconds)",
@@ -199,7 +206,7 @@ public class WorkspaceConnectorSettings implements NodeParameters {
             + " Used by this and downstream nodes connecting to Databricks.", //
         advanced = true)
     @NumberInputWidget(minValidation = IsNonNegativeValidation.class)
-    @Layout(ConnectionTimeoutsSection.class)
+    @Layout(TimeoutsSection.class)
     int m_connectionTimeout = 30;
 
     @Widget(title = "Read timeout (seconds)",
@@ -207,7 +214,7 @@ public class WorkspaceConnectorSettings implements NodeParameters {
             + " or 0 for an infinite timeout. Used by this and downstream nodes connecting to Databricks.", //
         advanced = true)
     @NumberInputWidget(minValidation = IsNonNegativeValidation.class)
-    @Layout(ConnectionTimeoutsSection.class)
+    @Layout(TimeoutsSection.class)
     int m_readTimeout = 30;
 
     Duration getReadTimeout() {
