@@ -152,7 +152,7 @@ public final class TypeMappingUtils {
         }
     }
 
-    static final class ConsumptionPathPersistor extends PathPersistor {
+    protected static final class ConsumptionPathPersistor extends PathPersistor {
 
         ConsumptionPathPersistor() {
             super(CFG_CONVERTER_PATH, CFG_CONSUMER_PATH);

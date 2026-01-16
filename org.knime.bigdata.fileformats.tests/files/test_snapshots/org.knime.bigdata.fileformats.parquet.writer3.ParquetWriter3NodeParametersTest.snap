@@ -443,7 +443,15 @@
             "route" : [ "settings" ]
           },
           "mapping" : {
-            "propertiesConfigPaths" : [ ],
+            "type" : "object",
+            "properties" : {
+              "byNameSettings" : {
+                "configPaths" : [ [ "name_to_type_mapping_rules" ] ]
+              },
+              "byTypeSettings" : {
+                "configPaths" : [ [ "type_to_type_mapping_rules" ] ]
+              }
+            },
             "configKey" : "input_type_mapping",
             "route" : [ "type_mapping" ]
           }

@@ -48,13 +48,20 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer3;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.ConsumptionPathPersistor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.webui.node.dialog.SettingsType;
 import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersUtil;
+import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.testing.node.dialog.DefaultNodeSettingsSnapshotTest;
 import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 
@@ -90,5 +97,30 @@ final class ParquetWriter3NodeParametersTest extends DefaultNodeSettingsSnapshot
         } catch (IOException | InvalidSettingsException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testConsumptionPathPersistor(final String dataType) throws InvalidSettingsException {
+        final var copy = saveLoad(new ConsumptionPathPersistor(), dataType);
+        assertEquals(dataType, copy);
+    }
+
+    private static Stream<String> testConsumptionPathPersistor() {
+        return Stream.of("java.lang.Double-&gt;FLOAT", "java.lang.String-&gt;ENUM (BINARY)");
+    }
+
+    /**
+     * @param <S>
+     * @param persistor
+     * @param value
+     * @return the loaded saved value
+     * @throws InvalidSettingsException
+     */
+    public static <S> S saveLoad(final NodeParametersPersistor<S> persistor, final S value)
+        throws InvalidSettingsException {
+        var nodeSettings = new NodeSettings("settings");
+        persistor.save(value, nodeSettings);
+        return persistor.load(nodeSettings);
     }
 }
