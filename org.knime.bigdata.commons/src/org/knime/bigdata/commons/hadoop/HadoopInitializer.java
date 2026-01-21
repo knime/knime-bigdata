@@ -26,6 +26,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.hadoop.fs.FileSystem;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.knime.core.node.KNIMEConstants;
@@ -76,6 +77,7 @@ public class HadoopInitializer {
             }
         }
 
+        loadDefaultFileSystems();
         UserGroupUtil.initHadoopConfigurationAndUGI(false);
 
         isInitialized = true;
@@ -107,6 +109,25 @@ public class HadoopInitializer {
         }
 
         return tmpHadoopDir.toFile().getCanonicalPath();
+    }
+
+    /**
+     * Lookup some file system implementation to trigger the internal Hadoop file system registry loader. This ensures
+     * that the default file system implementations are registered, using the right class loader. Otherwise the Service
+     * Loader, called by Hadoop, might not find the default implementations later on.
+     */
+    private static void loadDefaultFileSystems() {
+        final var origCtxClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(FileSystem.class.getClassLoader());
+
+            final var conf = ConfigurationFactory.createBaseConfiguration();
+            FileSystem.getFileSystemClass("hdfs", conf);
+        } catch (IOException e) {
+            LOG.error("Could not load default Hadoop FileSystem implementations.", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(origCtxClassLoader);
+        }
     }
 
 }
