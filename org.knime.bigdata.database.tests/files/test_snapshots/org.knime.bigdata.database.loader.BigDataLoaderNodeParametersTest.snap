@@ -116,10 +116,10 @@
       "type" : "Control",
       "scope" : "#/properties/model/properties/tableName",
       "options" : {
-        "format" : "dbTableChooser",
-        "dbConnectionError" : "No database is currently connected. To proceed, connect a database to the input port, or re-execute any upstream connector nodes.",
-        "validateSchema" : true,
-        "validateTable" : true
+        "widgetResource" : "org.knime.database.node.webui.dbtableselection.DBTableSelectionWidgetExtension.js",
+        "rpcServiceName" : "orgknimedatabasenodewebuidbtableselectionDBTableSelectionWidgetExtension",
+        "dbConnectionError" : "Currently, there exists no open database session. To proceed, connect a database to the input port, or re-execute any upstream connector nodes.",
+        "format" : "custom"
       }
     }, {
       "type" : "Control",
