@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.commons"
       label="KNIME Extension for Big Data Commons"
-      version="5.9.0.qualifier"
+      version="5.10.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
