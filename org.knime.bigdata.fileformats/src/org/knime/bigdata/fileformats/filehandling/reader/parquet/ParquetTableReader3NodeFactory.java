@@ -86,7 +86,7 @@ public final class ParquetTableReader3NodeFactory extends //
     @Override
     protected NodeDescription createNodeDescription() {
         return DefaultNodeDescriptionUtil.createNodeDescription( //
-            "Parquet Reader", //
+            "Parquet Reader (Labs)", //
             "./parquetreader-icon.png", //
             List.of(dynamicPort(FS_CONNECT_GRP_ID, "File System Connection", "The file system connection.")), //
             List.of(fixedPort("Data Table", "The data table containing the data of the Parquet file.")), //

@@ -44,7 +44,7 @@
    </node>
    <node
          category-path="/io/read"
-         deprecated="true"
+         deprecated="false"
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory2"
          hidden="false">
    </node>
@@ -52,7 +52,7 @@
          category-path="/io/read"
          deprecated="false"
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3NodeFactory"
-         hidden="false">
+         hidden="true">
    </node>
    <node
          category-path="/io/read"
