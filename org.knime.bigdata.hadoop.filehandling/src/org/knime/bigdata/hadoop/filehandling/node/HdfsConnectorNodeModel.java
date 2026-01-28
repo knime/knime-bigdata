@@ -58,12 +58,10 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.webui.node.impl.WebUINodeModel;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
@@ -73,32 +71,35 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class HdfsConnectorNodeModel extends NodeModel {
+@SuppressWarnings({ "deprecation", "restriction" })
+class HdfsConnectorNodeModel extends WebUINodeModel<HdfsConnectorNodeParameters> {
 
     private String m_fsId;
 
     private HdfsFSConnection m_connection;
 
-    private HdfsConnectorNodeSettings m_settings = new HdfsConnectorNodeSettings();
-
     /**
      * Default constructor.
      */
     HdfsConnectorNodeModel() {
-        super(new PortType[]{}, new PortType[]{FileSystemPortObject.TYPE});
+        super(new PortType[]{}, new PortType[]{FileSystemPortObject.TYPE}, HdfsConnectorNodeParameters.class);
     }
 
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        m_settings.validateValues();
+    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs, final HdfsConnectorNodeParameters params)
+        throws InvalidSettingsException {
+
+        params.validateOnConfigure();
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        final HdfsFSConnectionConfig config = m_settings.toFSConnectionConfig();
+        final HdfsFSConnectionConfig config = params.toFSConnectionConfig();
         return new PortObjectSpec[]{createSpec(config)};
     }
 
     @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final HdfsFSConnectionConfig config = m_settings.toFSConnectionConfig();
+    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
+        final HdfsConnectorNodeParameters params) throws Exception {
+
+        final HdfsFSConnectionConfig config = params.toFSConnectionConfig();
         m_connection = new HdfsFSConnection(config);
         testConnection(m_connection);
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
@@ -131,21 +132,6 @@ class HdfsConnectorNodeModel extends NodeModel {
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
         // Not used
-    }
-
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO output) {
-        m_settings.saveSettingsTo(output);
-    }
-
-    @Override
-    protected void validateSettings(final NodeSettingsRO input) throws InvalidSettingsException {
-        m_settings.validateSettings(input);
-    }
-
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO input) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(input);
     }
 
     @Override
