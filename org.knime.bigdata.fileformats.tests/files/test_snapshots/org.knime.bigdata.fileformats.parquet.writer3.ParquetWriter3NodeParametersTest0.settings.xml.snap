@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="test">
+    <config key="settings">
+        <config key="file_chooser_settings">
+            <config key="path">
+                <entry key="location_present" type="xboolean" value="true"/>
+                <entry key="file_system_type" type="xstring" value="LOCAL"/>
+                <entry key="path" type="xstring" value="/home/jochen/knime-workspace/compare/parquetfile2.parquet"/>
+            </config>
+            <config key="file_system_chooser__Internals">
+                <entry key="has_fs_port" type="xboolean" value="false"/>
+                <entry key="overwritten_by_variable" type="xboolean" value="false"/>
+                <entry key="convenience_fs_category" type="xstring" value="LOCAL"/>
+                <entry key="relative_to" type="xstring" value="knime.workflow"/>
+                <entry key="mountpoint" type="xstring" value="LOCAL"/>
+                <entry key="spaceId" type="xstring" value=""/>
+                <entry key="spaceName" type="xstring" value=""/>
+                <entry key="custom_url_timeout" type="xint" value="1000"/>
+                <entry key="connected_fs" type="xboolean" value="true"/>
+            </config>
+            <entry key="create_missing_folders" type="xboolean" value="false"/>
+            <entry key="if_path_exists" type="xstring" value="overwrite"/>
+            <config key="filter_mode">
+                <entry key="filter_mode" type="xstring" value="FILE"/>
+            </config>
+        </config>
+        <entry key="file_compression" type="xstring" value="UNCOMPRESSED"/>
+        <entry key="file_size" type="xlong" value="1"/>
+        <entry key="file_name_prefix" type="xstring" value="part_"/>
+        <entry key="within_file_chunk_size" type="xint" value="1"/>
+    </config>
+    <config key="type_mapping">
+        <config key="input_type_mapping">
+            <config key="name_to_type_mapping_rules">
+                <config key="name_to_type_mapping_rule_0">
+                    <entry key="name" type="xstring" value="Universe_0_0"/>
+                    <entry key="regex" type="xboolean" value="false"/>
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.def.DoubleCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.Double"/>
+                    <entry key="external_type" type="xstring" value="optional float field"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.DoubleValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="Double"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.Double-&gt;FLOAT"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="FLOAT"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="FLOAT"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+                <config key="name_to_type_mapping_rule_1">
+                    <entry key="name" type="xstring" value="Universe_0_1"/>
+                    <entry key="regex" type="xboolean" value="false"/>
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.def.DoubleCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.Double"/>
+                    <entry key="external_type" type="xstring" value="optional float field"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.DoubleValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="Double"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.Double-&gt;FLOAT"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="FLOAT"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="FLOAT"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+                <config key="name_to_type_mapping_rule_2">
+                    <entry key="name" type="xstring" value="Universe_1_0"/>
+                    <entry key="regex" type="xboolean" value="false"/>
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.def.DoubleCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.Double"/>
+                    <entry key="external_type" type="xstring" value="optional float field"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.DoubleValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="Double"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.Double-&gt;FLOAT"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="FLOAT"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="FLOAT"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+                <config key="name_to_type_mapping_rule_3">
+                    <entry key="name" type="xstring" value="Universe_1_1"/>
+                    <entry key="regex" type="xboolean" value="false"/>
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.def.DoubleCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.Double"/>
+                    <entry key="external_type" type="xstring" value="optional float field"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.DoubleValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="Double"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.Double-&gt;FLOAT"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.Double"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="FLOAT"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="FLOAT"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+                <config key="name_to_type_mapping_rule_4">
+                    <entry key="name" type="xstring" value="Cluster Membership"/>
+                    <entry key="regex" type="xboolean" value="false"/>
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.def.StringCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.String"/>
+                    <entry key="external_type" type="xstring" value="optional binary field (ENUM)"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.StringValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.String"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="String"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.String-&gt;ENUM (BINARY)"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.String"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="ENUM (BINARY)"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="ENUM (BINARY)"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+            </config>
+            <config key="type_to_type_mapping_rules">
+                <config key="type_to_type_mapping_rule_0">
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.def.BooleanCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.Boolean"/>
+                    <entry key="external_type" type="xstring" value="optional boolean field"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BooleanValue,class java.lang.Boolean,Boolean)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.BooleanValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.Boolean"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="Boolean"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.Boolean-&gt;BOOLEAN"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.Boolean"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="BOOLEAN"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="BOOLEAN"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+                <config key="type_to_type_mapping_rule_1">
+                    <config key="type">
+                        <entry key="cell_class" type="xstring" value="org.knime.core.data.uri.URIDataCell"/>
+                    </config>
+                    <entry key="intermediate_type" type="xstring" value="java.lang.String"/>
+                    <entry key="external_type" type="xstring" value="optional binary field (STRING)"/>
+                    <entry key="consumption_path_converter" type="xstring" value="org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(URIDataValue,class java.lang.String,String)"/>
+                    <entry key="consumption_path_converter_src" type="xstring" value="org.knime.core.data.uri.URIDataValue"/>
+                    <entry key="consumption_path_converter_dst" type="xstring" value="java.lang.String"/>
+                    <entry key="consumption_path_converter_name" type="xstring" value="String"/>
+                    <config key="consumption_path_converter_config"/>
+                    <entry key="consumption_path_consumer" type="xstring" value="java.lang.String-&gt;STRING (BINARY)"/>
+                    <entry key="consumption_path_consumer_src" type="xstring" value="java.lang.String"/>
+                    <entry key="consumption_path_consumer_dst" type="xstring" value="STRING (BINARY)"/>
+                    <entry key="consumption_path_consumer_name" type="xstring" value="STRING (BINARY)"/>
+                    <config key="consumption_path_consumer_config"/>
+                </config>
+            </config>
+        </config>
+    </config>
+</config>
