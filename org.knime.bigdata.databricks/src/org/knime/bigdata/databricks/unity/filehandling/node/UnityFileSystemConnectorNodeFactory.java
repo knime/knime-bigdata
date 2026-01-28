@@ -87,7 +87,7 @@ public class UnityFileSystemConnectorNodeFactory extends WebUINodeFactory<UnityF
         .icon("./file_system_connector.png") //
         .shortDescription("Databricks Unity File System Connector node.") //
         .fullDescription(FULL_DESCRIPTION) //
-        .modelSettingsClass(UnityFileSystemConnectorSettings.class) //
+        .modelSettingsClass(UnityFileSystemConnectorNodeParameters.class) //
         .nodeType(NodeType.Source)//
         .addInputPort("Databricks Workspace Connection", //
             CredentialPortObject.TYPE, //
