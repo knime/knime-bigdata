@@ -73,20 +73,20 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@SuppressWarnings("restriction")
-public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileSystemConnectorSettings> {
+@SuppressWarnings({"restriction", "deprecation"})
+public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileSystemConnectorNodeParameters> {
 
     private String m_fsId;
 
     private UnityFSConnection m_fsConnection;
 
     UnityFileSystemConnectorNodeModel(final WebUINodeConfiguration configuration) {
-        super(configuration, UnityFileSystemConnectorSettings.class);
+        super(configuration, UnityFileSystemConnectorNodeParameters.class);
     }
 
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs,
-        final UnityFileSystemConnectorSettings settings)
+        final UnityFileSystemConnectorNodeParameters settings)
         throws InvalidSettingsException {
 
         m_fsId = FSConnectionRegistry.getInstance().getKey();
@@ -113,7 +113,7 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
     }
 
     private static UnityFSConnectionConfig createFSConnectionConfig(final DatabricksAccessTokenCredential credential,
-        final DatabricksWorkspacePortObjectSpec spec, final UnityFileSystemConnectorSettings settings) {
+        final DatabricksWorkspacePortObjectSpec spec, final UnityFileSystemConnectorNodeParameters settings) {
 
         return UnityFSConnectionConfig.builder() //
             .withCredential(credential) //
@@ -131,7 +131,7 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
-        final UnityFileSystemConnectorSettings settings) throws Exception {
+        final UnityFileSystemConnectorNodeParameters settings) throws Exception {
 
         final DatabricksWorkspacePortObjectSpec spec = ((DatabricksWorkspacePortObject)inObjects[0]).getSpec();
         final DatabricksAccessTokenCredential credential =
