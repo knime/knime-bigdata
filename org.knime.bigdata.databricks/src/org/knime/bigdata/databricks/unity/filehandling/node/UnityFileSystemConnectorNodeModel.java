@@ -73,25 +73,23 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@SuppressWarnings("restriction")
-public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileSystemConnectorSettings> {
+@SuppressWarnings({"restriction", "deprecation"})
+public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileSystemConnectorNodeParameters> {
 
     private String m_fsId;
 
     private UnityFSConnection m_fsConnection;
 
     UnityFileSystemConnectorNodeModel(final WebUINodeConfiguration configuration) {
-        super(configuration, UnityFileSystemConnectorSettings.class);
+        super(configuration, UnityFileSystemConnectorNodeParameters.class);
     }
 
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs,
-        final UnityFileSystemConnectorSettings settings)
-        throws InvalidSettingsException {
+        final UnityFileSystemConnectorNodeParameters settings) throws InvalidSettingsException {
 
         m_fsId = FSConnectionRegistry.getInstance().getKey();
 
-        PortObjectSpec[] toReturn = new PortObjectSpec[]{null};
         if (inSpecs[0] != null) {
             if (!(inSpecs[0] instanceof DatabricksWorkspacePortObjectSpec)) {
                 throw new InvalidSettingsException(
@@ -102,24 +100,25 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
                 try {
                     final DatabricksAccessTokenCredential credential =
                         spec.resolveCredential(DatabricksAccessTokenCredential.class);
-                    final UnityFSConnectionConfig config = createFSConnectionConfig(credential, spec, settings);
-                    toReturn = new PortObjectSpec[]{createSpec(config)};
+                    final UnityFSConnectionConfig config =
+                        createFSConnectionConfig(credential, spec, settings.m_workingDirectory);
+                    return new PortObjectSpec[]{createSpec(config)};
                 } catch (final NoSuchCredentialException ex) {
                     throw new InvalidSettingsException(ex.getMessage(), ex);
                 }
             }
         }
-        return toReturn;
+        return new PortObjectSpec[]{null};
     }
 
-    private static UnityFSConnectionConfig createFSConnectionConfig(final DatabricksAccessTokenCredential credential,
-        final DatabricksWorkspacePortObjectSpec spec, final UnityFileSystemConnectorSettings settings) {
+    static UnityFSConnectionConfig createFSConnectionConfig(final DatabricksAccessTokenCredential credential,
+        final DatabricksWorkspacePortObjectSpec spec, final String workingDirectory) {
 
         return UnityFSConnectionConfig.builder() //
             .withCredential(credential) //
-            .withWorkingDirectory(settings.m_workingDirectory) //
+            .withWorkingDirectory(workingDirectory) //
             .withConnectionTimeout(spec.getConnectionTimeout()) //
-            .withReadTimeout(spec.getConnectionTimeout()) //
+            .withReadTimeout(spec.getReadTimeout()) //
             .build();
     }
 
@@ -131,12 +130,12 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
 
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
-        final UnityFileSystemConnectorSettings settings) throws Exception {
+        final UnityFileSystemConnectorNodeParameters settings) throws Exception {
 
         final DatabricksWorkspacePortObjectSpec spec = ((DatabricksWorkspacePortObject)inObjects[0]).getSpec();
         final DatabricksAccessTokenCredential credential =
             spec.resolveCredential(DatabricksAccessTokenCredential.class);
-        final UnityFSConnectionConfig config = createFSConnectionConfig(credential, spec, settings);
+        final UnityFSConnectionConfig config = createFSConnectionConfig(credential, spec, settings.m_workingDirectory);
         m_fsConnection = new UnityFSConnection(config);
         FSConnectionRegistry.getInstance().register(m_fsId, m_fsConnection);
 
@@ -146,7 +145,7 @@ public class UnityFileSystemConnectorNodeModel extends WebUINodeModel<UnityFileS
     }
 
     @SuppressWarnings("resource")
-    private static void testConnection(final UnityFSConnection connection) throws IOException {
+    static void testConnection(final UnityFSConnection connection) throws IOException {
         ((UnityFileSystem)connection.getFileSystem()).testConnection();
     }
 
