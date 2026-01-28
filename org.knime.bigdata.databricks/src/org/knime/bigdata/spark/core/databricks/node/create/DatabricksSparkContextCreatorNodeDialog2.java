@@ -690,8 +690,8 @@ public class DatabricksSparkContextCreatorNodeDialog2 extends NodeDialogPane imp
         } else {
             try {
                 return new DbfsFSConnection(m_settings.createDbfsFSConnectionConfig(getCredentialsProvider()));
-            } catch (InvalidSettingsException e) {
-                throw new IOException("Unable to create DBFS connectin: " + e.getMessage(), e);
+            } catch (final IllegalArgumentException e) {
+                throw new IOException("Unable to create DBFS connection: " + e.getMessage(), e);
             }
         }
     }

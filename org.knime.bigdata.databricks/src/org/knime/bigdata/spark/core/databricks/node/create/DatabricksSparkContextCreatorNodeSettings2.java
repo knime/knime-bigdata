@@ -47,6 +47,7 @@ package org.knime.bigdata.spark.core.databricks.node.create;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -59,12 +60,10 @@ import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSDescriptorProvider;
-import org.knime.bigdata.dbfs.filehandling.node.DbfsConnectorNodeSettings;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextFileSystemConfig;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -354,25 +353,29 @@ public class DatabricksSparkContextCreatorNodeSettings2 extends AbstractDatabric
      *
      * @param credentialsProvider Provider for the credentials
      * @return file system settings
-     * @throws InvalidSettingsException
      */
-    public DbfsFSConnectionConfig createDbfsFSConnectionConfig(final CredentialsProvider credentialsProvider)
-        throws InvalidSettingsException {
-
+    public DbfsFSConnectionConfig createDbfsFSConnectionConfig(final CredentialsProvider credentialsProvider) {
         if (m_useWorkspaceConnection) {
             throw new IllegalArgumentException(
                 "Cannot create FS config, unexpected workspace connection provided. This is a bug.");
         }
 
-        final DbfsConnectorNodeSettings settings = new DbfsConnectorNodeSettings(false);
-        settings.getUrlModel().setStringValue(getDatabricksInstanceURL());
-        settings.getWorkingDirectoryModel().setStringValue(getWorkingDirectory());
-        settings.getConnectionTimeoutModel().setIntValue(getConnectionTimeout());
-        settings.getReadTimeoutModel().setIntValue(getReceiveTimeout());
-        final NodeSettings tempSettings = new NodeSettings("ignored");
-        m_authSettings.saveSettingsForModel(tempSettings);
-        settings.getAuthenticationSettings().loadSettingsForModel(tempSettings);
-        return settings.toFSConnectionConfig(credentialsProvider);
+        final DbfsFSConnectionConfig.Builder builder = DbfsFSConnectionConfig.builder() //
+            .withDeploymentUrl(getDatabricksInstanceURL()) //
+            .withWorkingDirectory(getWorkingDirectory()) //
+            .withConnectionTimeout(Duration.ofSeconds(getConnectionTimeout())) //
+            .withReadTimeout(Duration.ofSeconds(getReceiveTimeout()));
+
+        if (m_authSettings.useTokenAuth()) {
+            final String token = m_authSettings.getToken(credentialsProvider);
+            builder.withToken(token);
+        } else {
+            final String username = m_authSettings.getUser(credentialsProvider);
+            final String password = m_authSettings.getPassword(credentialsProvider);
+            builder.withUserAndPassword(username, password);
+        }
+
+        return builder.build();
     }
 
     /**
