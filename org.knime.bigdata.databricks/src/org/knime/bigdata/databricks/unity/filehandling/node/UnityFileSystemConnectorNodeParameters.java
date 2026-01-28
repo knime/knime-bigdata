@@ -49,20 +49,23 @@
 package org.knime.bigdata.databricks.unity.filehandling.node;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
+import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFileSystem;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
+import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
+import org.knime.node.parameters.persistence.Persist;
 
 /**
- * Node settings for the Databricks Unity File System Connector.
+ * Node parameters for the Databricks Unity File System Connector.
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
+@LoadDefaultsForAbsentFields
 @SuppressWarnings("restriction")
-public class UnityFileSystemConnectorSettings implements NodeParameters {
+public class UnityFileSystemConnectorNodeParameters implements NodeParameters {
 
     @Section(title = "File System")
     interface FileSystemSection {
@@ -75,13 +78,14 @@ public class UnityFileSystemConnectorSettings implements NodeParameters {
             + " i.e. paths that do not have a leading slash."
             + " If not specified, the default working directory is \"/\".")
     @Layout(FileSystemSection.class)
+    @Persist(configKey = "workingDirectory")
     String m_workingDirectory = "/";
 
     @Override
     public void validate() throws InvalidSettingsException {
         if (StringUtils.isAllBlank(m_workingDirectory)) {
             throw new InvalidSettingsException("Please specify a working directory.");
-        } else if (!m_workingDirectory.startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
+        } else if (!m_workingDirectory.startsWith(UnityFileSystem.PATH_SEPARATOR)) {
             throw new InvalidSettingsException("Working directory must be an absolute path that starts with \"/\"");
         }
     }
