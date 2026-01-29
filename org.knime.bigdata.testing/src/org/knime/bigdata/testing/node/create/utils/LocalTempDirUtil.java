@@ -46,6 +46,7 @@
 package org.knime.bigdata.testing.node.create.utils;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,13 @@ public class LocalTempDirUtil {
 
             final FSPath localTmpParent = m_localFSConnection.getFileSystem()
                 .getPath(TestflowVariable.getString(TestflowVariable.TMP_LOCAL_PARENT, flowVars));
+
+            if (!Files.exists(localTmpParent)) {
+                Files.createDirectories(localTmpParent);
+            } else if (!Files.isDirectory(localTmpParent)) {
+                throw new InvalidSettingsException(
+                    "%s already exists but is not a directory".formatted(localTmpParent.toAbsolutePath().toString()));
+            }
             final FSPath localTmpDir = FSFiles.createTempDirectory(localTmpParent, "bde-tests-", "-local");
 
             final var newVars = new ArrayList<FlowVariable>();
