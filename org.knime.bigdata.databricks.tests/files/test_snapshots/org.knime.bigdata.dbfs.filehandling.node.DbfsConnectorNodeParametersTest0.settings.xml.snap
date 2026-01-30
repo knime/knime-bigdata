@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="test">
+    <entry key="url" type="xstring" value="https://some-host"/>
+    <config key="auth">
+        <entry key="type" type="xstring" value="token_v2"/>
+        <config key="token_v2">
+            <config key="credentials">
+                <entry key="isCredentials_Internals" type="xboolean" value="true"/>
+                <entry key="name" type="xstring" value=""/>
+                <entry key="login" type="xstring" value=""/>
+                <entry key="weaklyEncryptedPassword" type="xpassword" value="02CgAAAGMq_QxveL1vZ0EBj_wrFay6rblfrYxrrt6X"/>
+            </config>
+            <entry key="flowVarName_Internals" type="xstring" isnull="true" value=""/>
+        </config>
+        <config key="user_pwd_v2">
+            <config key="credentials">
+                <entry key="isCredentials_Internals" type="xboolean" value="true"/>
+                <entry key="name" type="xstring" value=""/>
+                <entry key="login" type="xstring" value="jenkins"/>
+            </config>
+            <entry key="flowVarName_Internals" type="xstring" isnull="true" value=""/>
+        </config>
+    </config>
+    <entry key="workingDirectory" type="xstring" value="/some/dir"/>
+    <entry key="connectionTimeout" type="xint" value="30"/>
+    <entry key="readTimeout" type="xint" value="30"/>
+</config>

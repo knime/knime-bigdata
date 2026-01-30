@@ -63,13 +63,11 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
+import org.knime.core.webui.node.impl.WebUINodeModel;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
@@ -80,9 +78,8 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Alexander Bondaletov
  */
-class DbfsConnectorNodeModel extends NodeModel {
-
-    private final DbfsConnectorNodeSettings m_settings;
+@SuppressWarnings({"deprecation", "restriction"})
+class DbfsConnectorNodeModel extends WebUINodeModel<DbfsConnectorNodeParameters> {
 
     private String m_fsId;
     private DbfsFSConnection m_fsConnection;
@@ -91,12 +88,13 @@ class DbfsConnectorNodeModel extends NodeModel {
      * Creates new instance.
      */
     DbfsConnectorNodeModel(final PortsConfiguration portsConfig, final boolean useWorkspaceConnection) {
-        super(portsConfig.getInputPorts(), portsConfig.getOutputPorts());
-        m_settings = new DbfsConnectorNodeSettings(useWorkspaceConnection);
+        super(portsConfig.getInputPorts(), portsConfig.getOutputPorts(), DbfsConnectorNodeParameters.class);
     }
 
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs, final DbfsConnectorNodeParameters params)
+        throws InvalidSettingsException {
+
         m_fsId = FSConnectionRegistry.getInstance().getKey();
 
         final FileSystemPortObjectSpec fsPortSpec;
@@ -111,7 +109,7 @@ class DbfsConnectorNodeModel extends NodeModel {
                 try {
                     final DatabricksAccessTokenCredential credential =
                         spec.resolveCredential(DatabricksAccessTokenCredential.class);
-                    fsPortSpec = createSpec(m_settings.toFSConnectionConfig(spec, credential));
+                    fsPortSpec = createSpec(params.toFSConnectionConfig(spec, credential));
                 } catch (final NoSuchCredentialException ex) {
                     throw new InvalidSettingsException(ex.getMessage(), ex);
                 }
@@ -119,22 +117,24 @@ class DbfsConnectorNodeModel extends NodeModel {
                 fsPortSpec = null;
             }
         } else {
-            fsPortSpec = createSpec(m_settings.toFSConnectionConfig(getCredentialsProvider()));
+            fsPortSpec = createSpec(params.toFSConnectionConfig(getCredentialsProvider()));
         }
 
         return new PortObjectSpec[]{fsPortSpec};
     }
 
     @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
+    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
+        final DbfsConnectorNodeParameters params) throws Exception {
+
         final DbfsFSConnectionConfig config;
         if (inObjects != null && inObjects.length > 0 && inObjects[0] != null) {
             final DatabricksWorkspacePortObjectSpec spec = ((DatabricksWorkspacePortObject)inObjects[0]).getSpec();
             final DatabricksAccessTokenCredential credential =
                 spec.resolveCredential(DatabricksAccessTokenCredential.class);
-            config = m_settings.toFSConnectionConfig(spec, credential);
+            config = params.toFSConnectionConfig(spec, credential);
         } else {
-            config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+            config = params.toFSConnectionConfig(getCredentialsProvider());
         }
 
         m_fsConnection = new DbfsFSConnection(config);
@@ -166,21 +166,6 @@ class DbfsConnectorNodeModel extends NodeModel {
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
             throws IOException, CanceledExecutionException {
         // nothing to save
-    }
-
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsForModel(settings);
-    }
-
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
-    }
-
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsForModel(settings);
     }
 
     @Override

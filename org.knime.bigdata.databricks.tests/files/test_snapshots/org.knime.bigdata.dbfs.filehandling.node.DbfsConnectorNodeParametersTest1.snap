@@ -1,0 +1,423 @@
+{
+  "data" : {
+    "model" : {
+      "url" : "https://some-host",
+      "authentication" : {
+        "type" : "TOKEN",
+        "tokenAuth" : {
+          "credentials" : {
+            "isHiddenPassword" : true,
+            "isHiddenSecondFactor" : false,
+            "username" : ""
+          }
+        },
+        "userPasswordAuth" : {
+          "credentials" : {
+            "isHiddenPassword" : false,
+            "isHiddenSecondFactor" : false,
+            "username" : "jenkins"
+          }
+        }
+      },
+      "workingDirectory" : "/some/dir",
+      "connectionTimeout" : 30,
+      "readTimeout" : 30
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "tokenAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentials" : {
+                    "type" : "object",
+                    "properties" : {
+                      "password" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "secondFactor" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "username" : {
+                        "type" : "string",
+                        "default" : ""
+                      }
+                    },
+                    "default" : {
+                      "isHiddenPassword" : false,
+                      "isHiddenSecondFactor" : false,
+                      "username" : ""
+                    }
+                  },
+                  "flowVarName" : {
+                    "type" : "string"
+                  }
+                },
+                "title" : "Personal access token",
+                "description" : "Enter a personal access token for authentication. The token will be persistently stored (in encrypted form) with the workflow.",
+                "default" : {
+                  "credentials" : {
+                    "isHiddenPassword" : false,
+                    "isHiddenSecondFactor" : false,
+                    "username" : ""
+                  }
+                }
+              },
+              "type" : {
+                "oneOf" : [ {
+                  "const" : "TOKEN",
+                  "title" : "Personal access token"
+                }, {
+                  "const" : "USERNAME_PASSWORD",
+                  "title" : "Username & password"
+                } ],
+                "title" : "Authentication method",
+                "description" : "Specify the authentication method to use. Personal access token or Username and password can be used for authentication. Databricks strongly recommends tokens.\n<ul>\n<li><b>Personal access token</b>: Authenticate with a personal access token. The token will be persistently stored (in encrypted form) with the workflow if not provided by a flow variable. Databricks strongly recommends tokens.</li>\n<li><b>Username &amp; password</b>: Authenticate with a username and password. The password will be persistently stored (in encrypted form) with the workflow.</li>\n</ul>",
+                "default" : "TOKEN"
+              },
+              "userPasswordAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentials" : {
+                    "type" : "object",
+                    "properties" : {
+                      "password" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "secondFactor" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "username" : {
+                        "type" : "string",
+                        "default" : ""
+                      }
+                    },
+                    "default" : {
+                      "isHiddenPassword" : false,
+                      "isHiddenSecondFactor" : false,
+                      "username" : ""
+                    }
+                  },
+                  "flowVarName" : {
+                    "type" : "string"
+                  }
+                },
+                "title" : "Username & Password",
+                "description" : "Credentials for username and password authentication.",
+                "default" : {
+                  "credentials" : {
+                    "isHiddenPassword" : false,
+                    "isHiddenSecondFactor" : false,
+                    "username" : ""
+                  }
+                }
+              }
+            },
+            "default" : {
+              "type" : "TOKEN",
+              "tokenAuth" : {
+                "credentials" : {
+                  "isHiddenPassword" : false,
+                  "isHiddenSecondFactor" : false,
+                  "username" : ""
+                }
+              },
+              "userPasswordAuth" : {
+                "credentials" : {
+                  "isHiddenPassword" : false,
+                  "isHiddenSecondFactor" : false,
+                  "username" : ""
+                }
+              }
+            }
+          },
+          "authenticationManagedByPortText" : {
+            "type" : "object"
+          },
+          "connectionTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Connection timeout (seconds)",
+            "description" : "Timeout in seconds to establish a connection, or 0 for an infinite timeout.",
+            "default" : 30
+          },
+          "readTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Read timeout (seconds)",
+            "description" : "Timeout in seconds to read data from an established connection, or 0 for an infinite timeout.",
+            "default" : 30
+          },
+          "url" : {
+            "type" : "string",
+            "title" : "Databricks URL",
+            "description" : "Full URL of the Databricks deployment, e.g. <i>https://&lt;account&gt;.cloud.databricks.com</i> on AWS or <i>https://&lt;region&gt;.azuredatabricks.net</i> on Azure.",
+            "default" : ""
+          },
+          "workingDirectory" : {
+            "type" : "string",
+            "title" : "Working directory",
+            "description" : "Specifies the working directory using the path syntax explained above. The working directory must be specified as an absolute path. A working directory allows downstream nodes to access files/folders using relative paths, i.e. paths that do not have a leading slash. If not specified, the default working directory is \"/\".",
+            "default" : "/"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "id" : "#/properties/model/properties/authenticationManagedByPortText",
+      "options" : {
+        "format" : "textMessage"
+      },
+      "providedOptions" : [ "message" ]
+    }, {
+      "label" : "Connection",
+      "type" : "Section",
+      "rule" : {
+        "effect" : "HIDE",
+        "condition" : {
+          "schema" : {
+            "not" : { }
+          }
+        }
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/url",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Authentication",
+      "type" : "Section",
+      "rule" : {
+        "effect" : "HIDE",
+        "condition" : {
+          "schema" : {
+            "not" : { }
+          }
+        }
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/type"
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/tokenAuth",
+        "options" : {
+          "hasUsername" : false,
+          "passwordLabel" : "Token",
+          "format" : "legacyCredentials"
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/authentication/properties/type",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "TOKEN"
+              } ]
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/userPasswordAuth",
+        "options" : {
+          "format" : "legacyCredentials"
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/authentication/properties/type",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "USERNAME_PASSWORD"
+              } ]
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "File System",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/workingDirectory",
+        "options" : {
+          "selectionMode" : "FOLDER",
+          "format" : "stringFileChooser"
+        },
+        "providedOptions" : [ "fileSystemId" ]
+      } ]
+    }, {
+      "label" : "Timeouts",
+      "type" : "Section",
+      "options" : {
+        "isAdvanced" : true
+      },
+      "rule" : {
+        "effect" : "HIDE",
+        "condition" : {
+          "schema" : {
+            "not" : { }
+          }
+        }
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/connectionTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/readTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authenticationManagedByPortText" : { },
+          "url" : { },
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "configPaths" : [ [ "type" ] ]
+              },
+              "tokenAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentials" : { },
+                  "flowVarName" : {
+                    "configPaths" : [ ]
+                  }
+                },
+                "configKey" : "token_v2",
+                "deprecatedConfigKeys" : [ {
+                  "deprecated" : [ [ "token" ] ]
+                } ]
+              },
+              "userPasswordAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentials" : { },
+                  "flowVarName" : {
+                    "configPaths" : [ ]
+                  }
+                },
+                "configKey" : "user_pwd_v2",
+                "deprecatedConfigKeys" : [ {
+                  "deprecated" : [ [ "user_pwd" ] ]
+                } ]
+              }
+            },
+            "configKey" : "auth"
+          },
+          "workingDirectory" : { },
+          "connectionTimeout" : { },
+          "readTimeout" : { }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "id" : "#/properties/model/properties/authenticationManagedByPortText",
+    "providedOptionName" : "message",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : null
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/readTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/authentication"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/readTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/connectionTimeout"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/readTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/readTimeout"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/readTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/url"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/readTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/workingDirectory"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/readTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  } ]
+}
