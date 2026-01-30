@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.spark"
       label="KNIME Extension for Apache Spark"
-      version="5.10.0.qualifier"
+      version="5.11.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
@@ -728,7 +728,7 @@ propagated with or for interoperation with KNIME.
    </license>
    
    <requires>
-      <import feature="org.knime.features.python2" version="5.10.0"/>
+      <import feature="org.knime.features.python2" version="5.11.0"/>
    </requires>
 
    <includes
