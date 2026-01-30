@@ -57,12 +57,10 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.webui.node.impl.WebUINodeModel;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
@@ -72,33 +70,35 @@ import org.knime.filehandling.core.port.FileSystemPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class KnoxHdfsConnectorNodeModel extends NodeModel {
+@SuppressWarnings({ "deprecation", "restriction" })
+class KnoxHdfsConnectorNodeModel extends WebUINodeModel<KnoxHdfsConnectorNodeParameters> {
 
     private String m_fsId;
 
     private KnoxHdfsFSConnection m_connection;
 
-    private KnoxHdfsConnectorNodeSettings m_settings = new KnoxHdfsConnectorNodeSettings();
-
     /**
      * Default constructor.
      */
     KnoxHdfsConnectorNodeModel() {
-        super(new PortType[]{}, new PortType[]{FileSystemPortObject.TYPE});
+        super(new PortType[]{}, new PortType[]{FileSystemPortObject.TYPE}, KnoxHdfsConnectorNodeParameters.class);
     }
 
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        m_settings.validateValues();
-        m_settings.configureInModel(inSpecs, m -> {}, getCredentialsProvider());
+    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs, final KnoxHdfsConnectorNodeParameters params)
+        throws InvalidSettingsException {
+
+        params.validateOnConfigure(getCredentialsProvider());
         m_fsId = FSConnectionRegistry.getInstance().getKey();
-        final KnoxHdfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+        final KnoxHdfsFSConnectionConfig config = params.toFSConnectionConfig(getCredentialsProvider());
         return new PortObjectSpec[]{createSpec(config)};
     }
 
     @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final KnoxHdfsFSConnectionConfig config = m_settings.toFSConnectionConfig(getCredentialsProvider());
+    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec,
+        final KnoxHdfsConnectorNodeParameters params) throws Exception {
+
+        final KnoxHdfsFSConnectionConfig config = params.toFSConnectionConfig(getCredentialsProvider());
         m_connection = new KnoxHdfsFSConnection(config);
         testConnection(m_connection);
         FSConnectionRegistry.getInstance().register(m_fsId, m_connection);
@@ -129,21 +129,6 @@ class KnoxHdfsConnectorNodeModel extends NodeModel {
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
         // Not used
-    }
-
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO output) {
-        m_settings.saveSettingsForModel(output);
-    }
-
-    @Override
-    protected void validateSettings(final NodeSettingsRO input) throws InvalidSettingsException {
-        m_settings.validateSettings(input);
-    }
-
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO input) throws InvalidSettingsException {
-        m_settings.loadSettingsForModel(input);
     }
 
     @Override

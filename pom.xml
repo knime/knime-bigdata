@@ -49,6 +49,7 @@
 				<module>org.knime.bigdata.filehandling.knox</module>
 				<module>org.knime.bigdata.hadoop.filehandling</module>
 				<module>org.knime.bigdata.hadoop.filehandling.knox</module>
+				<module>org.knime.bigdata.hadoop.filehandling.knox.tests</module>
 				<module>org.knime.bigdata.hadoop.filehandling.tests</module>
 				<module>org.knime.bigdata.hive</module>
 				<module>org.knime.bigdata.impala</module>

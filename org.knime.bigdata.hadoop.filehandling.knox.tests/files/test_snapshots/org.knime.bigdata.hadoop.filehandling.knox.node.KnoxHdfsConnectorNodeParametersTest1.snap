@@ -1,0 +1,278 @@
+{
+  "data" : {
+    "model" : {
+      "url" : "https://server:8443/gateway/default",
+      "authentication" : {
+        "type" : "USERNAME_PASSWORD",
+        "userPasswordAuth" : {
+          "credentials" : {
+            "isHiddenPassword" : true,
+            "isHiddenSecondFactor" : false,
+            "username" : "some-user"
+          }
+        }
+      },
+      "workingDirectory" : "/",
+      "connectionTimeout" : 30,
+      "receiveTimeout" : 30
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "oneOf" : [ {
+                  "const" : "USERNAME_PASSWORD",
+                  "title" : "Username password"
+                } ],
+                "default" : "USERNAME_PASSWORD"
+              },
+              "userPasswordAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentials" : {
+                    "type" : "object",
+                    "properties" : {
+                      "password" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "secondFactor" : {
+                        "type" : "string",
+                        "default" : ""
+                      },
+                      "username" : {
+                        "type" : "string",
+                        "default" : ""
+                      }
+                    },
+                    "default" : {
+                      "isHiddenPassword" : false,
+                      "isHiddenSecondFactor" : false,
+                      "username" : ""
+                    }
+                  },
+                  "flowVarName" : {
+                    "type" : "string"
+                  }
+                },
+                "title" : "Username & Password",
+                "description" : "Credentials for username and password authentication.",
+                "default" : {
+                  "credentials" : {
+                    "isHiddenPassword" : false,
+                    "isHiddenSecondFactor" : false,
+                    "username" : "jenkins"
+                  }
+                }
+              }
+            },
+            "default" : {
+              "type" : "USERNAME_PASSWORD",
+              "userPasswordAuth" : {
+                "credentials" : {
+                  "isHiddenPassword" : false,
+                  "isHiddenSecondFactor" : false,
+                  "username" : "jenkins"
+                }
+              }
+            }
+          },
+          "connectionTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Connection timeout (seconds)",
+            "description" : "Timeout in seconds to establish a connection, or 0 for an infinite timeout.",
+            "default" : 30
+          },
+          "receiveTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Read timeout (seconds)",
+            "description" : "Timeout in seconds to read data from the connection, or 0 for an infinite timeout.",
+            "default" : 30
+          },
+          "url" : {
+            "type" : "string",
+            "title" : "URL",
+            "description" : "KNOX URL including cluster name, for example\n<tt>https://&lt;server&gt;:8443/gateway/&lt;default&gt;</tt>\n(replace &lt;server&gt; with the fully qualified hostname and &lt;default&gt;\nwith your cluster name). The protocol should be <i>https</i> and port <i>8443</i>\non most deployments.",
+            "default" : "https://server:8443/gateway/default"
+          },
+          "workingDirectory" : {
+            "type" : "string",
+            "title" : "Working directory",
+            "description" : "Specify the working directory of the resulting file system connection,\nusing the UNIX-like path syntax. The working directory must be specified as an absolute path\n(starting with \"/\"). A working directory allows downstream nodes to access files/folders\nusing relative paths, i.e. paths that do not have a leading slash.\nThe default working directory is the root \"/\".",
+            "default" : "/"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "Connection",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/url",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Authentication",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/userPasswordAuth",
+        "options" : {
+          "format" : "legacyCredentials"
+        }
+      } ]
+    }, {
+      "label" : "File System",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/workingDirectory",
+        "options" : {
+          "selectionMode" : "FOLDER",
+          "format" : "stringFileChooser"
+        },
+        "providedOptions" : [ "fileSystemId" ]
+      } ]
+    }, {
+      "label" : "Timeouts",
+      "type" : "Section",
+      "options" : {
+        "isAdvanced" : true
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/connectionTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/receiveTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "url" : { },
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "configPaths" : [ [ "type" ] ]
+              },
+              "userPasswordAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "credentials" : { },
+                  "flowVarName" : {
+                    "configPaths" : [ ]
+                  }
+                },
+                "configKey" : "user_pwd_v2",
+                "deprecatedConfigKeys" : [ {
+                  "deprecated" : [ [ "user_pwd" ] ]
+                } ]
+              }
+            },
+            "configKey" : "auth"
+          },
+          "workingDirectory" : {
+            "configKey" : "workingDirectory"
+          },
+          "connectionTimeout" : { },
+          "receiveTimeout" : { }
+        }
+      }
+    }
+  },
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/authentication"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/connectionTimeout"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/receiveTimeout"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/url"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/workingDirectory"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/connectionTimeout", "#/properties/model/properties/receiveTimeout", "#/properties/model/properties/url", "#/properties/model/properties/workingDirectory" ]
+  } ]
+}
