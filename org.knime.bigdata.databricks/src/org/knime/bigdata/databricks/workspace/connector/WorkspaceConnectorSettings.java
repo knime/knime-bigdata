@@ -60,6 +60,8 @@ import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.custom.CustomValidation;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.custom.SimpleValidation;
 import org.knime.credentials.base.CredentialPortObject;
 import org.knime.credentials.base.CredentialPortObjectSpec;
 import org.knime.credentials.base.CredentialType;
@@ -127,12 +129,12 @@ public class WorkspaceConnectorSettings implements NodeParameters {
 
         @Override
         public String title() {
-            return "Authentication settings controlled by input port";
+            return "Settings controlled by input port";
         }
 
         @Override
         public String description() {
-            return "Remove the input port to change the settings";
+            return "Remove the input port to change the connection and authentication settings";
         }
 
         @Override
@@ -145,30 +147,37 @@ public class WorkspaceConnectorSettings implements NodeParameters {
     @TextMessage(value = AuthenticationManagedByPortMessage.class)
     Void m_authenticationManagedByPortText;
 
-    @Section(title = "Token")
-    @Effect(predicate =  AuthType.IsTokenAuthTypeAndCredentialInputNotConnected.class, type = EffectType.SHOW)
-    interface TokenSection {
+    @Section(title = "Connection")
+    @Effect(predicate = CredentialInputDatabricks.class, type = EffectType.HIDE)
+    interface ConnectionSection {
+    }
+
+    @Section(title = "Authentication")
+    @After(ConnectionSection.class)
+    @Effect(predicate = CredentialInputConnected.class, type = EffectType.HIDE)
+    interface AuthenticationSection {
     }
 
     @Section(title = "Timeouts")
     @Advanced
-    @After(TokenSection.class)
-    interface ConnectionTimeoutsSection {
+    @After(AuthenticationSection.class)
+    interface TimeoutsSection {
     }
 
     @Widget(title = "Databricks workspace URL", //
         description = "Full URL of the Databricks workspace, e.g. https://&lt;workspace&gt;.cloud.databricks.com/ "//
             + "or https://adb-&lt;workspace-id&gt;.&lt;random-number&gt;.azuredatabricks.net/ on Azure.")
-    @Effect(predicate = CredentialInputDatabricks.class, type = EffectType.HIDE)
+    @Layout(ConnectionSection.class)
+    @CustomValidation(UrlValidator.class)
     String m_workspaceUrl = "";
 
-    @Widget(title = "Authentication type", //
-        description = "Authentication type to use. The following types are supported:\n"//
+    @Widget(title = "Authentication method", //
+        description = "Specify the authentication method to use. The following types are supported:\n"//
             + "<ul>"//
             + "<li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n"//
             + "</ul>")
     @ValueReference(AuthTypeRef.class)
-    @Effect(predicate = CredentialInputConnected.class, type = EffectType.DISABLE)
+    @Layout(AuthenticationSection.class)
     AuthType m_authType = AuthType.TOKEN;
 
     static final class AuthTypeRef implements ParameterReference<AuthType> {
@@ -191,7 +200,8 @@ public class WorkspaceConnectorSettings implements NodeParameters {
         description = "The Databricks personal access token to use. The value\"\n"
             + " entered here will be stored in weakly encrypted form with the workflow.")
     @PasswordWidget(passwordLabel = "Token")
-    @Layout(TokenSection.class)
+    @Effect(predicate = AuthType.IsTokenAuthTypeAndCredentialInputNotConnected.class, type = EffectType.SHOW)
+    @Layout(AuthenticationSection.class)
     Credentials m_token = new Credentials();
 
     @Widget(title = "Connection timeout (seconds)",
@@ -199,7 +209,7 @@ public class WorkspaceConnectorSettings implements NodeParameters {
             + " Used by this and downstream nodes connecting to Databricks.", //
         advanced = true)
     @NumberInputWidget(minValidation = IsNonNegativeValidation.class)
-    @Layout(ConnectionTimeoutsSection.class)
+    @Layout(TimeoutsSection.class)
     int m_connectionTimeout = 30;
 
     @Widget(title = "Read timeout (seconds)",
@@ -207,7 +217,7 @@ public class WorkspaceConnectorSettings implements NodeParameters {
             + " or 0 for an infinite timeout. Used by this and downstream nodes connecting to Databricks.", //
         advanced = true)
     @NumberInputWidget(minValidation = IsNonNegativeValidation.class)
-    @Layout(ConnectionTimeoutsSection.class)
+    @Layout(TimeoutsSection.class)
     int m_readTimeout = 30;
 
     Duration getReadTimeout() {
@@ -226,7 +236,7 @@ public class WorkspaceConnectorSettings implements NodeParameters {
             return;
         }
 
-        validateWorkspaceURL();
+        validateWorkspaceURL(m_workspaceUrl);
 
         if (inSpecs != null && inSpecs.length > 0) {
             // if a credential input port is attached then usernamePassword and token don't matter
@@ -239,13 +249,13 @@ public class WorkspaceConnectorSettings implements NodeParameters {
         }
     }
 
-    private void validateWorkspaceURL() throws InvalidSettingsException {
-        if (StringUtils.isBlank(m_workspaceUrl)) {
+    private static void validateWorkspaceURL(final String workspaceUrl) throws InvalidSettingsException {
+        if (StringUtils.isBlank(workspaceUrl)) {
             throw new InvalidSettingsException("Please specify a Databricks workspace URL");
         }
 
         try {
-            final URI parsedUrl = new URI(m_workspaceUrl);
+            final URI parsedUrl = new URI(workspaceUrl);
             if (!Objects.equals("https", parsedUrl.getScheme())) {
                 throw new InvalidSettingsException("The provided Databricks workspace URL must start with https://");
             }
@@ -276,4 +286,14 @@ public class WorkspaceConnectorSettings implements NodeParameters {
         }
         return DatabricksAccessTokenCredential.TYPE == credentialType.get();
     }
+
+    // ===================== Custom Validations =====================
+
+    static class UrlValidator extends SimpleValidation<String> {
+        @Override
+        public void validate(final String url) throws InvalidSettingsException {
+            validateWorkspaceURL(url);
+        }
+    }
+
 }

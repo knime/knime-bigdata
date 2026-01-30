@@ -1,0 +1,231 @@
+{
+  "data" : {
+    "model" : {
+      "workspaceUrl" : "",
+      "authType" : "TOKEN",
+      "token" : {
+        "isHiddenPassword" : false,
+        "isHiddenSecondFactor" : false,
+        "username" : ""
+      },
+      "connectionTimeout" : 30,
+      "readTimeout" : 30
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authType" : {
+            "oneOf" : [ {
+              "const" : "TOKEN",
+              "title" : "Personal access token"
+            } ],
+            "title" : "Authentication method",
+            "description" : "Specify the authentication method to use. The following types are supported:\n<ul><li><b>Personal access token</b>: Authenticate with a personal access token.</li>\n</ul>",
+            "default" : "TOKEN"
+          },
+          "authenticationManagedByPortText" : {
+            "type" : "object"
+          },
+          "connectionTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Connection timeout (seconds)",
+            "description" : "Timeout in seconds to establish a connection, or 0 for an infinite timeout.   Used by this and downstream nodes connecting to Databricks.",
+            "default" : 30
+          },
+          "readTimeout" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Read timeout (seconds)",
+            "description" : "Timeout in seconds to read data from an established connection, or 0 for an infinite timeout. Used by this and downstream nodes connecting to Databricks.",
+            "default" : 30
+          },
+          "token" : {
+            "type" : "object",
+            "properties" : {
+              "password" : {
+                "type" : "string",
+                "default" : ""
+              },
+              "secondFactor" : {
+                "type" : "string",
+                "default" : ""
+              },
+              "username" : {
+                "type" : "string",
+                "default" : ""
+              }
+            },
+            "title" : "Personal access token",
+            "description" : "The Databricks personal access token to use. The value\"\n entered here will be stored in weakly encrypted form with the workflow.",
+            "default" : {
+              "isHiddenPassword" : false,
+              "isHiddenSecondFactor" : false,
+              "username" : ""
+            }
+          },
+          "workspaceUrl" : {
+            "type" : "string",
+            "title" : "Databricks workspace URL",
+            "description" : "Full URL of the Databricks workspace, e.g. https://&lt;workspace&gt;.cloud.databricks.com/ or https://adb-&lt;workspace-id&gt;.&lt;random-number&gt;.azuredatabricks.net/ on Azure.",
+            "default" : ""
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "id" : "#/properties/model/properties/authenticationManagedByPortText",
+      "options" : {
+        "format" : "textMessage"
+      },
+      "providedOptions" : [ "message" ]
+    }, {
+      "label" : "Connection",
+      "type" : "Section",
+      "rule" : {
+        "effect" : "HIDE",
+        "condition" : {
+          "schema" : {
+            "not" : { }
+          }
+        }
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/workspaceUrl"
+      } ]
+    }, {
+      "label" : "Authentication",
+      "type" : "Section",
+      "rule" : {
+        "effect" : "HIDE",
+        "condition" : {
+          "schema" : {
+            "not" : { }
+          }
+        }
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authType"
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/token",
+        "options" : {
+          "hasUsername" : false,
+          "passwordLabel" : "Token",
+          "format" : "credentials"
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "type" : "AND",
+            "conditions" : [ {
+              "scope" : "#/properties/model/properties/authType",
+              "schema" : {
+                "oneOf" : [ {
+                  "const" : "TOKEN"
+                } ]
+              }
+            }, {
+              "schema" : {
+                "not" : {
+                  "not" : { }
+                }
+              }
+            } ]
+          }
+        }
+      } ]
+    }, {
+      "label" : "Timeouts",
+      "type" : "Section",
+      "options" : {
+        "isAdvanced" : true
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/connectionTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          },
+          "isAdvanced" : true
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/readTimeout",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          },
+          "isAdvanced" : true
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authenticationManagedByPortText" : { },
+          "workspaceUrl" : { },
+          "authType" : { },
+          "token" : { },
+          "connectionTimeout" : { },
+          "readTimeout" : { }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "id" : "#/properties/model/properties/authenticationManagedByPortText",
+    "providedOptionName" : "message",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : null
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ ]
+  } ]
+}
