@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Hadoop Filehandling
 Bundle-SymbolicName: org.knime.bigdata.hadoop.filehandling; singleton:=true
-Bundle-Version: 5.9.0.qualifier
+Bundle-Version: 5.11.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.hadoop.filehandling.HadoopFilehandlingPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
@@ -10,6 +10,7 @@ Export-Package: org.knime.bigdata.hadoop.filehandling.testing,
  org.knime.bigdata.hadoop.filesystem
 Require-Bundle: org.knime.workbench.repository;bundle-version="[5.9.0,6.0.0)",
  org.knime.core;bundle-version="[5.9.0,6.0.0)",
+ org.knime.core.ui;bundle-version="[5.9.0,6.0.0)",
  org.knime.filehandling.core;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.commons;bundle-version="[5.9.0,6.0.0)",
  org.knime.kerberos;bundle-version="[5.9.0,6.0.0)",

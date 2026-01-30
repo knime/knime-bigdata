@@ -1,0 +1,282 @@
+{
+  "data" : {
+    "model" : {
+      "protocol" : "HDFS",
+      "host" : "localhost",
+      "useCustomPort" : false,
+      "customPort" : 8020,
+      "authentication" : {
+        "type" : "SIMPLE",
+        "simpleAuth" : {
+          "username" : "jenkins"
+        }
+      },
+      "workingDirectory" : "/"
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "simpleAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "username" : {
+                    "type" : "string",
+                    "title" : "Username",
+                    "description" : "The username to use for Pseudo/Simple authentication.\nThis username will be used to access the HDFS file system.",
+                    "default" : "jenkins"
+                  }
+                },
+                "default" : {
+                  "username" : "jenkins"
+                }
+              },
+              "type" : {
+                "oneOf" : [ {
+                  "const" : "SIMPLE",
+                  "title" : "Username"
+                }, {
+                  "const" : "KERBEROS",
+                  "title" : "Kerberos"
+                } ],
+                "title" : "Authentication method",
+                "description" : "Specify the authentication method to use.\n<ul>\n<li><b>Username</b>: Pseudo/Simple authentication using a given username</li>\n<li><b>Kerberos</b>: Kerberos ticket based authentication</li>\n</ul>",
+                "default" : "SIMPLE"
+              }
+            },
+            "default" : {
+              "type" : "SIMPLE",
+              "simpleAuth" : {
+                "username" : "jenkins"
+              }
+            }
+          },
+          "customPort" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Custom port",
+            "description" : "The custom port number to connect to. Must be between 1 and 65535.\nNote: The WebHDFS default ports are the Hadoop 3.x default ports.\nThe default WebHDFS port on Hadoop 2.x is 50070 and 50470 with SSL.",
+            "default" : 8020
+          },
+          "host" : {
+            "type" : "string",
+            "title" : "Host",
+            "description" : "Address of HDFS name node or WebHDFS/HTTPFS node.",
+            "default" : "localhost"
+          },
+          "protocol" : {
+            "oneOf" : [ {
+              "const" : "HDFS",
+              "title" : "HDFS"
+            }, {
+              "const" : "WEBHDFS",
+              "title" : "WebHDFS"
+            }, {
+              "const" : "WEBHDFS_SSL",
+              "title" : "WebHDFS with SSL"
+            }, {
+              "const" : "HTTPFS",
+              "title" : "HttpFS"
+            }, {
+              "const" : "HTTPFS_SSL",
+              "title" : "HttpFS with SSL"
+            } ],
+            "title" : "Protocol",
+            "description" : "HDFS protocol to use.\n<ul>\n<li><b>HDFS</b>: Native HDFS protocol (default port: 8020)</li>\n<li><b>WebHDFS</b>: WebHDFS REST API (default port: 9870)</li>\n<li><b>WebHDFS with SSL</b>: WebHDFS REST API with SSL encryption (default port: 9871)</li>\n<li><b>HttpFS</b>: HttpFS REST API (default port: 14000)</li>\n<li><b>HttpFS with SSL</b>: HttpFS REST API with SSL encryption (default port: 14000)</li>\n</ul>",
+            "default" : "HDFS"
+          },
+          "useCustomPort" : {
+            "type" : "boolean",
+            "title" : "Custom Port",
+            "description" : "Choose whether to use the default port for the selected protocol or specify a custom port.",
+            "default" : false
+          },
+          "workingDirectory" : {
+            "type" : "string",
+            "title" : "Working directory",
+            "description" : "Specify the working directory of the resulting file system connection.\nThe working directory must be specified as an absolute path (starting with \"/\").\nA working directory allows downstream nodes to access files/folders using relative paths,\ni.e. paths that do not have a leading slash. The default working directory is the root \"/\".",
+            "default" : "/"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "Connection",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/protocol"
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/host",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/useCustomPort",
+        "options" : {
+          "format" : "checkbox"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/customPort",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 65535.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 65535.0
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 1.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 1.0
+              }
+            }
+          }
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/useCustomPort",
+            "schema" : {
+              "const" : true
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Authentication",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/type"
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/authentication/properties/simpleAuth/properties/username",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          }
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/authentication/properties/type",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "SIMPLE"
+              } ]
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "File System",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/workingDirectory",
+        "options" : {
+          "selectionMode" : "FOLDER",
+          "format" : "stringFileChooser"
+        },
+        "providedOptions" : [ "fileSystemId" ]
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "protocol" : { },
+          "host" : { },
+          "useCustomPort" : { },
+          "customPort" : { },
+          "authentication" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "configPaths" : [ [ "type" ] ]
+              },
+              "simpleAuth" : {
+                "type" : "object",
+                "properties" : {
+                  "username" : {
+                    "configPaths" : [ [ "user" ] ]
+                  }
+                },
+                "configKey" : "simple"
+              }
+            },
+            "configKey" : "auth"
+          },
+          "workingDirectory" : { }
+        }
+      }
+    }
+  },
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/authentication"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/customPort"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/host"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/protocol"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/useCustomPort"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/workingDirectory"
+    },
+    "dependencies" : [ "#/properties/model/properties/authentication", "#/properties/model/properties/customPort", "#/properties/model/properties/host", "#/properties/model/properties/protocol", "#/properties/model/properties/useCustomPort", "#/properties/model/properties/workingDirectory" ]
+  } ]
+}
