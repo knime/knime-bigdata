@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Big Data Extensions
 Bundle-SymbolicName: org.knime.bigdata.testing;singleton:=true
-Bundle-Version: 5.9.0.qualifier
+Bundle-Version: 5.11.0.qualifier
 Bundle-ClassPath: bigdata-testing.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Require-Bundle: org.knime.testing;bundle-version="[5.10.0,6.0.0)",
@@ -11,7 +11,7 @@ Require-Bundle: org.knime.testing;bundle-version="[5.10.0,6.0.0)",
  org.knime.database;bundle-version="[5.10.0,6.0.0)",
  org.knime.database.nodes;bundle-version="[5.10.0,6.0.0)",
  org.knime.bigdata.database;bundle-version="[5.10.0,6.0.0)",
- org.knime.bigdata.databricks;bundle-version="[5.10.0,6.0.0)",
+ org.knime.bigdata.databricks;bundle-version="[5.11.0,6.0.0)",
  org.knime.bigdata.spark.core;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.spark.node;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.spark.core.sparkjobserver;bundle-version="[5.9.0,6.0.0)",
@@ -22,7 +22,7 @@ Require-Bundle: org.knime.testing;bundle-version="[5.10.0,6.0.0)",
  org.knime.base;bundle-version="[5.11.0,6.0.0)",
  org.knime.bigdata.hive;bundle-version="[5.10.0,6.0.0)",
  org.knime.bigdata.commons;bundle-version="[5.10.0,6.0.0)",
- org.knime.bigdata.hadoop.filehandling;bundle-version="[5.9.0,6.0.0)",
+ org.knime.bigdata.hadoop.filehandling;bundle-version="[5.11.0,6.0.0)",
  org.knime.filehandling.core;bundle-version="[5.10.0,6.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
