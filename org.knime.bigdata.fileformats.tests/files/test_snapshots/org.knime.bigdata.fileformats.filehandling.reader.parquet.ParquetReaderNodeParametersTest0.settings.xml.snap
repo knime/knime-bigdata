@@ -30,6 +30,7 @@
             </config>
         </config>
         <config key="ifSchemaChangesParams">
+            <entry key="ignoreSchemaChange" type="xboolean" value="false"/>
             <entry key="ifSchemaChangesOption" type="xstring" value="FAIL"/>
         </config>
         <config key="multiFileReaderParams">
@@ -49,54 +50,32 @@
                     <entry key="file_system_type" type="xstring" value="LOCAL"/>
                     <entry key="path" type="xstring" value="/Users/robin/Documents/DatasetsTest/TestData.parquet"/>
                 </config>
+                <entry key="sourceIdentifier" type="xstring" value="/Users/robin/Documents/DatasetsTest/TestData.parquet"/>
                 <config key="spec">
                     <config key="0">
-                        <entry key="name" type="xstring" value="StringCol"/>
-                        <entry key="type" type="xstring" value="0-STRING"/>
+                        <entry key="name" type="xstring" value="Universe_0_0"/>
+                        <entry key="type" type="xstring" value="0-DOUBLE"/>
+                        <entry key="hasType" type="xboolean" value="true"/>
                     </config>
                     <config key="1">
-                        <entry key="name" type="xstring" value="IntCol"/>
-                        <entry key="type" type="xstring" value="0-INTEGER"/>
+                        <entry key="name" type="xstring" value="Universe_0_1"/>
+                        <entry key="type" type="xstring" value="0-DOUBLE"/>
+                        <entry key="hasType" type="xboolean" value="true"/>
                     </config>
                     <config key="2">
-                        <entry key="name" type="xstring" value="LongCol"/>
-                        <entry key="type" type="xstring" value="0-LONG"/>
+                        <entry key="name" type="xstring" value="Universe_1_0"/>
+                        <entry key="type" type="xstring" value="0-DOUBLE"/>
+                        <entry key="hasType" type="xboolean" value="true"/>
                     </config>
                     <config key="3">
-                        <entry key="name" type="xstring" value="DoubleCol"/>
+                        <entry key="name" type="xstring" value="Universe_1_1"/>
                         <entry key="type" type="xstring" value="0-DOUBLE"/>
+                        <entry key="hasType" type="xboolean" value="true"/>
                     </config>
                     <config key="4">
-                        <entry key="name" type="xstring" value="BooleanCol"/>
-                        <entry key="type" type="xstring" value="0-BOOLEAN"/>
-                    </config>
-                    <config key="5">
-                        <entry key="name" type="xstring" value="MissingValStringCol"/>
+                        <entry key="name" type="xstring" value="Cluster Membership"/>
                         <entry key="type" type="xstring" value="0-STRING"/>
-                    </config>
-                    <config key="6">
-                        <entry key="name" type="xstring" value="LongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnName"/>
-                        <entry key="type" type="xstring" value="0-STRING"/>
-                    </config>
-                    <config key="7">
-                        <entry key="name" type="xstring" value="LongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnName"/>
-                        <entry key="type" type="xstring" value="0-DOUBLE"/>
-                    </config>
-                    <config key="8">
-                        <entry key="name" type="xstring" value="org.knime.core.data.time.localdate.LocalDateCell"/>
-                        <entry key="type" type="xstring" value="0-DATE"/>
-                    </config>
-                    <config key="9">
-                        <entry key="name" type="xstring" value="org.knime.core.data.time.localtime.LocalTimeCell"/>
-                        <entry key="type" type="xstring" value="0-TIME"/>
-                    </config>
-                    <config key="10">
-                        <entry key="name" type="xstring" value="org.knime.core.data.time.period.PeriodCell"/>
-                        <entry key="type" type="xstring" value="0-STRING"/>
-                    </config>
-                    <config key="11">
-                        <entry key="name" type="xstring" value="org.knime.core.data.time.duration.DurationCell"/>
-                        <entry key="type" type="xstring" value="0-STRING"/>
+                        <entry key="hasType" type="xboolean" value="true"/>
                     </config>
                 </config>
             </config>
@@ -104,108 +83,81 @@
         <entry key="enforceTypes" type="xboolean" value="true"/>
         <config key="columnTransformation">
             <config key="0">
-                <entry key="columnName" type="xstring" value="StringCol"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-                <entry key="originalTypeLabel" type="xstring" value="String"/>
+                <entry key="columnName" type="xstring" value="Universe_0_0"/>
+                <config key="originalProductionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
+                <entry key="originalTypeLabel" type="xstring" value="Number (Float)"/>
                 <entry key="includeInOutput" type="xboolean" value="true"/>
-                <entry key="columnRename" type="xstring" value="StringCol1"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
+                <entry key="columnRename" type="xstring" value="Universe_0_0"/>
+                <config key="productionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
             </config>
             <config key="1">
-                <entry key="columnName" type="xstring" value="IntCol"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.IntCell$IntCellFactory.create(class java.lang.Integer)"/>
-                <entry key="originalTypeLabel" type="xstring" value="Number (Integer)"/>
+                <entry key="columnName" type="xstring" value="Universe_0_1"/>
+                <config key="originalProductionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
+                <entry key="originalTypeLabel" type="xstring" value="Number (Float)"/>
                 <entry key="includeInOutput" type="xboolean" value="true"/>
-                <entry key="columnRename" type="xstring" value="IntCol -&gt; String"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
+                <entry key="columnRename" type="xstring" value="Universe_0_1 renamed"/>
+                <config key="productionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
+                    <entry key="_producer" type="xstring" value="String-&gt;class java.lang.String"/>
+                </config>
             </config>
             <config key="2">
-                <entry key="columnName" type="xstring" value="LongCol"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.LongCell$LongCellFactory.create(class java.lang.Long)"/>
-                <entry key="originalTypeLabel" type="xstring" value="Number (Long Integer)"/>
+                <entry key="columnName" type="xstring" value="Universe_1_0"/>
+                <config key="originalProductionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
+                <entry key="originalTypeLabel" type="xstring" value="Number (Float)"/>
                 <entry key="includeInOutput" type="xboolean" value="true"/>
-                <entry key="columnRename" type="xstring" value="LongCol"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.LongCell$LongCellFactory.create(class java.lang.Long)"/>
+                <entry key="columnRename" type="xstring" value="Universe_1_0"/>
+                <config key="productionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
             </config>
             <config key="3">
-                <entry key="columnName" type="xstring" value="DoubleCol"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                <entry key="columnName" type="xstring" value="Universe_1_1"/>
+                <config key="originalProductionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
                 <entry key="originalTypeLabel" type="xstring" value="Number (Float)"/>
                 <entry key="includeInOutput" type="xboolean" value="true"/>
-                <entry key="columnRename" type="xstring" value="DoubleCol"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                <entry key="columnRename" type="xstring" value="Universe_1_1"/>
+                <config key="productionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
+                    <entry key="_producer" type="xstring" value="Double-&gt;class java.lang.Double"/>
+                </config>
             </config>
             <config key="4">
-                <entry key="columnName" type="xstring" value="BooleanCol"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.BooleanCell$BooleanCellFactory.create(class java.lang.Boolean)"/>
-                <entry key="originalTypeLabel" type="xstring" value="Boolean"/>
+                <entry key="columnName" type="xstring" value="Cluster Membership"/>
+                <config key="originalProductionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
+                    <entry key="_producer" type="xstring" value="String-&gt;class java.lang.String"/>
+                </config>
+                <entry key="originalTypeLabel" type="xstring" value="String"/>
                 <entry key="includeInOutput" type="xboolean" value="true"/>
-                <entry key="columnRename" type="xstring" value="BooleanCol"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.BooleanCell$BooleanCellFactory.create(class java.lang.Boolean)"/>
+                <entry key="columnRename" type="xstring" value="Cluster Membership"/>
+                <config key="productionPath">
+                    <entry key="_converter" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
+                    <entry key="_producer" type="xstring" value="String-&gt;class java.lang.String"/>
+                </config>
             </config>
             <config key="5">
-                <entry key="columnName" type="xstring" value="MissingValStringCol"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-                <entry key="originalTypeLabel" type="xstring" value="String"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="MissingValStringCol"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-            </config>
-            <config key="6">
-                <entry key="columnName" type="xstring" value="LongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnName"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-                <entry key="originalTypeLabel" type="xstring" value="String"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="LongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnNameLongStringColumnName"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-            </config>
-            <config key="7">
-                <entry key="columnName" type="xstring" value="LongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnName"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
-                <entry key="originalTypeLabel" type="xstring" value="Number (Float)"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="LongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnNameLongDoubleColumnName"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.DoubleCell$DoubleCellFactory.create(class java.lang.Double)"/>
-            </config>
-            <config key="8">
-                <entry key="columnName" type="xstring" value="org.knime.core.data.time.localdate.LocalDateCell"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.time.localdate.LocalDateCellFactory.create(class java.time.LocalDate)"/>
-                <entry key="originalTypeLabel" type="xstring" value="Date"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="org.knime.core.data.time.localdate.LocalDateCell"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.time.localdate.LocalDateCellFactory.create(class java.time.LocalDate)"/>
-            </config>
-            <config key="9">
-                <entry key="columnName" type="xstring" value="org.knime.core.data.time.localtime.LocalTimeCell"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.time.localtime.LocalTimeCellFactory.create(class java.time.LocalTime)"/>
-                <entry key="originalTypeLabel" type="xstring" value="Time"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="org.knime.core.data.time.localtime.LocalTimeCell"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.time.localtime.LocalTimeCellFactory.create(class java.time.LocalTime)"/>
-            </config>
-            <config key="10">
-                <entry key="columnName" type="xstring" value="org.knime.core.data.time.period.PeriodCell"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-                <entry key="originalTypeLabel" type="xstring" value="String"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="org.knime.core.data.time.period.PeriodCell"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-            </config>
-            <config key="11">
-                <entry key="columnName" type="xstring" value="org.knime.core.data.time.duration.DurationCell"/>
-                <entry key="originalType" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-                <entry key="originalTypeLabel" type="xstring" value="String"/>
-                <entry key="includeInOutput" type="xboolean" value="false"/>
-                <entry key="columnRename" type="xstring" value="org.knime.core.data.time.duration.DurationCell"/>
-                <entry key="type" type="xstring" value="org.knime.core.data.def.StringCell$StringCellFactory.createCell(class java.lang.String)"/>
-            </config>
-            <config key="12">
                 <entry key="columnName" type="xstring" isnull="true" value=""/>
-                <entry key="originalType" type="xstring" value="&lt;default-columntype&gt;"/>
                 <entry key="originalTypeLabel" type="xstring" value="Default columntype"/>
                 <entry key="includeInOutput" type="xboolean" value="true"/>
                 <entry key="columnRename" type="xstring" isnull="true" value=""/>
-                <entry key="type" type="xstring" value="&lt;default-columntype&gt;"/>
+                <entry key="unknownsColumnDataType" type="xstring" value="&lt;default-columntype&gt;"/>
             </config>
         </config>
     </config>

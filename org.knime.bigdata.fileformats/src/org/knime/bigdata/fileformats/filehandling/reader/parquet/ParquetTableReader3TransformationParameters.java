@@ -47,8 +47,11 @@
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3Specific.ProductionPathProviderAndTypeHierarchy;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeBasedTransformationParameters;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDLoader;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.TableSpecConfigSerializer;
 
 /**
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
@@ -57,5 +60,17 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 @Modification(ParquetTableReader3TransformationParametersStateProviders.TransformationSettingsWidgetModification.class)
 final class ParquetTableReader3TransformationParameters extends KnimeTypeBasedTransformationParameters
     implements ProductionPathProviderAndTypeHierarchy {
+
+    @Override
+    protected TableSpecConfigSerializer<KnimeType>
+        createTableSpecConfigSerializer(final ConfigIDLoader configIdLoader) {
+        // TODO implement when adding the migration code for the old parquet reader node
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    protected String getConfigIdSettingsKey() {
+        return "big_data_reader";
+    }
 
 }

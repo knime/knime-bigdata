@@ -48,6 +48,7 @@ package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
@@ -72,11 +73,20 @@ public final class ParquetTableReader3NodeParameters implements NodeParameters {
         m_parquetReaderParameters.saveToSource(sourceSettings);
     }
 
+    void saveToConfig(final BigDataMultiTableReadConfig config, final ConfigID existingConfigID) {
+        saveTransformationParametersToConfig(config, existingConfigID);
+    }
+
     void saveToConfig(final BigDataMultiTableReadConfig config) {
-        final var configID = m_parquetReaderParameters.saveToConfig(config);
+        final var configId = m_parquetReaderParameters.saveToConfig(config);
+        saveTransformationParametersToConfig(config, configId);
+    }
+
+    private void saveTransformationParametersToConfig(final BigDataMultiTableReadConfig config,
+        final ConfigID existingConfigID) {
         m_transformationParameters.saveToConfig(//
             config, m_parquetReaderParameters.getSourcePath(), //
-            configID, //
+            existingConfigID, //
             m_parquetReaderParameters.getMultiFileParameters() //
         );
     }
