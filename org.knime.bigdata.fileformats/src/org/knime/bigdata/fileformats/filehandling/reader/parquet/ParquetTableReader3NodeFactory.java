@@ -66,6 +66,9 @@ import org.knime.core.util.Version;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDLoader;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.NodeSettingsConfigID;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
 
@@ -75,7 +78,7 @@ import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
 public final class ParquetTableReader3NodeFactory extends //
-    WebUITableReaderNodeFactory<ParquetTableReader3NodeParameters, FSPath, MultiFileSelectionPath, //
+    WebUITableReaderNodeFactory<ParquetTableReader3NodeParameters, MultiFileSelectionPath, //
             BigDataReaderConfig, KnimeType, BigDataCell, BigDataMultiTableReadConfig> {
 
     @SuppressWarnings("javadoc")
@@ -126,8 +129,8 @@ public final class ParquetTableReader3NodeFactory extends //
         return new ParquetConfigAndSourceSerializer();
     }
 
-    private final class ParquetConfigAndSourceSerializer extends
-        NodeParametersConfigAndSourceSerializer<ParquetTableReader3NodeParameters, FSPath, MultiFileSelectionPath, //
+    private final class ParquetConfigAndSourceSerializer
+        extends NodeParametersConfigAndSourceSerializer<ParquetTableReader3NodeParameters, MultiFileSelectionPath, //
                 BigDataReaderConfig, KnimeType, BigDataMultiTableReadConfig> {
         protected ParquetConfigAndSourceSerializer() {
             super(ParquetTableReader3NodeParameters.class);
@@ -135,9 +138,17 @@ public final class ParquetTableReader3NodeFactory extends //
 
         @Override
         protected void saveToSourceAndConfig(final ParquetTableReader3NodeParameters params,
-            final MultiFileSelectionPath sourceSettings, final BigDataMultiTableReadConfig config) {
-            params.saveToSource(sourceSettings);
-            params.saveToConfig(config);
+            final ConfigID existingConfigId, final MultiFileSelectionPath source,
+            final BigDataMultiTableReadConfig config) {
+            params.saveToSource(source);
+            params.saveToConfig(config, existingConfigId);
+        }
+
+        @Override
+        protected ConfigIDLoader getConfigIDLoader() {
+            // TODO: Return configIDLoader from BigDataTableReadConfigSerializer when available after moving this factory back to the original package.
+            return settings -> new NodeSettingsConfigID(
+                settings.getNodeSettings(new ParquetTableReader3TransformationParameters().getConfigIdSettingsKey()));
         }
     }
 
