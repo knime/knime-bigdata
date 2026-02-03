@@ -196,17 +196,7 @@
       },
       "elements" : [ {
         "type" : "Control",
-        "scope" : "#/properties/model/properties/url",
-        "options" : {
-          "validation" : {
-            "pattern" : {
-              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
-              "parameters" : {
-                "pattern" : ".*\\S.*"
-              }
-            }
-          }
-        }
+        "scope" : "#/properties/model/properties/url"
       } ]
     }, {
       "label" : "Authentication",

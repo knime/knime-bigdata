@@ -87,7 +87,7 @@ class DbfsConnectorNodeModel extends WebUINodeModel<DbfsConnectorNodeParameters>
     /**
      * Creates new instance.
      */
-    DbfsConnectorNodeModel(final PortsConfiguration portsConfig, final boolean useWorkspaceConnection) {
+    DbfsConnectorNodeModel(final PortsConfiguration portsConfig) {
         super(portsConfig.getInputPorts(), portsConfig.getOutputPorts(), DbfsConnectorNodeParameters.class);
     }
 

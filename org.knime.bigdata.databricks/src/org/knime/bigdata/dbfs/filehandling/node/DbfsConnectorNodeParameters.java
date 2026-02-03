@@ -53,11 +53,13 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.databricks.credential.DatabricksAccessTokenCredential;
 import org.knime.bigdata.databricks.node.DbfsAuthenticationNodeSettings;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
 import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObjectSpec;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnection;
 import org.knime.bigdata.dbfs.filehandling.fs.DbfsFSConnectionConfig;
@@ -113,8 +115,6 @@ import org.knime.node.parameters.widget.message.TextMessage.MessageType;
 import org.knime.node.parameters.widget.message.TextMessage.SimpleTextMessageProvider;
 import org.knime.node.parameters.widget.number.NumberInputWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsNonNegativeValidation;
-import org.knime.node.parameters.widget.text.TextInputWidget;
-import org.knime.node.parameters.widget.text.TextInputWidgetValidation.PatternValidation.IsNotBlankValidation;
 
 /**
  * Node parameters for Databricks File System Connector.
@@ -170,8 +170,12 @@ class DbfsConnectorNodeParameters implements NodeParameters {
 
     // ===================== Predicates =====================
 
+    private static final Predicate<PortType> isCredentialPort = CredentialPortObject.TYPE::equals;
+
+    private static final Predicate<PortType> isWorkspacePort = DatabricksWorkspacePortObject.TYPE::equals;
+
     private static boolean hasCredentialPort(final PortType[] types) {
-        return Arrays.stream(types).anyMatch(CredentialPortObject.TYPE::equals);
+        return Arrays.stream(types).anyMatch(isCredentialPort.or(isWorkspacePort));
     }
 
     /**
@@ -220,7 +224,6 @@ class DbfsConnectorNodeParameters implements NodeParameters {
         description = "Full URL of the Databricks deployment, e.g. "
             + "<i>https://&lt;account&gt;.cloud.databricks.com</i> on AWS or "
             + "<i>https://&lt;region&gt;.azuredatabricks.net</i> on Azure.")
-    @TextInputWidget(patternValidation = IsNotBlankValidation.class)
     @ValueReference(UrlRef.class)
     @CustomValidation(UrlValidator.class)
     String m_url = "";

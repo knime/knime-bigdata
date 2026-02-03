@@ -87,9 +87,32 @@ import org.knime.node.impl.description.PortDescription;
 public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnectorNodeModel>
     implements NodeDialogFactory, KaiNodeInterfaceFactory {
 
+    private static final String NODE_NAME = "Databricks File System Connector";
+
+    private static final String NODE_ICON = "./file_system_connector.png";
+
+    private static final String SHORT_DESCRIPTION =
+        "Connects to Databricks File System (DBFS) in order to read/write files in downstream nodes.";
+
+    private static final String FULL_DESCRIPTION =
+        "<p>This node connects to the Databricks File System (DBFS) of a Databricks deployment. The resulting"
+            + " output port allows downstream nodes to access DBFS as a file system, e.g. to read or write files and"
+            + " folders, or to perform other file system operations (browse/list files, copy, move, ...). </p>"
+            + "<p><b>Path syntax:</b> Paths for DBFS are specified with a UNIX-like syntax, for example"
+            + " <tt>/myfolder/file.csv</tt>, which is an absolute path that consists of: <ol> <li>A leading slash"
+            + " (<tt>/</tt>).</li> <li>The name of a folder (<tt>myfolder</tt>), followed by a slash.</li> <li>Followed"
+            + " by the name of a file (<tt>file.csv</tt>).</li> </ol> </p>";
+
     private static final String WORKSPACE_INPUT_NAME = "Databricks Workspace Connection";
 
     private static final String DBFS_OUTPUT_NAME = "DBFS Connection";
+
+    private static final List<PortDescription> INPUT_PORTS = Arrays.asList( //
+        dynamicPort(WORKSPACE_INPUT_NAME, WORKSPACE_INPUT_NAME,
+            "Databricks Workspace Connection, that can be connected to the Databricks Workspace Connector."));
+
+    private static final List<PortDescription> OUTPUT_PORTS = Arrays.asList(//
+        fixedPort("Databricks File System Connection", "Databricks File System Connection"));
 
     @Override
     protected Optional<PortsConfigurationBuilder> createPortsConfigBuilder() {
@@ -102,8 +125,7 @@ public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnec
     @Override
     public DbfsConnectorNodeModel createNodeModel(final NodeCreationConfiguration creationConfig) {
         final PortsConfiguration portsConfig = creationConfig.getPortConfig().orElseThrow();
-        final boolean useWorkspaceConnection = portsConfig.getInputPorts().length > 0;
-        return new DbfsConnectorNodeModel(portsConfig, useWorkspaceConnection);
+        return new DbfsConnectorNodeModel(portsConfig);
     }
 
     @Override
@@ -121,25 +143,6 @@ public class DbfsConnectorNodeFactory extends ConfigurableNodeFactory<DbfsConnec
     protected boolean hasDialog() {
         return true;
     }
-    private static final String NODE_NAME = "Databricks File System Connector";
-    private static final String NODE_ICON = "./file_system_connector.png";
-    private static final String SHORT_DESCRIPTION =
-            "Connects to Databricks File System (DBFS) in order to read/write files in downstream nodes.";
-    private static final String FULL_DESCRIPTION =
-        "<p>This node connects to the Databricks File System (DBFS) of a Databricks deployment. The resulting"
-            + " output port allows downstream nodes to access DBFS as a file system, e.g. to read or write files and"
-            + " folders, or to perform other file system operations (browse/list files, copy, move, ...). </p>"
-            + "<p><b>Path syntax:</b> Paths for DBFS are specified with a UNIX-like syntax, for example"
-            + " <tt>/myfolder/file.csv</tt>, which is an absolute path that consists of: <ol> <li>A leading slash"
-            + " (<tt>/</tt>).</li> <li>The name of a folder (<tt>myfolder</tt>), followed by a slash.</li> <li>Followed"
-            + " by the name of a file (<tt>file.csv</tt>).</li> </ol> </p>";
-
-    private static final List<PortDescription> INPUT_PORTS = Arrays.asList( //
-        dynamicPort(WORKSPACE_INPUT_NAME, "Databricks Workspace Connection",
-            "Databricks Workspace Connection, that can be connected to the Databricks Workspace Connector."));
-
-    private static final List<PortDescription> OUTPUT_PORTS = Arrays.asList(//
-        fixedPort("Databricks File System Connection", "Databricks File System Connection"));
 
     @Override
     public NodeDialogPane createNodeDialogPane(final NodeCreationConfiguration creationConfig) {
