@@ -87,7 +87,8 @@ public final class ParquetTableReader3NodeParameters implements NodeParameters {
         m_transformationParameters.saveToConfig(//
             config, m_parquetReaderParameters.getSourcePath(), //
             existingConfigID, //
-            m_parquetReaderParameters.getMultiFileParameters() //
+            m_parquetReaderParameters.getMultiFileParameters(), //
+            m_parquetReaderParameters.getIfSchemaChangesParameters() //
         );
     }
 
