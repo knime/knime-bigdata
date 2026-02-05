@@ -109,4 +109,8 @@ final class ParquetTableReader3Parameters implements NodeParameters {
         return m_multiFileReaderParams;
     }
 
+    IfSchemaChangesParameters getIfSchemaChangesParameters() {
+        return m_ifSchemaChangesParams;
+    }
+
 }
