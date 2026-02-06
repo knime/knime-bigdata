@@ -45,9 +45,11 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
+import org.knime.base.node.io.filehandling.webui.reader2.AbstractConfigIDSaver;
 import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.additionalsave.SaveAdditional;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.updates.ParameterReference;
@@ -63,8 +65,22 @@ public final class ParquetTableReader3NodeParameters implements NodeParameters {
     static final class ParquetReaderParametersRef implements ParameterReference<ParquetTableReader3Parameters> {
     }
 
+    @SaveAdditional(ConfigIDSaver.class)
     @ValueReference(ParquetReaderParametersRef.class)
     ParquetTableReader3Parameters m_parquetReaderParameters = new ParquetTableReader3Parameters();
+
+    static final class ConfigIDSaver extends AbstractConfigIDSaver<ParquetTableReader3Parameters> {
+
+        @Override
+        protected ConfigID createConfigID(final ParquetTableReader3Parameters param) {
+            return param.saveToConfig(new BigDataMultiTableReadConfig());
+        }
+
+        @Override
+        protected String getSourceID(final ParquetTableReader3Parameters param) {
+            return param.getSourcePath();
+        }
+    }
 
     ParquetTableReader3TransformationParameters m_transformationParameters =
         new ParquetTableReader3TransformationParameters();
@@ -73,19 +89,23 @@ public final class ParquetTableReader3NodeParameters implements NodeParameters {
         m_parquetReaderParameters.saveToSource(sourceSettings);
     }
 
-    void saveToConfig(final BigDataMultiTableReadConfig config, final ConfigID existingConfigID) {
-        saveTransformationParametersToConfig(config, existingConfigID);
+    void saveToConfig(final BigDataMultiTableReadConfig config, final String existingSourceId,
+        final ConfigID existingConfigId) {
+        m_parquetReaderParameters.saveToConfig(config);
+        saveTransformationParametersToConfig(config, existingSourceId, existingConfigId);
     }
 
     void saveToConfig(final BigDataMultiTableReadConfig config) {
         final var configId = m_parquetReaderParameters.saveToConfig(config);
-        saveTransformationParametersToConfig(config, configId);
+        final var sourceId = m_parquetReaderParameters.getSourcePath();
+        saveTransformationParametersToConfig(config, sourceId, configId);
     }
 
     private void saveTransformationParametersToConfig(final BigDataMultiTableReadConfig config,
-        final ConfigID existingConfigID) {
+        final String existingSourceId, final ConfigID existingConfigID) {
         m_transformationParameters.saveToConfig(//
-            config, m_parquetReaderParameters.getSourcePath(), //
+            config, //
+            existingSourceId, //
             existingConfigID, //
             m_parquetReaderParameters.getMultiFileParameters(), //
             m_parquetReaderParameters.getIfSchemaChangesParameters() //

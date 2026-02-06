@@ -138,10 +138,10 @@ public final class ParquetTableReader3NodeFactory extends //
 
         @Override
         protected void saveToSourceAndConfig(final ParquetTableReader3NodeParameters params,
-            final ConfigID existingConfigId, final MultiFileSelectionPath source,
+            final String existingSourceId, final ConfigID existingConfigId, final MultiFileSelectionPath source,
             final BigDataMultiTableReadConfig config) {
             params.saveToSource(source);
-            params.saveToConfig(config, existingConfigId);
+            params.saveToConfig(config, existingSourceId, existingConfigId);
         }
 
         @Override
