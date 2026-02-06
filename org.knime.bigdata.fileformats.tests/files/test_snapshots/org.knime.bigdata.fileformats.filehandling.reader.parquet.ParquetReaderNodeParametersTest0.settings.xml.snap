@@ -42,6 +42,10 @@
             <entry key="onUnsupportedColumnType" type="xstring" value="IGNORE"/>
         </config>
     </config>
+    <config key="configId_Internals">
+        <config key="big_data_reader"/>
+    </config>
+    <entry key="sourceId_Internals" type="xstring" value="/Users/robin/Documents/DatasetsTest"/>
     <config key="transformationParameters">
         <config key="specs">
             <config key="0">
