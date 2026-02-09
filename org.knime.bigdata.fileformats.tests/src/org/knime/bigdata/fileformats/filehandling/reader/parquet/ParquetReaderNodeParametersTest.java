@@ -63,20 +63,20 @@ class ParquetReaderNodeParametersTest extends DefaultNodeSettingsSnapshotTest {
 
     private static SnapshotTestConfiguration getConfig() {
         return SnapshotTestConfiguration.builder() //
-            .testJsonFormsForModel(ParquetTableReader3NodeParameters.class) //
+            .testJsonFormsForModel(ParquetTableReaderNodeParameters.class) //
             .testJsonFormsWithInstance(SettingsType.MODEL, () -> readSettings()) //
             .testNodeSettingsStructure(() -> readSettings()) //
             .build();
     }
 
-    private static ParquetTableReader3NodeParameters readSettings() {
+    private static ParquetTableReaderNodeParameters readSettings() {
         try {
             var path = getSnapshotPath(ParquetReaderNodeParametersTest.class).getParent().resolve("node_settings")
                 .resolve("ParquetReaderNodeParameters.xml");
             try (var fis = new FileInputStream(path.toFile())) {
                 var nodeSettings = NodeSettings.loadFromXML(fis);
                 return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
-                    ParquetTableReader3NodeParameters.class);
+                    ParquetTableReaderNodeParameters.class);
             }
         } catch (IOException | InvalidSettingsException e) {
             throw new RuntimeException(e);

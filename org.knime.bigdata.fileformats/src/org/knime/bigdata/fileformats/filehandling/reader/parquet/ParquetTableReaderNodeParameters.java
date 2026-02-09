@@ -56,34 +56,34 @@ import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
 
 /**
- * Parameters of the Parquet Table Reader Node {@link ParquetTableReader3NodeFactory}.
+ * Parameters of the Parquet Table Reader Node {@link ParquetTableReaderNodeFactory2}.
  *
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
-public final class ParquetTableReader3NodeParameters implements NodeParameters {
+public final class ParquetTableReaderNodeParameters implements NodeParameters {
 
-    static final class ParquetReaderParametersRef implements ParameterReference<ParquetTableReader3Parameters> {
+    static final class ParquetReaderParametersRef implements ParameterReference<ParquetTableReaderParameters> {
     }
 
     @SaveAdditional(ConfigIDSaver.class)
     @ValueReference(ParquetReaderParametersRef.class)
-    ParquetTableReader3Parameters m_parquetReaderParameters = new ParquetTableReader3Parameters();
+    ParquetTableReaderParameters m_parquetReaderParameters = new ParquetTableReaderParameters();
 
-    static final class ConfigIDSaver extends AbstractConfigIDSaver<ParquetTableReader3Parameters> {
+    static final class ConfigIDSaver extends AbstractConfigIDSaver<ParquetTableReaderParameters> {
 
         @Override
-        protected ConfigID createConfigID(final ParquetTableReader3Parameters param) {
+        protected ConfigID createConfigID(final ParquetTableReaderParameters param) {
             return param.saveToConfig(new BigDataMultiTableReadConfig());
         }
 
         @Override
-        protected String getSourceID(final ParquetTableReader3Parameters param) {
+        protected String getSourceID(final ParquetTableReaderParameters param) {
             return param.getSourcePath();
         }
     }
 
-    ParquetTableReader3TransformationParameters m_transformationParameters =
-        new ParquetTableReader3TransformationParameters();
+    ParquetTableReaderTransformationParameters m_transformationParameters =
+        new ParquetTableReaderTransformationParameters();
 
     void saveToSource(final MultiFileSelectionPath sourceSettings) {
         m_parquetReaderParameters.saveToSource(sourceSettings);

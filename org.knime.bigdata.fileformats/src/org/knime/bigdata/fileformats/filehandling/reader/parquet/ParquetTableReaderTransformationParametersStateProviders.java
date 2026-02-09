@@ -51,23 +51,23 @@ import java.util.function.Supplier;
 import org.knime.base.node.io.filehandling.webui.reader2.TransformationParametersStateProviders;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3NodeParameters.ParquetReaderParametersRef;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3Specific.ConfigAndReader;
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3Specific.ProductionPathProviderAndTypeHierarchy;
+import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeParameters.ParquetReaderParametersRef;
+import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderSpecific.ConfigAndReader;
+import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderSpecific.ProductionPathProviderAndTypeHierarchy;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeSerializer;
 
 /**
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
-final class ParquetTableReader3TransformationParametersStateProviders {
+final class ParquetTableReaderTransformationParametersStateProviders {
 
     static final class TypedReaderTableSpecsProvider
         extends TransformationParametersStateProviders.TypedReaderTableSpecsProvider<//
                 BigDataReaderConfig, KnimeType, BigDataMultiTableReadConfig>
         implements ConfigAndReader {
 
-        private Supplier<ParquetTableReader3Parameters> m_readerNodeParamsSupplier;
+        private Supplier<ParquetTableReaderParameters> m_readerNodeParamsSupplier;
 
         @Override
         protected void applyParametersToConfig(final BigDataMultiTableReadConfig config) {
@@ -134,7 +134,7 @@ final class ParquetTableReader3TransformationParametersStateProviders {
 
     }
 
-    private ParquetTableReader3TransformationParametersStateProviders() {
+    private ParquetTableReaderTransformationParametersStateProviders() {
         // Not intended to be initialized
     }
 

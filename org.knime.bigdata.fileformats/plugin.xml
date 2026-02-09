@@ -51,12 +51,6 @@
    <node
          category-path="/io/read"
          deprecated="false"
-         factory-class="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3NodeFactory"
-         hidden="true">
-   </node>
-   <node
-         category-path="/io/read"
-         deprecated="false"
          factory-class="org.knime.bigdata.fileformats.filehandling.reader.orc.OrcTableReaderNodeFactory"
          hidden="false">
    </node>

@@ -46,7 +46,7 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3Specific.ProductionPathProviderAndTypeHierarchy;
+import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderSpecific.ProductionPathProviderAndTypeHierarchy;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeBasedTransformationParameters;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 
@@ -54,8 +54,8 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
 @SuppressWarnings("restriction")
-@Modification(ParquetTableReader3TransformationParametersStateProviders.TransformationSettingsWidgetModification.class)
-final class ParquetTableReader3TransformationParameters extends KnimeTypeBasedTransformationParameters
+@Modification(ParquetTableReaderTransformationParametersStateProviders.TransformationSettingsWidgetModification.class)
+final class ParquetTableReaderTransformationParameters extends KnimeTypeBasedTransformationParameters
     implements ProductionPathProviderAndTypeHierarchy {
 
     @Override
