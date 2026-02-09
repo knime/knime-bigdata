@@ -1048,7 +1048,10 @@
               }
             }
           }
-        }
+        },
+        "propertiesDeprecatedConfigKeys" : [ {
+          "deprecated" : [ [ "settings" ], [ "advanced" ], [ "table_spec_config_Internals" ] ]
+        } ]
       }
     }
   },
