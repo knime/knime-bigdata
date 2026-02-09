@@ -156,7 +156,7 @@ public final class ParquetTableReaderNodeFactory2 extends //
     @Override
     protected MultiFileSelectionPath createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
         final var source = new MultiFileSelectionPath();
-        final var defaultParams = new ParquetTableReaderNodeParameters();
+        final var defaultParams = new ParquetTableReaderNodeParameters(nodeCreationConfig);
         defaultParams.saveToSource(source);
         return source;
     }
@@ -164,7 +164,7 @@ public final class ParquetTableReaderNodeFactory2 extends //
     @Override
     protected BigDataMultiTableReadConfig createConfig(final NodeCreationConfiguration nodeCreationConfig) {
         final var cfg = new BigDataMultiTableReadConfig();
-        final var defaultParams = new ParquetTableReaderNodeParameters();
+        final var defaultParams = new ParquetTableReaderNodeParameters(nodeCreationConfig);
         defaultParams.saveToConfig(cfg);
         return cfg;
     }

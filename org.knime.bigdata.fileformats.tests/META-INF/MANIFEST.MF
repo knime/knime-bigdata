@@ -9,6 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.knime.testing;bundle-version="[5.6.0,6.0.0)",
  junit-jupiter-api;bundle-version="[5.9.2,6.0.0)",
  junit-jupiter-params;bundle-version="[5.9.2,6.0.0)",
+ assertj-core;bundle-version="[3.27.3,4.0.0)",
+ org.knime.base.testing;bundle-version="[5.11.0,6.0.0)",
  org.knime.core.ui.testing;bundle-version="[5.6.0,6.0.0)"
 Automatic-Module-Name: org.knime.bigdata.fileformats.tests
 Bundle-ClassPath: .

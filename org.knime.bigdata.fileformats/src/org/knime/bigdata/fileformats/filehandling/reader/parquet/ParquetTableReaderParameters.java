@@ -46,6 +46,8 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
+import java.net.URL;
+
 import org.knime.base.node.io.filehandling.webui.reader2.IfSchemaChangesParameters;
 import org.knime.base.node.io.filehandling.webui.reader2.MultiFileReaderParameters;
 import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionParameters;
@@ -64,6 +66,14 @@ import org.knime.node.parameters.NodeParameters;
  */
 @SuppressWarnings("restriction")
 final class ParquetTableReaderParameters implements NodeParameters {
+
+    ParquetTableReaderParameters(final URL url) {
+        m_multiFileSelectionParams = new MultiFileSelectionParameters(url);
+    }
+
+    ParquetTableReaderParameters() {
+        // default constructor
+    }
 
     ConfigID saveToConfig(final BigDataMultiTableReadConfig config) {
         m_ifSchemaChangesParams.saveToConfig(config);
