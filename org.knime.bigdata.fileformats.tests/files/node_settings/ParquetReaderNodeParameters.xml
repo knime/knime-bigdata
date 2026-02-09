@@ -175,7 +175,7 @@
     <config key="variables"/>
     <entry key="customDescription" type="xstring" isnull="true" value=""/>
     <entry key="state" type="xstring" value="EXECUTED"/>
-    <entry key="factory" type="xstring" value="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReader3NodeFactory"/>
+    <entry key="factory" type="xstring" value="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory2"/>
     <entry key="node-name" type="xstring" value="Parquet Reader (Labs)"/>
     <entry key="node-bundle-name" type="xstring" value="KNIME BigData File Format Extension"/>
     <entry key="node-bundle-symbolic-name" type="xstring" value="org.knime.bigdata.fileformats"/>

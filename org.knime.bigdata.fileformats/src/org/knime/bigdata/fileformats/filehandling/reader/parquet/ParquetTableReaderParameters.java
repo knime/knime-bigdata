@@ -46,58 +46,71 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
-import org.knime.base.node.io.filehandling.webui.reader2.ReaderSpecific;
+import org.knime.base.node.io.filehandling.webui.reader2.IfSchemaChangesParameters;
+import org.knime.base.node.io.filehandling.webui.reader2.MultiFileReaderParameters;
+import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionParameters;
+import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataReadAdapterFactory;
-import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
-import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
-import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
-import org.knime.core.data.convert.map.ProducerRegistry;
-import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
-import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
-import org.knime.node.parameters.NodeParametersInput;
+import org.knime.bigdata.fileformats.filehandling.reader.type.UnsupportedTypesParameters;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
+import org.knime.node.parameters.NodeParameters;
 
-final class ParquetTableReader3Specific {
+/**
+ * Parameters for the Parquet Reader node.
+ *
+ * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
+ */
+@SuppressWarnings("restriction")
+final class ParquetTableReaderParameters implements NodeParameters {
 
-    static final ProductionPathProvider<KnimeType> PRODUCTION_PATH_PROVIDER =
-        BigDataReadAdapterFactory.INSTANCE.createProductionPathProvider();
-
-    interface ProductionPathProviderAndTypeHierarchy
-        extends ReaderSpecific.ProductionPathProviderAndTypeHierarchy<KnimeType> {
-        @Override
-        default ProductionPathProvider<KnimeType> getProductionPathProvider() {
-            return PRODUCTION_PATH_PROVIDER;
-        }
-
-        @Override
-        default TypeHierarchy<KnimeType, KnimeType> getTypeHierarchy() {
-            return KnimeTypeHierarchies.TYPE_HIERARCHY;
-        }
-
-        @Override
-        default ProducerRegistry<KnimeType, ?> getProducerRegistry() {
-            return BigDataReadAdapterFactory.INSTANCE.getProducerRegistry();
-        }
-
+    ConfigID saveToConfig(final BigDataMultiTableReadConfig config) {
+        m_ifSchemaChangesParams.saveToConfig(config);
+        m_multiFileReaderParams.saveToConfig(config);
+        m_unsupportedTypesParams.saveToConfig(config);
+        return config.getConfigID();
     }
 
-    interface ConfigAndReader
-        extends ReaderSpecific.ConfigAndReader<BigDataReaderConfig, KnimeType, BigDataMultiTableReadConfig> {
-
-        @Override
-        default BigDataMultiTableReadConfig createMultiTableReadConfig(final NodeParametersInput input) {
-            return new BigDataMultiTableReadConfig();
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        default ParquetTableReader2 createTableReader() {
-            return new ParquetTableReader2();
-        }
-
+    @Override
+    public void validate() throws InvalidSettingsException {
+        m_multiFileReaderParams.validate();
     }
 
-    private ParquetTableReader3Specific() {
-        // Utility class
+    void saveToSource(final MultiFileSelectionPath sourceSettings) {
+        m_multiFileSelectionParams.saveToSource(sourceSettings);
     }
+
+    // Common parameters
+
+    static final class SetParquetExtensions extends MultiFileSelectionParameters.SetFileReaderWidgetExtensions {
+        @Override
+        protected String[] getExtensions() {
+            return new String[]{"parquet"};
+        }
+    }
+
+    @Modification(SetParquetExtensions.class)
+    MultiFileSelectionParameters m_multiFileSelectionParams = new MultiFileSelectionParameters();
+
+    IfSchemaChangesParameters m_ifSchemaChangesParams = new IfSchemaChangesParameters();
+
+    MultiFileReaderParameters m_multiFileReaderParams = new MultiFileReaderParameters();
+
+    // Parquet-specific parameters
+
+    UnsupportedTypesParameters m_unsupportedTypesParams = new UnsupportedTypesParameters();
+
+    String getSourcePath() {
+        return m_multiFileSelectionParams.getSourcePath();
+    }
+
+    MultiFileReaderParameters getMultiFileParameters() {
+        return m_multiFileReaderParams;
+    }
+
+    IfSchemaChangesParameters getIfSchemaChangesParameters() {
+        return m_ifSchemaChangesParams;
+    }
+
 }
