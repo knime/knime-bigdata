@@ -55,5 +55,14 @@
          hidden="false">
    </node>
 </extension>
-   
+    <extension
+            point="org.knime.workbench.repository.registeredFileExtensions">
+        <FileExtensionMapping
+                NodeFactory="org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderNodeFactory2">
+            <FileExtension
+                    extension="parquet">
+            </FileExtension>
+        </FileExtensionMapping>
+    </extension>
+
 </plugin>

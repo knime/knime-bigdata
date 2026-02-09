@@ -45,13 +45,18 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
+import java.util.Optional;
+
 import org.knime.base.node.io.filehandling.webui.reader2.AbstractConfigIDSaver;
 import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.url.URLConfiguration;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.additionalsave.SaveAdditional;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.migration.Migration;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
@@ -63,6 +68,23 @@ import org.knime.node.parameters.updates.ValueReference;
  */
 @Migration(ParquetTableReaderMigration.class)
 public final class ParquetTableReaderNodeParameters implements NodeParameters {
+
+    ParquetTableReaderNodeParameters(final NodeParametersInput input) {
+        this(input.getURLConfiguration());
+    }
+
+    ParquetTableReaderNodeParameters(final NodeCreationConfiguration nodeCreationConfig) {
+        this(nodeCreationConfig.getURLConfig());
+    }
+
+    private ParquetTableReaderNodeParameters(final Optional<? extends URLConfiguration> urlConfig) { // NOSONAR
+        urlConfig.ifPresent(urlConfiguration -> m_parquetReaderParameters =
+            new ParquetTableReaderParameters(urlConfiguration.getUrl()));
+    }
+
+    ParquetTableReaderNodeParameters() {
+        // default constructor
+    }
 
     static final class ParquetReaderParametersRef implements ParameterReference<ParquetTableReaderParameters> {
     }
