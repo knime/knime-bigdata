@@ -9,3 +9,4 @@ documentation/secured_cluster_connection_guide_server/index.html
 **/.polyglot.META-INF
 */*.jar
 **/CHANGELOG.md
+*.snap.debug

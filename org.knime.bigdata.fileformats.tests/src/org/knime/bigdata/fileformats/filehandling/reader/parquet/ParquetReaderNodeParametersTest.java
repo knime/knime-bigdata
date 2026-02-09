@@ -66,13 +66,25 @@ class ParquetReaderNodeParametersTest extends DefaultNodeSettingsSnapshotTest {
             .testJsonFormsForModel(ParquetTableReaderNodeParameters.class) //
             .testJsonFormsWithInstance(SettingsType.MODEL, () -> readSettings()) //
             .testNodeSettingsStructure(() -> readSettings()) //
+            // Tests for migration from old settings model
+            .testNodeSettingsStructure(() -> readSettings("_4_5_3_empty")) //
+            .testNodeSettingsStructure(() -> readSettings("_4_5_3_configured")) //
+            .testNodeSettingsStructure(() -> readSettings("_4_5_3_transformation")) //
+            .testNodeSettingsStructure(() -> readSettings("_5_8_0_empty")) //
+            .testNodeSettingsStructure(() -> readSettings("_5_8_0_configured")) //
+            .testNodeSettingsStructure(() -> readSettings("_5_8_0_transformation")) //
+            // End of migration tests
             .build();
     }
 
     private static ParquetTableReaderNodeParameters readSettings() {
+        return readSettings("");
+    }
+
+    private static ParquetTableReaderNodeParameters readSettings(final String suffix) {
         try {
             var path = getSnapshotPath(ParquetReaderNodeParametersTest.class).getParent().resolve("node_settings")
-                .resolve("ParquetReaderNodeParameters.xml");
+                .resolve("ParquetReaderNodeParameters" + suffix + ".xml");
             try (var fis = new FileInputStream(path.toFile())) {
                 var nodeSettings = NodeSettings.loadFromXML(fis);
                 return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
