@@ -52,6 +52,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 
 /**
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
+ * @author Thomas Reifenberger, TNG Technology Consulting GmbH, Germany
  */
 @SuppressWarnings("restriction")
 @Modification(ParquetTableReaderTransformationParametersStateProviders.TransformationSettingsWidgetModification.class)

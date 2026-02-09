@@ -52,6 +52,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.additionalsave.SaveAdditional;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.node.parameters.NodeParameters;
+import org.knime.node.parameters.migration.Migration;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
 
@@ -60,6 +61,7 @@ import org.knime.node.parameters.updates.ValueReference;
  *
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
  */
+@Migration(ParquetTableReaderMigration.class)
 public final class ParquetTableReaderNodeParameters implements NodeParameters {
 
     static final class ParquetReaderParametersRef implements ParameterReference<ParquetTableReaderParameters> {
