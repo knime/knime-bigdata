@@ -73,8 +73,9 @@ import org.knime.filehandling.core.util.SettingsUtils;
  * {@link ConfigSerializer} for big data file format readers.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @noreference non-public API
  */
-enum BigDataTableReadConfigSerializer
+public enum BigDataTableReadConfigSerializer
     implements ConfigSerializer<BigDataMultiTableReadConfig>, ConfigIDFactory<BigDataMultiTableReadConfig> {
         INSTANCE;
 
@@ -94,11 +95,17 @@ enum BigDataTableReadConfigSerializer
 
     private static final String CFG_PATH_COLUMN_NAME = "path_column_name" + SettingsModel.CFGKEY_INTERNAL;
 
-    private static final String CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE = "fail_on_unsupported_column_type" + SettingsModel.CFGKEY_INTERNAL;
+    private static final String CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE =
+        "fail_on_unsupported_column_type" + SettingsModel.CFGKEY_INTERNAL;
 
     private final TableSpecConfigSerializer<KnimeType> m_tableSpecConfigSerializer;
 
-    private enum KnimeTypeSerializer implements NodeSettingsSerializer<KnimeType> {
+    /**
+     * Serializer for {@link KnimeType} objects to and from node settings.
+     *
+     * @noreference non-public API
+     */
+    public enum KnimeTypeSerializer implements NodeSettingsSerializer<KnimeType> {
             SERIALIZER;
 
         private static final String CFG_NESTING_LEVEL = "is_list";
