@@ -95,7 +95,7 @@ public enum BigDataTableReadConfigSerializer
 
     private static final String CFG_PATH_COLUMN_NAME = "path_column_name" + SettingsModel.CFGKEY_INTERNAL;
 
-    private static final String CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE =
+    private static final String CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE =
         "fail_on_unsupported_column_type" + SettingsModel.CFGKEY_INTERNAL;
 
     private final TableSpecConfigSerializer<KnimeType> m_tableSpecConfigSerializer;
@@ -166,7 +166,7 @@ public enum BigDataTableReadConfigSerializer
         final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
         // introduced in 4.5.0
         bigDataConfig.setFailOnUnsupportedColumnTypes(
-            settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes()));
+            settingsTab.getBoolean(CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes()));
     }
 
     private TableSpecConfig<KnimeType> loadTableSpecConfig(final NodeSettingsRO settings)
@@ -198,8 +198,8 @@ public enum BigDataTableReadConfigSerializer
         }
         final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
         // introduced in 4.5.0
-        if (settingsTab.containsKey(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE)) {
-            bigDataConfig.setFailOnUnsupportedColumnTypes(settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE));
+        if (settingsTab.containsKey(CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE)) {
+            bigDataConfig.setFailOnUnsupportedColumnTypes(settingsTab.getBoolean(CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE));
         }
 
         // added in 5.2.2 (AP-19239); we don't want existing workflows to make the check
@@ -224,7 +224,7 @@ public enum BigDataTableReadConfigSerializer
         advancedTab.addBoolean(CFG_CHECK_TABLE_SPEC, config.checkSavedTableSpec());
 
         final BigDataReaderConfig bigDataConfig = config.getReaderSpecificConfig();
-        settingsTab.addBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes());
+        settingsTab.addBoolean(CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE, bigDataConfig.failOnUnsupportedColumnTypes());
     }
 
     @Override
@@ -251,8 +251,8 @@ public enum BigDataTableReadConfigSerializer
             settingsTab.getString(CFG_PATH_COLUMN_NAME);
         }
         // introduced in 4.5.0
-        if (settingsTab.containsKey(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE)) {
-            settingsTab.getBoolean(CFG_FAIL_ON_USUPPORTED_COLUMN_TYPE);
+        if (settingsTab.containsKey(CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE)) {
+            settingsTab.getBoolean(CFG_FAIL_ON_UNSUPPORTED_COLUMN_TYPE);
         }
 
         // added in 5.2.2
