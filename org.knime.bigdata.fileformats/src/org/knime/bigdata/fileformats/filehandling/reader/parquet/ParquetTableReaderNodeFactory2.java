@@ -58,6 +58,7 @@ import org.knime.base.node.io.filehandling.webui.reader2.NodeParametersConfigAnd
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReadAdapterFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataTableReadConfigSerializer;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
@@ -73,7 +74,6 @@ import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDLoader;
-import org.knime.filehandling.core.node.table.reader.config.tablespec.NodeSettingsConfigID;
 import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
@@ -154,9 +154,7 @@ public final class ParquetTableReaderNodeFactory2 extends //
 
         @Override
         protected ConfigIDLoader getConfigIDLoader() {
-            // TODO: Return configIDLoader from BigDataTableReadConfigSerializer when available after moving this factory back to the original package.
-            return settings -> new NodeSettingsConfigID(
-                settings.getNodeSettings(new ParquetTableReaderTransformationParameters().getConfigIdSettingsKey()));
+            return BigDataTableReadConfigSerializer.INSTANCE;
         }
     }
 
