@@ -50,10 +50,11 @@ import static org.knime.node.impl.description.PortDescription.dynamicPort;
 import static org.knime.node.impl.description.PortDescription.fixedPort;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.knime.base.node.io.filehandling.webui.reader2.BackwardsCompatibleWebUITableReaderNodeFactory;
 import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
 import org.knime.base.node.io.filehandling.webui.reader2.NodeParametersConfigAndSourceSerializer;
-import org.knime.base.node.io.filehandling.webui.reader2.WebUITableReaderNodeFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReadAdapterFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
@@ -62,13 +63,18 @@ import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
 import org.knime.core.node.NodeDescription;
 import org.knime.core.node.context.NodeCreationConfiguration;
-import org.knime.core.util.Version;
+import org.knime.core.node.context.url.URLConfiguration;
+import org.knime.filehandling.core.connections.FSLocationUtil;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
+import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.node.table.reader.GenericTableReader;
 import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDLoader;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.NodeSettingsConfigID;
+import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
 
@@ -76,10 +82,11 @@ import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
  * Factory for the Parquet Table Reader Node.
  *
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany
+ * @author Thomas Reifenberger, TNG Technology Consulting GmbH, Germany
  */
 @SuppressWarnings("java:S110") // Inheritance depth imposed by table reader framework architecture
 public final class ParquetTableReaderNodeFactory2 extends //
-    WebUITableReaderNodeFactory<ParquetTableReaderNodeParameters, MultiFileSelectionPath, //
+    BackwardsCompatibleWebUITableReaderNodeFactory<ParquetTableReaderNodeParameters, MultiFileSelectionPath, //
             BigDataReaderConfig, KnimeType, BigDataCell, BigDataMultiTableReadConfig> {
 
     @SuppressWarnings("javadoc")
@@ -167,5 +174,19 @@ public final class ParquetTableReaderNodeFactory2 extends //
         final var defaultParams = new ParquetTableReaderNodeParameters(nodeCreationConfig);
         defaultParams.saveToConfig(cfg);
         return cfg;
+    }
+
+    private static final String[] FILE_SUFFIXES = {".parquet"};
+
+    @Override
+    protected SourceSettings<FSPath> createLegacySourceSettings(final NodeCreationConfiguration nodeCreationConfig) {
+        final SettingsModelReaderFileChooser settingsModel = new SettingsModelReaderFileChooser("file_selection",
+            nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
+            EnumConfig.create(FilterMode.FILE, FilterMode.FILES_IN_FOLDERS), FILE_SUFFIXES);
+        final Optional<? extends URLConfiguration> urlConfig = nodeCreationConfig.getURLConfig();
+        if (urlConfig.isPresent()) {
+            settingsModel.setLocation(FSLocationUtil.createFromURL(urlConfig.get().getUrl().toString()));
+        }
+        return settingsModel;
     }
 }
