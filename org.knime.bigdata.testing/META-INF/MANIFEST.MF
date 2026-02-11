@@ -18,12 +18,12 @@ Require-Bundle: org.knime.testing;bundle-version="[5.10.0,6.0.0)",
  org.knime.bigdata.spark.core.livy;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.spark.local;bundle-version="[5.10.0,6.0.0)",
  org.knime.bigdata.filehandling;bundle-version="[5.9.0,6.0.0)",
- org.knime.base.filehandling;bundle-version="[5.10.0,6.0.0)",
+ org.knime.base.filehandling;bundle-version="[5.11.0,6.0.0)",
  org.knime.base;bundle-version="[5.11.0,6.0.0)",
  org.knime.bigdata.hive;bundle-version="[5.10.0,6.0.0)",
  org.knime.bigdata.commons;bundle-version="[5.10.0,6.0.0)",
  org.knime.bigdata.hadoop.filehandling;bundle-version="[5.11.0,6.0.0)",
- org.knime.filehandling.core;bundle-version="[5.10.0,6.0.0)"
+ org.knime.filehandling.core;bundle-version="[5.11.0,6.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
