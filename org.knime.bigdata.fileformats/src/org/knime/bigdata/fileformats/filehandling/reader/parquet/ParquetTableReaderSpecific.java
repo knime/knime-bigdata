@@ -52,8 +52,9 @@ import org.knime.bigdata.fileformats.filehandling.reader.BigDataReadAdapterFacto
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
-import org.knime.core.data.convert.map.ProducerRegistry;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.DefaultProductionPathSerializer;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ProductionPathSerializer;
 import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
 import org.knime.node.parameters.NodeParametersInput;
 
@@ -75,8 +76,8 @@ final class ParquetTableReaderSpecific {
         }
 
         @Override
-        default ProducerRegistry<KnimeType, ?> getProducerRegistry() {
-            return BigDataReadAdapterFactory.INSTANCE.getProducerRegistry();
+        default ProductionPathSerializer getProductionPathSerializer() {
+            return new DefaultProductionPathSerializer(BigDataReadAdapterFactory.INSTANCE.getProducerRegistry());
         }
 
     }

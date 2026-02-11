@@ -75,6 +75,7 @@ import org.knime.core.data.def.BooleanCell;
 import org.knime.core.util.Pair;
 import org.knime.filehandling.core.connections.FSLocation;
 import org.knime.filehandling.core.node.table.reader.ProductionPathProvider;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ProductionPathSerializer;
 
 /**
  * Test for ParquetTableReader transformation parameters state providers.
@@ -157,6 +158,11 @@ final class ParquetTableReaderTransformationParametersStateProvidersTest
     @Override
     protected KnimeType getDoubleType() {
         return PrimitiveKnimeType.DOUBLE;
+    }
+
+    @Override
+    protected ProductionPathSerializer getProductionPathSerializer() {
+        return new ParquetTableReaderTransformationParameters().getProductionPathSerializer();
     }
 
     @Override
