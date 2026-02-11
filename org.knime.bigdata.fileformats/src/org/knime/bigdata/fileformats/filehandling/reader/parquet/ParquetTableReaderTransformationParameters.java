@@ -59,9 +59,4 @@ import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 final class ParquetTableReaderTransformationParameters extends KnimeTypeBasedTransformationParameters
     implements ProductionPathProviderAndTypeHierarchy {
 
-    @Override
-    protected String getConfigIdSettingsKey() {
-        return "big_data_reader";
-    }
-
 }
