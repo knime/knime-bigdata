@@ -48,27 +48,75 @@
  */
 package org.knime.bigdata.fileformats.filehandling.reader.orc;
 
-import org.knime.bigdata.fileformats.filehandling.reader.AbstractBigDataTableReaderNodeFactory;
+import static org.knime.node.impl.description.PortDescription.dynamicPort;
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.knime.base.node.io.filehandling.webui.reader2.BackwardsCompatibleWebUITableReaderNodeFactory;
+import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
+import org.knime.base.node.io.filehandling.webui.reader2.NodeParametersConfigAndSourceSerializer;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataReadAdapterFactory;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataReaderConfig;
+import org.knime.bigdata.fileformats.filehandling.reader.BigDataTableReadConfigSerializer;
 import org.knime.bigdata.fileformats.filehandling.reader.cell.BigDataCell;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeType;
+import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeHierarchies;
+import org.knime.core.node.NodeDescription;
+import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.url.URLConfiguration;
+import org.knime.filehandling.core.connections.FSLocationUtil;
 import org.knime.filehandling.core.connections.FSPath;
+import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
+import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
+import org.knime.filehandling.core.defaultnodesettings.filtermode.SettingsModelFilterMode.FilterMode;
 import org.knime.filehandling.core.node.table.reader.GenericTableReader;
+import org.knime.filehandling.core.node.table.reader.ReadAdapterFactory;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
+import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigIDLoader;
+import org.knime.filehandling.core.node.table.reader.paths.SourceSettings;
+import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeHierarchy;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
 
 /**
  * Node factory for the ORC Reader.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
+ * @author Thomas Reifenberger, TNG Technology Consulting GmbH, Germany
  */
-public final class OrcTableReaderNodeFactory extends AbstractBigDataTableReaderNodeFactory {
+@SuppressWarnings("java:S110") // Inheritance depth imposed by table reader framework architecture
+public final class OrcTableReaderNodeFactory
+    extends BackwardsCompatibleWebUITableReaderNodeFactory<OrcTableReaderNodeParameters, //
+            MultiFileSelectionPath, BigDataReaderConfig, KnimeType, BigDataCell, BigDataMultiTableReadConfig> {
 
-    private static final String[] FILE_SUFFIXES = {".orc"};
-
-    /**
-     * Constructor.
-     */
+    @SuppressWarnings("javadoc")
     public OrcTableReaderNodeFactory() {
-        super(FILE_SUFFIXES);
+        super(OrcTableReaderNodeParameters.class);
+    }
+
+    @Override
+    protected NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription( //
+            "ORC Reader", //
+            "./orcreader-icon.png", //
+            List.of(dynamicPort(FS_CONNECT_GRP_ID, "File System Connection", "The file system connection.")), //
+            List.of(fixedPort("Data table", "Data table containing the data of the ORC file.")), //
+            "Reader for ORC files.", //
+            "Reader for ORC files. It reads either single files or all files in a given directory.", //
+            List.of(), //
+            OrcTableReaderNodeParameters.class, //
+            null, //
+            NodeType.Source, //
+            List.of("Input", "Read", "ORC", "Apache ORC"), //
+            null //
+        );
+    }
+
+    @Override
+    protected ReadAdapterFactory<KnimeType, BigDataCell> getReadAdapterFactory() {
+        return BigDataReadAdapterFactory.INSTANCE;
     }
 
     @Override
@@ -76,4 +124,68 @@ public final class OrcTableReaderNodeFactory extends AbstractBigDataTableReaderN
         return new OrcTableReader();
     }
 
+    @Override
+    protected String extractRowKey(final BigDataCell value) {
+        return value.getString();
+    }
+
+    @Override
+    protected TypeHierarchy<KnimeType, KnimeType> getTypeHierarchy() {
+        return KnimeTypeHierarchies.TYPE_HIERARCHY;
+    }
+
+    @Override
+    protected OrcConfigAndSourceSerializer createSerializer() {
+        return new OrcConfigAndSourceSerializer();
+    }
+
+    private final class OrcConfigAndSourceSerializer
+        extends NodeParametersConfigAndSourceSerializer<OrcTableReaderNodeParameters, MultiFileSelectionPath, //
+                BigDataReaderConfig, KnimeType, BigDataMultiTableReadConfig> {
+        protected OrcConfigAndSourceSerializer() {
+            super(OrcTableReaderNodeParameters.class);
+        }
+
+        @Override
+        protected void saveToSourceAndConfig(final OrcTableReaderNodeParameters params, final String existingSourceId,
+            final ConfigID existingConfigId, final MultiFileSelectionPath source,
+            final BigDataMultiTableReadConfig config) {
+            params.saveToSource(source);
+            params.saveToConfig(config, existingSourceId, existingConfigId);
+        }
+
+        @Override
+        protected ConfigIDLoader getConfigIDLoader() {
+            return BigDataTableReadConfigSerializer.INSTANCE;
+        }
+    }
+
+    @Override
+    protected MultiFileSelectionPath createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
+        final var source = new MultiFileSelectionPath();
+        final var defaultParams = new OrcTableReaderNodeParameters(nodeCreationConfig);
+        defaultParams.saveToSource(source);
+        return source;
+    }
+
+    @Override
+    protected BigDataMultiTableReadConfig createConfig(final NodeCreationConfiguration nodeCreationConfig) {
+        final var cfg = new BigDataMultiTableReadConfig();
+        final var defaultParams = new OrcTableReaderNodeParameters(nodeCreationConfig);
+        defaultParams.saveToConfig(cfg);
+        return cfg;
+    }
+
+    private static final String[] FILE_SUFFIXES = {".orc"};
+
+    @Override
+    protected SourceSettings<FSPath> createLegacySourceSettings(final NodeCreationConfiguration nodeCreationConfig) {
+        final SettingsModelReaderFileChooser settingsModel = new SettingsModelReaderFileChooser("file_selection",
+            nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
+            EnumConfig.create(FilterMode.FILE, FilterMode.FILES_IN_FOLDERS), FILE_SUFFIXES);
+        final Optional<? extends URLConfiguration> urlConfig = nodeCreationConfig.getURLConfig();
+        urlConfig.ifPresent(urlConfiguration -> settingsModel
+            .setLocation(FSLocationUtil.createFromURL(urlConfiguration.getUrl().toString())));
+        return settingsModel;
+    }
 }

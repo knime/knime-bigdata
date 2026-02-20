@@ -63,6 +63,12 @@
                     extension="parquet">
             </FileExtension>
         </FileExtensionMapping>
+        <FileExtensionMapping
+                NodeFactory="org.knime.bigdata.fileformats.filehandling.reader.orc.OrcTableReaderNodeFactory">
+            <FileExtension
+                    extension="orc">
+            </FileExtension>
+        </FileExtensionMapping>
     </extension>
 
 </plugin>
