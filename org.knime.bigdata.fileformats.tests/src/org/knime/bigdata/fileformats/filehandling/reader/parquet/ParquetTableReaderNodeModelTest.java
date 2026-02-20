@@ -77,7 +77,7 @@ import org.knime.testing.util.WorkflowManagerUtil;
 @SuppressWarnings("restriction")
 class ParquetTableReaderNodeModelTest extends LocalWorkflowContextTest {
 
-    private static final String TEST_FILE = "test.parquet";
+    private static final String TEST_FILE = "/files/test.parquet";
 
     private NativeNodeContainer m_parquetReader;
 
