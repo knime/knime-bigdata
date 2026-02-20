@@ -43,7 +43,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package org.knime.bigdata.fileformats.filehandling.reader.parquet;
+package org.knime.bigdata.fileformats.filehandling.reader.orc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,16 +70,16 @@ import org.knime.filehandling.core.connections.FSLocation;
 import org.knime.testing.util.WorkflowManagerUtil;
 
 /**
- * Test for the Parquet Table Reader node model.
+ * Test for the Orc Table Reader node model.
  *
  * @author Thomas Reifenberger, TNG Technology Consulting GmbH, Germany
  */
 @SuppressWarnings("restriction")
-class ParquetTableReaderNodeModelTest extends LocalWorkflowContextTest {
+class OrcTableReaderNodeModelTest extends LocalWorkflowContextTest {
 
-    private static final String TEST_FILE = "/files/test.parquet";
+    private static final String TEST_FILE = "/files/test.orc";
 
-    private NativeNodeContainer m_parquetReader;
+    private NativeNodeContainer m_orcReader;
 
     @BeforeEach
     void setUp() {
@@ -92,11 +92,11 @@ class ParquetTableReaderNodeModelTest extends LocalWorkflowContextTest {
     }
 
     @Test
-    void testReadValidParquetFile() throws IOException, URISyntaxException, InvalidSettingsException {
+    void testReadValidOrcFile() throws IOException, URISyntaxException, InvalidSettingsException {
         // given
-        m_parquetReader = WorkflowManagerUtil.createAndAddNode(m_wfm, new ParquetTableReaderNodeFactory2());
-        final var settings = new ParquetTableReaderNodeParameters();
-        settings.m_parquetReaderParameters.m_multiFileSelectionParams.m_source =
+        m_orcReader = WorkflowManagerUtil.createAndAddNode(m_wfm, new OrcTableReaderNodeFactory());
+        final var settings = new OrcTableReaderNodeParameters();
+        settings.m_orcReaderParameters.m_multiFileSelectionParams.m_source =
             new MultiFileSelection<>(MultiFileSelectionMode.FILE, new DefaultFileChooserFilters(),
                 new FSLocation(FSCategory.LOCAL, getTestFilePath(TEST_FILE)));
         setSettings(settings);
@@ -105,47 +105,47 @@ class ParquetTableReaderNodeModelTest extends LocalWorkflowContextTest {
         m_wfm.executeAllAndWaitUntilDone();
 
         // then
-        assertTrue(m_parquetReader.getNodeContainerState().isExecuted());
+        assertTrue(m_orcReader.getNodeContainerState().isExecuted());
         final var outputTable = getOutputTable();
         assertThat(outputTable).isNotNull();
         assertThat(outputTable.size()).isGreaterThan(0);
-        assertThat(outputTable.getDataTableSpec().getColumnNames()).containsExactly("column1", "column2");
+        assertThat(outputTable.getDataTableSpec().getColumnNames()).containsExactly("Column 1", "Column 2");
     }
 
     @Test
-    void testReadValidParquetFileFromURL() throws IOException, URISyntaxException {
+    void testReadValidOrcFileFromURL() throws IOException, URISyntaxException {
         // given
         final var fileUrl =
-            FileLocator.toFileURL(ParquetTableReaderNodeModelTest.class.getResource(TEST_FILE).toURI().toURL());
-        final var creationConfig = new ParquetTableReaderNodeFactory2().createNodeCreationConfig();
+            FileLocator.toFileURL(OrcTableReaderNodeModelTest.class.getResource(TEST_FILE).toURI().toURL());
+        final var creationConfig = new OrcTableReaderNodeFactory().createNodeCreationConfig();
         creationConfig.setURLConfiguration(fileUrl);
 
         // when
-        var nodeId = m_wfm.addNodeAndApplyContext(new ParquetTableReaderNodeFactory2(), creationConfig, 42);
+        var nodeId = m_wfm.addNodeAndApplyContext(new OrcTableReaderNodeFactory(), creationConfig, 42);
 
         // then
-        m_parquetReader = (NativeNodeContainer)m_wfm.getNodeContainer(nodeId);
+        m_orcReader = (NativeNodeContainer)m_wfm.getNodeContainer(nodeId);
         m_wfm.executeAllAndWaitUntilDone();
-        assertTrue(m_parquetReader.getNodeContainerState().isExecuted());
+        assertTrue(m_orcReader.getNodeContainerState().isExecuted());
         final var outputTable = getOutputTable();
         assertThat(outputTable).isNotNull();
-        assertThat(outputTable.getDataTableSpec().getColumnNames()).containsExactly("column1", "column2");
+        assertThat(outputTable.getDataTableSpec().getColumnNames()).containsExactly("Column 1", "Column 2");
     }
 
     private BufferedDataTable getOutputTable() {
-        return (BufferedDataTable)m_parquetReader.getOutPort(1).getPortObject();
+        return (BufferedDataTable)m_orcReader.getOutPort(1).getPortObject();
     }
 
-    private void setSettings(final ParquetTableReaderNodeParameters settings) throws InvalidSettingsException {
-        final var nodeSettings = new NodeSettings("ParquetReader");
-        m_wfm.saveNodeSettings(m_parquetReader.getID(), nodeSettings);
+    private void setSettings(final OrcTableReaderNodeParameters settings) throws InvalidSettingsException {
+        final var nodeSettings = new NodeSettings("OrcReader");
+        m_wfm.saveNodeSettings(m_orcReader.getID(), nodeSettings);
         var modelSettings = nodeSettings.addNodeSettings("model");
-        NodeParametersUtil.saveSettings(ParquetTableReaderNodeParameters.class, settings, modelSettings);
-        m_wfm.loadNodeSettings(m_parquetReader.getID(), nodeSettings);
+        NodeParametersUtil.saveSettings(OrcTableReaderNodeParameters.class, settings, modelSettings);
+        m_wfm.loadNodeSettings(m_orcReader.getID(), nodeSettings);
     }
 
     private static String getTestFilePath(final String path) throws IOException, URISyntaxException {
-        var url = FileLocator.toFileURL(ParquetTableReaderNodeModelTest.class.getResource(path).toURI().toURL());
+        var url = FileLocator.toFileURL(OrcTableReaderNodeModelTest.class.getResource(path).toURI().toURL());
         return FileUtil.getFileFromURL(url).toPath().toString();
     }
 
