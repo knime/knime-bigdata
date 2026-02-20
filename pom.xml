@@ -32,16 +32,14 @@
 			<modules>
 				<!-- this needs to go first because it ensures that jar files required by spark.local are present -->
 				<module>org.knime.bigdata.spark.local/libs/fetch_jars</module>
-
 				<module>org.knime.bigdata.commons</module>
 				<module>org.knime.bigdata.hadoop.client.win32</module>
 				<module>org.knime.bigdata.database</module>
 				<module>org.knime.bigdata.databricks</module>
-				<module>org.knime.bigdata.databricks.tests</module>
 				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars</module>
 				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars273</module>
 				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars275</module>
-		<module>org.knime.bigdata.database.databricks.driver</module>
+				<module>org.knime.bigdata.database.databricks.driver</module>
 				<module>org.knime.bigdata.databricks.python</module>
 				<module>org.knime.bigdata.delta/lib/fetch_jars</module>
 				<module>org.knime.bigdata.delta</module>
@@ -50,8 +48,6 @@
 				<module>org.knime.bigdata.filehandling.knox</module>
 				<module>org.knime.bigdata.hadoop.filehandling</module>
 				<module>org.knime.bigdata.hadoop.filehandling.knox</module>
-				<module>org.knime.bigdata.hadoop.filehandling.knox.tests</module>
-				<module>org.knime.bigdata.hadoop.filehandling.tests</module>
 				<module>org.knime.bigdata.hive</module>
 				<module>org.knime.bigdata.impala</module>
 				<module>org.knime.bigdata.scripting</module>
@@ -93,9 +89,24 @@
 		<profile>
 			<id>test</id>
 			<modules>
+				<module>org.knime.bigdata.commons</module>
+				<module>org.knime.bigdata.filehandling</module>
+				<module>org.knime.bigdata.filehandling.knox</module>
+				<module>org.knime.bigdata.hive</module>
+				<module>org.knime.bigdata.impala</module>
+				<module>org.knime.bigdata.spark.core</module>
+				<module>org.knime.bigdata.spark.node</module>
+				<!-- required dependencies up to here, below are the unit tests -->
 				<module>org.knime.bigdata.database</module>
 				<module>org.knime.bigdata.database.tests</module>
+				<module>org.knime.bigdata.databricks</module>
+				<module>org.knime.bigdata.databricks.tests</module>
+				<module>org.knime.bigdata.fileformats</module>
 				<module>org.knime.bigdata.fileformats.tests</module>
+				<module>org.knime.bigdata.hadoop.filehandling</module>
+				<module>org.knime.bigdata.hadoop.filehandling.tests</module>
+				<module>org.knime.bigdata.hadoop.filehandling.knox</module>
+				<module>org.knime.bigdata.hadoop.filehandling.knox.tests</module>
 			</modules>
 		</profile>
 	</profiles>
