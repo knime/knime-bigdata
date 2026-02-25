@@ -100,7 +100,7 @@ public final class ParquetTableReaderNodeFactory2 extends //
             "Parquet Reader", //
             "./parquetreader-icon.png", //
             List.of(dynamicPort(FS_CONNECT_GRP_ID, "File System Connection", "The file system connection.")), //
-            List.of(fixedPort("Data Table", "The data table containing the data of the Parquet file.")), //
+            List.of(fixedPort("Data table", "The data table containing the data of the Parquet file.")), //
             "Reader for Parquet files.", //
             "Reader for Parquet files. It reads either single files or all files in a given directory.", //
             List.of(), //
