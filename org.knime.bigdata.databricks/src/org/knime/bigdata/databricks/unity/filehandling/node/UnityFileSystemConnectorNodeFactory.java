@@ -50,7 +50,7 @@ package org.knime.bigdata.databricks.unity.filehandling.node;
 
 import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeFactory;
-import org.knime.credentials.base.CredentialPortObject;
+import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject;
 import org.knime.filehandling.core.port.FileSystemPortObject;
 
 /**
@@ -58,28 +58,28 @@ import org.knime.filehandling.core.port.FileSystemPortObject;
  *
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "deprecation"})
 public class UnityFileSystemConnectorNodeFactory extends WebUINodeFactory<UnityFileSystemConnectorNodeModel> {
 
     private static final String FULL_DESCRIPTION =
-        "<p>Connects to the Unity Volumes of a Databricks workspace, in order to read/write files in downstream"//
-            + "nodes.</p>"//
-            + "<p>\n"//
-            + "The resulting\n"//
-            + "output port allows downstream nodes to access Databricks Unity Volumes as a file system, e.g.\n"//
-            + "to read or write files and folders, or to perform other file system operations (browse/list\n"//
-            + "files, copy, move, ...).\n"//
-            + "</p>\n"//
-            + "<p><b>Path syntax:</b> Paths for this connector are specified with a UNIX-like syntax, for example\n"//
+        "<p>Connects to the Unity Volumes of a Databricks workspace, in order to read/write files in downstream "
+            + "nodes.</p>"
+            + "<p>"
+            + "The resulting "
+            + "output port allows downstream nodes to access Databricks Unity Volumes as a file system, e.g. "
+            + "to read or write files and folders, or to perform other file system operations (browse/list "
+            + "files, copy, move, ...)."
+            + "</p>"
+            + "<p><b>Path syntax:</b> Paths for this connector are specified with a UNIX-like syntax, for example "
             + "<tt>/example-catalog/example-schema/example-volume/myfolder/file.csv</tt>, which is an absolute path "
-            + "that consists of:\n"//
-            + "<ol>\n"//
-            + "    <li>a leading slash (<tt>/</tt>)</li>\n"//
-            + "    <li>the name of a catalog in the workspace (<tt>example-catalog</tt>)</li>\n"//
-            + "    <li>the name of a schema in the catalog (<tt>example-schema</tt>)</li>\n"//
-            + "    <li>the name of a volume in the schema (<tt>example-volume</tt>)</li>\n"//
-            + "    <li>The name of a folder or file in the volume (<tt>myfolder/file.csv</tt>)</li>\n"//
-            + "</ol>\n"//
+            + "that consists of:"
+            + "<ol>"
+            + "<li>a leading slash (<tt>/</tt>)</li>"
+            + "<li>the name of a catalog in the workspace (<tt>example-catalog</tt>)</li>"
+            + "<li>the name of a schema in the catalog (<tt>example-schema</tt>)</li>"
+            + "<li>the name of a volume in the schema (<tt>example-volume</tt>)</li>"
+            + "<li>The name of a folder or file in the volume (<tt>myfolder/file.csv</tt>)</li>"
+            + "</ol>"
             + "</p>";
 
     private static final WebUINodeConfiguration CONFIGURATION = WebUINodeConfiguration.builder()//
@@ -87,10 +87,10 @@ public class UnityFileSystemConnectorNodeFactory extends WebUINodeFactory<UnityF
         .icon("./file_system_connector.png") //
         .shortDescription("Databricks Unity File System Connector node.") //
         .fullDescription(FULL_DESCRIPTION) //
-        .modelSettingsClass(UnityFileSystemConnectorSettings.class) //
+        .modelSettingsClass(UnityFileSystemConnectorNodeParameters.class) //
         .nodeType(NodeType.Source)//
         .addInputPort("Databricks Workspace Connection", //
-            CredentialPortObject.TYPE, //
+            DatabricksWorkspacePortObject.TYPE, //
             "Databricks Workspace connection") //
         .addOutputPort("File System", FileSystemPortObject.TYPE, "Databricks Unity File System.") //
         .sinceVersion(5, 3, 0)//

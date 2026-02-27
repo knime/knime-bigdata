@@ -1,0 +1,63 @@
+{
+  "data" : {
+    "model" : {
+      "workingDirectory" : "/"
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "workingDirectory" : {
+            "type" : "string",
+            "title" : "Working directory",
+            "description" : "Specifies the <i>working directory</i> of the resulting file system connection. The working directory must be specified as an absolute path. A working directory allows downstream nodes to access files/folders using <i>relative</i> paths, i.e. paths that do not have a leading slash. If not specified, the default working directory is \"/\".",
+            "default" : "/"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "File System",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/workingDirectory",
+        "options" : {
+          "selectionMode" : "FILE",
+          "format" : "stringFileChooser"
+        },
+        "providedOptions" : [ "fileSystemId" ]
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "workingDirectory" : {
+            "configKey" : "workingDirectory"
+          }
+        }
+      }
+    }
+  },
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/workingDirectory" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/workingDirectory"
+    },
+    "dependencies" : [ "#/properties/model/properties/workingDirectory" ]
+  } ]
+}

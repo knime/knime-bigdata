@@ -41,48 +41,52 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ---------------------------------------------------------------------
- *
- * History
- *   2024-05-24 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
+ * ------------------------------------------------------------------------
  */
 package org.knime.bigdata.databricks.unity.filehandling.node;
 
-import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.dbfs.filehandling.fs.DbfsFileSystem;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.node.parameters.NodeParameters;
-import org.knime.node.parameters.Widget;
-import org.knime.node.parameters.layout.Layout;
-import org.knime.node.parameters.layout.Section;
+import org.knime.core.node.NodeSettings;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersUtil;
+import org.knime.testing.node.dialog.DefaultNodeSettingsSnapshotTest;
+import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 
 /**
- * Node settings for the Databricks Unity File System Connector.
+ * Snapshot test for {@link UnityFileSystemConnectorNodeParameters}.
  *
- * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
+ * @author AI Migration Pipeline v1.2
  */
 @SuppressWarnings("restriction")
-public class UnityFileSystemConnectorSettings implements NodeParameters {
+final class UnityFileSystemConnectorNodeParametersTest extends DefaultNodeSettingsSnapshotTest {
 
-    @Section(title = "File System")
-    interface FileSystemSection {
+    UnityFileSystemConnectorNodeParametersTest() {
+        super(getConfig());
     }
 
-    @Widget(title = "Working directory", //
-        description = "Specifies the <i>working directory</i> of the resulting file system connection."
-            + " The working directory must be specified as an absolute path."
-            + " A working directory allows downstream nodes to access files/folders using <i>relative</i> paths,"
-            + " i.e. paths that do not have a leading slash."
-            + " If not specified, the default working directory is \"/\".")
-    @Layout(FileSystemSection.class)
-    String m_workingDirectory = "/";
+    private static SnapshotTestConfiguration getConfig() {
+        return SnapshotTestConfiguration.builder() //
+            .testJsonFormsForModel(UnityFileSystemConnectorNodeParameters.class) //
+            .testJsonFormsWithInstance(SettingsType.MODEL, UnityFileSystemConnectorNodeParametersTest::readSettings) //
+            .testNodeSettingsStructure(UnityFileSystemConnectorNodeParametersTest::readSettings) //
+            .build();
+    }
 
-    @Override
-    public void validate() throws InvalidSettingsException {
-        if (StringUtils.isAllBlank(m_workingDirectory)) {
-            throw new InvalidSettingsException("Please specify a working directory.");
-        } else if (!m_workingDirectory.startsWith(DbfsFileSystem.PATH_SEPARATOR)) {
-            throw new InvalidSettingsException("Working directory must be an absolute path that starts with \"/\"");
+    private static UnityFileSystemConnectorNodeParameters readSettings() {
+        try {
+            var path = getSnapshotPath(UnityFileSystemConnectorNodeParameters.class)
+                .getParent().resolve("node_settings")
+                .resolve("UnityFileSystemConnectorNodeParameters.xml");
+            try (var fis = new FileInputStream(path.toFile())) {
+                var nodeSettings = NodeSettings.loadFromXML(fis);
+                return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
+                    UnityFileSystemConnectorNodeParameters.class);
+            }
+        } catch (IOException | InvalidSettingsException e) {
+            throw new IllegalStateException(e);
         }
     }
 }
