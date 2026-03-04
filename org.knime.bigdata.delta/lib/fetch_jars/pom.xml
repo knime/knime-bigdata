@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.knime.bigdata.delta.sharing</groupId>
   <artifactId>databricks-fetch-jars</artifactId>
-  <version>3.3.1</version>
+  <version>4.1.0</version>
   <packaging>pom</packaging>
 
   <name>Jar fetcher for Delta Kernel</name>
@@ -13,7 +13,7 @@
   </description>
 
   <properties>
-    <parquet.version>1.15.2</parquet.version>
+    <parquet.version>1.17.0</parquet.version>
   </properties>
 
   <!-- NOTE ABOUT DEALING WITH DEPENDENCIES:
@@ -70,8 +70,24 @@
           <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.datatype</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

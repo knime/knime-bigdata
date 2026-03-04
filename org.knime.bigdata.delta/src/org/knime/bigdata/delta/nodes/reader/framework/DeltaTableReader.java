@@ -55,8 +55,8 @@ import java.util.Collections;
 
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderConfig;
 import org.knime.bigdata.delta.types.DeltaTableDataType;
-import org.knime.bigdata.delta.types.DeltaTableValue;
 import org.knime.bigdata.delta.types.DeltaTableTypeHelper;
+import org.knime.bigdata.delta.types.DeltaTableValue;
 import org.knime.bigdata.hadoop.filesystem.NioFileSystemUtil;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.filehandling.core.connections.FSPath;
@@ -110,14 +110,14 @@ public final class DeltaTableReader
             final var engine = DefaultEngine.create(hadoopConfig);
             final var table = Table.forPath(engine, hadoopPath.toString());
             final var snapshot = table.getLatestSnapshot(engine);
-            final var readSchema = filterColumns(snapshot.getSchema(engine));
-            final var scan = snapshot.getScanBuilder(engine) //
-                     .withReadSchema(engine, readSchema) // column filter
+            final var readSchema = filterColumns(snapshot.getSchema());
+            final var scan = snapshot.getScanBuilder() //
+                     .withReadSchema(readSchema) // column filter
                     // .withFilter(engine, filter) // value filter
                     .build();
 
             final var scanState = scan.getScanState(engine);
-            final var physicalReadSchema = ScanStateRow.getPhysicalDataReadSchema(engine, scanState);
+            final var physicalReadSchema = ScanStateRow.getPhysicalDataReadSchema(scanState);
 
             final var scanFilesIterator = scan.getScanFiles(engine);
             final var scanFileRowsIterator = new DeltaTableRowIterator(scanFilesIterator);
@@ -152,7 +152,7 @@ public final class DeltaTableReader
             final var engine = DefaultEngine.create(hadoopConfig);
             final var table = Table.forPath(engine, tablePath);
             final var snapshot = table.getLatestSnapshot(engine);
-            final var schema = snapshot.getSchema(engine);
+            final var schema = snapshot.getSchema();
 
             return readSpec(config, schema);
         } catch (final TableNotFoundException e) {
