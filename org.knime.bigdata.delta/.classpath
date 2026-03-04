@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/delta-kernel-api-3.3.1.jar" sourcepath="lib/delta-kernel-api-3.3.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/delta-kernel-defaults-3.3.1.jar" sourcepath="lib/delta-kernel-defaults-3.3.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/delta-storage-3.3.1.jar" sourcepath="lib/delta-storage-3.3.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parquet-column-1.15.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parquet-common-1.15.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parquet-encoding-1.15.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parquet-format-structures-1.15.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parquet-hadoop-1.15.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parquet-jackson-1.15.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/RoaringBitmap-0.9.25.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/shims-0.9.25.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/delta-kernel-api-4.1.0.jar" sourcepath="lib/delta-kernel-api-4.1.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/delta-kernel-defaults-4.1.0.jar" sourcepath="lib/delta-kernel-defaults-4.1.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/delta-storage-4.1.0.jar" sourcepath="lib/delta-storage-4.1.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jts-core-1.20.0.jar" sourcepath="lib/jts-core-1.20.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parquet-column-1.17.0.jar" sourcepath="lib/parquet-column-1.17.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parquet-common-1.17.0.jar" sourcepath="lib/parquet-common-1.17.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parquet-encoding-1.17.0.jar" sourcepath="lib/parquet-encoding-1.17.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parquet-format-structures-1.17.0.jar" sourcepath="lib/parquet-format-structures-1.17.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parquet-hadoop-1.17.0.jar" sourcepath="lib/parquet-hadoop-1.17.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parquet-jackson-1.17.0.jar" sourcepath="lib/parquet-jackson-1.17.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/RoaringBitmap-0.9.25.jar" sourcepath="lib/RoaringBitmap-0.9.25-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/shims-0.9.25.jar" sourcepath="lib/shims-0.9.25-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unitycatalog-client-0.4.0.jar" sourcepath="lib/unitycatalog-client-0.4.0-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>

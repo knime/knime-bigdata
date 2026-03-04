@@ -55,6 +55,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import io.delta.kernel.Scan;
+import io.delta.kernel.data.ColumnarBatch;
 import io.delta.kernel.data.FilteredColumnarBatch;
 import io.delta.kernel.data.Row;
 import io.delta.kernel.engine.Engine;
@@ -127,7 +128,25 @@ public class DeltaTableScanFileBatchIterator implements CloseableIterator<Filter
                 singletonCloseableIterator(fileStatus), //
                 m_physicalReadSchema, //
                 Optional.empty()); // value filter
-            return Scan.transformPhysicalData(m_engine, m_scanState, scanFileRow, physicalDataIter);
+
+            final var batchIter = new CloseableIterator<ColumnarBatch>() {
+                @Override
+                public void close() throws IOException {
+                    physicalDataIter.close();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return physicalDataIter.hasNext();
+                }
+
+                @Override
+                public ColumnarBatch next() {
+                    return physicalDataIter.next().getData();
+                }
+            };
+
+            return Scan.transformPhysicalData(m_engine, m_scanState, scanFileRow, batchIter);
         } catch (final IOException e) {
             throw new KernelException(e);
         }
