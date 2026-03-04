@@ -19,6 +19,7 @@
     <description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
     <properties>
+        <aircompressor.version>2.0.3</aircompressor.version>
         <commons.compress.version>1.26.2</commons.compress.version>
         <gson.version>2.11.0</gson.version>
         <ivy.version>2.5.2</ivy.version>
@@ -57,6 +58,13 @@
 	  Contra: Alters the maven dependency tree, which may be confusing.
 	 -->
     <dependencies>
+    <!-- BD-1381: bump aircompressor to avoid CVE -->
+        <dependency>
+            <groupId>io.airlift</groupId>
+            <artifactId>aircompressor</artifactId>
+            <version>${aircompressor.version}</version>
+        </dependency>
+    
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
