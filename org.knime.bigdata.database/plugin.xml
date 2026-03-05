@@ -33,8 +33,16 @@
             factory-class="org.knime.bigdata.database.hive.node.HiveConnectorNodeFactory"
             category-path="/db/connector"/>
       <node
-            factory-class="org.knime.bigdata.database.impala.node.ImpalaConnectorNodeFactory"
-            category-path="/db/connector"/>
+            category-path="/db/connector"
+            deprecated="true"
+            hidden="true"
+            factory-class="org.knime.bigdata.database.impala.node.ImpalaConnectorNodeFactory">
+      </node>
+      <node
+            category-path="/db/connector"
+            deprecated="false"
+            factory-class="org.knime.bigdata.database.impala.node.ImpalaConnectorNodeFactory2">
+      </node>
     </extension>
    <extension
          point="org.knime.database.Driver">
@@ -217,6 +225,7 @@
     <extension point="org.knime.workflow.migration.NodeMigrationRule">
        <Rule class="org.knime.bigdata.database.hive.node.HiveConnectorNodeMigrationRule"/>
        <Rule class="org.knime.bigdata.database.impala.node.ImpalaConnectorNodeMigrationRule"/>
+       <!-- <Rule class="org.knime.bigdata.database.impala.node.ImpalaConnectorNodeMigrationRule2"/> -->
     </extension>
    	
 </plugin>

@@ -44,61 +44,55 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   Mar 5, 2026 (Halil Yerlikaya, KNIME GmbH, Berlin, Germany): created
  */
 package org.knime.bigdata.database.impala.node;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import org.knime.bigdata.database.impala.Impala;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
+import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.AuthenticationSettings;
+import org.knime.core.webui.node.impl.WebUINodeConfiguration;
+import org.knime.database.connection.DBConnectionController;
+import org.knime.database.connection.UserDBConnectionController;
+import org.knime.database.node.connector.server.UnauthenticatedServerDBConnectorNodeModel2;
 
 /**
+ * Node model for the Impala Connector (WebUI).
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
- * @deprecated replaced by {@link ImpalaConnectorNodeFactory2}
+ * @author Halil Yerlikaya, KNIME GmbH, Berlin, Germany
  */
-@Deprecated(since = "5.6.0")
-public class ImpalaConnectorNodeFactory extends NodeFactory<ImpalaConnectorNodeModel> {
+@SuppressWarnings("restriction")
+public class ImpalaConnectorNodeModel2
+    extends UnauthenticatedServerDBConnectorNodeModel2<ImpalaConnectorNodeSettings> {
 
     /**
-     * {@inheritDoc}
+     * @param configuration the node configuration
      */
-    @Override
-    public ImpalaConnectorNodeModel createNodeModel() {
-        return new ImpalaConnectorNodeModel();
+    protected ImpalaConnectorNodeModel2(final WebUINodeConfiguration configuration) {
+        super(Impala.DB_TYPE, configuration, ImpalaConnectorNodeSettings.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected int getNrNodeViews() {
-        return 0;
+    protected DBConnectionController createConnectionController(final ImpalaConnectorNodeSettings modelSettings)
+        throws InvalidSettingsException {
+        final var credentials = modelSettings.m_authentication.getCredentials();
+        return new UserDBConnectionController(getDBUrl(modelSettings),
+            getAuthenticationType(modelSettings.m_authentication), credentials.getUsername(), credentials.getPassword(),
+            null, null, modelSettings.m_host);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<ImpalaConnectorNodeModel> createNodeView(final int viewIndex,
-        final ImpalaConnectorNodeModel nodeModel) {
-        return null;
+    private static AuthenticationType getAuthenticationType(final AuthenticationSettings authSettings) {
+        return switch (authSettings.getType()) {
+            case KERBEROS -> AuthenticationType.KERBEROS;
+            case USER_PWD -> AuthenticationType.USER_PWD;
+            default -> throw new IllegalArgumentException("Unknown Authentication type");
+        };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected boolean hasDialog() {
-        return true;
+    protected void validateSessionInfoSettings(final ImpalaConnectorNodeSettings modelSettings)
+        throws InvalidSettingsException {
+        modelSettings.validateAuthenticationSettings();
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new ImpalaConnectorNodeDialog();
-    }
-
 }
