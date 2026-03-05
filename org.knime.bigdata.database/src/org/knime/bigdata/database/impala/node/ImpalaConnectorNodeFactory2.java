@@ -44,59 +44,47 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   Mar 5, 2026 (Halil Yerlikaya, KNIME GmbH, Berlin, Germany): created
  */
 package org.knime.bigdata.database.impala.node;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import org.knime.core.webui.node.impl.WebUINodeConfiguration;
+import org.knime.core.webui.node.impl.WebUINodeFactory;
+import org.knime.database.port.DBSessionPortObject;
 
 /**
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Halil Yerlikaya, KNIME GmbH, Berlin, Germany
  */
-public class ImpalaConnectorNodeFactory extends NodeFactory<ImpalaConnectorNodeModel> {
+@SuppressWarnings("restriction")
+public class ImpalaConnectorNodeFactory2 extends WebUINodeFactory<ImpalaConnectorNodeModel2> {
 
     /**
-     * {@inheritDoc}
+     *
      */
-    @Override
-    public ImpalaConnectorNodeModel createNodeModel() {
-        return new ImpalaConnectorNodeModel();
+    public ImpalaConnectorNodeFactory2() {
+        super(CONFIGURATION);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
+    private static final WebUINodeConfiguration CONFIGURATION = WebUINodeConfiguration.builder() //
+        .name("Impala Connector (labs)") //
+        .icon("impala_connector.png") //
+        .shortDescription("Create a database connection to Apache Impala™.") //
+        .fullDescription("""
+                This node creates a connection to Apache Impala™ via JDBC. You need to provide the server's \
+                hostname (or IP address), the port, and a database name. Login credentials can either be \
+                provided directly in the configuration or via credential variables.
+                """) //
+        .modelSettingsClass(ImpalaConnectorNodeSettings.class) //
+        .addExternalResource("https://docs.knime.com/latest/db_extension_guide/index.html#register_jdbc",
+            "Database documentation") //
+        .nodeType(NodeType.Source) //
+        .addOutputPort("DB Connection", DBSessionPortObject.TYPE, "Impala DB Connection.") //
+        .keywords("database", "db", "connection", "session", "create", "impala") //
+        .build();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public NodeView<ImpalaConnectorNodeModel> createNodeView(final int viewIndex,
-        final ImpalaConnectorNodeModel nodeModel) {
-        return null;
+    public ImpalaConnectorNodeModel2 createNodeModel() {
+        return new ImpalaConnectorNodeModel2(CONFIGURATION);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new ImpalaConnectorNodeDialog();
-    }
-
 }
