@@ -1,0 +1,24 @@
+Terms for License of Databricks JDBC Driver 
+0. General
+===========
+This library containing the Databricks JDBC DRIVER is provided to you by KNIME AG ("KNIME") on this special license. 
+The Software is the intellectual property of Databricks Inc. or its licensors. KNIME licenses the Software to you under these terms and conditions. You can obtain the Databricks JDBC DRIVER also from Databricks's servers under Databricks License Terms.
+The Software is protected by law, including without limitation copyright laws and international treaty provisions. Except for the rights explicitly granted to you in this License Agreement, all right, title and interest in the Software are reserved. You do not acquire any intellectual property or other rights in the Software as a result of downloading the Software.
+
+1. Use of the Software; Distribution
+=====================================
+KNIME hereby grants you a personal, limited, non-exclusive, non-transferable, non-sublicenseable license to install and use the feature including the Software. Some components of the Software may be governed by applicable open source software licenses. Your license rights with respect to these individual components are defined by the applicable open source software licenses, and nothing in this license agreement will restrict, limit, or otherwise affect any rights or obligations you may have, or conditions to which you may be subject, under such open source software licenses. 
+
+2. Limitations
+===============
+You may not use the Software for any illegal purpose. You may not, and you will not encourage, assist or authorize any other person to, (a) sell, rent, lease, lend, loan, distribute, act as a service bureau, publicly communicate, transform, or sub-license the Software or otherwise assign any rights to the Software in whole or in part; (b) modify, alter, tamper with, repair, or otherwise create derivative works of the Software, (c) reverse engineer, disassemble, or decompile the Software or apply any other process or procedure to derive the source code of any software included in the Software, (d) work around any technical limitations in the Software, (e) publish the Software for others to copy, (f) use the Software for commercial software hosting services, or (g) access or use the Software in a way intended to avoid incurring fees or exceeding usage limits or quotas.
+
+3. Disclaimer of Warranties and Limitation of Liability
+========================================================
+a. YOU EXPRESSLY ACKNOWLEDGE AND AGREE THAT INSTALLATION AND USE OF, AND ANY OTHER ACCESS TO, THE SOFTWARE IS AT YOUR SOLE RISK. THE SOFTWARE IS DELIVERED TO YOU "AS IS" WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND, AND KNIME DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, QUIET ENJOYMENT, AND NON-INFRINGEMENT. NO ORAL OR WRITTEN INFORMATION OR ADVICE GIVEN BY KNIME OR AN AUTHORIZED REPRESENTATIVE OF KNIME WILL CREATE A WARRANTY. 
+
+b. TO THE EXTENT NOT PROHIBITED BY LAW, KNIME WILL NOT BE LIABLE TO YOU FOR ANY INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR BREACH OF ANY EXPRESS OR IMPLIED WARRANTY, BREACH OF CONTRACT, NEGLIGENCE, STRICT LIABILITY, OR ANY OTHER LEGAL THEORY RELATED TO THE SOFTWARE, INCLUDING WITHOUT LIMITATION ANY DAMAGES ARISING OUT OF LOSS OF PROFITS, REVENUE, DATA, OR USE OF THE SOFTWARE, EVEN IF KNIME HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, KNIME'S AGGREGATE LIABILITY UNDER THIS LICENSE AGREEMENT WILL BE LIMITED TO $25.00.
+
+4. Miscellaneous
+=================
+This Software is licensed to you, not sold. With this license agreement you receive a license for the Software from KNIME. Databricks are the owner of the Software, but KNIME and Databricks are not in any way through this agreement in any kind of partnership, joint venture, or any other relationship - and nothing in this agreement implies this. KNIME is no representative or agent of Databricks and has no authority to enter into any agreement on Databricks' behalf or on Databricks' name or otherwise bind Databricks to any agreement or obligation.
