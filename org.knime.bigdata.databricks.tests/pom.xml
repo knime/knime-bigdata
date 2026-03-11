@@ -31,6 +31,11 @@
 								<id>org.knime.features.base</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.knime.bigdata.database.databricks.driver</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
 						</extraRequirements>
 					</dependency-resolution>
 				</configuration>
