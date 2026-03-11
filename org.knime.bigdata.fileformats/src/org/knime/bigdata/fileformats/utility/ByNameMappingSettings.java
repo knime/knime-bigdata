@@ -44,12 +44,13 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Jan 28, 2026 (paulbaernreuther): created
+ *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
-package org.knime.bigdata.fileformats.parquet.writer3;
+package org.knime.bigdata.fileformats.utility;
 
-import static org.knime.bigdata.fileformats.parquet.writer3.TypeMappingUtils.getIdForConsumptionPath;
+import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
 
+import org.knime.bigdata.fileformats.utility.TypeMappingUtils.FilterType;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
@@ -57,37 +58,51 @@ import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
+import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 
-@SuppressWarnings("restriction")
-final class ByTypeMappingSettings implements NodeParameters {
-
-    ByTypeMappingSettings() {
+@SuppressWarnings({"restriction", "javadoc"})
+public final class ByNameMappingSettings implements NodeParameters {
+    ByNameMappingSettings() {
         //default constructor for deserialization
     }
 
-    ByTypeMappingSettings(final DataType knimeType, final ConsumptionPath consumptionPath) {
-        this(knimeType, getIdForConsumptionPath(consumptionPath));
+    public ByNameMappingSettings(final FilterType filterType, final String columnName, final DataType knimeType,
+        final ConsumptionPath consumptionPath) {
+        this(filterType, columnName, knimeType, getIdForConsumptionPath(consumptionPath));
     }
 
-    ByTypeMappingSettings(final DataType fromType, final String toType) {
-        this.m_fromType = fromType;
-        this.m_toType = toType;
+    ByNameMappingSettings(final FilterType filterType, final String fromColName, final DataType fromColType,
+        final String toColType) {
+        this.m_filterType = filterType;
+        this.m_fromColName = fromColName;
+        this.m_fromColType = fromColType;
+        this.m_toColType = toColType;
     }
+
+    @Widget(title = "Column selection type", description = "The option allows you to select how the column is matched.")
+    @ValueSwitchWidget
+    public FilterType m_filterType = FilterType.MANUAL;
+
+    @Widget(title = "Column name", description = "The column name or regex expression.")
+    @ValueReference(FromColRef.class)
+    public String m_fromColName = "";
 
     @Widget(title = "KNIME type", description = "KNIME data type to map from.")
     @ValueReference(FromColTypeRef.class)
     @Modification.WidgetReference(FromColTypeRef.class)
-    DataType m_fromType;
+    public DataType m_fromColType;
 
-    @Widget(title = "Mapping to", description = "Parquet data type to map to.")
-    @ValueReference(ToColTypeRef.class)
+    @Widget(title = "Mapping to", description = "External data type to map to.")
     @Modification.WidgetReference(ToColTypeRef.class)
-    String m_toType;
+    public String m_toColType;
 
-    interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
+    public interface FromColRef extends ParameterReference<String> {
     }
 
-    interface ToColTypeRef extends ParameterReference<String>, Modification.Reference {
+    public interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
+    }
+
+    public interface ToColTypeRef extends Modification.Reference {
     }
 
 }

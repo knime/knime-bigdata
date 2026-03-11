@@ -44,9 +44,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Jan 14, 2026: created
+ *   Mar 11, 2026: created
  */
-package org.knime.bigdata.fileformats.parquet.writer3;
+package org.knime.bigdata.fileformats.orc.writer2;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,33 +59,33 @@ import org.knime.testing.node.dialog.DefaultNodeSettingsSnapshotTest;
 import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 
 /**
- * Snapshot test for {@link ParquetWriter3NodeParameters}.
+ * Snapshot test for {@link ORCWriter2NodeParameters}.
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
-@SuppressWarnings("restriction")
-final class ParquetWriter3NodeParametersTest extends DefaultNodeSettingsSnapshotTest {
+@SuppressWarnings({"restriction", "javadoc"})
+final class ORCWriter2NodeParametersTest extends DefaultNodeSettingsSnapshotTest {
 
-    ParquetWriter3NodeParametersTest() {
+    ORCWriter2NodeParametersTest() {
         super(getConfig());
     }
 
     private static SnapshotTestConfiguration getConfig() {
         return SnapshotTestConfiguration.builder() //
-            .testJsonFormsForModel(ParquetWriter3NodeParameters.class) //
+            .testJsonFormsForModel(ORCWriter2NodeParameters.class) //
             .testJsonFormsWithInstance(SettingsType.MODEL, () -> readSettings()) //
             .testNodeSettingsStructure(() -> readSettings()) //
             .build();
     }
 
-    private static ParquetWriter3NodeParameters readSettings() {
+    private static ORCWriter2NodeParameters readSettings() {
         try {
-            var path = getSnapshotPath(ParquetWriter3NodeParameters.class).getParent().resolve("node_settings")
-                .resolve("ParquetWriter3NodeParameters.xml");
+            var path = getSnapshotPath(ORCWriter2NodeParameters.class).getParent().resolve("node_settings")
+                .resolve("ORCWriter2NodeParameters.xml");
             try (var fis = new FileInputStream(path.toFile())) {
                 var nodeSettings = NodeSettings.loadFromXML(fis);
                 return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
-                    ParquetWriter3NodeParameters.class);
+                    ORCWriter2NodeParameters.class);
             }
         } catch (IOException | InvalidSettingsException e) {
             throw new IllegalStateException(e);

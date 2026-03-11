@@ -41,14 +41,20 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ------------------------------------------------------------------------
+ * ---------------------------------------------------------------------
+ *
+ * History
+ *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
+package org.knime.bigdata.fileformats.orc.writer2;
 
-package org.knime.bigdata.fileformats.parquet.writer3;
-
-import java.util.List;
+import java.util.Arrays;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileWriterWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
@@ -61,9 +67,10 @@ import org.knime.node.parameters.layout.After;
 import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
+import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.node.parameters.persistence.Persist;
-import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions;
-import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions.OverwritePolicy;
+import org.knime.node.parameters.persistence.Persistor;
+import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithCreateMissingFolders;
 import org.knime.node.parameters.updates.Effect;
 import org.knime.node.parameters.updates.Effect.EffectType;
 import org.knime.node.parameters.updates.EffectPredicate;
@@ -71,22 +78,19 @@ import org.knime.node.parameters.updates.EffectPredicateProvider;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.StateProvider;
 import org.knime.node.parameters.updates.ValueReference;
-import org.knime.node.parameters.widget.choices.ChoicesProvider;
-import org.knime.node.parameters.widget.choices.EnumChoicesProvider;
 import org.knime.node.parameters.widget.choices.Label;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsPositiveIntegerValidation;
 
 /**
- * Node parameters for Parquet Writer.
+ * Node parameters for ORC Writer.
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
- * @author AI Migration Pipeline v1.2
  */
 @LoadDefaultsForAbsentFields
 @SuppressWarnings("restriction")
-class ParquetWriter3NodeParameters implements NodeParameters {
+final class ORCWriter2NodeParameters implements NodeParameters {
 
     private interface SettingsSection {
         interface SingleFileSelection {
@@ -106,39 +110,81 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @PersistWithin("settings")
     @Modification(OutputFileModification.class)
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    LegacyFileWriterWithFilterModeAndOverwritePolicyOptions m_outputLocation = //
-        new LegacyFileWriterWithFilterModeAndOverwritePolicyOptions();
+    LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions m_outputLocation = //
+        new LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions();
 
-    @Widget(title = "File Compression", description = "The compression codec used to write the Parquet file.")
-    @Persist(configKey = "file_compression")
+    @Widget(title = "File compression", description = "The compression codec used to write the ORC file.")
     @PersistWithin("settings")
+    @Persistor(CompressionPersistor.class)
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    Compression m_compression = Compression.UNCOMPRESSED;
+    Compression m_compression = Compression.NONE;
 
     enum Compression {
-            @Label("Uncompressed")
-            UNCOMPRESSED, //
+            @Label("None")
+            NONE, //
+            @Label("ZLIB")
+            ZLIB, //
             @Label("SNAPPY")
             SNAPPY, //
-            @Label("GZIP")
-            GZIP, //
-            @Label("ZSTD")
-            ZSTD;
+            @Label("LZO")
+            LZO, //
+            @Label("LZ4")
+            LZ4;
     }
 
-    @Widget(title = "Split data into files of size (MB)",
-        description = "Splits up the input data into files of the specified maximum size in megabytes. "
+    static final class CompressionPersistor implements NodeParametersPersistor<Compression> {
+
+        private static final String CONFIG_KEY = "file_compression";
+
+        @Override
+        public Compression load(final NodeSettingsRO settings) throws InvalidSettingsException {
+            final var value = settings.getString(CONFIG_KEY);
+            // The node model (FileFormatWriter2NodeModel) is created by AbstractFileFormatWriter2NodeFactory
+            // via a final createNodeModel() that cannot be overridden. The model owns a FileFormatWriter2Config
+            // instance whose m_compression SettingsModel is initialized with "UNCOMPRESSED" as the hard-coded
+            // default. This value is written to node settings on every saveSettingsTo() call and is then read
+            // back by this persistor. "UNCOMPRESSED" is not a valid CompressionKind in Apache ORC
+            // (valid values: NONE, ZLIB, SNAPPY, LZO, LZ4), so we map it to NONE here.
+            if ("UNCOMPRESSED".equals(value)) {
+                return Compression.NONE;
+            }
+            for (final Compression compression : Compression.values()) {
+                if (compression.name().equals(value)) {
+                    return compression;
+                }
+            }
+            throw new InvalidSettingsException(createInvalidSettingsExceptionMessage(value));
+        }
+
+        private static String createInvalidSettingsExceptionMessage(final String value) {
+            var values = Arrays.stream(Compression.values()).map(Enum::name).collect(Collectors.joining(", "));
+            return String.format("Invalid value '%s'. Possible values: %s", value, values);
+        }
+
+        @Override
+        public void save(final Compression compression, final NodeSettingsWO settings) {
+            settings.addString(CONFIG_KEY, compression.name());
+        }
+
+        @Override
+        public String[][] getConfigPaths() {
+            return new String[][]{{CONFIG_KEY}};
+        }
+    }
+
+    @Widget(title = "Split data into files of size (rows)",
+        description = "Splits up the input data into files with at most the given number of data rows. "
             + "This option is only available if the folder mode is selected.")
     @NumberInputWidget(minValidation = IsPositiveIntegerValidation.class)
     @Effect(predicate = WriteMode.IsFolderSelection.class, type = EffectType.SHOW)
     @Persist(configKey = "file_size")
     @PersistWithin("settings")
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    long m_fileSize = 1024;
+    long m_fileSize = 1000000;
 
     @Widget(title = "File name prefix",
         description = "The prefix to use for the file within the selected folder. A running index is appended "
-            + "starting with 0 e.g. part_00000.parquet, part_00001.parquet. This option is only available if "
+            + "starting with 0 e.g. part_00000.orc, part_00001.orc. This option is only available if "
             + "the folder mode is selected.")
     @Persist(configKey = "file_name_prefix")
     @Effect(predicate = WriteMode.IsFolderSelection.class, type = EffectType.SHOW)
@@ -146,18 +192,19 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @Layout(SettingsSection.BelowSingleFileSelection.class)
     String m_fileNamePrefix = "part_";
 
-    @Widget(title = "Within file row group size (MB)",
-        description = "Defines the maximum size of a row group within a file in megabyte. For more details see "
-            + "the <a href=\"https://parquet.apache.org/docs/\">Parquet documentation</a>.")
+    @Widget(title = "Within file stripe size (rows)",
+        description = "Defines the maximum number of rows of a file stripe. For more details see the "
+            + "<a href=\"https://cwiki.apache.org/confluence/display/Hive/LanguageManual+ORC\">"
+            + "ORC documentation</a>.")
     @NumberInputWidget(minValidation = IsPositiveIntegerValidation.class)
     @Persist(configKey = "within_file_chunk_size")
     @PersistWithin("settings")
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    int m_chunkSize = 128;
+    int m_chunkSize = 1024;
 
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    private static final class LegacyFileWriterWithFilterModeAndOverwritePolicyOptions extends //
-        LegacyFileWriterWithOverwritePolicyOptions {
+    private static final class LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions
+        extends LegacyFileWriterWithCreateMissingFolders {
         @Widget(title = "Mode",
             description = "Depending on the selected mode the node writes the input data into"
                 + " a single file or splits it up into several files of the defined size which"
@@ -188,9 +235,9 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @Layout(MappingSection.class)
     @PersistWithin("type_mapping")
     @Persist(configKey = "input_type_mapping")
-    ParquetTypeMappingParameters m_mapping = new ParquetTypeMappingParameters();
+    OrcTypeMappingParameters m_mapping = new OrcTypeMappingParameters();
 
-    private static final class OutputFileModification implements LegacyFileWriterWithOverwritePolicyOptions.Modifier {
+    private static final class OutputFileModification implements LegacyFileWriterWithCreateMissingFolders.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
@@ -198,23 +245,18 @@ class ParquetWriter3NodeParameters implements NodeParameters {
 
             // Add FileSelectionWidget to support both file and folder modes
             fileSelection.addAnnotation(FileSelectionWidget.class)
-                .withProperty("selectionModeProvider", ParquetWriter3FileSelectionModeProvider.class).modify();
+                .withProperty("selectionModeProvider", ORCWriter2FileSelectionModeProvider.class).modify();
 
-            // Modify FileWriterWidget to add parquet file extension filter
-            fileSelection.modifyAnnotation(FileWriterWidget.class).withProperty("fileExtension", "parquet").modify();
+            // Modify FileWriterWidget to add ORC file extension filter
+            fileSelection.modifyAnnotation(FileWriterWidget.class).withProperty("fileExtension", "orc").modify();
 
             fileSelection.modifyAnnotation(Widget.class).withProperty("title", "Output location")
                 .withProperty("description", "Select a file system and location where you want to store the file(s).")
                 .modify();
-
-            final var overwritePolicy = findOverwritePolicy(group);
-            overwritePolicy.addAnnotation(ChoicesProvider.class)
-                .withProperty("value", OverwritePolicyChoicesProvider.class).modify();
         }
     }
 
-    private static final class ParquetWriter3FileSelectionModeProvider
-        implements StateProvider<SingleFileSelectionMode> {
+    private static final class ORCWriter2FileSelectionModeProvider implements StateProvider<SingleFileSelectionMode> {
 
         private Supplier<WriteMode> m_modeSupplier;
 
@@ -228,14 +270,6 @@ class ParquetWriter3NodeParameters implements NodeParameters {
         public SingleFileSelectionMode computeState(final NodeParametersInput parametersInput) {
             return m_modeSupplier.get() == WriteMode.FOLDER ? SingleFileSelectionMode.FOLDER
                 : SingleFileSelectionMode.FILE;
-        }
-    }
-
-    private static final class OverwritePolicyChoicesProvider implements EnumChoicesProvider<OverwritePolicy> {
-
-        @Override
-        public List<OverwritePolicy> choices(final NodeParametersInput context) {
-            return List.of(OverwritePolicy.fail, OverwritePolicy.overwrite);
         }
     }
 
