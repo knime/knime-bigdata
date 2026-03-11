@@ -46,7 +46,7 @@
  * History
  *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
-package org.knime.bigdata.fileformats.orc.writer3;
+package org.knime.bigdata.fileformats.utility;
 
 import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
 
@@ -61,12 +61,12 @@ import org.knime.node.parameters.updates.ValueReference;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 
 @SuppressWarnings("restriction")
-final class ByNameMappingSettings implements NodeParameters {
+public final class ByNameMappingSettings implements NodeParameters {
     ByNameMappingSettings() {
         //default constructor for deserialization
     }
 
-    ByNameMappingSettings(final FilterType filterType, final String columnName, final DataType knimeType,
+    public ByNameMappingSettings(final FilterType filterType, final String columnName, final DataType knimeType,
         final ConsumptionPath consumptionPath) {
         this(filterType, columnName, knimeType, getIdForConsumptionPath(consumptionPath));
     }
@@ -81,28 +81,28 @@ final class ByNameMappingSettings implements NodeParameters {
 
     @Widget(title = "Column selection type", description = "The option allows you to select how the column is matched.")
     @ValueSwitchWidget
-    FilterType m_filterType = FilterType.MANUAL;
+    public FilterType m_filterType = FilterType.MANUAL;
 
     @Widget(title = "Column name", description = "The column name or regex expression.")
     @ValueReference(FromColRef.class)
-    String m_fromColName = "";
+    public String m_fromColName = "";
 
     @Widget(title = "KNIME type", description = "KNIME data type to map from.")
     @ValueReference(FromColTypeRef.class)
     @Modification.WidgetReference(FromColTypeRef.class)
-    DataType m_fromColType;
+    public DataType m_fromColType;
 
     @Widget(title = "Mapping to", description = "ORC data type to map to.")
     @Modification.WidgetReference(ToColTypeRef.class)
-    String m_toColType;
+    public String m_toColType;
 
-    interface FromColRef extends ParameterReference<String> {
+    public interface FromColRef extends ParameterReference<String> {
     }
 
-    interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
+    public interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
     }
 
-    interface ToColTypeRef extends Modification.Reference {
+    public interface ToColTypeRef extends Modification.Reference {
     }
 
 }

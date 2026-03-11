@@ -46,7 +46,7 @@
  * History
  *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
-package org.knime.bigdata.fileformats.orc.writer3;
+package org.knime.bigdata.fileformats.utility;
 
 import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
 
@@ -59,13 +59,13 @@ import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
 
 @SuppressWarnings("restriction")
-final class ByTypeMappingSettings implements NodeParameters {
+public final class ByTypeMappingSettings implements NodeParameters {
 
     ByTypeMappingSettings() {
         //default constructor for deserialization
     }
 
-    ByTypeMappingSettings(final DataType knimeType, final ConsumptionPath consumptionPath) {
+    public ByTypeMappingSettings(final DataType knimeType, final ConsumptionPath consumptionPath) {
         this(knimeType, getIdForConsumptionPath(consumptionPath));
     }
 
@@ -77,17 +77,17 @@ final class ByTypeMappingSettings implements NodeParameters {
     @Widget(title = "KNIME type", description = "KNIME data type to map from.")
     @ValueReference(FromColTypeRef.class)
     @Modification.WidgetReference(FromColTypeRef.class)
-    DataType m_fromType;
+    public DataType m_fromType;
 
     @Widget(title = "Mapping to", description = "ORC data type to map to.")
     @ValueReference(ToColTypeRef.class)
     @Modification.WidgetReference(ToColTypeRef.class)
-    String m_toType;
+    public String m_toType;
 
-    interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
+    public interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
     }
 
-    interface ToColTypeRef extends ParameterReference<String>, Modification.Reference {
+    public interface ToColTypeRef extends ParameterReference<String>, Modification.Reference {
     }
 
 }

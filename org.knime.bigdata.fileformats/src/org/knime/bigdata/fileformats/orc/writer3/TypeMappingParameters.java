@@ -61,6 +61,8 @@ import org.apache.orc.TypeDescription;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCSource;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
+import org.knime.bigdata.fileformats.utility.ByNameMappingSettings;
+import org.knime.bigdata.fileformats.utility.ByTypeMappingSettings;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.FilterType;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.TypeChoicesProvider;
