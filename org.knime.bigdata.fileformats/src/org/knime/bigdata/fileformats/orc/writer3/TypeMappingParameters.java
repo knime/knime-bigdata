@@ -106,8 +106,7 @@ final class TypeMappingParameters implements NodeParameters {
         // default constructor
     }
 
-    TypeMappingParameters(final ByNameMappingSettings[] byNameSettings,
-        final ByTypeMappingSettings[] byTypeSettings) {
+    TypeMappingParameters(final ByNameMappingSettings[] byNameSettings, final ByTypeMappingSettings[] byTypeSettings) {
         m_byNameSettings = byNameSettings;
         m_byTypeSettings = byTypeSettings;
     }
