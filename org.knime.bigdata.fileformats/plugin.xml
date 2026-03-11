@@ -20,8 +20,14 @@
          factory-class="org.knime.bigdata.fileformats.parquet.writer.ParquetWriterNodeFactory"/>
    <node
          category-path="/io/write"
-         deprecated="false"
+         deprecated="true"
          factory-class="org.knime.bigdata.fileformats.orc.writer2.ORCWriter2NodeFactory"
+         hidden="false">
+   </node>
+   <node
+         category-path="/io/write"
+         deprecated="false"
+         factory-class="org.knime.bigdata.fileformats.orc.writer3.ORCWriter3NodeFactory"
          hidden="false">
    </node>
    <node
