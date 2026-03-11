@@ -48,7 +48,6 @@
  */
 package org.knime.bigdata.fileformats.orc.writer3;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
@@ -64,8 +63,7 @@ import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
 import org.knime.node.parameters.persistence.Persist;
-import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions;
-import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithOverwritePolicyOptions.OverwritePolicy;
+import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithCreateMissingFolders;
 import org.knime.node.parameters.updates.Effect;
 import org.knime.node.parameters.updates.Effect.EffectType;
 import org.knime.node.parameters.updates.EffectPredicate;
@@ -73,8 +71,6 @@ import org.knime.node.parameters.updates.EffectPredicateProvider;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.StateProvider;
 import org.knime.node.parameters.updates.ValueReference;
-import org.knime.node.parameters.widget.choices.ChoicesProvider;
-import org.knime.node.parameters.widget.choices.EnumChoicesProvider;
 import org.knime.node.parameters.widget.choices.Label;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidget;
@@ -110,8 +106,8 @@ class ORCWriter3NodeParameters implements NodeParameters {
     @PersistWithin("settings")
     @Modification(OutputFileModification.class)
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    LegacyFileWriterWithFilterModeAndOverwritePolicyOptions m_outputLocation =
-        new LegacyFileWriterWithFilterModeAndOverwritePolicyOptions();
+    LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions m_outputLocation =
+        new LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions();
 
     @Widget(title = "File Compression", description = "The compression codec used to write the ORC file.")
     @Persist(configKey = "file_compression")
@@ -164,8 +160,8 @@ class ORCWriter3NodeParameters implements NodeParameters {
     int m_chunkSize = 1024;
 
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    private static final class LegacyFileWriterWithFilterModeAndOverwritePolicyOptions
-        extends LegacyFileWriterWithOverwritePolicyOptions {
+    private static final class LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions
+        extends LegacyFileWriterWithCreateMissingFolders {
         @Widget(title = "Mode",
             description = "Depending on the selected mode the node writes the input data into"
                 + " a single file or splits it up into several files of the defined size which"
@@ -198,7 +194,7 @@ class ORCWriter3NodeParameters implements NodeParameters {
     OrcTypeMappingParameters m_mapping = new OrcTypeMappingParameters();
 
     private static final class OutputFileModification
-        implements LegacyFileWriterWithOverwritePolicyOptions.Modifier {
+        implements LegacyFileWriterWithCreateMissingFolders.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
@@ -216,10 +212,6 @@ class ORCWriter3NodeParameters implements NodeParameters {
                 .withProperty("title", "Output location")
                 .withProperty("description", "Select a file system and location where you want to store the file(s).")
                 .modify();
-
-            final var overwritePolicy = findOverwritePolicy(group);
-            overwritePolicy.addAnnotation(ChoicesProvider.class)
-                .withProperty("value", OverwritePolicyChoicesProvider.class).modify();
         }
     }
 
@@ -238,14 +230,6 @@ class ORCWriter3NodeParameters implements NodeParameters {
         public SingleFileSelectionMode computeState(final NodeParametersInput parametersInput) {
             return m_modeSupplier.get() == WriteMode.FOLDER ? SingleFileSelectionMode.FOLDER
                 : SingleFileSelectionMode.FILE;
-        }
-    }
-
-    private static final class OverwritePolicyChoicesProvider implements EnumChoicesProvider<OverwritePolicy> {
-
-        @Override
-        public List<OverwritePolicy> choices(final NodeParametersInput context) {
-            return List.of(OverwritePolicy.fail, OverwritePolicy.overwrite);
         }
     }
 
