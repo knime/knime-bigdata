@@ -48,9 +48,9 @@
  */
 package org.knime.bigdata.fileformats.orc.writer3;
 
-import static org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.getIdForConsumptionPath;
+import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
 
-import org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.FilterType;
+import org.knime.bigdata.fileformats.utility.TypeMappingUtils.FilterType;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;

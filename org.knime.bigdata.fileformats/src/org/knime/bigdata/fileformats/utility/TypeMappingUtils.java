@@ -68,7 +68,7 @@ import org.knime.node.parameters.widget.choices.StringChoicesProvider;
  */
 public final class TypeMappingUtils {
 
-    enum FilterType {
+    public enum FilterType {
 
             @Label(value = "Manual", description = "Use the exact name of the column")
             MANUAL,
@@ -77,7 +77,7 @@ public final class TypeMappingUtils {
             REGEX
     }
 
-    abstract static class TypeChoicesProvider<X, T extends ParameterReference<DataType>>
+    public abstract static class TypeChoicesProvider<X, T extends ParameterReference<DataType>>
         implements StringChoicesProvider {
 
         private final Class<T> m_ref;
@@ -112,7 +112,7 @@ public final class TypeMappingUtils {
         }
     }
 
-    static String getIdForConsumptionPath(final ConsumptionPath path) {
+    public static String getIdForConsumptionPath(final ConsumptionPath path) {
         return formatStringPair(path.getConverterFactory().getIdentifier(), path.getConsumerFactory().getIdentifier());
     }
 

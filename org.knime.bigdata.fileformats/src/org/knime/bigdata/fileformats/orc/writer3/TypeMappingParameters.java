@@ -48,7 +48,7 @@
  */
 package org.knime.bigdata.fileformats.orc.writer3;
 
-import static org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.getIdForConsumptionPath;
+import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -58,9 +58,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.orc.TypeDescription;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCSource;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
-import org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.FilterType;
-import org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.OrcTypeChoicesProvider;
+import org.knime.bigdata.fileformats.utility.TypeMappingUtils;
+import org.knime.bigdata.fileformats.utility.TypeMappingUtils.FilterType;
+import org.knime.bigdata.fileformats.utility.TypeMappingUtils.TypeChoicesProvider;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
 import org.knime.core.node.InvalidSettingsException;
@@ -70,6 +73,7 @@ import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputat
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.DataTypeMappingConfigurationData;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 import org.knime.node.parameters.NodeParameters;
@@ -159,10 +163,15 @@ final class TypeMappingParameters implements NodeParameters {
         }
 
         private static final class ByNameOrcTypeChoicesProvider
-            extends OrcTypeChoicesProvider<ByNameMappingSettings.FromColTypeRef> {
+            extends TypeChoicesProvider<TypeDescription, ByNameMappingSettings.FromColTypeRef> {
 
             ByNameOrcTypeChoicesProvider() {
                 super(ByNameMappingSettings.FromColTypeRef.class);
+            }
+
+            @Override
+            protected DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> getMappingService() {
+                return ORCTypeMappingService.getInstance();
             }
         }
 
@@ -242,10 +251,15 @@ final class TypeMappingParameters implements NodeParameters {
         }
 
         private static final class ByTypeOrcTypeChoicesProvider
-            extends OrcTypeChoicesProvider<ByTypeMappingSettings.FromColTypeRef> {
+            extends TypeChoicesProvider<TypeDescription, ByTypeMappingSettings.FromColTypeRef> {
 
             ByTypeOrcTypeChoicesProvider() {
                 super(ByTypeMappingSettings.FromColTypeRef.class);
+            }
+
+            @Override
+            protected DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> getMappingService() {
+                return ORCTypeMappingService.getInstance();
             }
         }
 
