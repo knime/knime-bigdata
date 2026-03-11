@@ -48,7 +48,7 @@
  */
 package org.knime.bigdata.fileformats.orc.writer3;
 
-import static org.knime.bigdata.fileformats.orc.writer3.OrcTypeMappingUtils.getIdForConsumptionPath;
+import static org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.getIdForConsumptionPath;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -59,8 +59,8 @@ import java.util.stream.Collectors;
 
 import org.apache.orc.TypeDescription;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
-import org.knime.bigdata.fileformats.orc.writer3.OrcTypeMappingUtils.FilterType;
-import org.knime.bigdata.fileformats.orc.writer3.OrcTypeMappingUtils.OrcTypeChoicesProvider;
+import org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.FilterType;
+import org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.OrcTypeChoicesProvider;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
 import org.knime.core.node.InvalidSettingsException;
@@ -97,17 +97,17 @@ import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
  *
  * @author Jochen Reissinger, TNG Technology Consulting GmbH
  */
-@Persistor(OrcTypeMappingParameters.OrcTypeMappingPersistor.class)
-@Migration(OrcTypeMappingParameters.OrcTypeMappingMigration.class)
+@Persistor(TypeMappingParameters.TypeMappingPersistor.class)
+@Migration(TypeMappingParameters.TypeMappingMigration.class)
 @SuppressWarnings("restriction")
-final class OrcTypeMappingParameters implements NodeParameters {
+final class TypeMappingParameters implements NodeParameters {
 
-    OrcTypeMappingParameters() {
+    TypeMappingParameters() {
         // default constructor
     }
 
-    OrcTypeMappingParameters(final OrcByNameMappingSettings[] byNameSettings,
-        final OrcByTypeMappingSettings[] byTypeSettings) {
+    TypeMappingParameters(final ByNameMappingSettings[] byNameSettings,
+        final ByTypeMappingSettings[] byTypeSettings) {
         m_byNameSettings = byNameSettings;
         m_byTypeSettings = byTypeSettings;
     }
@@ -122,7 +122,7 @@ final class OrcTypeMappingParameters implements NodeParameters {
             Define type mappings that apply to all columns of the specified KNIME type. These mappings are applied \
             after the mappings defined in the 'Mapping by Name' section.
             """)
-    @After(OrcTypeMappingParameters.MappingByName.class)
+    @After(TypeMappingParameters.MappingByName.class)
     private interface MappingByType {
     }
 
@@ -131,21 +131,21 @@ final class OrcTypeMappingParameters implements NodeParameters {
             specified ORC type.
             """)
     @ArrayWidget(addButtonText = "Add name", elementTitle = "Column name")
-    @Layout(OrcTypeMappingParameters.MappingByName.class)
-    @Modification(OrcTypeMappingParameters.ByNameModification.class)
-    OrcByNameMappingSettings[] m_byNameSettings = new OrcByNameMappingSettings[0];
+    @Layout(TypeMappingParameters.MappingByName.class)
+    @Modification(TypeMappingParameters.ByNameModification.class)
+    ByNameMappingSettings[] m_byNameSettings = new ByNameMappingSettings[0];
 
     private static final class ByNameModification implements Modification.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
-            group.find(OrcByNameMappingSettings.FromColTypeRef.class).addAnnotation(ChoicesProvider.class)
+            group.find(ByNameMappingSettings.FromColTypeRef.class).addAnnotation(ChoicesProvider.class)
                 .withValue(ByNameKnimeTypeChoicesProvider.class).modify();
 
-            group.find(OrcByNameMappingSettings.ToColTypeRef.class).addAnnotation(ChoicesProvider.class)
+            group.find(ByNameMappingSettings.ToColTypeRef.class).addAnnotation(ChoicesProvider.class)
                 .withValue(ByNameOrcTypeChoicesProvider.class).modify();
 
-            group.find(OrcByNameMappingSettings.ToColTypeRef.class).addAnnotation(ValueProvider.class)
+            group.find(ByNameMappingSettings.ToColTypeRef.class).addAnnotation(ValueProvider.class)
                 .withValue(ByNameOrcTypeValueProvider.class).modify();
         }
 
@@ -160,10 +160,10 @@ final class OrcTypeMappingParameters implements NodeParameters {
         }
 
         private static final class ByNameOrcTypeChoicesProvider
-            extends OrcTypeChoicesProvider<OrcByNameMappingSettings.FromColTypeRef> {
+            extends OrcTypeChoicesProvider<ByNameMappingSettings.FromColTypeRef> {
 
             ByNameOrcTypeChoicesProvider() {
-                super(OrcByNameMappingSettings.FromColTypeRef.class);
+                super(ByNameMappingSettings.FromColTypeRef.class);
             }
         }
 
@@ -175,13 +175,12 @@ final class OrcTypeMappingParameters implements NodeParameters {
 
             @Override
             public void init(final StateProviderInitializer initializer) {
-                m_fromColumn = initializer.computeFromValueSupplier(OrcByNameMappingSettings.FromColRef.class);
-                m_fromType = initializer.computeFromValueSupplier(OrcByNameMappingSettings.FromColTypeRef.class);
+                m_fromColumn = initializer.computeFromValueSupplier(ByNameMappingSettings.FromColRef.class);
+                m_fromType = initializer.computeFromValueSupplier(ByNameMappingSettings.FromColTypeRef.class);
             }
 
             @Override
-            public String computeState(final NodeParametersInput context)
-                throws StateComputationFailureException {
+            public String computeState(final NodeParametersInput context) throws StateComputationFailureException {
                 final String colName = m_fromColumn.get();
                 final DataType dataType = m_fromType.get();
                 if (colName == null || dataType == null) {
@@ -190,30 +189,32 @@ final class OrcTypeMappingParameters implements NodeParameters {
                 final var mappingService = ORCTypeMappingService.getInstance();
                 final var consumptionPaths = mappingService.getConsumptionPathsFor(dataType);
                 final var path = consumptionPaths.stream().findFirst();
-                return path.map(OrcTypeMappingUtils::getIdForConsumptionPath).orElse("");
+                return path.map(TypeMappingUtils::getIdForConsumptionPath).orElse("");
             }
+
         }
+
     }
 
     @Widget(title = "Type",
         description = "Columns that match the given KNIME type will be mapped to the specified ORC data type.")
     @ArrayWidget(addButtonText = "Add type", elementTitle = "Type")
-    @ValueReference(OrcTypeMappingParameters.ByTypeRef.class)
-    @Layout(OrcTypeMappingParameters.MappingByType.class)
-    @Modification(OrcTypeMappingParameters.ByTypeModification.class)
-    OrcByTypeMappingSettings[] m_byTypeSettings = new OrcByTypeMappingSettings[0];
+    @ValueReference(TypeMappingParameters.ByTypeRef.class)
+    @Layout(TypeMappingParameters.MappingByType.class)
+    @Modification(TypeMappingParameters.ByTypeModification.class)
+    ByTypeMappingSettings[] m_byTypeSettings = new ByTypeMappingSettings[0];
 
     private static final class ByTypeModification implements Modification.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
-            group.find(OrcByTypeMappingSettings.FromColTypeRef.class).addAnnotation(ChoicesProvider.class)
+            group.find(ByTypeMappingSettings.FromColTypeRef.class).addAnnotation(ChoicesProvider.class)
                 .withValue(ByTypeKnimeTypeChoicesProvider.class).modify();
 
-            group.find(OrcByTypeMappingSettings.ToColTypeRef.class).addAnnotation(ChoicesProvider.class)
+            group.find(ByTypeMappingSettings.ToColTypeRef.class).addAnnotation(ChoicesProvider.class)
                 .withValue(ByTypeOrcTypeChoicesProvider.class).modify();
 
-            group.find(OrcByTypeMappingSettings.ToColTypeRef.class).addAnnotation(ValueProvider.class)
+            group.find(ByTypeMappingSettings.ToColTypeRef.class).addAnnotation(ValueProvider.class)
                 .withValue(ByTypeOrcTypeValueProvider.class).modify();
         }
 
@@ -221,13 +222,12 @@ final class OrcTypeMappingParameters implements NodeParameters {
 
             private Supplier<DataType> m_fromType;
 
-            private Supplier<OrcByTypeMappingSettings[]> m_array;
+            private Supplier<ByTypeMappingSettings[]> m_array;
 
             @Override
             public void init(final StateProviderInitializer initializer) {
-                this.m_fromType =
-                    initializer.computeFromValueSupplier(OrcByTypeMappingSettings.FromColTypeRef.class);
-                this.m_array = initializer.computeFromValueSupplier(OrcTypeMappingParameters.ByTypeRef.class);
+                this.m_fromType = initializer.computeFromValueSupplier(ByTypeMappingSettings.FromColTypeRef.class);
+                this.m_array = initializer.computeFromValueSupplier(TypeMappingParameters.ByTypeRef.class);
                 initializer.computeBeforeOpenDialog();
             }
 
@@ -235,19 +235,18 @@ final class OrcTypeMappingParameters implements NodeParameters {
             public List<DataType> choices(final NodeParametersInput context) {
                 final var mappingService = ORCTypeMappingService.getInstance();
                 final var existingTypes = Arrays.stream(m_array.get()).map(setting -> setting.m_fromType)
-                    .filter(type -> type != null && !type.equals(this.m_fromType.get()))
-                    .collect(Collectors.toSet());
-                return mappingService.getKnimeSourceTypes().stream()
-                    .filter(type -> !existingTypes.contains(type))
+                    .filter(type -> type != null && !type.equals(this.m_fromType.get())).collect(Collectors.toSet());
+                return mappingService.getKnimeSourceTypes().stream().filter(type -> !existingTypes.contains(type))
                     .sorted(Comparator.comparing(DataType::toPrettyString)).toList();
             }
+
         }
 
         private static final class ByTypeOrcTypeChoicesProvider
-            extends OrcTypeChoicesProvider<OrcByTypeMappingSettings.FromColTypeRef> {
+            extends OrcTypeChoicesProvider<ByTypeMappingSettings.FromColTypeRef> {
 
             ByTypeOrcTypeChoicesProvider() {
-                super(OrcByTypeMappingSettings.FromColTypeRef.class);
+                super(ByTypeMappingSettings.FromColTypeRef.class);
             }
         }
 
@@ -257,13 +256,11 @@ final class OrcTypeMappingParameters implements NodeParameters {
 
             @Override
             public void init(final StateProviderInitializer initializer) {
-                m_fromType =
-                    initializer.computeFromValueSupplier(OrcByTypeMappingSettings.FromColTypeRef.class);
+                m_fromType = initializer.computeFromValueSupplier(ByTypeMappingSettings.FromColTypeRef.class);
             }
 
             @Override
-            public String computeState(final NodeParametersInput context)
-                throws StateComputationFailureException {
+            public String computeState(final NodeParametersInput context) throws StateComputationFailureException {
                 final DataType dataType = m_fromType.get();
                 if (dataType == null) {
                     return "";
@@ -271,18 +268,20 @@ final class OrcTypeMappingParameters implements NodeParameters {
                 final var mappingService = ORCTypeMappingService.getInstance();
                 final var consumptionPaths = mappingService.getConsumptionPathsFor(dataType);
                 final var path = consumptionPaths.stream().findFirst();
-                return path.map(OrcTypeMappingUtils::getIdForConsumptionPath).orElse("");
+                return path.map(TypeMappingUtils::getIdForConsumptionPath).orElse("");
             }
+
         }
+
     }
 
-    private interface ByTypeRef extends ParameterReference<OrcByTypeMappingSettings[]> {
+    private interface ByTypeRef extends ParameterReference<ByTypeMappingSettings[]> {
     }
 
-    static final class OrcTypeMappingPersistor implements NodeParametersPersistor<OrcTypeMappingParameters> {
+    static final class TypeMappingPersistor implements NodeParametersPersistor<TypeMappingParameters> {
 
         @Override
-        public OrcTypeMappingParameters load(final NodeSettingsRO settings) throws InvalidSettingsException {
+        public TypeMappingParameters load(final NodeSettingsRO settings) throws InvalidSettingsException {
 
             final var configData = DataTypeMappingConfigurationData.from(settings);
             final var config = configData.resolve(ORCTypeMappingService.getInstance(),
@@ -290,38 +289,37 @@ final class OrcTypeMappingParameters implements NodeParameters {
 
             final var byNameSettings = config.getNameRules().stream()//
                 .filter(DataTypeMappingConfiguration.Rule::isValid)//
-                .map(OrcTypeMappingPersistor::toByNameMappingSettings)//
-                .toArray(OrcByNameMappingSettings[]::new);
+                .map(TypeMappingPersistor::toByNameMappingSettings)//
+                .toArray(ByNameMappingSettings[]::new);
 
             final var byTypeSettings = config.getTypeRules().stream()//
                 .filter(DataTypeMappingConfiguration.Rule::isValid)//
-                .map(OrcTypeMappingPersistor::toByTypeMappingSettings)//
-                .toArray(OrcByTypeMappingSettings[]::new);
+                .map(TypeMappingPersistor::toByTypeMappingSettings)//
+                .toArray(ByTypeMappingSettings[]::new);
 
-            return new OrcTypeMappingParameters(byNameSettings, byTypeSettings);
+            return new TypeMappingParameters(byNameSettings, byTypeSettings);
         }
 
-        private static OrcByNameMappingSettings
+        private static ByNameMappingSettings
             toByNameMappingSettings(final DataTypeMappingConfiguration<TypeDescription>.Rule rule) {
             final var filterType = rule.isRegex() ? FilterType.REGEX : FilterType.MANUAL;
             final var columnName = rule.getColumnName();
             final var knimeType = rule.getKnimeType();
             final var consumptionPath = rule.getConsumptionPath();
-            return new OrcByNameMappingSettings(filterType, columnName, knimeType, consumptionPath);
+            return new ByNameMappingSettings(filterType, columnName, knimeType, consumptionPath);
         }
 
-        private static OrcByTypeMappingSettings
+        private static ByTypeMappingSettings
             toByTypeMappingSettings(final DataTypeMappingConfiguration<TypeDescription>.Rule rule) {
             final var knimeType = rule.getKnimeType();
             final var consumptionPath = rule.getConsumptionPath();
-            return new OrcByTypeMappingSettings(knimeType, consumptionPath);
+            return new ByTypeMappingSettings(knimeType, consumptionPath);
         }
 
         @Override
-        public void save(final OrcTypeMappingParameters params, final NodeSettingsWO settings) {
+        public void save(final TypeMappingParameters params, final NodeSettingsWO settings) {
             final var mappingService = ORCTypeMappingService.getInstance();
-            final var config =
-                mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+            final var config = mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
             Arrays.stream(params.m_byNameSettings).forEach(s -> {
                 var matchingPath = findMatchingConsumptionPath(s.m_fromColType, s.m_toColType);
                 matchingPath.ifPresent(consumptionPath -> config.addRule(s.m_fromColName,
@@ -339,8 +337,8 @@ final class OrcTypeMappingParameters implements NodeParameters {
             final String toTypePathString) {
             final var mappingService = ORCTypeMappingService.getInstance();
             final var consumptionPaths = mappingService.getConsumptionPathsFor(fromType);
-            return consumptionPaths.stream()
-                .filter(path -> getIdForConsumptionPath(path).equals(toTypePathString)).findFirst();
+            return consumptionPaths.stream().filter(path -> getIdForConsumptionPath(path).equals(toTypePathString))
+                .findFirst();
         }
 
         @Override
@@ -349,17 +347,16 @@ final class OrcTypeMappingParameters implements NodeParameters {
         }
     }
 
-    static class OrcTypeMappingMigration implements NodeParametersMigration<OrcTypeMappingParameters> {
+    static class TypeMappingMigration implements NodeParametersMigration<TypeMappingParameters> {
 
-        OrcTypeMappingMigration() {
+        TypeMappingMigration() {
             super();
         }
 
         @Override
-        public List<ConfigMigration<OrcTypeMappingParameters>> getConfigMigrations() {
+        public List<ConfigMigration<TypeMappingParameters>> getConfigMigrations() {
             return List
-                .of(ConfigMigration.builder(settings -> (OrcTypeMappingParameters)null)
-                    .withMatcher(settings -> false)
+                .of(ConfigMigration.builder(settings -> (TypeMappingParameters)null).withMatcher(settings -> false)
                     .withDeprecatedConfigPath("name_to_type_mapping_rules", "type_to_type_mapping_rules").build());
         }
     }

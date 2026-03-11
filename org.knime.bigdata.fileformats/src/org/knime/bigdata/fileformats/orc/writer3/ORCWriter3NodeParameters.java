@@ -106,7 +106,7 @@ class ORCWriter3NodeParameters implements NodeParameters {
     @PersistWithin("settings")
     @Modification(OutputFileModification.class)
     @Layout(SettingsSection.BelowSingleFileSelection.class)
-    LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions m_outputLocation =
+    LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions m_outputLocation = //
         new LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions();
 
     @Widget(title = "File Compression", description = "The compression codec used to write the ORC file.")
@@ -172,6 +172,7 @@ class ORCWriter3NodeParameters implements NodeParameters {
         @PersistWithin("filter_mode")
         @ValueReference(WriteMode.Ref.class)
         WriteMode m_mode = WriteMode.FILE;
+
     }
 
     enum WriteMode {
@@ -191,7 +192,7 @@ class ORCWriter3NodeParameters implements NodeParameters {
     @Layout(MappingSection.class)
     @PersistWithin("type_mapping")
     @Persist(configKey = "input_type_mapping")
-    OrcTypeMappingParameters m_mapping = new OrcTypeMappingParameters();
+    TypeMappingParameters m_mapping = new TypeMappingParameters();
 
     private static final class OutputFileModification
         implements LegacyFileWriterWithCreateMissingFolders.Modifier {

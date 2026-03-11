@@ -47,9 +47,11 @@
  *   Mar 11, 2026 (Jochen Reissinger, TNG Technology Consulting GmbH): created
  */
 package org.knime.bigdata.fileformats.orc.writer3;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
+
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
@@ -58,33 +60,40 @@ import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.widget.choices.Label;
 import org.knime.node.parameters.widget.choices.StringChoice;
 import org.knime.node.parameters.widget.choices.StringChoicesProvider;
+
 /**
- * Contains utility methods for ORC type mapping settings.
+ * Contains utility methods for {@link TypeMappingParameters} and the mapping settings.
  *
  * @author Jochen Reissinger, TNG Technology Consulting GmbH
  */
-public final class OrcTypeMappingUtils {
-    private OrcTypeMappingUtils() {
-        // utility class
-    }
+public final class TypeMappingUtils {
+
     enum FilterType {
+
             @Label(value = "Manual", description = "Use the exact name of the column")
             MANUAL,
+
             @Label(value = "Regex", description = "Allow regex expressions to select multiple columns")
             REGEX
     }
+
     abstract static class OrcTypeChoicesProvider<T extends ParameterReference<DataType>>
         implements StringChoicesProvider {
+
         private final Class<T> m_ref;
+
         private Supplier<DataType> m_fromColType;
+
         protected OrcTypeChoicesProvider(final Class<T> ref) {
             this.m_ref = ref;
         }
+
         @Override
         public void init(final StateProviderInitializer initializer) {
             this.m_fromColType = initializer.computeFromValueSupplier(this.m_ref);
             initializer.computeBeforeOpenDialog();
         }
+
         @Override
         public List<StringChoice> computeState(final NodeParametersInput context) {
             final DataType dataType = this.m_fromColType.get();
@@ -95,14 +104,16 @@ public final class OrcTypeMappingUtils {
             return mappingService.getConsumptionPathsFor(dataType).stream()
                 .sorted(Comparator.comparing(ConsumptionPath::toString))
                 .map(path -> new StringChoice(getIdForConsumptionPath(path),
-                    "→ " + path.getConverterFactory().getDestinationType().getSimpleName() + " \u2192 "
+                    "\u2192 " + path.getConverterFactory().getDestinationType().getSimpleName() + " \u2192 "
                         + path.getConsumerFactory().getDestinationType().toString()))
                 .toList();
         }
     }
+
     static String getIdForConsumptionPath(final ConsumptionPath path) {
         return formatStringPair(path.getConverterFactory().getIdentifier(), path.getConsumerFactory().getIdentifier());
     }
+
     private static String formatStringPair(final String first, final String second) {
         return first + ";" + second;
     }

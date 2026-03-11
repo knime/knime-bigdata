@@ -47,7 +47,10 @@
  *   Mar 11, 2026 (Jochen Reissinger, TNG Technology Consulting GmbH): created
  */
 package org.knime.bigdata.fileformats.orc.writer3;
-import static org.knime.bigdata.fileformats.orc.writer3.OrcTypeMappingUtils.getIdForConsumptionPath;
+
+import static org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.getIdForConsumptionPath;
+
+import org.knime.bigdata.fileformats.orc.writer3.TypeMappingUtils.FilterType;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
@@ -55,28 +58,51 @@ import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
+import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
+
 @SuppressWarnings("restriction")
-final class OrcByTypeMappingSettings implements NodeParameters {
-    OrcByTypeMappingSettings() {
-        // default constructor for deserialization
+final class ByNameMappingSettings implements NodeParameters {
+    ByNameMappingSettings() {
+        //default constructor for deserialization
     }
-    OrcByTypeMappingSettings(final DataType knimeType, final ConsumptionPath consumptionPath) {
-        this(knimeType, getIdForConsumptionPath(consumptionPath));
+
+    ByNameMappingSettings(final FilterType filterType, final String columnName, final DataType knimeType,
+        final ConsumptionPath consumptionPath) {
+        this(filterType, columnName, knimeType, getIdForConsumptionPath(consumptionPath));
     }
-    OrcByTypeMappingSettings(final DataType fromType, final String toType) {
-        this.m_fromType = fromType;
-        this.m_toType = toType;
+
+    ByNameMappingSettings(final FilterType filterType, final String fromColName, final DataType fromColType,
+        final String toColType) {
+        this.m_filterType = filterType;
+        this.m_fromColName = fromColName;
+        this.m_fromColType = fromColType;
+        this.m_toColType = toColType;
     }
+
+    @Widget(title = "Column selection type", description = "The option allows you to select how the column is matched.")
+    @ValueSwitchWidget
+    FilterType m_filterType = FilterType.MANUAL;
+
+    @Widget(title = "Column name", description = "The column name or regex expression.")
+    @ValueReference(FromColRef.class)
+    String m_fromColName = "";
+
     @Widget(title = "KNIME type", description = "KNIME data type to map from.")
     @ValueReference(FromColTypeRef.class)
     @Modification.WidgetReference(FromColTypeRef.class)
-    DataType m_fromType;
+    DataType m_fromColType;
+
     @Widget(title = "Mapping to", description = "ORC data type to map to.")
-    @ValueReference(ToColTypeRef.class)
     @Modification.WidgetReference(ToColTypeRef.class)
-    String m_toType;
+    String m_toColType;
+
+    interface FromColRef extends ParameterReference<String> {
+    }
+
     interface FromColTypeRef extends ParameterReference<DataType>, Modification.Reference {
     }
-    interface ToColTypeRef extends ParameterReference<String>, Modification.Reference {
+
+    interface ToColTypeRef extends Modification.Reference {
     }
+
 }
