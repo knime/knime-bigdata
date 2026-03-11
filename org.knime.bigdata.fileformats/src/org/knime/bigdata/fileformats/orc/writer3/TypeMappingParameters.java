@@ -44,7 +44,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Mar 11, 2026 (Jochen Reissinger, TNG Technology Consulting GmbH): created
+ *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
 package org.knime.bigdata.fileformats.orc.writer3;
 
@@ -95,7 +95,7 @@ import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
  * Node parameters for type mapping part in ORC Writer. Backwards compatible to the settings structure of
  * {@link SettingsModelDataTypeMapping}. KNIME to External type mappings by name and type.
  *
- * @author Jochen Reissinger, TNG Technology Consulting GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @Persistor(TypeMappingParameters.TypeMappingPersistor.class)
 @Migration(TypeMappingParameters.TypeMappingMigration.class)

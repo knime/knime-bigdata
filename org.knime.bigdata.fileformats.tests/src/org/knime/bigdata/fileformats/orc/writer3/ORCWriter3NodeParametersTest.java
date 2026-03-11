@@ -67,7 +67,7 @@ import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 /**
  * Snapshot test for {@link ORCWriter3NodeParameters}.
  *
- * @author Jochen Reissinger, TNG Technology Consulting GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @SuppressWarnings("restriction")
 final class ORCWriter3NodeParametersTest extends DefaultNodeSettingsSnapshotTest {

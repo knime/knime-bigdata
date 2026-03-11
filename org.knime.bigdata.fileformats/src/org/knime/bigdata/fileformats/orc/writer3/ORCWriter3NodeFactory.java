@@ -67,7 +67,7 @@ import org.knime.node.impl.description.PortDescription;
 /**
  * <code>NodeFactory</code> for the "ORC Writer" Node.
  *
- * @author Jochen Reissinger, TNG Technology Consulting GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @SuppressWarnings("restriction")
 public final class ORCWriter3NodeFactory extends AbstractFileFormatWriter2NodeFactory implements //

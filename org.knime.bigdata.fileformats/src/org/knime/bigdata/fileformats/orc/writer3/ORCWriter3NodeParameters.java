@@ -44,7 +44,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Mar 11, 2026 (Jochen Reissinger, TNG Technology Consulting GmbH): created
+ *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
 package org.knime.bigdata.fileformats.orc.writer3;
 
@@ -80,7 +80,7 @@ import org.knime.node.parameters.widget.text.TextInputWidget;
 /**
  * Node parameters for ORC Writer.
  *
- * @author Jochen Reissinger, TNG Technology Consulting GmbH
+ * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
 @LoadDefaultsForAbsentFields
 @SuppressWarnings("restriction")
