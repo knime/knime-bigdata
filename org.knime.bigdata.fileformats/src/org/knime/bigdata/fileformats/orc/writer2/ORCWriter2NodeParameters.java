@@ -80,6 +80,7 @@ import org.knime.node.parameters.widget.choices.Label;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidget;
 import org.knime.node.parameters.widget.number.NumberInputWidgetValidation.MinValidation.IsPositiveIntegerValidation;
+import org.knime.node.parameters.migration.Migrate;
 import org.knime.node.parameters.widget.text.TextInputWidget;
 
 /**
@@ -117,6 +118,7 @@ class ORCWriter2NodeParameters implements NodeParameters {
     @Widget(title = "File Compression", description = "The compression codec used to write the ORC file.")
     @PersistWithin("settings")
     @Persistor(CompressionPersistor.class)
+    @Migrate
     @Layout(SettingsSection.BelowSingleFileSelection.class)
     Compression m_compression = Compression.NONE;
 
@@ -177,7 +179,6 @@ class ORCWriter2NodeParameters implements NodeParameters {
         description = "The prefix to use for the file within the selected folder. A running index is appended "
             + "starting with 0 e.g. part_00000.orc, part_00001.orc. This option is only available if "
             + "the folder mode is selected.")
-    @TextInputWidget
     @Persist(configKey = "file_name_prefix")
     @Effect(predicate = WriteMode.IsFolderSelection.class, type = EffectType.SHOW)
     @PersistWithin("settings")
