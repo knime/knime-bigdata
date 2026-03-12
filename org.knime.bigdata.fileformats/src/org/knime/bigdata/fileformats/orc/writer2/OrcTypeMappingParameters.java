@@ -48,52 +48,30 @@
  */
 package org.knime.bigdata.fileformats.orc.writer2;
 
-import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.orc.TypeDescription;
-import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
-import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCSource;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
 import org.knime.bigdata.fileformats.utility.ByNameMappingSettings;
 import org.knime.bigdata.fileformats.utility.ByTypeMappingSettings;
+import org.knime.bigdata.fileformats.utility.TypeMappingParameters;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils;
-import org.knime.bigdata.fileformats.utility.TypeMappingUtils.FilterType;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.TypeChoicesProvider;
 import org.knime.core.data.DataType;
-import org.knime.core.data.convert.map.ConsumptionPath;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
-import org.knime.datatype.mapping.DataTypeMappingConfiguration;
-import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
-import org.knime.node.datatype.mapping.DataTypeMappingConfigurationData;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
-import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.NodeParametersInput;
-import org.knime.node.parameters.Widget;
-import org.knime.node.parameters.array.ArrayWidget;
-import org.knime.node.parameters.layout.After;
-import org.knime.node.parameters.layout.Layout;
-import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.ConfigMigration;
 import org.knime.node.parameters.migration.Migration;
-import org.knime.node.parameters.migration.NodeParametersMigration;
-import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.node.parameters.persistence.Persistor;
-import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.StateProvider;
 import org.knime.node.parameters.updates.ValueProvider;
-import org.knime.node.parameters.updates.ValueReference;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
 
@@ -103,44 +81,25 @@ import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
-@Persistor(TypeMappingParameters.TypeMappingPersistor.class)
-@Migration(TypeMappingParameters.TypeMappingMigration.class)
+@Persistor(OrcTypeMappingParameters.OrcTypeMappingPersistor.class)
+@Migration(OrcTypeMappingParameters.OrcTypeMappingMigration.class)
+@Modification({OrcTypeMappingParameters.ByNameModification.class, OrcTypeMappingParameters.ByTypeModification.class})
 @SuppressWarnings("restriction")
-final class TypeMappingParameters implements NodeParameters {
+final class OrcTypeMappingParameters extends TypeMappingParameters {
 
-    private static final ORCTypeMappingService MAPPING_SERVICE = ORCTypeMappingService.getInstance();
+    private static final DataTypeMappingService<TypeDescription, ?, ?> MAPPING_SERVICE =
+        ORCTypeMappingService.getInstance();
 
-    TypeMappingParameters() {
+    OrcTypeMappingParameters() {
         // default constructor
     }
 
-    TypeMappingParameters(final ByNameMappingSettings[] byNameSettings, final ByTypeMappingSettings[] byTypeSettings) {
-        m_byNameSettings = byNameSettings;
-        m_byTypeSettings = byTypeSettings;
+    OrcTypeMappingParameters(final ByNameMappingSettings[] byNameSettings,
+        final ByTypeMappingSettings[] byTypeSettings) {
+        super(byNameSettings, byTypeSettings);
     }
 
-    @Section(title = "Mapping by Name", description = "Define name-based mappings that apply to specific columns.")
-    private interface MappingByName {
-    }
-
-    @Section(title = "Mapping by Type", description = """
-            Define type mappings that apply to all columns of the specified KNIME type. These mappings are applied \
-            after the mappings defined in the 'Mapping by Name' section.
-            """)
-    @After(TypeMappingParameters.MappingByName.class)
-    private interface MappingByType {
-    }
-
-    @Widget(title = "Name", description = """
-            Columns that match the given name (or regular expression) and KNIME type will be mapped to the \
-            specified ORC type.
-            """)
-    @ArrayWidget(addButtonText = "Add name", elementTitle = "Column name")
-    @Layout(TypeMappingParameters.MappingByName.class)
-    @Modification(TypeMappingParameters.ByNameModification.class)
-    ByNameMappingSettings[] m_byNameSettings = new ByNameMappingSettings[0];
-
-    private static final class ByNameModification implements Modification.Modifier {
+    static final class ByNameModification implements Modification.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
@@ -171,7 +130,7 @@ final class TypeMappingParameters implements NodeParameters {
             }
 
             @Override
-            protected DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> getMappingService() {
+            protected DataTypeMappingService<TypeDescription, ?, ?> getMappingService() {
                 return MAPPING_SERVICE;
             }
         }
@@ -204,15 +163,7 @@ final class TypeMappingParameters implements NodeParameters {
 
     }
 
-    @Widget(title = "Type",
-        description = "Columns that match the given KNIME type will be mapped to the specified ORC data type.")
-    @ArrayWidget(addButtonText = "Add type", elementTitle = "Type")
-    @ValueReference(TypeMappingParameters.ByTypeRef.class)
-    @Layout(TypeMappingParameters.MappingByType.class)
-    @Modification(TypeMappingParameters.ByTypeModification.class)
-    ByTypeMappingSettings[] m_byTypeSettings = new ByTypeMappingSettings[0];
-
-    private static final class ByTypeModification implements Modification.Modifier {
+    static final class ByTypeModification implements Modification.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
@@ -235,7 +186,7 @@ final class TypeMappingParameters implements NodeParameters {
             @Override
             public void init(final StateProviderInitializer initializer) {
                 this.m_fromType = initializer.computeFromValueSupplier(ByTypeMappingSettings.FromColTypeRef.class);
-                this.m_array = initializer.computeFromValueSupplier(TypeMappingParameters.ByTypeRef.class);
+                this.m_array = initializer.computeFromValueSupplier(ByTypeRef.class);
                 initializer.computeBeforeOpenDialog();
             }
 
@@ -257,7 +208,7 @@ final class TypeMappingParameters implements NodeParameters {
             }
 
             @Override
-            protected DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> getMappingService() {
+            protected DataTypeMappingService<TypeDescription, ?, ?> getMappingService() {
                 return MAPPING_SERVICE;
             }
         }
@@ -283,88 +234,28 @@ final class TypeMappingParameters implements NodeParameters {
             }
 
         }
-
     }
 
-    private interface ByTypeRef extends ParameterReference<ByTypeMappingSettings[]> {
-    }
-
-    static final class TypeMappingPersistor implements NodeParametersPersistor<TypeMappingParameters> {
+    static final class OrcTypeMappingPersistor extends TypeMappingPersistor<OrcTypeMappingParameters> {
 
         @Override
-        public TypeMappingParameters load(final NodeSettingsRO settings) throws InvalidSettingsException {
-
-            final var configData = DataTypeMappingConfigurationData.from(settings);
-            final var config = configData.resolve(MAPPING_SERVICE, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
-
-            final var byNameSettings = config.getNameRules().stream()//
-                .filter(DataTypeMappingConfiguration.Rule::isValid)//
-                .map(TypeMappingPersistor::toByNameMappingSettings)//
-                .toArray(ByNameMappingSettings[]::new);
-
-            final var byTypeSettings = config.getTypeRules().stream()//
-                .filter(DataTypeMappingConfiguration.Rule::isValid)//
-                .map(TypeMappingPersistor::toByTypeMappingSettings)//
-                .toArray(ByTypeMappingSettings[]::new);
-
-            return new TypeMappingParameters(byNameSettings, byTypeSettings);
-        }
-
-        private static ByNameMappingSettings
-            toByNameMappingSettings(final DataTypeMappingConfiguration<TypeDescription>.Rule rule) {
-            final var filterType = rule.isRegex() ? FilterType.REGEX : FilterType.MANUAL;
-            final var columnName = rule.getColumnName();
-            final var knimeType = rule.getKnimeType();
-            final var consumptionPath = rule.getConsumptionPath();
-            return new ByNameMappingSettings(filterType, columnName, knimeType, consumptionPath);
-        }
-
-        private static ByTypeMappingSettings
-            toByTypeMappingSettings(final DataTypeMappingConfiguration<TypeDescription>.Rule rule) {
-            final var knimeType = rule.getKnimeType();
-            final var consumptionPath = rule.getConsumptionPath();
-            return new ByTypeMappingSettings(knimeType, consumptionPath);
+        protected DataTypeMappingService<?, ?, ?> getMappingService() {
+            return MAPPING_SERVICE;
         }
 
         @Override
-        public void save(final TypeMappingParameters params, final NodeSettingsWO settings) {
-            final var config = MAPPING_SERVICE.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
-            Arrays.stream(params.m_byNameSettings).forEach(s -> {
-                var matchingPath = findMatchingConsumptionPath(s.m_fromColType, s.m_toColType);
-                matchingPath.ifPresent(consumptionPath -> config.addRule(s.m_fromColName,
-                    s.m_filterType == FilterType.REGEX, s.m_fromColType, consumptionPath));
-            });
-            Arrays.stream(params.m_byTypeSettings).forEach(s -> {
-                var matchingPath = findMatchingConsumptionPath(s.m_fromType, s.m_toType);
-                matchingPath.ifPresent(consumptionPath -> config.addRule(s.m_fromType, consumptionPath));
-            });
-
-            DataTypeMappingConfigurationData.from(config).copyTo(settings);
-        }
-
-        private static Optional<ConsumptionPath> findMatchingConsumptionPath(final DataType fromType,
-            final String toTypePathString) {
-            final var consumptionPaths = MAPPING_SERVICE.getConsumptionPathsFor(fromType);
-            return consumptionPaths.stream().filter(path -> getIdForConsumptionPath(path).equals(toTypePathString))
-                .findFirst();
-        }
-
-        @Override
-        public String[][] getConfigPaths() {
-            return new String[][]{};
+        protected OrcTypeMappingParameters create(final ByNameMappingSettings[] byNameSettings,
+            final ByTypeMappingSettings[] byTypeSettings) {
+            return new OrcTypeMappingParameters(byNameSettings, byTypeSettings);
         }
     }
 
-    static class TypeMappingMigration implements NodeParametersMigration<TypeMappingParameters> {
-
-        TypeMappingMigration() {
-            super();
-        }
+    static final class OrcTypeMappingMigration extends TypeMappingMigration<OrcTypeMappingParameters> {
 
         @Override
-        public List<ConfigMigration<TypeMappingParameters>> getConfigMigrations() {
+        public List<ConfigMigration<OrcTypeMappingParameters>> getConfigMigrations() {
             return List
-                .of(ConfigMigration.builder(settings -> (TypeMappingParameters)null).withMatcher(settings -> false)
+                .of(ConfigMigration.builder(settings -> (OrcTypeMappingParameters)null).withMatcher(settings -> false)
                     .withDeprecatedConfigPath("name_to_type_mapping_rules", "type_to_type_mapping_rules").build());
         }
     }

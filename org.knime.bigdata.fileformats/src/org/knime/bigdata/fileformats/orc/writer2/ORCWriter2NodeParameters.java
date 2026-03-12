@@ -227,7 +227,7 @@ class ORCWriter2NodeParameters implements NodeParameters {
     @Layout(MappingSection.class)
     @PersistWithin("type_mapping")
     @Persist(configKey = "input_type_mapping")
-    TypeMappingParameters m_mapping = new TypeMappingParameters();
+    OrcTypeMappingParameters m_mapping = new OrcTypeMappingParameters();
 
     private static final class OutputFileModification implements LegacyFileWriterWithCreateMissingFolders.Modifier {
 
