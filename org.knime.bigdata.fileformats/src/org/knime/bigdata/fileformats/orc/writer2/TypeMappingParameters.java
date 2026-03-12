@@ -108,6 +108,8 @@ import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
 @SuppressWarnings("restriction")
 final class TypeMappingParameters implements NodeParameters {
 
+    private static final ORCTypeMappingService MAPPING_SERVICE = ORCTypeMappingService.getInstance();
+
     TypeMappingParameters() {
         // default constructor
     }
@@ -156,8 +158,7 @@ final class TypeMappingParameters implements NodeParameters {
 
             @Override
             public List<DataType> choices(final NodeParametersInput context) {
-                final var mappingService = ORCTypeMappingService.getInstance();
-                return mappingService.getKnimeSourceTypes().stream()
+                return MAPPING_SERVICE.getKnimeSourceTypes().stream()
                     .sorted(Comparator.comparing(DataType::toPrettyString)).toList();
             }
         }
@@ -171,7 +172,7 @@ final class TypeMappingParameters implements NodeParameters {
 
             @Override
             protected DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> getMappingService() {
-                return ORCTypeMappingService.getInstance();
+                return MAPPING_SERVICE;
             }
         }
 
@@ -194,8 +195,7 @@ final class TypeMappingParameters implements NodeParameters {
                 if (colName == null || dataType == null) {
                     return "";
                 }
-                final var mappingService = ORCTypeMappingService.getInstance();
-                final var consumptionPaths = mappingService.getConsumptionPathsFor(dataType);
+                final var consumptionPaths = MAPPING_SERVICE.getConsumptionPathsFor(dataType);
                 final var path = consumptionPaths.stream().findFirst();
                 return path.map(TypeMappingUtils::getIdForConsumptionPath).orElse("");
             }
@@ -241,10 +241,9 @@ final class TypeMappingParameters implements NodeParameters {
 
             @Override
             public List<DataType> choices(final NodeParametersInput context) {
-                final var mappingService = ORCTypeMappingService.getInstance();
                 final var existingTypes = Arrays.stream(m_array.get()).map(setting -> setting.m_fromType)
                     .filter(type -> type != null && !type.equals(this.m_fromType.get())).collect(Collectors.toSet());
-                return mappingService.getKnimeSourceTypes().stream().filter(type -> !existingTypes.contains(type))
+                return MAPPING_SERVICE.getKnimeSourceTypes().stream().filter(type -> !existingTypes.contains(type))
                     .sorted(Comparator.comparing(DataType::toPrettyString)).toList();
             }
 
@@ -259,7 +258,7 @@ final class TypeMappingParameters implements NodeParameters {
 
             @Override
             protected DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> getMappingService() {
-                return ORCTypeMappingService.getInstance();
+                return MAPPING_SERVICE;
             }
         }
 
@@ -278,8 +277,7 @@ final class TypeMappingParameters implements NodeParameters {
                 if (dataType == null) {
                     return "";
                 }
-                final var mappingService = ORCTypeMappingService.getInstance();
-                final var consumptionPaths = mappingService.getConsumptionPathsFor(dataType);
+                final var consumptionPaths = MAPPING_SERVICE.getConsumptionPathsFor(dataType);
                 final var path = consumptionPaths.stream().findFirst();
                 return path.map(TypeMappingUtils::getIdForConsumptionPath).orElse("");
             }
@@ -297,8 +295,7 @@ final class TypeMappingParameters implements NodeParameters {
         public TypeMappingParameters load(final NodeSettingsRO settings) throws InvalidSettingsException {
 
             final var configData = DataTypeMappingConfigurationData.from(settings);
-            final var config = configData.resolve(ORCTypeMappingService.getInstance(),
-                DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+            final var config = configData.resolve(MAPPING_SERVICE, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
 
             final var byNameSettings = config.getNameRules().stream()//
                 .filter(DataTypeMappingConfiguration.Rule::isValid)//
@@ -331,8 +328,7 @@ final class TypeMappingParameters implements NodeParameters {
 
         @Override
         public void save(final TypeMappingParameters params, final NodeSettingsWO settings) {
-            final var mappingService = ORCTypeMappingService.getInstance();
-            final var config = mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+            final var config = MAPPING_SERVICE.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
             Arrays.stream(params.m_byNameSettings).forEach(s -> {
                 var matchingPath = findMatchingConsumptionPath(s.m_fromColType, s.m_toColType);
                 matchingPath.ifPresent(consumptionPath -> config.addRule(s.m_fromColName,
@@ -348,8 +344,7 @@ final class TypeMappingParameters implements NodeParameters {
 
         private static Optional<ConsumptionPath> findMatchingConsumptionPath(final DataType fromType,
             final String toTypePathString) {
-            final var mappingService = ORCTypeMappingService.getInstance();
-            final var consumptionPaths = mappingService.getConsumptionPathsFor(fromType);
+            final var consumptionPaths = MAPPING_SERVICE.getConsumptionPathsFor(fromType);
             return consumptionPaths.stream().filter(path -> getIdForConsumptionPath(path).equals(toTypePathString))
                 .findFirst();
         }
