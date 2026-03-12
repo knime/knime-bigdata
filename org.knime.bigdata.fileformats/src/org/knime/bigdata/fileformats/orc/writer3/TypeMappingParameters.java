@@ -117,9 +117,7 @@ final class TypeMappingParameters implements NodeParameters {
         m_byTypeSettings = byTypeSettings;
     }
 
-    @Section(title = "Mapping by Name", description = """
-            Define name-based mappings that apply to specific columns. \
-            """)
+    @Section(title = "Mapping by Name", description = "Define name-based mappings that apply to specific columns.")
     private interface MappingByName {
     }
 
