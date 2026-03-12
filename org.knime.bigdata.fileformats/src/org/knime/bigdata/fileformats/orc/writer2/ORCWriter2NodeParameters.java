@@ -50,6 +50,9 @@ package org.knime.bigdata.fileformats.orc.writer2;
 
 import java.util.function.Supplier;
 
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileWriterWidget;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
@@ -62,7 +65,9 @@ import org.knime.node.parameters.layout.After;
 import org.knime.node.parameters.layout.Layout;
 import org.knime.node.parameters.layout.Section;
 import org.knime.node.parameters.migration.LoadDefaultsForAbsentFields;
+import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.node.parameters.persistence.Persist;
+import org.knime.node.parameters.persistence.Persistor;
 import org.knime.node.parameters.persistence.legacy.LegacyFileWriterWithCreateMissingFolders;
 import org.knime.node.parameters.updates.Effect;
 import org.knime.node.parameters.updates.Effect.EffectType;
@@ -110,8 +115,8 @@ class ORCWriter2NodeParameters implements NodeParameters {
         new LegacyFileWriterWithFilterModeAndCreateMissingFoldersOptions();
 
     @Widget(title = "File Compression", description = "The compression codec used to write the ORC file.")
-    @Persist(configKey = "file_compression")
     @PersistWithin("settings")
+    @Persistor(CompressionPersistor.class)
     @Layout(SettingsSection.BelowSingleFileSelection.class)
     Compression m_compression = Compression.NONE;
 
@@ -126,6 +131,36 @@ class ORCWriter2NodeParameters implements NodeParameters {
             LZO, //
             @Label("LZ4")
             LZ4;
+    }
+
+    static final class CompressionPersistor implements NodeParametersPersistor<Compression> {
+
+        private static final String CONFIG_KEY = "file_compression";
+
+        @Override
+        public Compression load(final NodeSettingsRO settings) throws InvalidSettingsException {
+            final var value = settings.getString(CONFIG_KEY);
+            // The node model (FileFormatWriter2NodeModel) is created by AbstractFileFormatWriter2NodeFactory
+            // via a final createNodeModel() that cannot be overridden. The model owns a FileFormatWriter2Config
+            // instance whose m_compression SettingsModel is initialised with "UNCOMPRESSED" as the hardcoded
+            // default. This value is written to node settings on every saveSettingsTo() call and is then read
+            // back by this persistor. "UNCOMPRESSED" is not a valid CompressionKind in Apache ORC
+            // (valid values: NONE, ZLIB, SNAPPY, LZO, LZ4), so we map it to NONE here.
+            if ("UNCOMPRESSED".equals(value)) {
+                return Compression.NONE;
+            }
+            return Compression.valueOf(value);
+        }
+
+        @Override
+        public void save(final Compression compression, final NodeSettingsWO settings) {
+            settings.addString(CONFIG_KEY, compression.name());
+        }
+
+        @Override
+        public String[][] getConfigPaths() {
+            return new String[][]{{CONFIG_KEY}};
+        }
     }
 
     @Widget(title = "Split data into files of size (rows)",
@@ -194,8 +229,7 @@ class ORCWriter2NodeParameters implements NodeParameters {
     @Persist(configKey = "input_type_mapping")
     TypeMappingParameters m_mapping = new TypeMappingParameters();
 
-    private static final class OutputFileModification
-        implements LegacyFileWriterWithCreateMissingFolders.Modifier {
+    private static final class OutputFileModification implements LegacyFileWriterWithCreateMissingFolders.Modifier {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
@@ -206,18 +240,15 @@ class ORCWriter2NodeParameters implements NodeParameters {
                 .withProperty("selectionModeProvider", ORCWriter2FileSelectionModeProvider.class).modify();
 
             // Modify FileWriterWidget to add ORC file extension filter
-            fileSelection.modifyAnnotation(FileWriterWidget.class)
-                .withProperty("fileExtension", "orc").modify();
+            fileSelection.modifyAnnotation(FileWriterWidget.class).withProperty("fileExtension", "orc").modify();
 
-            fileSelection.modifyAnnotation(Widget.class)
-                .withProperty("title", "Output location")
+            fileSelection.modifyAnnotation(Widget.class).withProperty("title", "Output location")
                 .withProperty("description", "Select a file system and location where you want to store the file(s).")
                 .modify();
         }
     }
 
-    private static final class ORCWriter2FileSelectionModeProvider
-        implements StateProvider<SingleFileSelectionMode> {
+    private static final class ORCWriter2FileSelectionModeProvider implements StateProvider<SingleFileSelectionMode> {
 
         private Supplier<WriteMode> m_modeSupplier;
 
