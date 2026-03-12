@@ -46,7 +46,7 @@
  * History
  *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
-package org.knime.bigdata.fileformats.orc.writer3;
+package org.knime.bigdata.fileformats.orc.writer2;
 
 import java.util.function.Supplier;
 
@@ -84,7 +84,7 @@ import org.knime.node.parameters.widget.text.TextInputWidget;
  */
 @LoadDefaultsForAbsentFields
 @SuppressWarnings("restriction")
-class ORCWriter3NodeParameters implements NodeParameters {
+class ORCWriter2NodeParameters implements NodeParameters {
 
     @Section(title = "Settings",
         description = "General settings regarding the output file location and storage configuration.")
@@ -203,7 +203,7 @@ class ORCWriter3NodeParameters implements NodeParameters {
 
             // Add FileSelectionWidget to support both file and folder modes
             fileSelection.addAnnotation(FileSelectionWidget.class)
-                .withProperty("selectionModeProvider", ORCWriter3FileSelectionModeProvider.class).modify();
+                .withProperty("selectionModeProvider", ORCWriter2FileSelectionModeProvider.class).modify();
 
             // Modify FileWriterWidget to add ORC file extension filter
             fileSelection.modifyAnnotation(FileWriterWidget.class)
@@ -216,7 +216,7 @@ class ORCWriter3NodeParameters implements NodeParameters {
         }
     }
 
-    private static final class ORCWriter3FileSelectionModeProvider
+    private static final class ORCWriter2FileSelectionModeProvider
         implements StateProvider<SingleFileSelectionMode> {
 
         private Supplier<WriteMode> m_modeSupplier;

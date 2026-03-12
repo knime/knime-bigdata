@@ -46,7 +46,7 @@
  * History
  *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
-package org.knime.bigdata.fileformats.orc.writer3;
+package org.knime.bigdata.fileformats.orc.writer2;
 
 import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForConsumptionPath;
 

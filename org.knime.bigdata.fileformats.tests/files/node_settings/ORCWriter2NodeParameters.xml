@@ -125,7 +125,7 @@
     </config>
     <entry key="customDescription" type="xstring" isnull="true" value=""/>
     <entry key="state" type="xstring" value="EXECUTED"/>
-    <entry key="factory" type="xstring" value="org.knime.bigdata.fileformats.orc.writer3.ORCWriter3NodeFactory"/>
+    <entry key="factory" type="xstring" value="org.knime.bigdata.fileformats.orc.writer2.ORCWriter2NodeFactory"/>
     <entry key="node-name" type="xstring" value="ORC Writer"/>
     <entry key="node-bundle-name" type="xstring" value="KNIME BigData File Format Extension"/>
     <entry key="node-bundle-symbolic-name" type="xstring" value="org.knime.bigdata.fileformats"/>

@@ -46,52 +46,46 @@
  * History
  *   Mar 11, 2026: created
  */
-package org.knime.bigdata.fileformats.orc.writer3;
-
-import static org.junit.Assert.assertEquals;
+package org.knime.bigdata.fileformats.orc.writer2;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.webui.node.dialog.SettingsType;
 import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersUtil;
-import org.knime.node.parameters.persistence.NodeParametersPersistor;
 import org.knime.testing.node.dialog.DefaultNodeSettingsSnapshotTest;
 import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 
 /**
- * Snapshot test for {@link ORCWriter3NodeParameters}.
+ * Snapshot test for {@link ORCWriter2NodeParameters}.
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
-@SuppressWarnings("restriction")
-final class ORCWriter3NodeParametersTest extends DefaultNodeSettingsSnapshotTest {
+@SuppressWarnings({"restriction", "javadoc"})
+final class ORCWriter2NodeParametersTest extends DefaultNodeSettingsSnapshotTest {
 
-    ORCWriter3NodeParametersTest() {
+    ORCWriter2NodeParametersTest() {
         super(getConfig());
     }
 
     private static SnapshotTestConfiguration getConfig() {
         return SnapshotTestConfiguration.builder() //
-            .testJsonFormsForModel(ORCWriter3NodeParameters.class) //
+            .testJsonFormsForModel(ORCWriter2NodeParameters.class) //
             .testJsonFormsWithInstance(SettingsType.MODEL, () -> readSettings()) //
             .testNodeSettingsStructure(() -> readSettings()) //
             .build();
     }
 
-    private static ORCWriter3NodeParameters readSettings() {
+    private static ORCWriter2NodeParameters readSettings() {
         try {
-            var path = getSnapshotPath(ORCWriter3NodeParameters.class).getParent().resolve("node_settings")
-                .resolve("ORCWriter3NodeParameters.xml");
+            var path = getSnapshotPath(ORCWriter2NodeParameters.class).getParent().resolve("node_settings")
+                .resolve("ORCWriter2NodeParameters.xml");
             try (var fis = new FileInputStream(path.toFile())) {
                 var nodeSettings = NodeSettings.loadFromXML(fis);
                 return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
-                    ORCWriter3NodeParameters.class);
+                    ORCWriter2NodeParameters.class);
             }
         } catch (IOException | InvalidSettingsException e) {
             throw new IllegalStateException(e);
