@@ -1,4 +1,7 @@
 #!groovy
+
+def BN = (BRANCH_NAME == 'master' || BRANCH_NAME.startsWith('releases/')) ? BRANCH_NAME : KNIMEConstants.NEXT_RELEASE_BRANCH
+
 library "knime-pipeline@$DEFAULT_LIBRARY_VERSION"
 
 properties([
