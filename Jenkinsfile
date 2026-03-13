@@ -18,14 +18,21 @@ try {
         knimetools.defaultTychoBuild('org.knime.update.bigdata', 'maven && java21 && large')
     }
 
+    def baseBranch
+    stage("Determine Basebranch") {
+        node('macosx||macosx-aarch'){
+            checkout scm
+            baseBranch = knimetools.getBaseBranch()
+            echo "Basebranch is ${baseBranch}"
+        }
+    }
 
     testConfigs = [
         WorkflowTests: {
             // TEST REGEX
             def local_bd_tests = "(SparkLocal|SparkExecutor|SparkDatabase|BigDataFileFormats)/(spark_2_[0-4]_higher|spark_3_5_higher|spark_all|ORC|Parquet|DeltaTable)/(?!KnimeOnSpark_ServerProfiles_[a-z])(?!BD163_GenericDataSource_NoDriver)(?!BD892_KerberosImpersonation_Spark)(?!NewDBFramework/BD921_Spark2Hive_no_default_db).+"
 
-    
-            def testPrefix = "BigDataTests/${BN == KNIMEConstants.NEXT_RELEASE_BRANCH || BN == 'releases/STS' || BN == 'releases/STS-next' ? 'master' : BN}".replaceAll('releases/', '')
+            def testPrefix = "BigDataTests/${baseBranch == 'releases/STS' || baseBranch == 'releases/STS-next' ? 'master' : baseBranch}".replaceAll('releases/', '')
             def testRegex = "/${testPrefix}/${local_bd_tests}"
 
             echo "${testRegex}"
@@ -106,10 +113,8 @@ try {
                     ]
                 )
             }
-            
         },
         FileHandlingTests: {
-            def baseBranch = "${BN == KNIMEConstants.NEXT_RELEASE_BRANCH || BN == 'releases/STS' || BN == 'releases/STS-next' ? 'master' : BN}".replaceAll('releases/', '')
             def fhTestflowsDir = "BigDataTests/${baseBranch}/File Handling v2"
             workflowTests.runFilehandlingTests (
                 testflowsDir: fhTestflowsDir,
