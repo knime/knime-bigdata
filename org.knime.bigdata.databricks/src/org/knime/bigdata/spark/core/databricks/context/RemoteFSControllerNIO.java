@@ -64,6 +64,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.URIUtil;
+import org.knime.bigdata.databricks.unity.filehandling.fs.UnityFSDescriptorProvider;
 import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksJobSerializationUtils.StagingAreaAccess;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.core.node.NodeLogger;
@@ -153,6 +154,15 @@ public class RemoteFSControllerNIO implements RemoteFSController {
     @Override
     public String getStagingArea() {
         return m_stagingAreaString;
+    }
+
+    @Override
+    public boolean getStagingAreaUseHadoopFS() {
+        final boolean isUnityFS = m_fsConnection.getFSType().equals(UnityFSDescriptorProvider.FS_TYPE);
+
+        // use the new NIO based staging area implementation with Unity FS,
+        // other file systems default to the Hadoop FS based staging area implementation
+        return !isUnityFS;
     }
 
     @Override

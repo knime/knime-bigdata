@@ -98,7 +98,8 @@ public class DatabricksClient {
 
     private static final long START_CLUSTER_TIMEOUT = 900 * 1000L; // = 15 minutes
     private static final long INSTALL_JOB_JAR_TIMEOUT = 300 * 1000L; // = 5 minutes
-    private static final String INIT_DATABRICKS_CONTEXT = "def dsc = %s.createContext(sc, \"%s\", %b)";
+
+    private static final String INIT_DATABRICKS_CONTEXT = "def dsc = %s.createContext(sc, \"%s\", %b, %b)";
     private static final String RUN_ON_DATABRICKS_CONTEXT = "dsc.run(\"%s\")";
     private static final String CONTEXT_LANG = "scala";
 
@@ -458,14 +459,18 @@ public class DatabricksClient {
      *
      * @param jobClassName class name of databricks spark job
      * @param stagingArea URI or path of staging area
+     * @param stagingAreaUseHadoopFS <code>true</code> if staging area should be accessed via the legacy Hadoop
+     *            FileSystem implementation, <code>false</code> if staging area should be accessed via Java NIO based
+     *            implementation.
      * @param stagingAreaIsPath <code>true</code> if staging area is path in default Hadoop FS
      * @param exec execution monitor to check
      * @return identifier of new context
      * @throws KNIMESparkException
      * @throws CanceledExecutionException
      */
-    String createContext(final String jobClassName, final String stagingArea, final boolean stagingAreaIsPath,
-        final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+    String createContext(final String jobClassName, final String stagingArea, final boolean stagingAreaUseHadoopFS,
+        final boolean stagingAreaIsPath, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
 
         if (exec != null) {
             exec.setMessage("Starting context on cluster");
@@ -495,7 +500,8 @@ public class DatabricksClient {
             }
 
             // initialize job runner (databricks spark context)
-            final String cmd = String.format(INIT_DATABRICKS_CONTEXT, jobClassName, stagingArea, stagingAreaIsPath);
+            final String cmd = String.format(INIT_DATABRICKS_CONTEXT, jobClassName, stagingArea, stagingAreaUseHadoopFS,
+                stagingAreaIsPath);
             executeCommand(context.id, cmd, exec);
 
             LOG.info("Spark execution context " + context.id + " on Databricks cluster " + m_config.getClusterId()

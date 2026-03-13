@@ -47,13 +47,19 @@ public class DatabricksSparkREPLContext {
      *
      * @param sc spark context to use
      * @param stagingArea URI or path of staging area
+     * @param stagingAreaUseHadoopFS <code>true</code> if staging area should be accessed via the legacy Hadoop
+     *            FileSystem implementation, <code>false</code> if staging area should be accessed via Java NIO based
+     *            implementation.
      * @param stagingAreaIsPath <code>true</code> if staging area is a path on default Hadoop FS
      * @throws Exception on failures
      */
-    protected DatabricksSparkREPLContext(final SparkContext sc, final String stagingArea, final boolean stagingAreaIsPath) throws Exception {
+    protected DatabricksSparkREPLContext(final SparkContext sc, final String stagingArea,
+        final boolean stagingAreaUseHadoopFS, final boolean stagingAreaIsPath) throws Exception {
+
         m_sparkContext = sc;
         final File tmp = determineSparkLocalDir(sc);
-        DatabricksSparkSideStagingArea.ensureInitialized(stagingArea, stagingAreaIsPath, tmp, sc.hadoopConfiguration());
+        DatabricksSparkSideStagingArea.ensureInitialized(stagingArea, stagingAreaUseHadoopFS, stagingAreaIsPath, tmp,
+            sc.hadoopConfiguration());
         m_stagingArea = DatabricksSparkSideStagingArea.SINGLETON_INSTANCE;
     }
 

@@ -42,47 +42,54 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   Mar 11, 2026 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.spark.core.databricks.context;
+package org.knime.bigdata.spark.core.databricks.node.create;
 
-import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksJobSerializationUtils.StagingAreaAccess;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettings;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersUtil;
+import org.knime.testing.node.dialog.DefaultNodeSettingsSnapshotTest;
+import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 
 /**
- * KNIME-side implementation of {@link StagingAreaAccess}.
+ * Snapshot test for {@link DatabricksSparkConnectorNodeParameters}.
  *
- * @author Bjoern Lohrmann, KNIME GmbH
- * @author Sascha Wolke, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-public interface RemoteFSController extends StagingAreaAccess {
+@SuppressWarnings("restriction")
+final class DatabricksSparkConnectorNodeParametersTest extends DefaultNodeSettingsSnapshotTest {
 
-    /**
-     * Tries to create the staging area, which is typically a folder in the remote file system provided in the
-     * constructor. This method may try to create the folder in several locations before it fails.
-     *
-     * @throws KNIMESparkException If no staging area could be created, this exception wraps the original exception
-     *             thrown during the last attempt to create the staging area folder.
-     */
-    public void createStagingArea() throws KNIMESparkException;
+    DatabricksSparkConnectorNodeParametersTest() {
+        super(getConfig());
+    }
 
-    /**
-     * @return the full Hadoop-API URI of the staging area (see {@link #getStagingAreaReturnsPath()}.
-     */
-    public String getStagingArea();
+    private static SnapshotTestConfiguration getConfig() {
+        return SnapshotTestConfiguration.builder() //
+            .testJsonFormsForModel(DatabricksSparkConnectorNodeParameters.class) //
+            .testJsonFormsWithInstance(SettingsType.MODEL, DatabricksSparkConnectorNodeParametersTest::readSettings) //
+            .testNodeSettingsStructure(DatabricksSparkConnectorNodeParametersTest::readSettings) //
+            .build();
+    }
 
-    /**
-     * @return <code>true</code> if staging area should be accessed via the legacy Hadoop FileSystem implementation,
-     *         <code>false</code> if staging area should be accessed via Java NIO based implementation.
-     */
-    public boolean getStagingAreaUseHadoopFS();
-
-    /**
-     * @return when true, then the value returned by {@link #getStagingArea()} is a path, otherwise it is a full URI.
-     */
-    public boolean getStagingAreaReturnsPath();
-
-    /**
-     * Closes the connection to the remote FS if necessary.
-     */
-    public void ensureClosed();
+    private static DatabricksSparkConnectorNodeParameters readSettings() {
+        try {
+            var path = getSnapshotPath(DatabricksSparkConnectorNodeParameters.class)
+                .getParent().resolve("node_settings")
+                .resolve("DatabricksSparkConnectorNodeParameters.xml");
+            try (var fis = new FileInputStream(path.toFile())) {
+                var nodeSettings = NodeSettings.loadFromXML(fis);
+                return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
+                    DatabricksSparkConnectorNodeParameters.class);
+            }
+        } catch (IOException | InvalidSettingsException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }
