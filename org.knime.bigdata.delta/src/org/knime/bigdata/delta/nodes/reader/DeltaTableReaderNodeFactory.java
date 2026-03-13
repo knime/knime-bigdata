@@ -50,6 +50,7 @@ package org.knime.bigdata.delta.nodes.reader;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.xmlbeans.XmlException;
@@ -63,7 +64,10 @@ import org.knime.core.node.context.url.URLConfiguration;
 import org.knime.core.webui.node.dialog.NodeDialog;
 import org.knime.core.webui.node.dialog.NodeDialogFactory;
 import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
 import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
 import org.knime.core.webui.node.impl.WebUINodeConfiguration;
 import org.knime.core.webui.node.impl.WebUINodeFactory;
 import org.knime.filehandling.core.connections.FSCategory;
@@ -92,7 +96,7 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("restriction") // New Node UI is not yet API
 public final class DeltaTableReaderNodeFactory
     extends AbstractTableReaderNodeFactory<DeltaTableReaderConfig, DeltaTableDataType, DeltaTableValue>
-    implements NodeDialogFactory {
+    implements NodeDialogFactory, KaiNodeInterfaceFactory {
 
     private static final String FULL_DESCRIPTION = """
             <p>
@@ -186,6 +190,11 @@ public final class DeltaTableReaderNodeFactory
     protected StorableMultiTableReadConfig<DeltaTableReaderConfig, DeltaTableDataType>
         createConfig(final NodeCreationConfiguration nodeCreationConfig) {
         return new DeltaTableReaderMultiTableReadConfig();
+    }
+
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, DeltaTableReaderNodeSettings.class));
     }
 
 }

@@ -107,4 +107,5 @@ public class UnityFileSystemConnectorNodeFactory extends WebUINodeFactory<UnityF
     public UnityFileSystemConnectorNodeModel createNodeModel() {
         return new UnityFileSystemConnectorNodeModel(CONFIGURATION);
     }
+
 }
