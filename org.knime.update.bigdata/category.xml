@@ -53,6 +53,8 @@
           <category name="knime-bigdata" />
    </feature>
 
+   <feature id="org.knime.features.bigdata.databricks.deprecated" />
+
    <category-def name="knime-bigdata" label="Build artifacts from knime-bigdata">
        <description>Build artifacts from knime-bigdata</description>
    </category-def>
