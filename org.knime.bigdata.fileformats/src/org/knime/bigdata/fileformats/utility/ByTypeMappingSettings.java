@@ -58,7 +58,7 @@ import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
 
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "javadoc"})
 public final class ByTypeMappingSettings implements NodeParameters {
 
     ByTypeMappingSettings() {
@@ -79,7 +79,7 @@ public final class ByTypeMappingSettings implements NodeParameters {
     @Modification.WidgetReference(FromColTypeRef.class)
     public DataType m_fromType;
 
-    @Widget(title = "Mapping to", description = "ORC data type to map to.")
+    @Widget(title = "Mapping to", description = "External data type to map to.")
     @ValueReference(ToColTypeRef.class)
     @Modification.WidgetReference(ToColTypeRef.class)
     public String m_toType;

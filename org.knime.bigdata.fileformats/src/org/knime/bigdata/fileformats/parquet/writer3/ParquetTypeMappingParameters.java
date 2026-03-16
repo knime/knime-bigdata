@@ -44,16 +44,14 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Mar 11, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
+ *   Jan 8, 2026 (Jochen Reißinger, TNG Technology Consulting GmbH): created
  */
-package org.knime.bigdata.fileformats.orc.writer2;
+package org.knime.bigdata.fileformats.parquet.writer3;
 
-import java.util.function.Supplier;
-
-import org.apache.orc.TypeDescription;
-import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
-import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCSource;
-import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeDestination;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeMappingService;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetLogicalTypeSource;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.bigdata.fileformats.utility.ByNameMappingSettings;
 import org.knime.bigdata.fileformats.utility.ByTypeMappingSettings;
 import org.knime.bigdata.fileformats.utility.TypeMappingParameters;
@@ -61,38 +59,35 @@ import org.knime.bigdata.fileformats.utility.TypeMappingUtils.AbstractExternalTy
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.AvailableKnimeTypeChoicesProvider;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.KnimeSourceTypeChoicesProvider;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.TypeChoicesProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
 import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
-import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
-import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.migration.Migration;
 import org.knime.node.parameters.persistence.Persistor;
-import org.knime.node.parameters.updates.StateProvider;
 import org.knime.node.parameters.updates.ValueProvider;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
 
 /**
- * Node parameters for type mapping part in ORC Writer. Backwards compatible to the settings structure of
+ * Node parameters for type mapping part in Parquet Writer. Backwards compatible to the settings structure of
  * {@link SettingsModelDataTypeMapping}. KNIME to External type mappings by name and type.
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
-@Persistor(OrcTypeMappingParameters.OrcTypeMappingPersistor.class)
-@Migration(OrcTypeMappingParameters.OrcTypeMappingMigration.class)
-@Modification({OrcTypeMappingParameters.ByNameModification.class, OrcTypeMappingParameters.ByTypeModification.class})
+@Persistor(ParquetTypeMappingParameters.ParquetTypeMappingPersistor.class)
+@Migration(ParquetTypeMappingParameters.ParquetTypeMappingMigration.class)
+@Modification({ParquetTypeMappingParameters.ByNameModification.class,
+    ParquetTypeMappingParameters.ByTypeModification.class})
 @SuppressWarnings("restriction")
-final class OrcTypeMappingParameters extends TypeMappingParameters {
+final class ParquetTypeMappingParameters extends TypeMappingParameters {
 
-    private static final DataTypeMappingService<TypeDescription, ORCSource, ORCDestination> MAPPING_SERVICE =
-        ORCTypeMappingService.getInstance();
+    private static final DataTypeMappingService<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> MAPPING_SERVICE =
+        ParquetLogicalTypeMappingService.getInstance();
 
-    OrcTypeMappingParameters() {
+    ParquetTypeMappingParameters() {
         // default constructor
     }
 
-    OrcTypeMappingParameters(final ByNameMappingSettings[] byNameSettings,
+    ParquetTypeMappingParameters(final ByNameMappingSettings[] byNameSettings,
         final ByTypeMappingSettings[] byTypeSettings) {
         super(byNameSettings, byTypeSettings);
     }
@@ -105,32 +100,32 @@ final class OrcTypeMappingParameters extends TypeMappingParameters {
                 .withValue(ByNameKnimeTypeChoicesProvider.class).modify();
 
             group.find(ByNameMappingSettings.ToColTypeRef.class).addAnnotation(ChoicesProvider.class)
-                .withValue(ByNameOrcTypeChoicesProvider.class).modify();
+                .withValue(ByNameParquetTypeChoicesProvider.class).modify();
 
             group.find(ByNameMappingSettings.ToColTypeRef.class).addAnnotation(ValueProvider.class)
-                .withValue(ByNameOrcTypeValueProvider.class).modify();
+                .withValue(ByNameParquetTypeValueProvider.class).modify();
         }
 
-        private static final class ByNameKnimeTypeChoicesProvider
-            extends KnimeSourceTypeChoicesProvider<TypeDescription, ORCSource, ORCDestination> {
+        private static final class ByNameKnimeTypeChoicesProvider extends
+            KnimeSourceTypeChoicesProvider<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> {
 
             ByNameKnimeTypeChoicesProvider() {
                 super(MAPPING_SERVICE);
             }
         }
 
-        private static final class ByNameOrcTypeChoicesProvider extends
-            TypeChoicesProvider<TypeDescription, ORCSource, ORCDestination, ByNameMappingSettings.FromColTypeRef> {
+        private static final class ByNameParquetTypeChoicesProvider extends
+            TypeChoicesProvider<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination, ByNameMappingSettings.FromColTypeRef> {
 
-            ByNameOrcTypeChoicesProvider() {
+            ByNameParquetTypeChoicesProvider() {
                 super(MAPPING_SERVICE, ByNameMappingSettings.FromColTypeRef.class);
             }
         }
 
-        private static final class ByNameOrcTypeValueProvider extends
-            AbstractExternalTypeValueProvider<TypeDescription, ORCSource, ORCDestination, ByNameMappingSettings.FromColTypeRef> {
+        private static final class ByNameParquetTypeValueProvider extends
+            AbstractExternalTypeValueProvider<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination, ByNameMappingSettings.FromColTypeRef> {
 
-            ByNameOrcTypeValueProvider() {
+            ByNameParquetTypeValueProvider() {
                 super(MAPPING_SERVICE, ByNameMappingSettings.FromColTypeRef.class);
             }
         }
@@ -140,76 +135,49 @@ final class OrcTypeMappingParameters extends TypeMappingParameters {
 
         @Override
         public void modify(final Modification.WidgetGroupModifier group) {
-            group.find(ByTypeRef.class).addAnnotation(ValueProvider.class)
-                .withValue(DefaultByTypeMappingsProvider.class).modify();
-
             group.find(ByTypeMappingSettings.FromColTypeRef.class).addAnnotation(ChoicesProvider.class)
                 .withValue(ByTypeKnimeTypeChoicesProvider.class).modify();
 
             group.find(ByTypeMappingSettings.ToColTypeRef.class).addAnnotation(ChoicesProvider.class)
-                .withValue(ByTypeOrcTypeChoicesProvider.class).modify();
+                .withValue(ByTypeParquetTypeChoicesProvider.class).modify();
 
             group.find(ByTypeMappingSettings.ToColTypeRef.class).addAnnotation(ValueProvider.class)
-                .withValue(ByTypeOrcTypeValueProvider.class).modify();
+                .withValue(ByTypeParquetTypeValueProvider.class).modify();
         }
 
-        private static final class DefaultByTypeMappingsProvider implements StateProvider<ByTypeMappingSettings[]> {
-
-            private Supplier<ByTypeMappingSettings[]> m_current;
-
-            @Override
-            public void init(final StateProviderInitializer initializer) {
-                m_current = initializer.getValueSupplier(ByTypeRef.class);
-                initializer.computeBeforeOpenDialog();
-            }
-
-            @Override
-            public ByTypeMappingSettings[] computeState(final NodeParametersInput context)
-                throws StateComputationFailureException {
-                if (m_current.get().length > 0) {
-                    // already has settings (loaded from saved node) — don't overwrite
-                    throw new StateComputationFailureException();
-                }
-                return MAPPING_SERVICE.newDefaultKnimeToExternalMappingConfiguration().getTypeRules().stream()
-                    .filter(DataTypeMappingConfiguration.Rule::isValid)
-                    .map(rule -> new ByTypeMappingSettings(rule.getKnimeType(), rule.getConsumptionPath()))
-                    .toArray(ByTypeMappingSettings[]::new);
-            }
-        }
-
-        private static final class ByTypeKnimeTypeChoicesProvider
-            extends AvailableKnimeTypeChoicesProvider<TypeDescription, ORCSource, ORCDestination> {
+        private static final class ByTypeKnimeTypeChoicesProvider extends
+            AvailableKnimeTypeChoicesProvider<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> {
 
             ByTypeKnimeTypeChoicesProvider() {
                 super(MAPPING_SERVICE);
             }
         }
 
-        private static final class ByTypeOrcTypeChoicesProvider extends
-            TypeChoicesProvider<TypeDescription, ORCSource, ORCDestination, ByTypeMappingSettings.FromColTypeRef> {
+        private static final class ByTypeParquetTypeChoicesProvider extends
+            TypeChoicesProvider<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination, ByTypeMappingSettings.FromColTypeRef> {
 
-            ByTypeOrcTypeChoicesProvider() {
+            ByTypeParquetTypeChoicesProvider() {
                 super(MAPPING_SERVICE, ByTypeMappingSettings.FromColTypeRef.class);
             }
         }
 
-        private static final class ByTypeOrcTypeValueProvider extends
-            AbstractExternalTypeValueProvider<TypeDescription, ORCSource, ORCDestination, ByTypeMappingSettings.FromColTypeRef> {
+        private static final class ByTypeParquetTypeValueProvider extends
+            AbstractExternalTypeValueProvider<ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination, ByTypeMappingSettings.FromColTypeRef> {
 
-            ByTypeOrcTypeValueProvider() {
+            ByTypeParquetTypeValueProvider() {
                 super(MAPPING_SERVICE, ByTypeMappingSettings.FromColTypeRef.class);
             }
         }
     }
 
-    static final class OrcTypeMappingPersistor
-        extends TypeMappingPersistor<OrcTypeMappingParameters, TypeDescription, ORCSource, ORCDestination> {
+    static final class ParquetTypeMappingPersistor extends
+        TypeMappingPersistor<ParquetTypeMappingParameters, ParquetType, ParquetLogicalTypeSource, ParquetLogicalTypeDestination> {
 
-        OrcTypeMappingPersistor() {
-            super(MAPPING_SERVICE, OrcTypeMappingParameters::new);
+        ParquetTypeMappingPersistor() {
+            super(MAPPING_SERVICE, ParquetTypeMappingParameters::new);
         }
     }
 
-    static final class OrcTypeMappingMigration extends TypeMappingMigration<OrcTypeMappingParameters> {
+    static final class ParquetTypeMappingMigration extends TypeMappingMigration<ParquetTypeMappingParameters> {
     }
 }

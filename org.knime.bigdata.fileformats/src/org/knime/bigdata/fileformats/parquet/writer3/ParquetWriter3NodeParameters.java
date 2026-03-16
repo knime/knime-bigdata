@@ -192,7 +192,7 @@ class ParquetWriter3NodeParameters implements NodeParameters {
     @Layout(MappingSection.class)
     @PersistWithin("type_mapping")
     @Persist(configKey = "input_type_mapping")
-    TypeMappingParameters m_mapping = new TypeMappingParameters();
+    ParquetTypeMappingParameters m_mapping = new ParquetTypeMappingParameters();
 
     private static final class OutputFileModification implements LegacyFileWriterWithOverwritePolicyOptions.Modifier {
 

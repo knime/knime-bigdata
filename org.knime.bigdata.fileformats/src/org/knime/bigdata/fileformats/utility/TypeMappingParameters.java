@@ -53,10 +53,13 @@ import static org.knime.bigdata.fileformats.utility.TypeMappingUtils.getIdForCon
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.FilterType;
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.Destination;
+import org.knime.core.data.convert.map.Source;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -85,15 +88,19 @@ import org.knime.node.parameters.updates.ValueReference;
  * <p>
  * Concrete subclasses must:
  * <ul>
- * <li>declare a {@code private static final DataTypeMappingService<?, ?, ?> MAPPING_SERVICE} field</li>
- * <li>define concrete static inner modifier and provider classes that reference that field</li>
- * <li>annotate the subclass with {@code @Persistor} and {@code @Migration} referencing their own concrete inner classes
- * extending {@link TypeMappingPersistor} and {@link TypeMappingMigration}</li>
+ * <li>declare a {@code private static final DataTypeMappingService<X, S, D> MAPPING_SERVICE} field</li>
+ * <li>define concrete static inner modifier classes whose provider inner classes extend the reusable abstract bases in
+ * {@link TypeMappingUtils} (e.g. {@link TypeMappingUtils.KnimeSourceTypeChoicesProvider},
+ * {@link TypeMappingUtils.AvailableKnimeTypeChoicesProvider},
+ * {@link TypeMappingUtils.AbstractExternalTypeValueProvider}, {@link TypeMappingUtils.TypeChoicesProvider})</li>
+ * <li>annotate the subclass with {@code @Persistor} and {@code @Migration} referencing a concrete inner class
+ * instantiating {@link TypeMappingPersistor} directly and a concrete inner class extending
+ * {@link TypeMappingMigration}</li>
  * </ul>
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "javadoc"})
 public abstract class TypeMappingParameters implements NodeParameters {
 
     protected TypeMappingParameters() {
@@ -138,34 +145,36 @@ public abstract class TypeMappingParameters implements NodeParameters {
     public ByTypeMappingSettings[] m_byTypeSettings = new ByTypeMappingSettings[0];
 
     /**
-     * Abstract base persistor for {@link TypeMappingParameters} subclasses. Concrete subclasses must override
-     * {@link #getMappingService()} and {@link #create(ByNameMappingSettings[], ByTypeMappingSettings[])}.
+     * Persistor for {@link TypeMappingParameters} subclasses. Subclasses pass the mapping service and an instance
+     * factory to the constructor; no further overrides are needed.
      *
      * @param <P> the concrete {@link TypeMappingParameters} subclass
+     * @param <X> the external type whose instances describe the target data types
+     * @param <S> the external source type, must implement {@link Source}{@code <X>}
+     * @param <D> the external destination type, must implement {@link Destination}{@code <X>}
      */
-    public abstract static class TypeMappingPersistor<P extends TypeMappingParameters>
+    public static class TypeMappingPersistor<P extends TypeMappingParameters, X, S extends Source<X>, D extends Destination<X>>
         implements NodeParametersPersistor<P> {
 
-        /**
-         * Returns the format-specific mapping service.
-         *
-         * @return the mapping service
-         */
-        protected abstract DataTypeMappingService<?, ?, ?> getMappingService();
+        private final DataTypeMappingService<X, S, D> m_mappingService;
+
+        private final BiFunction<ByNameMappingSettings[], ByTypeMappingSettings[], P> m_factory;
 
         /**
-         * Creates a new instance of the concrete parameters subclass.
-         *
-         * @param byNameSettings loaded by-name settings
-         * @param byTypeSettings loaded by-type settings
-         * @return a new parameters instance
+         * @param mappingService the format-specific mapping service
+         * @param factory a function that creates a new instance of the concrete parameters subclass from loaded by-name
+         *            and by-type settings
          */
-        protected abstract P create(ByNameMappingSettings[] byNameSettings, ByTypeMappingSettings[] byTypeSettings);
+        public TypeMappingPersistor(final DataTypeMappingService<X, S, D> mappingService,
+            final BiFunction<ByNameMappingSettings[], ByTypeMappingSettings[], P> factory) {
+            this.m_mappingService = mappingService;
+            this.m_factory = factory;
+        }
 
         @Override
         public P load(final NodeSettingsRO settings) throws InvalidSettingsException {
             final var configData = DataTypeMappingConfigurationData.from(settings);
-            final var config = configData.resolve(getMappingService(), DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+            final var config = configData.resolve(m_mappingService, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
 
             final var byNameSettings = config.getNameRules().stream().filter(DataTypeMappingConfiguration.Rule::isValid)
                 .map(TypeMappingPersistor::toByNameMappingSettings).toArray(ByNameMappingSettings[]::new);
@@ -173,7 +182,7 @@ public abstract class TypeMappingParameters implements NodeParameters {
             final var byTypeSettings = config.getTypeRules().stream().filter(DataTypeMappingConfiguration.Rule::isValid)
                 .map(TypeMappingPersistor::toByTypeMappingSettings).toArray(ByTypeMappingSettings[]::new);
 
-            return create(byNameSettings, byTypeSettings);
+            return m_factory.apply(byNameSettings, byTypeSettings);
         }
 
         private static ByNameMappingSettings toByNameMappingSettings(final DataTypeMappingConfiguration<?>.Rule rule) {
@@ -188,22 +197,18 @@ public abstract class TypeMappingParameters implements NodeParameters {
 
         @Override
         public void save(final P params, final NodeSettingsWO settings) {
-            final var config =
-                getMappingService().createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
-            Arrays.stream(params.m_byNameSettings).forEach(s -> {
-                findMatchingConsumptionPath(s.m_fromColType, s.m_toColType).ifPresent(
-                    path -> config.addRule(s.m_fromColName, s.m_filterType == FilterType.REGEX, s.m_fromColType, path));
-            });
-            Arrays.stream(params.m_byTypeSettings).forEach(s -> {
-                findMatchingConsumptionPath(s.m_fromType, s.m_toType)
-                    .ifPresent(path -> config.addRule(s.m_fromType, path));
-            });
+            final var config = m_mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+            Arrays.stream(params.m_byNameSettings)
+                .forEach(s -> findMatchingConsumptionPath(s.m_fromColType, s.m_toColType).ifPresent(path -> config
+                    .addRule(s.m_fromColName, s.m_filterType == FilterType.REGEX, s.m_fromColType, path)));
+            Arrays.stream(params.m_byTypeSettings).forEach(s -> findMatchingConsumptionPath(s.m_fromType, s.m_toType)
+                .ifPresent(path -> config.addRule(s.m_fromType, path)));
             DataTypeMappingConfigurationData.from(config).copyTo(settings);
         }
 
         private Optional<ConsumptionPath> findMatchingConsumptionPath(final DataType fromType,
             final String toTypePathString) {
-            return getMappingService().getConsumptionPathsFor(fromType).stream()
+            return m_mappingService.getConsumptionPathsFor(fromType).stream()
                 .filter(path -> getIdForConsumptionPath(path).equals(toTypePathString)).findFirst();
         }
 

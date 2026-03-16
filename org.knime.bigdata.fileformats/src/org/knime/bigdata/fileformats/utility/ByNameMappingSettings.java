@@ -60,7 +60,7 @@ import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.ValueReference;
 import org.knime.node.parameters.widget.choices.ValueSwitchWidget;
 
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "javadoc"})
 public final class ByNameMappingSettings implements NodeParameters {
     ByNameMappingSettings() {
         //default constructor for deserialization
@@ -92,7 +92,7 @@ public final class ByNameMappingSettings implements NodeParameters {
     @Modification.WidgetReference(FromColTypeRef.class)
     public DataType m_fromColType;
 
-    @Widget(title = "Mapping to", description = "ORC data type to map to.")
+    @Widget(title = "Mapping to", description = "External data type to map to.")
     @Modification.WidgetReference(ToColTypeRef.class)
     public String m_toColType;
 

@@ -104,12 +104,12 @@
                     "toColType" : {
                       "type" : "string",
                       "title" : "Mapping to",
-                      "description" : "Parquet data type to map to."
+                      "description" : "External data type to map to."
                     }
                   }
                 },
                 "title" : "Name",
-                "description" : "Columns that match the given name (or regular expression) and KNIME type will be mapped to the specified database type.\n",
+                "description" : "Columns that match the given name (or regular expression) and KNIME type will be mapped to the specified external type.\n",
                 "default" : [ ]
               },
               "byTypeSettings" : {
@@ -125,12 +125,12 @@
                     "toType" : {
                       "type" : "string",
                       "title" : "Mapping to",
-                      "description" : "Parquet data type to map to."
+                      "description" : "External data type to map to."
                     }
                   }
                 },
                 "title" : "Type",
-                "description" : "Columns that match the given KNIME type will be mapped to the specified Parquet data type.",
+                "description" : "Columns that match the given KNIME type will be mapped to the specified external data type.",
                 "default" : [ ]
               }
             },
@@ -342,7 +342,7 @@
       "elements" : [ {
         "label" : "Mapping by Name",
         "type" : "Section",
-        "description" : "Define name-based mappings that apply to specific columns. ",
+        "description" : "Define name-based mappings that apply to specific columns.",
         "elements" : [ {
           "type" : "Control",
           "scope" : "#/properties/model/properties/mapping/properties/byNameSettings",
@@ -493,6 +493,27 @@
           "text" : "Boolean"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.cdx.CDXMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "CDXML",
+        "type" : {
+          "id" : "org.knime.chem.types.cdx.CDXMLValue",
+          "text" : "CDXML"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.CMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "CML",
+        "type" : {
+          "id" : "org.knime.chem.types.CMLValue",
+          "text" : "CML"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.CtabCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "CTab",
+        "type" : {
+          "id" : "org.knime.chem.types.CtabValue",
+          "text" : "CTab"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "Collection (List) (Collection of: Binary Object)",
         "type" : {
@@ -516,6 +537,27 @@
       }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "Collection (List) (Collection of: Boolean)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.cdx.CDXMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: CDXML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.CMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: CML)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.CtabCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: CTab)",
         "type" : {
           "id" : "org.knime.core.data.collection.ListDataValue",
           "text" : "Collection (List)"
@@ -612,6 +654,13 @@
           "text" : "Collection (List)"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.helm.HELMCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: HELM)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "Collection (List) (Collection of: HTML)",
         "type" : {
@@ -633,6 +682,13 @@
           "text" : "Collection (List)"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.InchiCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: InChI)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "Collection (List) (Collection of: JSON)",
         "type" : {
@@ -642,6 +698,13 @@
       }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.PMMLCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "Collection (List) (Collection of: Model (PMML))",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.Mol2Cell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Mol2)",
         "type" : {
           "id" : "org.knime.core.data.collection.ListDataValue",
           "text" : "Collection (List)"
@@ -682,8 +745,22 @@
           "text" : "Collection (List)"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.RxnCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: Rxn)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "Collection (List) (Collection of: SDF)",
+        "type" : {
+          "id" : "org.knime.core.data.collection.ListDataValue",
+          "text" : "Collection (List)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmartsCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Collection (List) (Collection of: SMARTS)",
         "type" : {
           "id" : "org.knime.core.data.collection.ListDataValue",
           "text" : "Collection (List)"
@@ -815,6 +892,13 @@
           "text" : "Geo (polygon)"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.helm.HELMCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "HELM",
+        "type" : {
+          "id" : "org.knime.chem.types.helm.HELMValue",
+          "text" : "HELM"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.html.HTMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "HTML",
         "type" : {
@@ -836,6 +920,13 @@
           "text" : "Image (SVG)"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.InchiCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "InChI",
+        "type" : {
+          "id" : "org.knime.chem.types.InchiValue",
+          "text" : "InChI"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.json.JSONCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "JSON",
         "type" : {
@@ -848,6 +939,13 @@
         "type" : {
           "id" : "org.knime.core.data.xml.PMMLValue",
           "text" : "Model (PMML)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.Mol2Cell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Mol2",
+        "type" : {
+          "id" : "org.knime.chem.types.Mol2Value",
+          "text" : "Mol2"
         }
       }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.MolCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
@@ -885,11 +983,25 @@
           "text" : "PDB"
         }
       }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.RxnCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Rxn",
+        "type" : {
+          "id" : "org.knime.chem.types.RxnValue",
+          "text" : "Rxn"
+        }
+      }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SdfCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
         "text" : "SDF",
         "type" : {
           "id" : "org.knime.chem.types.SdfValue",
           "text" : "SDF"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmartsCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "SMARTS",
+        "type" : {
+          "id" : "org.knime.chem.types.SmartsValue",
+          "text" : "SMARTS"
         }
       }, {
         "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.chem.types.SmilesCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
@@ -951,14 +1063,15 @@
   } ],
   "globalUpdates" : [ {
     "trigger" : {
-      "scope" : "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColName"
+      "id" : "after-open-dialog"
     },
-    "dependencies" : [ "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColName", "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType" ]
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType", "#/properties/model/properties/mapping/properties/byTypeSettings/items/properties/fromType" ]
   }, {
     "trigger" : {
       "scope" : "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType"
     },
-    "dependencies" : [ "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColName", "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType" ]
+    "dependencies" : [ "#/properties/model/properties/mapping/properties/byNameSettings/items/properties/fromColType" ]
   }, {
     "trigger" : {
       "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings"

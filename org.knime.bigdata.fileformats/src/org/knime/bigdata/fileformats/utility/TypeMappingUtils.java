@@ -48,24 +48,32 @@
  */
 package org.knime.bigdata.fileformats.utility;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.Destination;
+import org.knime.core.data.convert.map.Source;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.updates.ParameterReference;
+import org.knime.node.parameters.updates.StateProvider;
+import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
 import org.knime.node.parameters.widget.choices.Label;
 import org.knime.node.parameters.widget.choices.StringChoice;
 import org.knime.node.parameters.widget.choices.StringChoicesProvider;
 
 /**
- * Contains utility methods for type mapping widgets used in file format writer nodes.
+ * Contains utility methods and reusable abstract provider classes for type mapping widgets used in file format writer
+ * nodes.
  *
  * @author Jochen Reißinger, TNG Technology Consulting GmbH
  */
+@SuppressWarnings({"javadoc", "restriction"})
 public final class TypeMappingUtils {
 
     public enum FilterType {
@@ -77,18 +85,32 @@ public final class TypeMappingUtils {
             REGEX
     }
 
-    public abstract static class TypeChoicesProvider<X, T extends ParameterReference<DataType>>
+    /**
+     * Abstract base class for choices providers that map a KNIME {@link DataType} to a list of available external
+     * target types for a given format.
+     *
+     * @param <X> the external type whose instances describe the target data types
+     * @param <S> the external source type, must implement {@link Source}{@code <X>}
+     * @param <D> the external destination type, must implement {@link Destination}{@code <X>}
+     * @param <T> the parameter reference type used to track the selected source {@link DataType}
+     */
+    public abstract static class TypeChoicesProvider<X, S extends Source<X>, D extends Destination<X>, T extends ParameterReference<DataType>>
         implements StringChoicesProvider {
 
         private final Class<T> m_ref;
 
+        private final DataTypeMappingService<X, S, D> m_mappingService;
+
         private Supplier<DataType> m_fromColType;
 
-        protected TypeChoicesProvider(final Class<T> ref) {
+        /**
+         * @param mappingService the format-specific mapping service
+         * @param ref the parameter reference class used to track the selected source {@link DataType}
+         */
+        protected TypeChoicesProvider(final DataTypeMappingService<X, S, D> mappingService, final Class<T> ref) {
+            this.m_mappingService = mappingService;
             this.m_ref = ref;
         }
-
-        protected abstract DataTypeMappingService<X, ?, ?> getMappingService();
 
         @Override
         public void init(final StateProviderInitializer initializer) {
@@ -102,8 +124,7 @@ public final class TypeMappingUtils {
             if (dataType == null) {
                 return List.of();
             }
-            final var mappingService = getMappingService();
-            return mappingService.getConsumptionPathsFor(dataType).stream()
+            return m_mappingService.getConsumptionPathsFor(dataType).stream()
                 .sorted(Comparator.comparing(ConsumptionPath::toString))
                 .map(path -> new StringChoice(getIdForConsumptionPath(path),
                     "\u2192 " + path.getConverterFactory().getDestinationType().getSimpleName() + " \u2192 "
@@ -113,10 +134,118 @@ public final class TypeMappingUtils {
     }
 
     public static String getIdForConsumptionPath(final ConsumptionPath path) {
-        return formatStringPair(path.getConverterFactory().getIdentifier(), path.getConsumerFactory().getIdentifier());
+        return path.getConverterFactory().getIdentifier() + ";" + path.getConsumerFactory().getIdentifier();
     }
 
-    private static String formatStringPair(final String first, final String second) {
-        return first + ";" + second;
+    /**
+     * Abstract base for a {@link DataTypeChoicesProvider} that lists all KNIME source types known to the mapping
+     * service, sorted alphabetically.
+     *
+     * @param <X> the external type
+     * @param <S> the external source type
+     * @param <D> the external destination type
+     */
+    public abstract static class KnimeSourceTypeChoicesProvider<X, S extends Source<X>, D extends Destination<X>>
+        implements DataTypeChoicesProvider {
+
+        private final DataTypeMappingService<X, S, D> m_mappingService;
+
+        /**
+         * @param mappingService the format-specific mapping service
+         */
+        protected KnimeSourceTypeChoicesProvider(final DataTypeMappingService<X, S, D> mappingService) {
+            this.m_mappingService = mappingService;
+        }
+
+        @Override
+        public List<DataType> choices(final NodeParametersInput context) {
+            return m_mappingService.getKnimeSourceTypes().stream()
+                .sorted(Comparator.comparing(DataType::toPrettyString)).toList();
+        }
     }
+
+    /**
+     * Abstract base for a {@link DataTypeChoicesProvider} that lists KNIME source types available for a new by-type
+     * mapping row, excluding types that are already mapped in other rows.
+     *
+     * @param <X> the external type
+     * @param <S> the external source type
+     * @param <D> the external destination type
+     */
+    public abstract static class AvailableKnimeTypeChoicesProvider<X, S extends Source<X>, D extends Destination<X>>
+        implements DataTypeChoicesProvider {
+
+        private final DataTypeMappingService<X, S, D> m_mappingService;
+
+        private Supplier<DataType> m_fromType;
+
+        private Supplier<ByTypeMappingSettings[]> m_array;
+
+        /**
+         * @param mappingService the format-specific mapping service
+         */
+        protected AvailableKnimeTypeChoicesProvider(final DataTypeMappingService<X, S, D> mappingService) {
+            this.m_mappingService = mappingService;
+        }
+
+        @Override
+        public void init(final StateProviderInitializer initializer) {
+            this.m_fromType = initializer.computeFromValueSupplier(ByTypeMappingSettings.FromColTypeRef.class);
+            this.m_array = initializer.computeFromValueSupplier(TypeMappingParameters.ByTypeRef.class);
+            initializer.computeBeforeOpenDialog();
+        }
+
+        @Override
+        public List<DataType> choices(final NodeParametersInput context) {
+            final var existingTypes = Arrays.stream(m_array.get()).map(s -> s.m_fromType)
+                .filter(type -> type != null && !type.equals(this.m_fromType.get())).collect(Collectors.toSet());
+            return m_mappingService.getKnimeSourceTypes().stream().filter(type -> !existingTypes.contains(type))
+                .sorted(Comparator.comparing(DataType::toPrettyString)).toList();
+        }
+    }
+
+    /**
+     * Abstract base for a {@link StateProvider} that computes the default external type string for a selected KNIME
+     * type, picking the first available consumption path.
+     *
+     * @param <X> the external type
+     * @param <S> the external source type
+     * @param <D> the external destination type
+     * @param <T> the parameter reference type used to read the selected source {@link DataType}
+     */
+    public abstract static class AbstractExternalTypeValueProvider<X, S extends Source<X>, D extends Destination<X>, T extends ParameterReference<DataType>>
+        implements StateProvider<String> {
+
+        private final DataTypeMappingService<X, S, D> m_mappingService;
+
+        private Supplier<DataType> m_fromType;
+
+        private final Class<T> m_ref;
+
+        /**
+         * @param mappingService the format-specific mapping service
+         * @param ref the parameter reference class used to read the selected source {@link DataType}
+         */
+        protected AbstractExternalTypeValueProvider(final DataTypeMappingService<X, S, D> mappingService,
+            final Class<T> ref) {
+            this.m_mappingService = mappingService;
+            this.m_ref = ref;
+        }
+
+        @Override
+        public void init(final StateProviderInitializer initializer) {
+            m_fromType = initializer.computeFromValueSupplier(m_ref);
+        }
+
+        @Override
+        public String computeState(final NodeParametersInput context) {
+            final DataType dataType = m_fromType.get();
+            if (dataType == null) {
+                return "";
+            }
+            return m_mappingService.getConsumptionPathsFor(dataType).stream().findFirst()
+                .map(TypeMappingUtils::getIdForConsumptionPath).orElse("");
+        }
+    }
+
 }

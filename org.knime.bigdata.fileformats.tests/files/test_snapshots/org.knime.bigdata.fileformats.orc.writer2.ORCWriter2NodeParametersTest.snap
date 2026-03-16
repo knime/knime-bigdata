@@ -106,7 +106,7 @@
                     "toColType" : {
                       "type" : "string",
                       "title" : "Mapping to",
-                      "description" : "ORC data type to map to."
+                      "description" : "External data type to map to."
                     }
                   }
                 },
@@ -127,7 +127,7 @@
                     "toType" : {
                       "type" : "string",
                       "title" : "Mapping to",
-                      "description" : "ORC data type to map to."
+                      "description" : "External data type to map to."
                     }
                   }
                 },
