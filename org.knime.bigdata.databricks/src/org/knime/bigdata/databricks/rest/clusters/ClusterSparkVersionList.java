@@ -42,88 +42,25 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2026-03-12 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
 package org.knime.bigdata.databricks.rest.clusters;
 
-import java.io.IOException;
-
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Response;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * REST API definition of cluster API.
+ * List of {@link ClusterSparkVersion}.
  *
- * @see <a href="https://docs.databricks.com/api/latest/clusters.html#clusters-api">Cluster API</a>
- * @author Sascha Wolke, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@Path("2.0/clusters")
-public interface ClusterAPI {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ClusterSparkVersionList {
 
     /**
-     * Return information about all pinned clusters, currently active clusters, up to 70 of the most recently terminated
-     * interactive clusters in the past 30 days, and up to 30 of the most recently terminated job clusters in the past
-     * 30 days.
-     *
-     * @return list of cluster informations
-     * @throws IOException on failures
+     * List of {@link ClusterSparkVersion}.
      */
-    @GET
-    @Path("list")
-    ClusterInfoList list() throws IOException;
-
-    /**
-     * Retrieve the information for a cluster given its identifier.
-     *
-     * @param clusterId The cluster about which to retrieve information.
-     * @return informations about the cluster
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("get")
-    ClusterInfo getCluster(@QueryParam("cluster_id") String clusterId) throws IOException;
-
-    /**
-     * Retrieve the information for a cluster given its identifier.
-     *
-     * @param clusterId The cluster about which to retrieve information.
-     * @return informations about the cluster as response, with headers like the org id
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("get")
-    Response getClusterResponse(@QueryParam("cluster_id") String clusterId) throws IOException;
-
-    /**
-     * Start a terminated Spark cluster given its ID. If the cluster is not in a TERMINATED state, nothing will happen.
-     *
-     * @param cluster The cluster to start.
-     * @throws IOException on failures
-     */
-    @POST
-    @Path("start")
-    void start(Cluster cluster) throws IOException;
-
-    /**
-     * Terminate a Spark cluster given its ID. The cluster is removed asynchronously.
-     *
-     * @param cluster The cluster to terminate.
-     * @throws IOException on failures
-     */
-    @POST
-    @Path("delete")
-    void delete(Cluster cluster) throws IOException;
-
-    /**
-     * List available Spark Versions.
-     *
-     * @return list of available Spark Versions
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("spark-versions")
-    ClusterSparkVersionList listSparkVersions() throws IOException;
+    public ClusterSparkVersion[] versions;
 
 }

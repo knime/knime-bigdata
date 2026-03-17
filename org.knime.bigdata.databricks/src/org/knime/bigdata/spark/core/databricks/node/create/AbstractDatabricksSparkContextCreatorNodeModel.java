@@ -59,6 +59,7 @@ import java.util.UUID;
 
 import org.knime.bigdata.database.databricks.Databricks;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.databricks.DatabricksSparkContextProvider;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.knime.bigdata.spark.node.util.context.DestroyAndDisposeSparkContextTask;
@@ -155,7 +156,7 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeModel<T extends A
         // An ID that is unique to this node model instance, i.e. no two instances of this node model
         // have the same value here. Additionally, it's value changes during reset.
         final String uniqueContextId = UUID.randomUUID().toString();
-        m_sparkContextId = AbstractDatabricksSparkContextCreatorNodeSettings.createSparkContextID(uniqueContextId);
+        m_sparkContextId = DatabricksSparkContextProvider.createSparkContextID(uniqueContextId);
     }
 
     /**

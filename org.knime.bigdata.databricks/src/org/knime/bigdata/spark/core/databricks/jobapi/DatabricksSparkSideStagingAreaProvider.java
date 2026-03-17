@@ -42,47 +42,27 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   2026-03-11 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.spark.core.databricks.context;
+package org.knime.bigdata.spark.core.databricks.jobapi;
 
 import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksJobSerializationUtils.StagingAreaAccess;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 
 /**
- * KNIME-side implementation of {@link StagingAreaAccess}.
+ * Databricks staging area provider that combines the staging area, temp provider and a cleanup method.
  *
- * @author Bjoern Lohrmann, KNIME GmbH
- * @author Sascha Wolke, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-public interface RemoteFSController extends StagingAreaAccess {
+@SparkClass
+public interface DatabricksSparkSideStagingAreaProvider extends StagingAreaAccess, SparkDistributedTempProvider {
 
     /**
-     * Tries to create the staging area, which is typically a folder in the remote file system provided in the
-     * constructor. This method may try to create the folder in several locations before it fails.
-     *
-     * @throws KNIMESparkException If no staging area could be created, this exception wraps the original exception
-     *             thrown during the last attempt to create the staging area folder.
+     * Cleanup staging area and temp directory.
      */
-    public void createStagingArea() throws KNIMESparkException;
+    void cleanUp();
 
-    /**
-     * @return the full Hadoop-API URI of the staging area (see {@link #getStagingAreaReturnsPath()}.
-     */
-    public String getStagingArea();
-
-    /**
-     * @return <code>true</code> if staging area should be accessed via the legacy Hadoop FileSystem implementation,
-     *         <code>false</code> if staging area should be accessed via Java NIO based implementation.
-     */
-    public boolean getStagingAreaUseHadoopFS();
-
-    /**
-     * @return when true, then the value returned by {@link #getStagingArea()} is a path, otherwise it is a full URI.
-     */
-    public boolean getStagingAreaReturnsPath();
-
-    /**
-     * Closes the connection to the remote FS if necessary.
-     */
-    public void ensureClosed();
 }

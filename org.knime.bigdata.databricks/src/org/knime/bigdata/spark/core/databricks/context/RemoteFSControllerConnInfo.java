@@ -272,6 +272,11 @@ public class RemoteFSControllerConnInfo implements RemoteFSController {
     }
 
     @Override
+    public boolean getStagingAreaUseHadoopFS() {
+        return true;
+    }
+
+    @Override
     public boolean getStagingAreaReturnsPath() {
         return m_stagingAreaIsPath;
     }
