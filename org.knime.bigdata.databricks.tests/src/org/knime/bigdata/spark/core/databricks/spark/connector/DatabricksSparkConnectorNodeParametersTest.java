@@ -42,88 +42,55 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   Mar 11, 2026 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.databricks.rest.clusters;
+package org.knime.bigdata.spark.core.databricks.spark.connector;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Response;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettings;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersUtil;
+import org.knime.testing.node.dialog.DefaultNodeSettingsSnapshotTest;
+import org.knime.testing.node.dialog.SnapshotTestConfiguration;
 
 /**
- * REST API definition of cluster API.
+ * Snapshot test for {@link DatabricksSparkConnectorNodeParameters}.
  *
- * @see <a href="https://docs.databricks.com/api/latest/clusters.html#clusters-api">Cluster API</a>
- * @author Sascha Wolke, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
-@Path("2.0/clusters")
-public interface ClusterAPI {
+@SuppressWarnings("restriction")
+final class DatabricksSparkConnectorNodeParametersTest extends DefaultNodeSettingsSnapshotTest {
 
-    /**
-     * Return information about all pinned clusters, currently active clusters, up to 70 of the most recently terminated
-     * interactive clusters in the past 30 days, and up to 30 of the most recently terminated job clusters in the past
-     * 30 days.
-     *
-     * @return list of cluster informations
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("list")
-    ClusterInfoList list() throws IOException;
+    DatabricksSparkConnectorNodeParametersTest() {
+        super(getConfig());
+    }
 
-    /**
-     * Retrieve the information for a cluster given its identifier.
-     *
-     * @param clusterId The cluster about which to retrieve information.
-     * @return informations about the cluster
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("get")
-    ClusterInfo getCluster(@QueryParam("cluster_id") String clusterId) throws IOException;
+    private static SnapshotTestConfiguration getConfig() {
+        return SnapshotTestConfiguration.builder() //
+            .testJsonFormsForModel(DatabricksSparkConnectorNodeParameters.class) //
+            .testJsonFormsWithInstance(SettingsType.MODEL, DatabricksSparkConnectorNodeParametersTest::readSettings) //
+            .testNodeSettingsStructure(DatabricksSparkConnectorNodeParametersTest::readSettings) //
+            .build();
+    }
 
-    /**
-     * Retrieve the information for a cluster given its identifier.
-     *
-     * @param clusterId The cluster about which to retrieve information.
-     * @return informations about the cluster as response, with headers like the org id
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("get")
-    Response getClusterResponse(@QueryParam("cluster_id") String clusterId) throws IOException;
-
-    /**
-     * Start a terminated Spark cluster given its ID. If the cluster is not in a TERMINATED state, nothing will happen.
-     *
-     * @param cluster The cluster to start.
-     * @throws IOException on failures
-     */
-    @POST
-    @Path("start")
-    void start(Cluster cluster) throws IOException;
-
-    /**
-     * Terminate a Spark cluster given its ID. The cluster is removed asynchronously.
-     *
-     * @param cluster The cluster to terminate.
-     * @throws IOException on failures
-     */
-    @POST
-    @Path("delete")
-    void delete(Cluster cluster) throws IOException;
-
-    /**
-     * List available Spark Versions.
-     *
-     * @return list of available Spark Versions
-     * @throws IOException on failures
-     */
-    @GET
-    @Path("spark-versions")
-    ClusterSparkVersionList listSparkVersions() throws IOException;
+    private static DatabricksSparkConnectorNodeParameters readSettings() {
+        try {
+            var path = getSnapshotPath(DatabricksSparkConnectorNodeParameters.class)
+                .getParent().resolve("node_settings")
+                .resolve("DatabricksSparkConnectorNodeParameters.xml");
+            try (var fis = new FileInputStream(path.toFile())) {
+                var nodeSettings = NodeSettings.loadFromXML(fis);
+                return NodeParametersUtil.loadSettings(nodeSettings.getNodeSettings(SettingsType.MODEL.getConfigKey()),
+                    DatabricksSparkConnectorNodeParameters.class);
+            }
+        } catch (IOException | InvalidSettingsException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
 }

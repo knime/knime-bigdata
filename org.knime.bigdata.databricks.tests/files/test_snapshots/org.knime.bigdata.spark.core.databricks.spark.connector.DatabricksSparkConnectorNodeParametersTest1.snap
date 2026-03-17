@@ -1,0 +1,163 @@
+{
+  "data" : {
+    "model" : {
+      "clusterId" : "0310-162821-xihp4wst",
+      "sparkVersion" : "3.5",
+      "stagingArea" : "/jenkins-tests/default/jenkins-test-volume",
+      "terminateClusterOnDestroy" : false,
+      "jobCheckFrequency" : 123
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "clusterId" : {
+            "type" : "string",
+            "title" : "Cluster ID",
+            "description" : "Unique identifier of a cluster in the databricks workspace.",
+            "default" : ""
+          },
+          "jobCheckFrequency" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Job status polling interval (seconds)",
+            "description" : "The frequency with which KNIME polls the status of a job in seconds.",
+            "default" : 1
+          },
+          "sparkVersion" : {
+            "type" : "string",
+            "title" : "Spark Version",
+            "description" : "Version of Spark running on the cluster.",
+            "default" : "3.5"
+          },
+          "stagingArea" : {
+            "type" : "string",
+            "title" : "Staging area for Spark jobs",
+            "description" : "Specify a directory in the Unity File System, that will be used to transfer temporary files between KNIME and the Spark context.",
+            "default" : ""
+          },
+          "terminateClusterOnDestroy" : {
+            "type" : "boolean",
+            "title" : "Terminate cluster on context destroy",
+            "description" : "If selected, the cluster will be destroyed when the node will be reset, the <i>Destroy Spark Context</i> node executed on the context, the workflow or KNIME is closed. This way, resources are released, but all data cached inside the cluster are lost, unless they have been saved to persistent storage such as DBFS.",
+            "default" : false
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "Cluster",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/clusterId",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          },
+          "format" : "dropDown"
+        },
+        "providedOptions" : [ "possibleValues" ]
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/sparkVersion",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          },
+          "format" : "dropDown"
+        },
+        "providedOptions" : [ "possibleValues" ]
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/stagingArea",
+        "options" : {
+          "selectionMode" : "FOLDER",
+          "format" : "stringFileChooser"
+        },
+        "providedOptions" : [ "fileSystemId" ]
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/terminateClusterOnDestroy",
+        "options" : {
+          "format" : "checkbox"
+        }
+      } ]
+    }, {
+      "label" : "Timeouts",
+      "type" : "Section",
+      "options" : {
+        "isAdvanced" : true
+      },
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/jobCheckFrequency",
+        "options" : {
+          "validation" : {
+            "max" : {
+              "errorMessage" : "The value must not exceed 2147483647.",
+              "parameters" : {
+                "isExclusive" : false,
+                "max" : 2.147483647E9
+              }
+            },
+            "min" : {
+              "errorMessage" : "The value must be at least 0.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.0
+              }
+            }
+          }
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "clusterId" : { },
+          "sparkVersion" : { },
+          "stagingArea" : { },
+          "terminateClusterOnDestroy" : { },
+          "jobCheckFrequency" : { }
+        }
+      }
+    }
+  },
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/clusterId", "#/properties/model/properties/sparkVersion", "#/properties/model/properties/stagingArea" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/clusterId"
+    },
+    "dependencies" : [ "#/properties/model/properties/clusterId", "#/properties/model/properties/sparkVersion" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/stagingArea"
+    },
+    "dependencies" : [ "#/properties/model/properties/stagingArea" ]
+  } ]
+}

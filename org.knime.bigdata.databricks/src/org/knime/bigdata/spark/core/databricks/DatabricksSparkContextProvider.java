@@ -57,7 +57,6 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContext;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
-import org.knime.bigdata.spark.core.databricks.node.create.AbstractDatabricksSparkContextCreatorNodeSettings;
 import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -152,7 +151,7 @@ public class DatabricksSparkContextProvider implements SparkContextProvider<Data
     public SparkContextID createTestingSparkContextID(final Map<String, FlowVariable> flowVariables)
         throws InvalidSettingsException {
 
-        return AbstractDatabricksSparkContextCreatorNodeSettings.createSparkContextID("testflowContext");
+        return createSparkContextID("testflowContext");
     }
 
     @Override
@@ -169,4 +168,16 @@ public class DatabricksSparkContextProvider implements SparkContextProvider<Data
             return settings.createContextConfig(contextId, fsConnectionId, cp);
         }
     }
+
+    /**
+     * Utility function to generate a Databricks {@link SparkContextID}. This should act as the single source of truth
+     * when generating IDs for Databricks Spark contexts.
+     *
+     * @param uniqueId A unique ID for the context. It is the responsibility of the caller to ensure uniqueness.
+     * @return a new {@link SparkContextID}
+     */
+    public static SparkContextID createSparkContextID(final String uniqueId) {
+        return new SparkContextID(String.format("%s://%s", SparkContextIDScheme.SPARK_DATABRICKS, uniqueId));
+    }
+
 }

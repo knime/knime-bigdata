@@ -67,7 +67,6 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.bigdata.database.databricks.Databricks;
 import org.knime.bigdata.database.databricks.DatabricksDBDriverLocator;
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.databricks.DatabricksSparkContextProvider;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContext;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
@@ -571,17 +570,6 @@ public abstract class AbstractDatabricksSparkContextCreatorNodeSettings extends 
         m_knimeToExternalMappingConfig.loadSettingsFrom(settings);
 
         updateEnabledness();
-    }
-
-    /**
-     * Utility function to generate a Databricks {@link SparkContextID}. This should act as the single source of truth when
-     * generating IDs for Databricks Spark contexts.
-     *
-     * @param uniqueId A unique ID for the context. It is the responsibility of the caller to ensure uniqueness.
-     * @return a new {@link SparkContextID}
-     */
-    public static SparkContextID createSparkContextID(final String uniqueId) {
-        return new SparkContextID(String.format("%s://%s", SparkContextIDScheme.SPARK_DATABRICKS, uniqueId));
     }
 
 }

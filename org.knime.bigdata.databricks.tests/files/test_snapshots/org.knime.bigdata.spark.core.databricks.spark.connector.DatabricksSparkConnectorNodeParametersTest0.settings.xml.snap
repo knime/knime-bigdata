@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="test">
+    <entry key="clusterId" type="xstring" value="0310-162821-xihp4wst"/>
+    <entry key="sparkVersion" type="xstring" value="3.5"/>
+    <entry key="stagingArea" type="xstring" value="/jenkins-tests/default/jenkins-test-volume"/>
+    <entry key="terminateClusterOnDestroy" type="xboolean" value="false"/>
+    <entry key="jobCheckFrequency" type="xint" value="123"/>
+</config>

@@ -101,4 +101,9 @@ public class ClusterAPIWrapper extends APIWrapper<ClusterAPI> implements Cluster
         });
     }
 
+    @Override
+    public ClusterSparkVersionList listSparkVersions() throws IOException {
+        return invoke(m_api::listSparkVersions);
+    }
+
 }
