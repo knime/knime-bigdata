@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-parent_2.12</artifactId>
-        <version>3.5.6</version>
+        <version>3.5.8</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knime.bigdata</groupId>
     <artifactId>spark-local-fetch-jars</artifactId>
-    <version>3.5.6</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
+    <version>3.5.8</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
     <packaging>pom</packaging>
 
     <name>Jar fetcher for local Spark</name>
@@ -20,12 +20,11 @@
 
     <properties>
         <aircompressor.version>2.0.3</aircompressor.version>
-        <jersey.version>2.47</jersey.version>
         <commons.compress.version>1.26.2</commons.compress.version>
         <gson.version>2.11.0</gson.version>
         <ivy.version>2.5.2</ivy.version>
         <parquet.version>1.15.2</parquet.version>
-        <spark.version>3.5.6</spark.version>
+        <spark.version>3.5.8</spark.version>
         <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
@@ -64,48 +63,6 @@
             <groupId>io.airlift</groupId>
             <artifactId>aircompressor</artifactId>
             <version>${aircompressor.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.glassfish.jersey.core</groupId>
-          <artifactId>jersey-client</artifactId>
-          <version>${jersey.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.glassfish.jersey.core</groupId>
-          <artifactId>jersey-common</artifactId>
-          <version>${jersey.version}</version>
-          <exclusions>
-            <exclusion>
-              <artifactId>jakarta.activation</artifactId>
-              <groupId>com.sun.activation</groupId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>org.glassfish.jersey.core</groupId>
-          <artifactId>jersey-server</artifactId>
-          <version>${jersey.version}</version>
-          <exclusions>
-            <exclusion>
-              <artifactId>jakarta.xml.bind-api</artifactId>
-              <groupId>jakarta.xml.bind</groupId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>org.glassfish.jersey.containers</groupId>
-          <artifactId>jersey-container-servlet</artifactId>
-          <version>${jersey.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.glassfish.jersey.containers</groupId>
-          <artifactId>jersey-container-servlet-core</artifactId>
-          <version>${jersey.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.glassfish.jersey.inject</groupId>
-          <artifactId>jersey-hk2</artifactId>
-          <version>${jersey.version}</version>
         </dependency>
 
         <dependency>
