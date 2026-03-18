@@ -45,11 +45,21 @@
  */
 package org.knime.bigdata.spark.core.databricks;
 
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_CLUSTER_ID;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_CONNECTIONTIMEOUT;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_RECEIVETIMEOUT;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_SETSTAGINGAREAFOLDER;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_STAGINGAREAFOLDER;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_TOKEN;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_DATABRICKS_URL;
+import static org.knime.bigdata.commons.testing.TestflowVariable.SPARK_VERSION;
+
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.databricks.DatabricksPlugin;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -57,11 +67,10 @@ import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContext;
 import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextConfig;
-import org.knime.bigdata.spark.core.databricks.node.create.DatabricksSparkContextCreatorNodeSettings2;
+import org.knime.bigdata.spark.core.databricks.context.DatabricksSparkContextFileSystemConfig;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -158,15 +167,46 @@ public class DatabricksSparkContextProvider implements SparkContextProvider<Data
     public DatabricksSparkContextConfig createTestingSparkContextConfig(final SparkContextID contextId,
         final Map<String, FlowVariable> flowVariables, final String fsConnectionId) throws InvalidSettingsException {
 
-        final CredentialsProvider cp = null;
+        if (!flowVariables.containsKey(SPARK_VERSION.getName())) {
+            throw new InvalidSettingsException("Spark version flow variable is required.");
+        }
+
+        if (!flowVariables.containsKey(SPARK_DATABRICKS_URL.getName())) {
+            throw new InvalidSettingsException("Databricks URL flow variable is required.");
+        }
+
+        if (!flowVariables.containsKey(SPARK_DATABRICKS_CLUSTER_ID.getName())) {
+            throw new InvalidSettingsException("Databricks cluster ID flow variable is required.");
+        }
+
+        if (!flowVariables.containsKey(SPARK_DATABRICKS_TOKEN.getName())) {
+            throw new InvalidSettingsException("Databricks token flow variable is required.");
+        }
+
+        if (!TestflowVariable.stringEqualsIgnoreCase(SPARK_DATABRICKS_SETSTAGINGAREAFOLDER, "true", flowVariables)) {
+            throw new InvalidSettingsException("Databricks set staging area folder flow variable must be true.");
+        }
+
+        if (!flowVariables.containsKey(SPARK_DATABRICKS_STAGINGAREAFOLDER.getName())) {
+            throw new InvalidSettingsException("Databricks staging area folder flow variable is required.");
+        }
 
         if (StringUtils.isBlank(fsConnectionId)) {
             throw new InvalidSettingsException("File system ID required.");
-        } else {
-            final DatabricksSparkContextCreatorNodeSettings2 settings =
-                DatabricksSparkContextCreatorNodeSettings2.fromFlowVariables(flowVariables);
-            return settings.createContextConfig(contextId, fsConnectionId, cp);
         }
+
+        return new DatabricksSparkContextFileSystemConfig( //
+            SparkVersion.fromString(TestflowVariable.getString(SPARK_VERSION, flowVariables)), //
+            TestflowVariable.getString(SPARK_DATABRICKS_URL, flowVariables), //
+            TestflowVariable.getString(SPARK_DATABRICKS_CLUSTER_ID, flowVariables), //
+            TestflowVariable.getString(SPARK_DATABRICKS_TOKEN, flowVariables), //
+            TestflowVariable.getString(SPARK_DATABRICKS_STAGINGAREAFOLDER, flowVariables), //
+            false, // terminateOnDestroy, keep cluster running
+            TestflowVariable.getInt(SPARK_DATABRICKS_CONNECTIONTIMEOUT, flowVariables), //
+            TestflowVariable.getInt(SPARK_DATABRICKS_RECEIVETIMEOUT, flowVariables), //
+            1, // jobCheckFrequency, check every second
+            contextId, //
+            fsConnectionId);
     }
 
     /**

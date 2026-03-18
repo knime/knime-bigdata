@@ -53,7 +53,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
 import org.knime.bigdata.commons.testing.TestflowVariable;
-import org.knime.bigdata.dbfs.filehandling.testing.TestingDbfsFSConnectionFactory;
+import org.knime.bigdata.databricks.unity.filehandling.testing.TestingUnityFSConnectionFactory;
 import org.knime.bigdata.hadoop.filehandling.testing.TestingHdfsConnectionFactory;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.core.node.ExecutionContext;
@@ -111,7 +111,7 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
             case SPARK_LIVY:
                 return TestingHdfsConnectionFactory.createSpec(fsId, flowVars);
             case SPARK_DATABRICKS:
-                return TestingDbfsFSConnectionFactory.createFileSystemPortSpec(fsId, flowVars);
+                return TestingUnityFSConnectionFactory.createFileSystemPortSpec(fsId, flowVars);
             default:
                 throw new InvalidSettingsException(
                     "Spark context ID scheme not supported: " + sparkScheme);
@@ -172,7 +172,7 @@ public class CreateTestFileSystemPortUtil implements CreateTestPortUtil {
             case SPARK_LIVY:
                 return TestingHdfsConnectionFactory.createConnection(flowVars);
             case SPARK_DATABRICKS:
-                return TestingDbfsFSConnectionFactory.createFSConnection(flowVars);
+                return TestingUnityFSConnectionFactory.createFSConnection(flowVars);
             default:
                 throw new InvalidSettingsException(
                     "Spark context ID scheme not supported: " + sparkScheme);
