@@ -46,7 +46,7 @@
  * History
  *   Mar 11, 2026 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.spark.core.databricks.spark.connector;
+package org.knime.bigdata.databricks.spark.connector;
 
 import java.io.FileInputStream;
 import java.io.IOException;

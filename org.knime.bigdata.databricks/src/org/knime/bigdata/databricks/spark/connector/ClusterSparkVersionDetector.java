@@ -46,7 +46,7 @@
  * History
  *   2026-03-12 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.spark.core.databricks.spark.connector;
+package org.knime.bigdata.databricks.spark.connector;
 
 import java.util.Optional;
 import java.util.regex.Matcher;

@@ -15,7 +15,7 @@
     <config key="variables"/>
     <entry key="customDescription" type="xstring" isnull="true" value=""/>
     <entry key="state" type="xstring" value="CONFIGURED"/>
-    <entry key="factory" type="xstring" value="org.knime.bigdata.spark.core.databricks.spark.connector.DatabricksSparkConnectorNodeFactory"/>
+    <entry key="factory" type="xstring" value="org.knime.bigdata.databricks.spark.connector.DatabricksSparkConnectorNodeFactory"/>
     <entry key="node-name" type="xstring" value="Databricks Spark Connector"/>
     <entry key="node-bundle-name" type="xstring" value="KNIME Databricks Spark context and DBFS connector"/>
     <entry key="node-bundle-symbolic-name" type="xstring" value="org.knime.bigdata.databricks"/>

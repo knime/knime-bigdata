@@ -46,7 +46,7 @@
  * History
  *   2026-03-10 (Sascha Wolke, KNIME GmbH, Berlin, Germany): created
  */
-package org.knime.bigdata.spark.core.databricks.spark.connector;
+package org.knime.bigdata.databricks.spark.connector;
 
 import static org.knime.node.impl.description.PortDescription.fixedPort;
 
