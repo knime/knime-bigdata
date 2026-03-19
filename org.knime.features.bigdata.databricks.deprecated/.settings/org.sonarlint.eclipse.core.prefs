@@ -2,5 +2,5 @@ autoEnabled=true
 bindingSuggestionsDisabled=false
 eclipse.preferences.version=1
 indexingBasedOnEclipsePlugIns=true
-projectKey=KNIME_knime-bigdata
+projectKey=knime_knime-bigdata
 serverId=SonarCloud
