@@ -13,13 +13,12 @@
           }
         },
         "createMissingFolders" : false,
-        "overwritePolicy" : "overwrite",
         "mode" : "FILE"
       },
-      "compression" : "UNCOMPRESSED",
-      "fileSize" : 1024,
+      "compression" : "NONE",
+      "fileSize" : 1000000,
       "fileNamePrefix" : "part_",
-      "chunkSize" : 128,
+      "chunkSize" : 1024,
       "mapping" : {
         "byNameSettings" : [ ],
         "byTypeSettings" : [ ]
@@ -35,40 +34,43 @@
           "chunkSize" : {
             "type" : "integer",
             "format" : "int32",
-            "title" : "Within file row group size (MB)",
-            "description" : "Defines the maximum size of a row group within a file in megabyte. For more details see the <a href=\"https://parquet.apache.org/docs/\">Parquet documentation</a>.",
-            "default" : 128
+            "title" : "Within file stripe size (rows)",
+            "description" : "Defines the maximum number of rows of a file stripe. For more details see the <a href=\"https://cwiki.apache.org/confluence/display/Hive/LanguageManual+ORC\">ORC documentation</a>.",
+            "default" : 1024
           },
           "compression" : {
             "oneOf" : [ {
-              "const" : "UNCOMPRESSED",
-              "title" : "Uncompressed"
+              "const" : "NONE",
+              "title" : "None"
+            }, {
+              "const" : "ZLIB",
+              "title" : "ZLIB"
             }, {
               "const" : "SNAPPY",
               "title" : "SNAPPY"
             }, {
-              "const" : "GZIP",
-              "title" : "GZIP"
+              "const" : "LZO",
+              "title" : "LZO"
             }, {
-              "const" : "ZSTD",
-              "title" : "ZSTD"
+              "const" : "LZ4",
+              "title" : "LZ4"
             } ],
             "title" : "File Compression",
-            "description" : "The compression codec used to write the Parquet file.",
-            "default" : "UNCOMPRESSED"
+            "description" : "The compression codec used to write the ORC file.",
+            "default" : "NONE"
           },
           "fileNamePrefix" : {
             "type" : "string",
             "title" : "File name prefix",
-            "description" : "The prefix to use for the file within the selected folder. A running index is appended starting with 0 e.g. part_00000.parquet, part_00001.parquet. This option is only available if the folder mode is selected.",
+            "description" : "The prefix to use for the file within the selected folder. A running index is appended starting with 0 e.g. part_00000.orc, part_00001.orc. This option is only available if the folder mode is selected.",
             "default" : "part_"
           },
           "fileSize" : {
             "type" : "integer",
             "format" : "int64",
-            "title" : "Split data into files of size (MB)",
-            "description" : "Splits up the input data into files of the specified maximum size in megabytes. This option is only available if the folder mode is selected.",
-            "default" : 1024
+            "title" : "Split data into files of size (rows)",
+            "description" : "Splits up the input data into files with at most the given number of data rows. This option is only available if the folder mode is selected.",
+            "default" : 1000000
           },
           "mapping" : {
             "type" : "object",
@@ -187,24 +189,6 @@
                 "title" : "Mode",
                 "description" : "Depending on the selected mode the node writes the input data into a single file or splits it up into several files of the defined size which are then stored in the specified folder.",
                 "default" : "FILE"
-              },
-              "overwritePolicy" : {
-                "oneOf" : [ {
-                  "const" : "fail",
-                  "title" : "Fail"
-                }, {
-                  "const" : "overwrite",
-                  "title" : "Overwrite"
-                }, {
-                  "const" : "ignore",
-                  "title" : "Ignore"
-                }, {
-                  "const" : "append",
-                  "title" : "Append"
-                } ],
-                "title" : "If exists",
-                "description" : "Specify the behavior of the node in case the output file already exists.<ul><li><b>Fail</b>: Will issue an error during the node's execution (to prevent unintentional overwrite).</li><li><b>Overwrite</b>: Will replace any existing file.</li><li><b>Ignore</b>: Will ignore if a file already exists and continues the copying process.</li></ul>",
-                "default" : "overwrite"
               }
             },
             "default" : {
@@ -219,7 +203,6 @@
                 }
               },
               "createMissingFolders" : false,
-              "overwritePolicy" : "overwrite",
               "mode" : "FILE"
             }
           }
@@ -242,7 +225,7 @@
         "type" : "Control",
         "scope" : "#/properties/model/properties/outputLocation/properties/file",
         "options" : {
-          "fileExtension" : "parquet",
+          "fileExtension" : "orc",
           "isLocal" : true,
           "isWriter" : true,
           "selectionMode" : "FILE",
@@ -258,13 +241,6 @@
         "options" : {
           "format" : "checkbox"
         }
-      }, {
-        "type" : "Control",
-        "scope" : "#/properties/model/properties/outputLocation/properties/overwritePolicy",
-        "options" : {
-          "format" : "valueSwitch"
-        },
-        "providedOptions" : [ "possibleValues" ]
       }, {
         "type" : "Control",
         "scope" : "#/properties/model/properties/compression"
@@ -420,9 +396,6 @@
               "createMissingFolders" : {
                 "configKey" : "create_missing_folders"
               },
-              "overwritePolicy" : {
-                "configKey" : "if_path_exists"
-              },
               "mode" : {
                 "configKey" : "filter_mode",
                 "route" : [ "filter_mode" ]
@@ -432,7 +405,7 @@
             "route" : [ "settings" ]
           },
           "compression" : {
-            "configKey" : "file_compression",
+            "configPaths" : [ [ "file_compression" ] ],
             "route" : [ "settings" ]
           },
           "fileSize" : {
@@ -1041,24 +1014,89 @@
       } ]
     } ]
   }, {
+    "scope" : "#/properties/model/properties/mapping/properties/byTypeSettings",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String);java.lang.String->string"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(StringValue,class java.lang.String,String));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.String->string)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double);java.lang.Double->double"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DoubleValue,class java.lang.Double,Double));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.Double->double)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long);java.lang.Long->bigint"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.LongCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LongValue,class java.lang.Long,Long));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.Long->bigint)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LocalDateTimeValue,class java.time.LocalDateTime,LocalDateTime);java.time.LocalDateTime->timestamp"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdatetime.LocalDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LocalDateTimeValue,class java.time.LocalDateTime,LocalDateTime));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.time.LocalDateTime->timestamp)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->string"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localtime.LocalTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString())));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.String->string)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LocalDateValue,class java.time.LocalDate,LocalDate);java.time.LocalDate->date"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.localdate.LocalDateCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(LocalDateValue,class java.time.LocalDate,LocalDate));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.time.LocalDate->date)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->string"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.zoneddatetime.ZonedDateTimeCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString())));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.String->string)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->string"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.period.PeriodCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString())));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.String->string)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString()));java.lang.String->string"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.time.duration.DurationCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(DataValue,class java.lang.String,String (toString())));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.String->string)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BooleanValue,class java.lang.Boolean,Boolean);java.lang.Boolean->boolean"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BooleanValue,class java.lang.Boolean,Boolean));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.Boolean->boolean)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer);java.lang.Integer->int"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(IntValue,class java.lang.Integer,Integer));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.lang.Integer->int)"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BinaryObjectDataValue,class java.io.InputStream,InputStream);java.io.InputStream->binary"
+      }, {
+        "fromType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"collection_element_type\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.blob.BinaryObjectDataCell\"}}},\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.collection.ListCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "toType" : "org.knime.core.data.convert.java.CollectionConverterFactory(org.knime.core.data.convert.java.SimpleDataCellToJavaConverterFactory(BinaryObjectDataValue,class java.io.InputStream,InputStream));org.knime.bigdata.fileformats.orc.datatype.mapping.ORCListCellValueConsumerFactory(java.io.InputStream->binary)"
+      } ]
+    } ]
+  }, {
     "scope" : "#/properties/model/properties/outputLocation/properties/file",
     "providedOptionName" : "selectionMode",
     "values" : [ {
       "indices" : [ ],
       "value" : "FILE"
-    } ]
-  }, {
-    "scope" : "#/properties/model/properties/outputLocation/properties/overwritePolicy",
-    "providedOptionName" : "possibleValues",
-    "values" : [ {
-      "indices" : [ ],
-      "value" : [ {
-        "id" : "fail",
-        "text" : "Fail"
-      }, {
-        "id" : "overwrite",
-        "text" : "Overwrite"
-      } ]
     } ]
   } ],
   "globalUpdates" : [ {
