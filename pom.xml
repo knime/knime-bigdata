@@ -32,19 +32,19 @@
 			<modules>
 				<!-- this needs to go first because it ensures that jar files required by spark.local are present -->
 				<module>org.knime.bigdata.spark.local/libs/fetch_jars</module>
+				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars275</module>
+				<module>org.knime.bigdata.database.databricks.driver.deprecated/lib/fetch_jars</module>
+				<module>org.knime.bigdata.database.databricks.driver.deprecated/lib/fetch_jars273</module>
+				<module>org.knime.bigdata.delta/lib/fetch_jars</module>
 
 				<module>org.knime.bigdata.commons</module>
 				<module>org.knime.bigdata.hadoop.client.win32</module>
 				<module>org.knime.bigdata.database</module>
 				<module>org.knime.bigdata.databricks</module>
 				<module>org.knime.bigdata.databricks.tests</module>
-				<module>org.knime.bigdata.database.databricks.driver/lib/fetch_jars275</module>
 				<module>org.knime.bigdata.database.databricks.driver</module>
-				<module>org.knime.bigdata.database.databricks.driver.deprecated/lib/fetch_jars</module>
-				<module>org.knime.bigdata.database.databricks.driver.deprecated/lib/fetch_jars273</module>
 				<module>org.knime.bigdata.database.databricks.driver.deprecated</module>
 				<module>org.knime.bigdata.databricks.python</module>
-				<module>org.knime.bigdata.delta/lib/fetch_jars</module>
 				<module>org.knime.bigdata.delta</module>
 				<module>org.knime.bigdata.fileformats</module>
 				<module>org.knime.bigdata.filehandling</module>
