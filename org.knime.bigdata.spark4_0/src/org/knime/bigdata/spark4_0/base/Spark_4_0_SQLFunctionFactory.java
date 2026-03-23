@@ -39,17 +39,16 @@ import static org.apache.spark.sql.functions.skewness;
 import static org.apache.spark.sql.functions.stddev_pop;
 import static org.apache.spark.sql.functions.stddev_samp;
 import static org.apache.spark.sql.functions.sum;
-import static org.apache.spark.sql.functions.sumDistinct;
+import static org.apache.spark.sql.functions.sum_distinct;
 import static org.apache.spark.sql.functions.var_pop;
 import static org.apache.spark.sql.functions.var_samp;
 import static org.apache.spark.sql.functions.window;
-import static scala.collection.JavaConversions.asScalaBuffer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.catalyst.expressions.Expression;
-import org.apache.spark.sql.catalyst.expressions.Literal;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
@@ -58,13 +57,12 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark4_0.api.TypeConverters;
 
-import scala.collection.Seq;
+import scala.collection.JavaConverters;
 
 /**
  * Factory of Spark functions.
@@ -119,7 +117,7 @@ public class Spark_4_0_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
         } else if ("count".equals(name)) {
             column = count(inputColumn);
         } else if ("count_distinct".equals(name) && args >= 1) {
-            column = countDistinct(inputColumn, getAdditionalColumns(input));
+            column = countDistinct(inputColumn, JavaConverters.asScala(getAdditionalColumns(input).iterator()).toSeq());
         } else if ("covar_pop".equals(name) && args == 2) {
             column = covar_pop(doubleColumn, getDoubleCol(input, 1));
         } else if ("covar_samp".equals(name) && args == 2) {
@@ -147,9 +145,9 @@ public class Spark_4_0_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
         } else if ("sum_boolean".equals(name)) {
             column = sum(inputColumn.cast(DataTypes.IntegerType));
         } else if ("sum_distinct".equals(name)) {
-            column = sumDistinct(inputColumn);
+            column = sum_distinct(inputColumn);
         } else if ("sum_distinct_boolean".equals(name)) {
-            column = sumDistinct(inputColumn.cast(DataTypes.IntegerType));
+            column = sum_distinct(inputColumn.cast(DataTypes.IntegerType));
         } else if ("var_samp".equals(name)) { // alias: variance
             column = var_samp(doubleColumn);
         } else if ("var_pop".equals(name)) {
@@ -184,33 +182,37 @@ public class Spark_4_0_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
         final String inputColName = (String) getArg(input, 0);
         final Expression outputExpr;
 
-        if ("count".equals(function) || "count_distinct".equals(function)) { // handle count(*) and count(distinct ...)
-            return new IntermediateField(input.getOutputName(), IntermediateDataTypes.LONG);
+//        if ("count".equals(function) || "count_distinct".equals(function)) { // handle count(*) and count(distinct ...)
+//            return new IntermediateField(input.getOutputName(), IntermediateDataTypes.LONG);
+//
+//        } else if ("covar_pop".equals(function) || "covar_samp".equals(function)) { // lookup second column argument
+//            final Column inputColumnA = new Column(
+//                Literal.create(null, inputFields[inputSchema.fieldIndex(inputColName)].dataType())).name(inputColName);
+//            final String inputColNameB = (String) getArg(input, 0);
+//            final Column inputColumnB = new Column(
+//                Literal.create(null, inputFields[inputSchema.fieldIndex(inputColNameB)].dataType())).name(inputColNameB);
+//            if ("covar_pop".equals(function)) {
+//                outputExpr = covar_pop(inputColumnA, inputColumnB).expr();
+//            } else {
+//                outputExpr = covar_samp(inputColumnA, inputColumnB).expr();
+//            }
+//
+//        } else { // use getFunctionColumn to get expression
+//            final Column inputColumn = new Column(
+//                Literal.create(null, inputFields[inputSchema.fieldIndex(inputColName)].dataType())).name(inputColName);
+//            outputExpr = getFunctionColumn(input, inputColumn).expr();
+//        }
+//
+//        final IntermediateToSparkConverter<?> converter = TypeConverters.getConverter(outputExpr.dataType());
+//        if (converter != null) {
+//            return new IntermediateField(input.getOutputName(), converter.getIntermediateDataType());
+//        } else {
+//            return new IntermediateField(input.getOutputName(), TypeConverters.getDefaultConverter().getIntermediateDataType());
+//        }
 
-        } else if ("covar_pop".equals(function) || "covar_samp".equals(function)) { // lookup second column argument
-            final Column inputColumnA = new Column(
-                Literal.create(null, inputFields[inputSchema.fieldIndex(inputColName)].dataType())).name(inputColName);
-            final String inputColNameB = (String) getArg(input, 0);
-            final Column inputColumnB = new Column(
-                Literal.create(null, inputFields[inputSchema.fieldIndex(inputColNameB)].dataType())).name(inputColNameB);
-            if ("covar_pop".equals(function)) {
-                outputExpr = covar_pop(inputColumnA, inputColumnB).expr();
-            } else {
-                outputExpr = covar_samp(inputColumnA, inputColumnB).expr();
-            }
-
-        } else { // use getFunctionColumn to get expression
-            final Column inputColumn = new Column(
-                Literal.create(null, inputFields[inputSchema.fieldIndex(inputColName)].dataType())).name(inputColName);
-            outputExpr = getFunctionColumn(input, inputColumn).expr();
-        }
-
-        final IntermediateToSparkConverter<?> converter = TypeConverters.getConverter(outputExpr.dataType());
-        if (converter != null) {
-            return new IntermediateField(input.getOutputName(), converter.getIntermediateDataType());
-        } else {
-            return new IntermediateField(input.getOutputName(), TypeConverters.getDefaultConverter().getIntermediateDataType());
-        }
+        final DataType inputDataType = inputFields[inputSchema.fieldIndex(inputColName)].dataType();
+        final IntermediateToSparkConverter<?> converter = TypeConverters.getConverter(inputDataType);
+        return new IntermediateField(input.getOutputName(), converter.getIntermediateDataType());
     }
 
     /** @return converted function argument */
@@ -220,13 +222,13 @@ public class Spark_4_0_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
     }
 
     /** @return additional arguments as string (all arguments except the first) */
-    private Seq<Column> getAdditionalColumns(final SparkSQLFunctionJobInput agg) {
+    private List<Column> getAdditionalColumns(final SparkSQLFunctionJobInput agg) {
         final int args = agg.getArgCount();
         final ArrayList<Column> result = new ArrayList<>(args - 1);
         for (int i = 1; i < args; i++) {
             result.add(column((String) getArg(agg, i)));
         }
-        return asScalaBuffer(result);
+        return result;
     }
 
     /**

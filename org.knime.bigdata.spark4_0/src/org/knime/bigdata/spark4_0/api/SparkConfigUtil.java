@@ -39,7 +39,7 @@ public final class SparkConfigUtil {
      */
     @SuppressWarnings("resource")
     public static boolean adaptiveExecutionEnabled(final SparkContext sparkContext) {
-        return SparkSession.builder().sparkContext(sparkContext).getOrCreate().sqlContext().conf()
+        return SparkSession.builder().sparkContext(sparkContext).getOrCreate().sessionState().conf()
             .adaptiveExecutionEnabled();
     }
 

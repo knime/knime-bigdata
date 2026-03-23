@@ -133,7 +133,18 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
             String resultFrame = input.getUID() + "_resultDataFrame" + (i + 1);
             Dataset<Row> pydf = EXCHANGER.getDataFrame(resultFrame);
             sb.append("resultDataFrame" + (i + 1) + "(" + SHOW_ROW_COUNT +" of " + pydf.count() + " rows):\n");
-            sb.append(pydf.showString(SHOW_ROW_COUNT, CLOUMN_TRUNCAT, false));
+            if (pydf instanceof org.apache.spark.sql.classic.Dataset) {
+                // in case of a classic Dataset we can use the showString method to get a nice output
+                final org.apache.spark.sql.classic.Dataset<Row> classicDF = (org.apache.spark.sql.classic.Dataset<Row>) pydf;
+                sb.append(classicDF.showString(SHOW_ROW_COUNT, CLOUMN_TRUNCAT, false));
+            } else {
+                // for a regular dataframe we just print the first rows as string
+                List<Row> rows = pydf.takeAsList(SHOW_ROW_COUNT);
+                for (Row row : rows) {
+                    sb.append(row.toString());
+                    sb.append("\n");
+                }
+            }
             sb.append("\n");
         }
         return sb.toString();

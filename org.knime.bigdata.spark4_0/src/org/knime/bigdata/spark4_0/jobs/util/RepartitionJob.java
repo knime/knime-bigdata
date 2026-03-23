@@ -30,6 +30,8 @@ import org.knime.bigdata.spark.node.util.repartition.RepartitionJobOutput;
 import org.knime.bigdata.spark4_0.api.NamedObjects;
 import org.knime.bigdata.spark4_0.api.SparkJob;
 
+import scala.jdk.javaapi.CollectionConverters;
+
 /**
  * Repartition / coalesce data frames.
  *
@@ -73,7 +75,7 @@ public class RepartitionJob implements SparkJob<RepartitionJobInput, Repartition
                     throw new KNIMESparkException("Unable to read thread count from local spark string: " + master);
                 } else {
                     final int cores = sparkContext.conf().getInt("spark.executor.cores", 1);
-                    executors = sparkContext.getExecutorIds().size();
+                    executors = CollectionConverters.asJava(sparkContext.getExecutorIds()).size();
                     newNumberOfPartitions = Math.max(1, (int)(input.getFactor() * executors * cores));
                 }
                 break;

@@ -18,7 +18,7 @@
 package org.knime.bigdata.spark4_0.jobs.preproc.groupby;
 
 import static org.apache.spark.sql.functions.col;
-import static scala.collection.JavaConversions.asScalaBuffer;
+import static scala.collection.JavaConverters.asScalaBuffer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +82,7 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
 
         } else { // group by mode
             resultFrame = inputFrame
-                    .groupBy(asScalaBuffer(getFunctionColumns(input.getGroupByFunctions())))
+                    .groupBy((Column)asScalaBuffer(getFunctionColumns(input.getGroupByFunctions())))
                     .agg(aggColumns.get(0), aggColumns.subList(1, aggColumns.size()).toArray(new Column[0]));
         }
 
@@ -115,7 +115,7 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
         }
 
         return validatedFrame
-                .groupBy(asScalaBuffer(groupByAliased))
+                .groupBy((Column)asScalaBuffer(groupByAliased))
                 .pivot(input.getPivotColumn(), pivotValues)
                 .agg(aggCols.get(0), aggCols.subList(1, aggCols.size()).toArray(new Column[0]))
                 .toDF(outputColumns.toArray(new String[0])); // rewrite column names from uniquified/Spark-generated column names

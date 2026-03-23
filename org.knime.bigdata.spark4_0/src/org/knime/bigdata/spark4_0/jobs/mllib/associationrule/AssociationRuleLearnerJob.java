@@ -37,7 +37,7 @@ import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearner
 import org.knime.bigdata.spark4_0.api.NamedObjects;
 import org.knime.bigdata.spark4_0.api.SimpleSparkJob;
 
-import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 import scala.collection.Map;
 /**
  * Implements a association rules learner using frequent pattern mining in spark.
@@ -63,7 +63,7 @@ public class AssociationRuleLearnerJob implements SimpleSparkJob<AssociationRule
         final String modelUid = "fpgrowth_" + UUID.randomUUID();
 
         // Parameters added in Spark 2.4, that we don't support right now
-        final Map<Object, Object> itemSupport = JavaConversions.mapAsScalaMap(Collections.emptyMap());
+        final Map<Object, Object> itemSupport = JavaConverters.asScala(Collections.emptyMap());
         final long numTrainingRecords = 0L;
 
         final FPGrowthModel model = new FPGrowthModel(modelUid, freqItemsets, itemSupport, numTrainingRecords);

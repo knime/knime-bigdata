@@ -28,7 +28,7 @@ import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkCon
 import org.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 
-import scala.collection.mutable.WrappedArray;
+import scala.collection.mutable.ArraySeq;
 
 /**
  * Converts intermediate arrays into spark arrays and vice versa.
@@ -77,8 +77,8 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
             }
             return result;
 
-        } else if (sparkObject instanceof WrappedArray) {
-            return convert(((WrappedArray<?>) sparkObject).array());
+        } else if (sparkObject instanceof ArraySeq) {
+            return convert(((ArraySeq<?>)sparkObject).toArray(scala.reflect.ClassTag$.MODULE$.Object()));
 
         } else {
             return super.convert(sparkObject);
@@ -93,7 +93,7 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
             for (int i = 0, length = objectArray.length; i < length; i++) {
                 result[i] = m_elementConverter.convert(objectArray[i]);
             }
-            return WrappedArray.make(result);
+            return ArraySeq.make(result);
 
         } else {
             return super.convert(intermediateTypeValue);
