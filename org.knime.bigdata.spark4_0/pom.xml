@@ -6,7 +6,7 @@
 		<version>${revision}${changelist}</version>
 	</parent>
 	<groupId>org.knime</groupId>
-	<artifactId>org.knime.bigdata.spark3_5</artifactId>
+	<artifactId>org.knime.bigdata.spark4_0</artifactId>
 	<version>${revision}${changelist}</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>

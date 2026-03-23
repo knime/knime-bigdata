@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 3.5
-Bundle-SymbolicName: org.knime.bigdata.spark3_5;singleton:=true
+Bundle-SymbolicName: org.knime.bigdata.spark4_0;singleton:=true
 Bundle-Version: 5.9.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Export-Package: org.knime.bigdata.spark3_5.api,
- org.knime.bigdata.spark3_5.base
+Export-Package: org.knime.bigdata.spark4_0.api,
+ org.knime.bigdata.spark4_0.base
 Require-Bundle: org.knime.core;bundle-version="[5.9.0,6.0.0)",
  org.knime.base;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.databricks;bundle-version="[5.9.0,6.0.0)",
@@ -14,7 +14,7 @@ Require-Bundle: org.knime.core;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.spark.node;bundle-version="[5.9.0,6.0.0)",
  org.knime.bigdata.spark.core.livy;bundle-version="[5.9.0,6.0.0)",
  org.apache.livy.api;bundle-version="[0.4.0,0.5.0)",
- org.apache.spark_2.12;bundle-version="[3.5.8,3.6.0)",
+ org.apache.spark_2.12;bundle-version="[4.0.2,4.1.0)",
  org.apache.hadoop.client;bundle-version="[3.4.2,4.0.0)",
  org.apache.log4j;bundle-version="[1.2.15,2.0.0)",
  org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
@@ -30,4 +30,4 @@ Require-Bundle: org.knime.core;bundle-version="[5.9.0,6.0.0)",
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
-Automatic-Module-Name: org.knime.bigdata.spark3_5
+Automatic-Module-Name: org.knime.bigdata.spark4_0
