@@ -79,6 +79,9 @@ public class LocalSparkWrapperFactory {
         // netty
         bundles.add(FrameworkUtil.getBundle(io.netty.channel.EventLoopGroup.class));
 
+        // javax.xml.bind
+        bundles.add(FrameworkUtil.getBundle(javax.xml.bind.DatatypeConverter.class));
+
         // knosp.node (KNIME-on-Spark, aka KNIME Workflow Executor for Apache Spark)
         final Bundle knospNodeBundle = Platform.getBundle(KNOSP_NODE_PLUGIN);
         if (knospNodeBundle != null) {
@@ -96,6 +99,7 @@ public class LocalSparkWrapperFactory {
                 "com.knime",//
                 "org.eclipse",//
                 "org.glassfish.jersey",//
+                "java.xml.bind",//
                 "javax.ws.rs"},
             new String[]{"com.knime.bigdata.knosp.node.jobmanager.proxy"}, bundles.toArray(new Bundle[0]));
 

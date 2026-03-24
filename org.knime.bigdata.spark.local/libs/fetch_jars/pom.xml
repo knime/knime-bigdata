@@ -5,14 +5,14 @@
 		the binary Spark build -->
     <parent>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-parent_2.12</artifactId>
-        <version>3.5.8</version>
+        <artifactId>spark-parent_2.13</artifactId>
+        <version>4.0.2</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knime.bigdata</groupId>
     <artifactId>spark-local-fetch-jars</artifactId>
-    <version>3.5.8</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
+    <version>4.0.2</version> <!-- Upload a copy of pyspark to our artifactory when changing this -->
     <packaging>pom</packaging>
 
     <name>Jar fetcher for local Spark</name>
@@ -24,7 +24,7 @@
         <gson.version>2.11.0</gson.version>
         <ivy.version>2.5.2</ivy.version>
         <parquet.version>1.15.2</parquet.version>
-        <spark.version>3.5.8</spark.version>
+        <spark.version>4.0.2</spark.version>
         <zookeeper.version>3.8.4</zookeeper.version>
         <scalastyle.skip>true</scalastyle.skip>
         <checkstyle.skip>true</checkstyle.skip>
@@ -67,7 +67,7 @@
 
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_2.12</artifactId>
+            <artifactId>spark-sql_2.13</artifactId>
             <version>${spark.version}</version>
             <exclusions>
                 <!-- Netty 4.x is implicitly provided via the org.apache.hadoop.client OSGI bundle -->
@@ -88,7 +88,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-avro_2.12</artifactId>
+            <artifactId>spark-avro_2.13</artifactId>
             <version>${spark.version}</version>
             <exclusions>
                 <exclusion>
@@ -99,7 +99,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-hive_2.12</artifactId>
+            <artifactId>spark-hive_2.13</artifactId>
             <version>${spark.version}</version>
             <exclusions>
                 <exclusion>
@@ -114,7 +114,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-hive-thriftserver_2.12</artifactId>
+            <artifactId>spark-hive-thriftserver_2.13</artifactId>
             <version>${spark.version}</version>
             <exclusions>
                 <exclusion>
@@ -125,7 +125,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-mllib_2.12</artifactId>
+            <artifactId>spark-mllib_2.13</artifactId>
             <version>${spark.version}</version>
             <exclusions>
                 <exclusion>

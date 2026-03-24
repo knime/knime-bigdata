@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.util.Shell.ExitCodeException;
 import org.apache.hive.service.Service.STATE;
@@ -42,34 +41,34 @@ import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark.local.hadoop.LocalFileSystemHiveTempWrapper;
-import org.knime.bigdata.spark3_5.api.NamedObjects;
-import org.knime.bigdata.spark3_5.api.SimpleSparkJob;
-import org.knime.bigdata.spark3_5.api.SparkJob;
-import org.knime.bigdata.spark3_5.api.SparkJobWithFiles;
+import org.knime.bigdata.spark4_0.api.NamedObjects;
+import org.knime.bigdata.spark4_0.api.SimpleSparkJob;
+import org.knime.bigdata.spark4_0.api.SparkJob;
+import org.knime.bigdata.spark4_0.api.SparkJobWithFiles;
 
 import scala.Option;
 
 /**
  * Implementation of {@link LocalSparkWrapper} and {@link NamedObjects}. Objects of this class hold and manage an actual
  * SparkContext and run jobs on it.
- * 
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
 public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	private final static Logger LOG = Logger.getLogger(LocalSparkWrapperImpl.class);
-	
+
 	private final static String SPARK_APP_NAME = "spark.app.name";
-	
+
 	private final static String SPARK_MASTER = "spark.master";
-	
+
 	private final static String SPARK_LOCAL_DIR = "spark.local.dir";
-	
+
 	private final static String SPARK_DRIVER_HOST = "spark.driver.host";
-	
+
 	private String m_derbyUrl;
-	
+
 	private int m_hiveserverPort = -1;
 
 	private final Map<String, Object> m_namedObjects = new HashMap<>();
@@ -84,7 +83,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	 * Parent directory for temporary data.
 	 */
 	private File m_sparkTmpDir;
-	
+
 	/**
 	 * Subdirectory of {@link #m_sparkTmpDir} that is used to store copies of
 	 * the input files for {@link SparkJobWithFiles}. This is necessary because
@@ -93,12 +92,12 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	 * ensure that Spark works on independent copies.
 	 */
 	private File m_jobInputFileCopyDir;
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
     public Map<String, Object> runJob(final Map<String, Object> localSparkInputMap, final String jobGroupId)
         throws InterruptedException {
-	    
+
 		// we need to replace the current context class loader (which comes from OSGI)
 		// with the spark class loader, otherwise Java's ServiceLoader frame does not
 		// work properly which breaks Spark's DataSource API
@@ -106,15 +105,15 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		WrapperJobOutput toReturn;
 
 		try {
-			final LocalSparkJobInput localSparkInput = new LocalSparkJobInput(); 
+			final LocalSparkJobInput localSparkInput = new LocalSparkJobInput();
 			LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(localSparkInputMap, getClass().getClassLoader(), localSparkInput);
-			
+
 			final JobInput jobInput = localSparkInput.getSparkJobInput();
 
 			Object sparkJob = getClass().getClassLoader().loadClass(localSparkInput.getSparkJobClass()).newInstance();
 
 			markJobGroupId(jobGroupId, sparkJob.getClass().getSimpleName());
-			
+
 			ensureNamedInputObjectsExist(jobInput);
 			ensureNamedOutputObjectsDoNotExist(jobInput);
 
@@ -177,7 +176,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
     /**
      * Thread-safe method (against {@link #cancelJob(String)} to check for cancellation and set the current job group id
      * if not cancelled.
-     * 
+     *
      * @param jobGroupId
      * @param jobDescription
      * @throws InterruptedException
@@ -188,9 +187,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	    }
         m_sparkSession.sparkContext().setJobGroup(jobGroupId, jobDescription, true);
     }
-	
+
     @Override
-    public synchronized void cancelJob(String jobGroupId) {
+    public synchronized void cancelJob(final String jobGroupId) {
         m_sparkSession.sparkContext().cancelJobGroup(jobGroupId);
     }
 
@@ -208,10 +207,10 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		return inputFileCopies;
 	}
 
-	private File copyJobInputFile(Path inputFile) throws IOException {
+	private File copyJobInputFile(final Path inputFile) throws IOException {
 		final Path inputFileCopy = Files.createTempFile(m_jobInputFileCopyDir.toPath(), null, inputFile.getFileName().toString());
 		Files.copy(inputFile, inputFileCopy, StandardCopyOption.REPLACE_EXISTING);
-		
+
 		return inputFileCopy.toFile();
 	}
 
@@ -235,7 +234,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	@Override
-	public void addDataFrame(String key, Dataset<Row> dataset) {
+	public void addDataFrame(final String key, final Dataset<Row> dataset) {
 		synchronized (m_namedObjects) {
 			m_namedObjects.put(key, dataset);
 		}
@@ -243,21 +242,21 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Dataset<Row> getDataFrame(String key) {
+	public Dataset<Row> getDataFrame(final String key) {
 		synchronized (m_namedObjects) {
 			return (Dataset<Row>) m_namedObjects.get(key);
 		}
 	}
 
 	@Override
-	public JavaRDD<Row> getJavaRdd(String key) {
+	public JavaRDD<Row> getJavaRdd(final String key) {
 		synchronized (m_namedObjects) {
 			return getDataFrame(key).toJavaRDD();
 		}
 	}
 
 	@Override
-	public boolean validateNamedObject(String key) {
+	public boolean validateNamedObject(final String key) {
 		synchronized (m_namedObjects) {
 			return m_namedObjects.containsKey(key);
 		}
@@ -265,7 +264,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void deleteNamedDataFrame(String key) {
+	public void deleteNamedDataFrame(final String key) {
 		synchronized (m_namedObjects) {
 			Object removed = m_namedObjects.remove(key);
 			if (removed != null) {
@@ -282,26 +281,26 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	@Override
-    public synchronized void openSparkContext(String name, int workerThreads, Map<String, String> userSparkConf,
-        boolean enableHiveSupport, boolean startThriftserver, int thriftserverPort, String hiveDataFolder)
+    public synchronized void openSparkContext(final String name, final int workerThreads, final Map<String, String> userSparkConf,
+        final boolean enableHiveSupport, final boolean startThriftserver, final int thriftserverPort, final String hiveDataFolder)
         throws KNIMESparkException {
-		
+
 		// we need to replace the current context class loader (which comes from OSGI)
 		// with the spark class loader, otherwise Java's ServiceLoader frame does not
 		// work properly which breaks Spark's DataSource API
 		final ClassLoader origContextClassLoader = swapContextClassLoader();
-		
+
 		try {
-			
+
 			final SparkConf sparkConf = new SparkConf(false);
 			final String pythonPath = getPythonPath(sparkConf);
 			final Map<String, String> filteredUserSparkConf = filterUserSparkConfMap(userSparkConf);
-			
+
 			initSparkTmpDir();
 			initJobInputFileCopyDir();
-			
+
 			configureSparkLocalDir(filteredUserSparkConf, sparkConf);
-			
+
 			if (enableHiveSupport) {
 				configureHiveSupport(sparkConf, hiveDataFolder);
 
@@ -315,7 +314,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			for (String userKey : filteredUserSparkConf.keySet()) {
 				sparkConf.set(userKey, filteredUserSparkConf.get(userKey));
 			}
-			
+
 			m_sparkSession = SparkSession
 				.builder()
 				.appName(String.format("Local Spark (%s)", name))
@@ -330,7 +329,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.config("spark.executorEnv.PYTHONPATH", pythonPath.replace(',', File.pathSeparatorChar))
 				.config(sparkConf)
 				.getOrCreate();
-            m_adaptiveQueryExecution = m_sparkSession.sqlContext().conf().adaptiveExecutionEnabled();
+            m_adaptiveQueryExecution = m_sparkSession.sessionState().conf().adaptiveExecutionEnabled();
 
 			if (startThriftserver) {
 				try {
@@ -351,7 +350,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 	}
 
-    private static String getPythonPath(SparkConf conf) throws IOException {
+    private static String getPythonPath(final SparkConf conf) throws IOException {
         final Option<String> jar = SparkContext.jarOfObject(conf);
         if (jar.isDefined()) {
             Path jarPath = Paths.get(URI.create("file:" + jar.get()));
@@ -365,7 +364,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
             return "";
         }
     }
-	
+
 	private void initJobInputFileCopyDir() throws IOException {
 		m_jobInputFileCopyDir = new File(m_sparkTmpDir, "spark_filecopy_dir");
 		if (!m_jobInputFileCopyDir.mkdir()) {
@@ -409,8 +408,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 		sparkConf.set(SPARK_LOCAL_DIR, sparkLocalDir.getAbsolutePath());
 	}
-	
-	private void configureHiveSupport(SparkConf sparkConf, String hiveDataFolder) throws IOException {
+
+	private void configureHiveSupport(final SparkConf sparkConf, final String hiveDataFolder) throws IOException {
 
 		// BD-1304: Loading JDBC drivers via Spark 2 Database and lazy loading the Hive metastore Derby JDBC driver,
 		// might result in a never ending JDBC driver search loop...
@@ -430,7 +429,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 						String.format("Hive data folder %s does not exist. Please create it first.",
 								hiveDataFolder));
 			}
-			
+
 			ensureWritableDirectory(hiveParentDir, "Hive data folder");
 
 			final File derbyMetastoreDB = new File(hiveParentDir, "metastore_db");
@@ -476,7 +475,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		// Note: This fix can be removed in Spark 2.4: https://issues.apache.org/jira/browse/SPARK-23831
 		sparkConf.set("spark.sql.hive.metastore.sharedPrefixes", "org.apache.derby.");
 	}
-	
+
 	private static void ensureWritableDirectory(final File maybeDir, final String errorMsgName) throws IOException {
 		if (!maybeDir.isDirectory()) {
 			throw new IOException(
@@ -499,7 +498,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		deleteRecursivelyOnExit(m_sparkTmpDir);
 	}
 
-	private static Map<String, String> filterUserSparkConfMap(Map<String, String> sparkConfMap) {
+	private static Map<String, String> filterUserSparkConfMap(final Map<String, String> sparkConfMap) {
 		final Map<String, String> filteredMap = new HashMap<>(sparkConfMap);
 		filteredMap.remove(SPARK_APP_NAME);
 		filteredMap.remove(SPARK_MASTER);
@@ -541,7 +540,11 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	    }
 
         if (m_sparkSession != null) {
+            try {
             m_sparkSession.close();
+            } catch (IOException e) {
+                LOG.warn("Error while closing Spark session.", e);
+            }
             m_sparkSession = null;
             try {
                 // shut down the entire derby system
@@ -553,7 +556,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
     }
 
 	@Override
-	public void deleteNamedObjects(Set<String> namedObjects) {
+	public void deleteNamedObjects(final Set<String> namedObjects) {
 		for (String namedObjectId : namedObjects) {
 		    final Object namedObject = m_namedObjects.get(namedObjectId);
 		    if (namedObject != null && namedObject instanceof Dataset) {
@@ -580,7 +583,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	@Override
-	public <T> void add(String key, final T obj) {
+	public <T> void add(final String key, final T obj) {
 		synchronized (m_namedObjects) {
 			m_namedObjects.put(key, obj);
 		}
@@ -588,7 +591,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T get(String key) {
+	public <T> T get(final String key) {
 		synchronized (m_namedObjects) {
 			return (T) m_namedObjects.get(key);
 		}
@@ -596,7 +599,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T delete(String namedObjectId) {
+    public <T> T delete(final String namedObjectId) {
         synchronized (m_namedObjects) {
             final T namedObject = (T) m_namedObjects.get(namedObjectId);
             if (namedObject != null && namedObject instanceof Dataset) {
