@@ -31,6 +31,9 @@
         <artifactory.login>${env.ARTIFACTORY_LOGIN}</artifactory.login>
         <artifactory.password>${env.ARTIFACTORY_PASSWORD}</artifactory.password>
         <spark.repo>https://${artifactory.login}:${artifactory.password}@artifactory.knime.com:443/artifactory/generic-downloads/pyspark</spark.repo>
+
+        <!-- override maven version, used enforce-versions from spark pom -->
+        <maven.version>3.9.6</maven.version>
     </properties>
 
 
