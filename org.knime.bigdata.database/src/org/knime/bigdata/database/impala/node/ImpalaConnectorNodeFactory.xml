@@ -33,7 +33,7 @@
                 If this option is not enabled, you can select a specific version of the registered drivers via the 
                 drop-down list. Additional drivers can be registered via KNIME's preference 
                 page "KNIME -> Databases". For more details on how to register a new driver see the
-                <a href="https://docs.knime.com/latest/db_extension_guide/index.html#register_jdbc">database documentation</a>.
+                <a href="https://docs.knime.com/ap/latest/db_extension_guide/#register-your-own-jdbc-drivers">database documentation</a>.
                 </p>
                 <p>
                 The node includes the Apache Hive driver, which is compatible with Impala.
