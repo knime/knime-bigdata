@@ -23,7 +23,7 @@
 			 output would be "Bar 1", "Bar 2", "Bar 3".
             </p>
             <p>
-              More complicated cases contain <a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html#cg">
+              More complicated cases contain <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html#cg">
               capturing groups</a>, i.e. expressions in parentheses that, if 
               matched in a column name, are saved. The groups can be referenced
               in the replacement string using <tt>$g</tt>, whereby <tt>g</tt>
@@ -46,9 +46,9 @@
             <p>
               Further documentation regarding regular expressions can be found 
               in the Java API documentation, in particular the classes <a href=
-              "http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">
+              "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html">
               Pattern</a> and <a href=
-              "http://download.oracle.com/javase/6/docs/api/java/util/regex/Matcher.html">
+              "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Matcher.html">
               Matcher</a>. 
             </p>
         </intro>
