@@ -58,7 +58,7 @@ public class DatabricksPrepareContextJob implements SparkJob<DatabricksPrepareCo
     public DatabricksPrepareContextJobOutput runJob(final SparkContext sparkContext, final DatabricksPrepareContextJobInput input,
         final NamedObjects namedObjects) throws Exception {
 
-        DistributedFileUtils.ensureInitialized(DatabricksSparkSideStagingArea.SINGLETON_INSTANCE);
+        DistributedFileUtils.ensureInitializedDatabricks(DatabricksSparkSideStagingArea.SINGLETON_INSTANCE);
 
         sparkContext.addSparkListener(new KNIMEDatabricksSparkListener());
 
