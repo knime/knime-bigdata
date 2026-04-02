@@ -109,6 +109,9 @@ class DatabricksSparkConnectorNodeParameters implements NodeParameters {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(DatabricksSparkConnectorNodeParameters.class);
 
+    // This node supports only Spark 3.4+ and we don't like to support the Spark versions of the legacy Spark feature.
+    private static final SparkVersion MIN_SUPPORTED_SPARK_VERSION = SparkVersion.V_3_4;
+
     // ===================== Section definitions =====================
 
     @Section(title = "Cluster")
@@ -262,6 +265,7 @@ class DatabricksSparkConnectorNodeParameters implements NodeParameters {
         @Override
         public List<StringChoice> computeState(final NodeParametersInput context) {
             return new DatabricksSparkContextProvider().getSupportedSparkVersions().stream() //
+                .filter(v -> v.compareTo(MIN_SUPPORTED_SPARK_VERSION) >= 0) //
                 .sorted(Collections.reverseOrder()) //
                 .map(v -> new StringChoice(v.toString(), v.getLabel())) //
                 .toList();
