@@ -65,17 +65,15 @@ public class DatabricksSparkJob {
      *
      * @param sc {@link SparkContext} to use
      * @param stagingArea URI or path of staging area
-     * @param stagingAreaUseHadoopFS <code>true</code> if staging area should be accessed via the legacy Hadoop
-     *            FileSystem implementation, <code>false</code> if staging area should be accessed via Java NIO based
-     *            implementation.
+     * @param isUnityCatalog {@code true} if staging area is on a Unity Catalog volume, <code>false</code> otherwise
      * @param stagingAreaIsPath <code>true</code> if staging area is a path on default Hadoop FS
      * @return new context instance
      * @throws Exception
      */
     public static DatabricksSparkREPLContext createContext(final SparkContext sc, final String stagingArea,
-        final boolean stagingAreaUseHadoopFS, final boolean stagingAreaIsPath) throws Exception {
+        final boolean isUnityCatalog, final boolean stagingAreaIsPath) throws Exception {
 
-        return new DatabricksSparkREPLContext(sc, stagingArea, stagingAreaUseHadoopFS, stagingAreaIsPath);
+        return new DatabricksSparkREPLContext(sc, stagingArea, isUnityCatalog, stagingAreaIsPath);
     }
 
     /**

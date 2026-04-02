@@ -71,7 +71,7 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
 
         SparkSideStagingArea.ensureInitialized(input.getStagingArea(), input.stagingAreaIsPath(),
             determineSparkLocalDir(sparkContext), sparkContext.hadoopConfiguration());
-        DistributedFileUtils.ensureInitialized(SparkSideStagingArea.SINGLETON_INSTANCE);
+        DistributedFileUtils.ensureInitializedLivy(SparkSideStagingArea.SINGLETON_INSTANCE);
 
         sparkContext.addSparkListener(new KNIMELivySparkListener());
 
