@@ -61,6 +61,13 @@ import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 public interface DatabricksSparkSideStagingAreaProvider extends StagingAreaAccess, SparkDistributedTempProvider {
 
     /**
+     * Indicates whether the staging area is based on the Unity Catalog.
+     *
+     * @return {@code true} if the staging area is based on the Unity Catalog, {@code false} otherwise
+     */
+    boolean isUnityCatalog();
+
+    /**
      * Cleanup staging area and temp directory.
      */
     void cleanUp();

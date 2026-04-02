@@ -42,15 +42,15 @@ import org.apache.log4j.Logger;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- * Spark-side utility class to access the staging area via the Java NIO API.
+ * Spark-side utility class to access the staging area via the Java NIO API on a Databricks Unity Catalog volume.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
 @SparkClass
-public class DatabricksSparkSideNIOStagingArea implements DatabricksSparkSideStagingAreaProvider {
+public class DatabricksSparkSideUnityCatalogStagingArea implements DatabricksSparkSideStagingAreaProvider {
 
-    private static final Logger LOG = Logger.getLogger(DatabricksSparkSideNIOStagingArea.class);
+    private static final Logger LOG = Logger.getLogger(DatabricksSparkSideUnityCatalogStagingArea.class);
 
     private static final Pattern STAGING_FILENAME_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+"); // NOSONAR filenames contains only ASCI characters and are controlled by us
 
@@ -58,7 +58,7 @@ public class DatabricksSparkSideNIOStagingArea implements DatabricksSparkSideSta
 
     private final Path m_localTmpDir;
 
-    DatabricksSparkSideNIOStagingArea(final String stagingArea, final File localTmpDir) {
+    DatabricksSparkSideUnityCatalogStagingArea(final String stagingArea, final File localTmpDir) {
         m_stagingArea = Paths.get(stagingArea);
         m_localTmpDir = localTmpDir.toPath();
 
@@ -209,4 +209,10 @@ public class DatabricksSparkSideNIOStagingArea implements DatabricksSparkSideSta
     public URI getDistributedTempDirURI() {
         return m_stagingArea.toUri();
     }
+
+    @Override
+    public boolean isUnityCatalog() {
+        return true;
+    }
+
 }

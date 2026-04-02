@@ -30,34 +30,33 @@ import java.nio.file.Path;
 import java.util.Map.Entry;
 
 import org.apache.hadoop.conf.Configuration;
-import org.knime.bigdata.spark.core.databricks.jobapi.DatabricksJobSerializationUtils.StagingAreaAccess;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.util.SparkDistributedTempProvider;
 
 /**
- * Spark-side utility class that delegates staging area access to {@link DatabricksSparkSideNIOStagingArea} or
+ * Spark-side utility class that delegates staging area access to {@link DatabricksSparkSideUnityCatalogStagingArea} or
  * {@link DatabricksSparkSideHadoopStagingArea} depending on the configuration.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  * @author Sascha Wolke, KNIME GmbH, Berlin, Germany
  */
 @SparkClass
-public class DatabricksSparkSideStagingArea implements StagingAreaAccess, SparkDistributedTempProvider {
+public class DatabricksSparkSideStagingArea implements DatabricksSparkSideStagingAreaProvider {
 
     public static final DatabricksSparkSideStagingArea SINGLETON_INSTANCE = new DatabricksSparkSideStagingArea();
 
     private volatile DatabricksSparkSideStagingAreaProvider m_stagingArea;
 
-    public static synchronized void ensureInitialized(final String stagingArea, final boolean stagingAreaUseHadoopFS,
+    public static synchronized void ensureInitialized(final String stagingArea, final boolean isUnityCatalog,
         final boolean stagingAreaIsPath, final File localTmpDir, final Configuration hadoopConf)
         throws URISyntaxException {
 
         if (SINGLETON_INSTANCE.m_stagingArea == null) {
-            if (stagingAreaUseHadoopFS) {
+            if (isUnityCatalog) {
+                SINGLETON_INSTANCE.m_stagingArea =
+                    new DatabricksSparkSideUnityCatalogStagingArea(stagingArea, localTmpDir);
+            } else {
                 SINGLETON_INSTANCE.m_stagingArea =
                     new DatabricksSparkSideHadoopStagingArea(stagingArea, stagingAreaIsPath, localTmpDir, hadoopConf);
-            } else {
-                SINGLETON_INSTANCE.m_stagingArea = new DatabricksSparkSideNIOStagingArea(stagingArea, localTmpDir);
             }
         }
     }
@@ -92,6 +91,7 @@ public class DatabricksSparkSideStagingArea implements StagingAreaAccess, SparkD
         m_stagingArea.deleteSafely(stagingFilename);
     }
 
+    @Override
     public void cleanUp() {
         m_stagingArea.cleanUp();
     }
@@ -99,6 +99,11 @@ public class DatabricksSparkSideStagingArea implements StagingAreaAccess, SparkD
     @Override
     public URI getDistributedTempDirURI() {
         return m_stagingArea.getDistributedTempDirURI();
+    }
+
+    @Override
+    public boolean isUnityCatalog() {
+        return m_stagingArea.isUnityCatalog();
     }
 
 }

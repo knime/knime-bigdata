@@ -197,7 +197,7 @@ class DatabricksJobController implements JobController {
 
             final String jobClassName = m_databricksJobClass.getName();
             m_contextId = m_databricksClient.createContext(jobClassName, m_remoteFSController.getStagingArea(),
-                m_remoteFSController.getStagingAreaUseHadoopFS(), m_remoteFSController.getStagingAreaReturnsPath(),
+                m_remoteFSController.isUnityCatalog(), m_remoteFSController.getStagingAreaReturnsPath(),
                 exec);
         }
     }
