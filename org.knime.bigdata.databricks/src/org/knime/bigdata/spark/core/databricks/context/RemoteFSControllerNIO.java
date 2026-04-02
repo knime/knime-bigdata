@@ -157,12 +157,8 @@ public class RemoteFSControllerNIO implements RemoteFSController {
     }
 
     @Override
-    public boolean getStagingAreaUseHadoopFS() {
-        final boolean isUnityFS = m_fsConnection.getFSType().equals(UnityFSDescriptorProvider.FS_TYPE);
-
-        // use the new NIO based staging area implementation with Unity FS,
-        // other file systems default to the Hadoop FS based staging area implementation
-        return !isUnityFS;
+    public boolean isUnityCatalog() {
+        return m_fsConnection.getFSType().equals(UnityFSDescriptorProvider.FS_TYPE);
     }
 
     @Override

@@ -459,16 +459,14 @@ public class DatabricksClient {
      *
      * @param jobClassName class name of databricks spark job
      * @param stagingArea URI or path of staging area
-     * @param stagingAreaUseHadoopFS <code>true</code> if staging area should be accessed via the legacy Hadoop
-     *            FileSystem implementation, <code>false</code> if staging area should be accessed via Java NIO based
-     *            implementation.
+     * @param isUnityCatalog {@code true} if staging area is on a Unity Catalog volume, <code>false</code> otherwise
      * @param stagingAreaIsPath <code>true</code> if staging area is path in default Hadoop FS
      * @param exec execution monitor to check
      * @return identifier of new context
      * @throws KNIMESparkException
      * @throws CanceledExecutionException
      */
-    String createContext(final String jobClassName, final String stagingArea, final boolean stagingAreaUseHadoopFS,
+    String createContext(final String jobClassName, final String stagingArea, final boolean isUnityCatalog,
         final boolean stagingAreaIsPath, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
 
@@ -500,7 +498,7 @@ public class DatabricksClient {
             }
 
             // initialize job runner (databricks spark context)
-            final String cmd = String.format(INIT_DATABRICKS_CONTEXT, jobClassName, stagingArea, stagingAreaUseHadoopFS,
+            final String cmd = String.format(INIT_DATABRICKS_CONTEXT, jobClassName, stagingArea, isUnityCatalog,
                 stagingAreaIsPath);
             executeCommand(context.id, cmd, exec);
 

@@ -272,8 +272,8 @@ public class RemoteFSControllerConnInfo implements RemoteFSController {
     }
 
     @Override
-    public boolean getStagingAreaUseHadoopFS() {
-        return true;
+    public boolean isUnityCatalog() {
+        return false;
     }
 
     @Override

@@ -63,26 +63,25 @@ public interface RemoteFSController extends StagingAreaAccess {
      * @throws KNIMESparkException If no staging area could be created, this exception wraps the original exception
      *             thrown during the last attempt to create the staging area folder.
      */
-    public void createStagingArea() throws KNIMESparkException;
+    void createStagingArea() throws KNIMESparkException;
 
     /**
      * @return the full Hadoop-API URI of the staging area (see {@link #getStagingAreaReturnsPath()}.
      */
-    public String getStagingArea();
+    String getStagingArea();
 
     /**
-     * @return <code>true</code> if staging area should be accessed via the legacy Hadoop FileSystem implementation,
-     *         <code>false</code> if staging area should be accessed via Java NIO based implementation.
+     * @return {@code true} if the staging area is on a Unity Catalog volume, <code>false</code> otherwise
      */
-    public boolean getStagingAreaUseHadoopFS();
+    boolean isUnityCatalog();
 
     /**
      * @return when true, then the value returned by {@link #getStagingArea()} is a path, otherwise it is a full URI.
      */
-    public boolean getStagingAreaReturnsPath();
+    boolean getStagingAreaReturnsPath();
 
     /**
      * Closes the connection to the remote FS if necessary.
      */
-    public void ensureClosed();
+    void ensureClosed();
 }

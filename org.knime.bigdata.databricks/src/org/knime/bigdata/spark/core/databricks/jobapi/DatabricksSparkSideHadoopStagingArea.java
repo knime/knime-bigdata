@@ -228,4 +228,10 @@ public class DatabricksSparkSideHadoopStagingArea implements DatabricksSparkSide
     public URI getDistributedTempDirURI() {
         return m_stagingAreaURI;
     }
+
+    @Override
+    public boolean isUnityCatalog() {
+        return false;
+    }
+
 }
