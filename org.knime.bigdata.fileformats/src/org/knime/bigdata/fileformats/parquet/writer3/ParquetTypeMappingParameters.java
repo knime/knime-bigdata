@@ -59,7 +59,7 @@ import org.knime.bigdata.fileformats.utility.TypeMappingUtils.AbstractExternalTy
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.AvailableKnimeTypeChoicesProvider;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.KnimeSourceTypeChoicesProvider;
 import org.knime.bigdata.fileformats.utility.TypeMappingUtils.TypeChoicesProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.modification.Modification;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 import org.knime.node.parameters.Widget;

@@ -48,7 +48,7 @@ package org.knime.bigdata.fileformats.filehandling.reader.parquet;
 
 import org.knime.bigdata.fileformats.filehandling.reader.parquet.ParquetTableReaderSpecific.ProductionPathProviderAndTypeHierarchy;
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeBasedTransformationParameters;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.modification.Modification;
 
 /**
  * @author Robin Gerling, KNIME GmbH, Konstanz, Germany

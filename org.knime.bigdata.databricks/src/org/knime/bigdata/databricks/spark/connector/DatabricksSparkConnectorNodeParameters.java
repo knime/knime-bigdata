@@ -72,13 +72,13 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.CheckUtils;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FSConnectionProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.WithCustomFileSystem;
-import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.custom.CustomValidation;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.custom.SimpleValidation;
+import org.knime.node.parameters.widget.file.customfilesystem.FSConnectionProvider;
+import org.knime.node.parameters.widget.file.FileSelectionWidget;
+import org.knime.node.parameters.widget.file.SingleFileSelectionMode;
+import org.knime.node.parameters.widget.file.customfilesystem.WithCustomFileSystem;
+import org.knime.node.parameters.updates.StateComputationAbortException;
+import org.knime.node.parameters.experimental.validation.CustomValidation;
+import org.knime.node.parameters.experimental.validation.SimpleValidation;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.node.parameters.Advanced;
 import org.knime.node.parameters.NodeParameters;
@@ -289,7 +289,7 @@ class DatabricksSparkConnectorNodeParameters implements NodeParameters {
         }
 
         @Override
-        public String computeState(final NodeParametersInput context) throws StateComputationFailureException {
+        public String computeState(final NodeParametersInput context) throws StateComputationAbortException {
             final String clusterId = m_clusterIdSupplier.get();
 
             try {

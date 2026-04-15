@@ -50,7 +50,7 @@ import org.knime.bigdata.database.databricks.Databricks;
 import org.knime.bigdata.databricks.node.ClusterChoiceProvider;
 import org.knime.bigdata.databricks.sparksql.connector.SparkSQLConnectorParameters.ConnectorModification;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.modification.Modification;
 import org.knime.database.node.connector.DBConnectorNodeSettingsUtils.DBDialectChoicesProvider;
 import org.knime.database.node.connector.DBConnectorNodeSettingsUtils.DBDriverChoicesProvider;
 import org.knime.database.node.connector.SpecificDBConnectorNodeSettings;

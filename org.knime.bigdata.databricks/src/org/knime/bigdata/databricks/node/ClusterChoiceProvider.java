@@ -60,7 +60,7 @@ import org.knime.bigdata.databricks.workspace.port.DatabricksWorkspacePortObject
 import org.knime.core.data.sort.AlphanumericComparator;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.handler.WidgetHandlerException;
+import org.knime.node.parameters.experimental.validation.WidgetHandlerException;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.node.parameters.NodeParametersInput;
 import org.knime.node.parameters.widget.choices.StringChoice;

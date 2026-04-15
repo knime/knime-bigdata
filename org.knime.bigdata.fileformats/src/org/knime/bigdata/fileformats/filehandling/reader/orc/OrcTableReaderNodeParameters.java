@@ -53,7 +53,7 @@ import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadCo
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.context.NodeCreationConfiguration;
 import org.knime.core.node.context.url.URLConfiguration;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.additionalsave.SaveAdditional;
+import org.knime.node.parameters.experimental.additionalsave.SaveAdditional;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.node.parameters.NodeParameters;
 import org.knime.node.parameters.NodeParametersInput;

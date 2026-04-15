@@ -47,7 +47,7 @@
 package org.knime.bigdata.fileformats.filehandling.reader.orc;
 
 import org.knime.bigdata.fileformats.filehandling.reader.type.KnimeTypeBasedTransformationParameters;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.modification.Modification;
 
 /**
  * @author Thomas Reifenberger, TNG Technology Consulting GmbH, Germany

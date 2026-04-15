@@ -55,7 +55,7 @@ import org.knime.base.node.io.filehandling.webui.reader2.MultiFileSelectionPath;
 import org.knime.bigdata.fileformats.filehandling.reader.BigDataMultiTableReadConfig;
 import org.knime.bigdata.fileformats.filehandling.reader.type.UnsupportedTypesParameters;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.modification.Modification;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
 import org.knime.node.parameters.NodeParameters;
 

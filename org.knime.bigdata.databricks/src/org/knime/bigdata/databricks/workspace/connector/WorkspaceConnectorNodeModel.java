@@ -73,7 +73,7 @@ import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.message.Message;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.webui.node.impl.WebUINodeModel;
+import org.knime.node.parameters.legacy.nodeimpl.WebUINodeModel;
 import org.knime.credentials.base.Credential;
 import org.knime.credentials.base.CredentialCache;
 import org.knime.credentials.base.CredentialPortObject;

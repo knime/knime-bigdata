@@ -660,7 +660,7 @@
         "options" : {
           "fileExtensions" : [ "orc" ],
           "filters" : {
-            "classId" : "org.knime.core.webui.node.dialog.defaultdialog.internal.file.DefaultFileChooserFilters",
+            "classId" : "org.knime.node.parameters.widget.file.DefaultFileChooserFilters",
             "uiSchema" : {
               "elements" : [ {
                 "label" : "File filter options",
