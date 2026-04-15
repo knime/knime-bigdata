@@ -75,7 +75,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.impl.NodeParametersInputImpl;
 import org.knime.node.parameters.widget.file.customfilesystem.FSConnectionProvider;
 import org.knime.node.parameters.widget.file.FileSelectionWidget;
 import org.knime.node.parameters.widget.file.SingleFileSelectionMode;
@@ -345,7 +344,7 @@ class DbfsConnectorNodeParameters implements NodeParameters {
         }
 
         private static CredentialsProvider getCredentialsProvider(final NodeParametersInput input) {
-            return ((NodeParametersInputImpl)input).getCredentialsProvider().orElseThrow();
+            return input.getCredentialsProvider().orElseThrow();
         }
 
     }
