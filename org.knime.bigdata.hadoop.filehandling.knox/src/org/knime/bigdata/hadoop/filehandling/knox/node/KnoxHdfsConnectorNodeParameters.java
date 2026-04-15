@@ -62,16 +62,16 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.NodeParametersInputImpl;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FSConnectionProvider;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.FileSelectionWidget;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.SingleFileSelectionMode;
-import org.knime.core.webui.node.dialog.defaultdialog.internal.file.WithCustomFileSystem;
-import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.LegacyCredentials;
-import org.knime.core.webui.node.dialog.defaultdialog.setting.credentials.LegacyCredentialsAuthProviderSettings;
-import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.custom.CustomValidation;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.validation.custom.SimpleValidation;
+import org.knime.core.webui.node.dialog.defaultdialog.impl.NodeParametersInputImpl;
+import org.knime.node.parameters.widget.file.customfilesystem.FSConnectionProvider;
+import org.knime.node.parameters.widget.file.FileSelectionWidget;
+import org.knime.node.parameters.widget.file.SingleFileSelectionMode;
+import org.knime.node.parameters.widget.file.customfilesystem.WithCustomFileSystem;
+import org.knime.node.parameters.legacy.widget.credentials.LegacyCredentials;
+import org.knime.node.parameters.legacy.widget.credentials.LegacyCredentialsAuthProviderSettings;
+import org.knime.node.parameters.updates.StateComputationAbortException;
+import org.knime.node.parameters.experimental.validation.CustomValidation;
+import org.knime.node.parameters.experimental.validation.SimpleValidation;
 import org.knime.filehandling.core.connections.base.auth.StandardAuthTypes;
 import org.knime.filehandling.core.connections.base.auth.UserPasswordAuthProviderSettings;
 import org.knime.node.parameters.Advanced;
@@ -220,7 +220,7 @@ class KnoxHdfsConnectorNodeParameters implements NodeParameters {
 
         @Override
         public FSConnectionProvider computeState(final NodeParametersInput parametersInput)
-            throws StateComputationFailureException {
+            throws StateComputationAbortException {
 
             return () -> { // NOSONAR: Longer lambda acceptable, as it improves readability
                 final var params = new KnoxHdfsConnectorNodeParameters();

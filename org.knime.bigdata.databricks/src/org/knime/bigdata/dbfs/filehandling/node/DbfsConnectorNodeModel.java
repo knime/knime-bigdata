@@ -67,7 +67,7 @@ import org.knime.core.node.context.ports.PortsConfiguration;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
-import org.knime.core.webui.node.impl.WebUINodeModel;
+import org.knime.node.parameters.legacy.nodeimpl.WebUINodeModel;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.filehandling.core.connections.FSConnectionRegistry;
 import org.knime.filehandling.core.port.FileSystemPortObject;

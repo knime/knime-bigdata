@@ -55,7 +55,7 @@ import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.Advance
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.AdvancedSettings.OnUnsupportedColumnTypeOption;
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.AdvancedSettings.OnUnsupportedColumnTypesRef;
 import org.knime.bigdata.delta.nodes.reader.DeltaTableReaderNodeSettings.AdvancedSettings.SkipFirstDataRowsRef;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
+import org.knime.node.parameters.modification.Modification;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
 import org.knime.node.parameters.updates.ValueProvider;
 

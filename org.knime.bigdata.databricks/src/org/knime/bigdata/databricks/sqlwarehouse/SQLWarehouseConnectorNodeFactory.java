@@ -45,8 +45,8 @@
  */
 package org.knime.bigdata.databricks.sqlwarehouse;
 
-import org.knime.core.webui.node.impl.WebUINodeConfiguration;
-import org.knime.core.webui.node.impl.WebUINodeFactory;
+import org.knime.node.parameters.legacy.nodeimpl.WebUINodeConfiguration;
+import org.knime.node.parameters.legacy.nodeimpl.WebUINodeFactory;
 import org.knime.credentials.base.CredentialPortObject;
 import org.knime.database.port.DBSessionPortObject;
 

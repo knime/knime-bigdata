@@ -73,7 +73,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.util.exception.ClientErrorAccessException;
-import org.knime.core.webui.node.impl.WebUINodeConfiguration;
+import org.knime.node.parameters.legacy.nodeimpl.WebUINodeConfiguration;
 import org.knime.credentials.base.NoSuchCredentialException;
 import org.knime.database.DBType;
 import org.knime.database.connection.DBConnectionController;

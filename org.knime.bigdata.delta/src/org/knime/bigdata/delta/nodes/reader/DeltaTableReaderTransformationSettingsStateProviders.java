@@ -65,9 +65,9 @@ import org.knime.bigdata.delta.types.DeltaTableDataType;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.webui.node.dialog.defaultdialog.util.updates.StateComputationFailureException;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification;
-import org.knime.core.webui.node.dialog.defaultdialog.widget.Modification.WidgetGroupModifier;
+import org.knime.node.parameters.updates.StateComputationAbortException;
+import org.knime.node.parameters.modification.Modification;
+import org.knime.node.parameters.modification.Modification.WidgetGroupModifier;
 import org.knime.filehandling.core.connections.FSCategory;
 import org.knime.filehandling.core.connections.FSLocation;
 import org.knime.filehandling.core.node.table.reader.spec.TypedReaderTableSpec;
@@ -109,7 +109,7 @@ final class DeltaTableReaderTransformationSettingsStateProviders {
         // Modified version using a single path
         @Override
         public Map<String, TypedReaderTableSpec<DeltaTableDataType>>
-            computeState(final NodeParametersInput context) throws StateComputationFailureException {
+            computeState(final NodeParametersInput context) throws StateComputationAbortException {
 
             final var fileSelection = m_fileSelectionSupplier.get();
             if (!WorkflowContextUtil.hasWorkflowContext() // no workflow context available
@@ -162,7 +162,7 @@ final class DeltaTableReaderTransformationSettingsStateProviders {
         // Modified version using a single path
         @Override
         public FSLocation[] computeState(final NodeParametersInput context)
-            throws StateComputationFailureException {
+            throws StateComputationAbortException {
 
             final var fileSelection = m_fileSelectionSupplier.get();
             if (!WorkflowContextUtil.hasWorkflowContext() // no workflow context available
